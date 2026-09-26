@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen } from 'lucide-react';
 import { APP_CONFIG, NAV_LINKS } from '../../lib/constants';
 
 export const Footer: React.FC = () => {
@@ -11,23 +10,33 @@ export const Footer: React.FC = () => {
           {/* Brand Info */}
           <div className="md:col-span-6 space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-brand-gold border-2 border-brand-dark flex items-center justify-center shadow-brutal-xs">
-                <BookOpen className="w-4 h-4 text-brand-dark stroke-[2.5]" />
+              <div className="h-8 w-8 p-0.5 bg-brand-paper border-2 border-brand-dark flex items-center justify-center shadow-brutal-xs shrink-0">
+                <img
+                  src="/poraplan-logo.png"
+                  alt="PoraPlan Logo"
+                  className="h-full w-full object-contain"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (!target.src.includes('assets')) {
+                      target.src = '/assets/poraplan-logo.png';
+                    }
+                  }}
+                />
               </div>
-              <span className="font-heading font-extrabold text-xl text-brand-bg tracking-tight">
+              <span className="font-heading font-extrabold text-lg sm:text-xl text-brand-bg tracking-tight">
                 {APP_CONFIG.name}
               </span>
-              <span className="font-mono text-xs px-2 py-0.5 border border-brand-bg/30 text-brand-gold">
+              <span className="font-mono text-[10px] sm:text-xs px-2 py-0.5 border border-brand-bg/30 text-brand-gold">
                 {APP_CONFIG.version}
               </span>
             </div>
             
-            <p className="text-brand-bg/80 text-sm max-w-md font-sans">
+            <p className="text-brand-bg/80 text-xs sm:text-sm max-w-md font-sans">
               {APP_CONFIG.tagline}
             </p>
 
-            <div className="inline-block p-3 border-2 border-brand-bg/20 bg-black/20 text-xs font-mono text-brand-bg/70">
-              <span className="text-brand-gold font-bold">STATUS:</span> Phase 0 Project Foundation // Scalable Frontend Core
+            <div className="inline-block p-2.5 border-2 border-brand-bg/20 bg-black/20 text-[11px] sm:text-xs font-mono text-brand-bg/70">
+              <span className="text-brand-gold font-bold">STATUS:</span> Phase 0 Foundation // Personal Study Assistance &amp; Mentorship
             </div>
           </div>
 

@@ -25,18 +25,18 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses = 
-    'inline-flex items-center justify-center font-bold font-sans tracking-wide uppercase transition-all duration-100 ease-out border-2 border-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none select-none';
+    'inline-flex items-center justify-center font-bold font-sans tracking-tight transition-all duration-100 ease-out border-2 border-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none select-none rounded-none text-center';
 
   const sizeClasses: Record<ButtonSize, string> = {
-    sm: 'text-xs px-3.5 py-1.5 gap-1.5 shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none',
-    md: 'text-sm px-5 py-2.5 gap-2 shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none',
-    lg: 'text-base px-6 py-3.5 gap-2.5 shadow-brutal-lg hover:-translate-x-1 hover:-translate-y-1 active:translate-x-1 active:translate-y-1 active:shadow-none',
+    sm: 'text-xs px-3 py-1.5 gap-1.5 shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none',
+    md: 'text-xs sm:text-sm px-4 py-2 sm:px-4.5 sm:py-2.5 gap-2 shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none',
+    lg: 'text-sm sm:text-base px-4.5 py-2.5 sm:px-5 sm:py-3 gap-2 shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none',
   };
 
   const variantClasses: Record<ButtonVariant, string> = {
-    primary: 'bg-brand-gold text-brand-dark hover:bg-[#e59b20]',
+    primary: 'bg-brand-gold text-brand-dark hover:bg-[#e89a1c]',
     secondary: 'bg-brand-teal text-white hover:bg-[#0995a1]',
-    dark: 'bg-brand-navy text-brand-bg hover:bg-[#06213b]',
+    dark: 'bg-brand-navy text-brand-bg hover:bg-[#062039]',
     outline: 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint',
     ghost: 'bg-transparent border-transparent shadow-none hover:bg-black/5 hover:border-brand-dark hover:shadow-brutal-xs',
   };

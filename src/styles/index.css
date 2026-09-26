@@ -10,19 +10,24 @@
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   body {
     background-color: #F6FAFB;
     color: #172B3A;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 100vw;
     overflow-x: hidden;
+    line-height: 1.5;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
     color: #082B4C;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
+    font-weight: 700;
   }
 
   /* Academic Monospace accents */
@@ -34,9 +39,9 @@
 /* Retro Academic Grid Background Pattern (subtle 24px grid) */
 .academic-grid-pattern {
   background-image: 
-    linear-gradient(to right, rgba(23, 43, 58, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(23, 43, 58, 0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
+    linear-gradient(to right, rgba(8, 43, 76, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(8, 43, 76, 0.045) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 .academic-dots-pattern {
@@ -44,7 +49,13 @@
   background-size: 16px 16px;
 }
 
-/* Tactile neo-brutalist interaction */
+/* Notebook ledger lines */
+.notebook-rule {
+  background-image: linear-gradient(to bottom, transparent 95%, rgba(8, 43, 76, 0.08) 95%);
+  background-size: 100% 28px;
+}
+
+/* Tactile button transitions */
 .tactile-btn {
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
@@ -52,5 +63,6 @@
   transform: translate(-2px, -2px);
 }
 .tactile-btn:active {
-  transform: translate(2px, 2px);
+  transform: translate(1px, 1px);
 }
+

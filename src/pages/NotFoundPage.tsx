@@ -16,11 +16,11 @@ export const NotFoundPage: React.FC = () => {
             <FileQuestion className="w-7 h-7 text-brand-dark stroke-[2.5]" />
           </div>
 
-          <h1 className="text-3xl font-extrabold font-heading text-brand-navy">
+          <h1 className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy">
             Syllabus Topic Not Found
           </h1>
 
-          <p className="text-sm text-brand-dark/80 font-sans mt-2 mb-6">
+          <p className="text-xs sm:text-sm text-brand-dark/80 font-sans mt-2 mb-5">
             The study page or docket you requested does not exist in the current PoraPlan course registry.
           </p>
 

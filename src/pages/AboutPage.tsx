@@ -25,17 +25,17 @@ export const AboutPage: React.FC = () => {
             <Badge variant="navy" size="sm">ABOUT</Badge>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-brand-navy tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-brand-navy tracking-tight">
             About {APP_CONFIG.name}
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-brand-dark/85 max-w-2xl font-sans">
+          <p className="mt-2.5 text-xs sm:text-base text-brand-dark/85 max-w-2xl font-sans">
             We believe that structured daily routines, honest evaluation, and personalized mentorship beat chaotic cramming every time.
           </p>
         </div>
       </section>
 
       {/* Main Content */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+      <section className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Mission & Background */}
