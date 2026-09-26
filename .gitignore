@@ -26,6 +26,7 @@ dist-ssr/
 *.pem
 *.key
 *.cert
+!.env.example
 
 # Editor directories and files
 .vscode/*

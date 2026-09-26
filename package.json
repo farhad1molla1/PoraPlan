@@ -11,6 +11,7 @@
     "postinstall": "node -e \"const fs=require('fs'); if(fs.existsSync('node_modules/@rollup/wasm-node')) { fs.cpSync('node_modules/@rollup/wasm-node', 'node_modules/rollup', {recursive: true, force: true}); }\""
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "lucide-react": "^1.48.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
