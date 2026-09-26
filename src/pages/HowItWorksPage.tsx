@@ -165,7 +165,7 @@ export const HowItWorksPage: React.FC = () => {
               Ready to start your study plan?
             </h3>
             <p className="text-xs sm:text-sm text-brand-bg/85 font-sans mt-0.5">
-              Join the foundation cohort and begin your structured learning cycle.
+              Join PoraPlan and begin your structured daily study cycle.
             </p>
           </div>
           <Button
@@ -174,7 +174,7 @@ export const HowItWorksPage: React.FC = () => {
             size="md"
             rightIcon={<ArrowRight className="w-4 h-4 stroke-[2.5]" />}
           >
-            Join Foundation Cohort
+            Get Started Now
           </Button>
         </div>
       </section>

@@ -71,7 +71,7 @@ export const SignupPage: React.FC = () => {
                 Start Your PoraPlan Journey
               </h3>
               <p className="mt-1.5 text-xs text-brand-bg/80 leading-relaxed font-sans">
-                Move away from chaotic study schedules. Join the foundation cohort to participate in structured daily learning cycles.
+                Move away from chaotic study schedules. Join PoraPlan to participate in structured daily learning cycles.
               </p>
 
               {/* Roles Breakdown Box */}
@@ -96,7 +96,7 @@ export const SignupPage: React.FC = () => {
             </div>
 
             <div className="mt-4 pt-3 border-t border-brand-bg/20 text-[10px] font-mono text-brand-bg/60">
-              STATUS: Foundation Enrolment Active
+              STATUS: Registration Open
             </div>
           </div>
 
@@ -106,16 +106,16 @@ export const SignupPage: React.FC = () => {
               {/* Header Stamp */}
               <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2.5 mb-3.5">
                 <span className="font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
-                  NEW CADRE ENROLLMENT
+                  ACCOUNT REGISTRATION
                 </span>
-                <Badge variant="gold" size="sm">FOUNDATION COHORT</Badge>
+                <Badge variant="gold" size="sm">GET STARTED</Badge>
               </div>
 
               <h1 className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy mb-1">
                 Begin Your Registration
               </h1>
               <p className="text-xs text-brand-dark/75 font-sans mb-3.5">
-                Select your academic cadre and reserve your place in the upcoming cohort.
+                Select your role to get started with PoraPlan.
               </p>
 
               {/* Phase 0 Notice */}
@@ -241,7 +241,7 @@ export const SignupPage: React.FC = () => {
                     size="md"
                     rightIcon={<ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />}
                   >
-                    Enroll in Foundation Cohort
+                    Create My Account
                   </Button>
                 </div>
               </form>

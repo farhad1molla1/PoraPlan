@@ -4,7 +4,7 @@ export const APP_CONFIG = {
   name: 'PoraPlan',
   tagline: 'You study. We organize how, what and when.',
   descriptor: 'Personal Study Assistance & Mentorship Platform',
-  version: '0.1 MVP',
+  version: '0.1',
   codePrefix: 'PP-SYS',
 };
 

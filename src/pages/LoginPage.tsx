@@ -212,7 +212,7 @@ export const LoginPage: React.FC = () => {
                 to="/signup"
                 className="font-bold text-brand-navy font-mono underline hover:text-brand-teal ml-1"
               >
-                Enroll in Foundation Cohort →
+                Create your account →
               </Link>
             </div>
           </div>

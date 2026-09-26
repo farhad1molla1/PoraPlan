@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { Button } from '../common/Button';
-import { Badge } from '../common/Badge';
 import { NAV_LINKS, APP_CONFIG } from '../../lib/constants';
 
 export const Navbar: React.FC = () => {
@@ -38,15 +37,10 @@ export const Navbar: React.FC = () => {
               />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy tracking-tight leading-tight">
-                  {APP_CONFIG.name}
-                </span>
-                <Badge variant="gold" size="sm" className="hidden sm:inline-flex py-0 px-1 text-[9px]">
-                  MVP
-                </Badge>
-              </div>
-              <span className="text-[10px] font-mono text-brand-muted hidden sm:inline-block leading-none">
+              <span className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy tracking-tight leading-tight">
+                {APP_CONFIG.name}
+              </span>
+              <span className="text-[10px] font-mono text-brand-muted hidden sm:inline-block leading-none mt-0.5">
                 Study &amp; Mentorship
               </span>
             </div>

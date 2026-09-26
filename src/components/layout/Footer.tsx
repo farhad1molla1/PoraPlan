@@ -36,7 +36,7 @@ export const Footer: React.FC = () => {
             </p>
 
             <div className="inline-block p-2.5 border-2 border-brand-bg/20 bg-black/20 text-[11px] sm:text-xs font-mono text-brand-bg/70">
-              <span className="text-brand-gold font-bold">STATUS:</span> Phase 0 Foundation // Personal Study Assistance &amp; Mentorship
+              <span className="text-brand-gold font-bold">SYSTEM:</span> Personal Study Assistance &amp; Mentorship Platform
             </div>
           </div>
 
