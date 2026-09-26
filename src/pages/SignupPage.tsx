@@ -1,20 +1,75 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Info, User, Award, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, AlertTriangle, User, Award, ArrowRight, KeyRound, Loader2, CheckCircle } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
 import { APP_CONFIG } from '../lib/constants';
+import { useAuth } from '../hooks/useAuth';
+import type { UserRole } from '../types/database';
 
 export const SignupPage: React.FC = () => {
   const [role, setRole] = useState<'student' | 'mentor'>('student');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [focusArea, setFocusArea] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successNotice, setSuccessNotice] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { signUp, user, role: currentRole, isConfigured } = useAuth();
+  const navigate = useNavigate();
+
+  // If already logged in, redirect to respective role workspace
+  useEffect(() => {
+    if (user && currentRole) {
+      if (currentRole === 'mentor') {
+        navigate('/dashboard/mentor', { replace: true });
+      } else if (currentRole === 'admin') {
+        navigate('/dashboard/admin', { replace: true });
+      } else {
+        navigate('/dashboard/student', { replace: true });
+      }
+    }
+  }, [user, currentRole, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMessage(null);
+    setSuccessNotice(null);
+
+    if (password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters in length.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error, role: createdRole } = await signUp(
+        email,
+        password,
+        fullName,
+        role as UserRole
+      );
+
+      if (error) {
+        setErrorMessage(error.message || 'Registration could not be completed.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      setSuccessNotice('Account successfully created! Redirecting to your workspace...');
+      setTimeout(() => {
+        const target = createdRole === 'mentor' ? '/dashboard/mentor' : '/dashboard/student';
+        navigate(target);
+      }, 1000);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'An unexpected error occurred during registration.';
+      setErrorMessage(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -96,7 +151,7 @@ export const SignupPage: React.FC = () => {
             </div>
 
             <div className="mt-4 pt-3 border-t border-brand-bg/20 text-[10px] font-mono text-brand-bg/60">
-              STATUS: Registration Open
+              STATUS: Phase 1 Auth Active
             </div>
           </div>
 
@@ -118,20 +173,34 @@ export const SignupPage: React.FC = () => {
                 Select your role to get started with PoraPlan.
               </p>
 
-              {/* Phase 0 Notice */}
-              <div className="mb-3.5 p-2.5 border-2 border-brand-dark bg-brand-gold-light text-xs font-mono flex items-start gap-2">
-                <Info className="w-3.5 h-3.5 text-brand-dark shrink-0 mt-0.5 stroke-[2.5]" />
-                <div>
-                  <span className="font-bold text-brand-dark block text-[11px]">PHASE 0 ARCHITECTURAL PREVIEW</span>
-                  <span className="text-brand-dark/80 font-sans text-[11px]">
-                    Backend account creation will connect with Supabase in Phase 1.
-                  </span>
+              {/* Status / Notice Banner */}
+              {!isConfigured && (
+                <div className="mb-3.5 p-2.5 border-2 border-brand-dark bg-brand-gold-light text-xs font-mono flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-brand-dark shrink-0 mt-0.5 stroke-[2.5]" />
+                  <div>
+                    <span className="font-bold text-brand-dark block text-[11px]">SUPABASE ENVIRONMENT PLACEHOLDER</span>
+                    <span className="text-brand-dark/80 font-sans text-[11px]">
+                      Add active project credentials in `.env.local` to execute live auth sessions against your Supabase project.
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {submitted && (
-                <div className="mb-3.5 p-2.5 border-2 border-brand-dark bg-brand-teal-light text-xs font-mono text-brand-dark">
-                  <strong>Registration captured in preview mode.</strong> Active authentication will be connected in Phase 1.
+              {errorMessage && (
+                <div className="mb-3.5 p-2.5 border-2 border-brand-dark bg-red-100 text-xs font-mono text-red-900 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-700 shrink-0 mt-0.5 stroke-[2.5]" />
+                  <div>
+                    <strong>Registration Error:</strong> {errorMessage}
+                  </div>
+                </div>
+              )}
+
+              {successNotice && (
+                <div className="mb-3.5 p-2.5 border-2 border-brand-dark bg-emerald-100 text-xs font-mono text-emerald-900 flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5 stroke-[2.5]" />
+                  <div>
+                    <strong>Success:</strong> {successNotice}
+                  </div>
                 </div>
               )}
 
@@ -213,6 +282,36 @@ export const SignupPage: React.FC = () => {
                   />
                 </div>
 
+                {/* Password Field */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label
+                      htmlFor="signup-password"
+                      className="block text-xs font-mono uppercase font-bold tracking-wider text-brand-dark"
+                    >
+                      Password
+                    </label>
+                    <span className="text-[10px] font-mono text-brand-muted">
+                      Min 6 characters
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      id="signup-password"
+                      name="password"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••••••"
+                      className="w-full px-3 py-2 bg-brand-bg border-2 border-brand-dark text-xs sm:text-sm text-brand-dark placeholder-brand-dark/40 font-mono shadow-brutal-xs focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-brand-dark"
+                    />
+                    <KeyRound className="w-3.5 h-3.5 text-brand-muted absolute right-3 top-2.5 pointer-events-none" />
+                  </div>
+                </div>
+
                 {/* Target Field / Course */}
                 <div>
                   <label
@@ -239,9 +338,16 @@ export const SignupPage: React.FC = () => {
                     variant="primary"
                     fullWidth
                     size="md"
-                    rightIcon={<ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />}
+                    disabled={isSubmitting}
+                    rightIcon={
+                      isSubmitting ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                      )
+                    }
                   >
-                    Create My Account
+                    {isSubmitting ? 'Creating Account...' : 'Create My Account'}
                   </Button>
                 </div>
               </form>

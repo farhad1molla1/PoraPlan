@@ -1,18 +1,66 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Info, KeyRound, Mail, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, AlertTriangle, KeyRound, Mail, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
 import { APP_CONFIG } from '../lib/constants';
+import { useAuth } from '../hooks/useAuth';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { signIn, user, role, isConfigured } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // If already authenticated, redirect to appropriate role workspace
+  useEffect(() => {
+    if (user && role) {
+      const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
+      if (from && from !== '/login') {
+        navigate(from, { replace: true });
+      } else if (role === 'mentor') {
+        navigate('/dashboard/mentor', { replace: true });
+      } else if (role === 'admin') {
+        navigate('/dashboard/admin', { replace: true });
+      } else {
+        navigate('/dashboard/student', { replace: true });
+      }
+    }
+  }, [user, role, navigate, location]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMessage(null);
+    setIsSubmitting(true);
+
+    try {
+      const { error, role: loggedInRole } = await signIn(email, password);
+
+      if (error) {
+        setErrorMessage(error.message || 'Authentication failed. Please verify credentials.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Route based on role
+      const targetRole = loggedInRole || role || 'student';
+      if (targetRole === 'mentor') {
+        navigate('/dashboard/mentor');
+      } else if (targetRole === 'admin') {
+        navigate('/dashboard/admin');
+      } else {
+        navigate('/dashboard/student');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'An unexpected error occurred during sign in.';
+      setErrorMessage(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -99,7 +147,7 @@ export const LoginPage: React.FC = () => {
             </div>
 
             <div className="mt-4 pt-3 border-t border-brand-bg/20 text-[10px] font-mono text-brand-bg/60">
-              STATUS: Phase 0 Foundation Gateway
+              STATUS: Phase 1 Auth Active
             </div>
           </div>
 
@@ -121,20 +169,25 @@ export const LoginPage: React.FC = () => {
                 Enter your registered credentials to open your active study cycle.
               </p>
 
-              {/* Phase 0 Preview Notice */}
-              <div className="mb-4 p-2.5 border-2 border-brand-dark bg-brand-teal-light text-xs font-mono flex items-start gap-2">
-                <Info className="w-3.5 h-3.5 text-brand-teal shrink-0 mt-0.5 stroke-[2.5]" />
-                <div>
-                  <span className="font-bold text-brand-dark block text-[11px]">PHASE 0 ARCHITECTURAL PREVIEW</span>
-                  <span className="text-brand-dark/80 font-sans text-[11px]">
-                    Authentication backend connects with Supabase in Phase 1.
-                  </span>
+              {/* Status / Notice Banner */}
+              {!isConfigured && (
+                <div className="mb-4 p-2.5 border-2 border-brand-dark bg-brand-gold-light text-xs font-mono flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-brand-dark shrink-0 mt-0.5 stroke-[2.5]" />
+                  <div>
+                    <span className="font-bold text-brand-dark block text-[11px]">SUPABASE ENVIRONMENT PLACEHOLDER</span>
+                    <span className="text-brand-dark/80 font-sans text-[11px]">
+                      Add active project credentials in `.env.local` to execute live auth sessions against your Supabase project.
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {submitted && (
-                <div className="mb-3.5 p-2.5 border-2 border-brand-dark bg-brand-gold-light text-xs font-mono text-brand-dark">
-                  <strong>Form captured in preview mode.</strong> Active authentication will be connected in Phase 1.
+              {errorMessage && (
+                <div className="mb-3.5 p-2.5 border-2 border-brand-dark bg-red-100 text-xs font-mono text-red-900 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-700 shrink-0 mt-0.5 stroke-[2.5]" />
+                  <div>
+                    <strong>Access Denied:</strong> {errorMessage}
+                  </div>
                 </div>
               )}
 
@@ -197,9 +250,16 @@ export const LoginPage: React.FC = () => {
                     variant="primary"
                     fullWidth
                     size="md"
-                    rightIcon={<ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />}
+                    disabled={isSubmitting}
+                    rightIcon={
+                      isSubmitting ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                      )
+                    }
                   >
-                    Sign In
+                    {isSubmitting ? 'Authenticating...' : 'Sign In'}
                   </Button>
                 </div>
               </form>

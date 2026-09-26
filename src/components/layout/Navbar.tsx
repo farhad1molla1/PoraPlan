@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { Menu, X, ArrowUpRight, LogOut, LayoutDashboard } from 'lucide-react';
 import { Button } from '../common/Button';
 import { NAV_LINKS, APP_CONFIG } from '../../lib/constants';
+import { useAuth } from '../../hooks/useAuth';
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, role, signOut } = useAuth();
 
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
   const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  const getDashboardPath = () => {
+    if (role === 'mentor') return '/dashboard/mentor';
+    if (role === 'admin') return '/dashboard/admin';
+    return '/dashboard/student';
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-brand-bg border-b-2 border-brand-dark">
@@ -68,27 +76,59 @@ export const Navbar: React.FC = () => {
 
           {/* Desktop Auth CTAs */}
           <div className="hidden md:flex items-center gap-2.5">
-            <Button to="/login" variant="ghost" size="sm">
-              Log In
-            </Button>
-            <Button
-              to="/signup"
-              variant="primary"
-              size="sm"
-              rightIcon={<ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />}
-            >
-              Get Started
-            </Button>
+            {user ? (
+              <>
+                <Button
+                  to={getDashboardPath()}
+                  variant="primary"
+                  size="sm"
+                  leftIcon={<LayoutDashboard className="w-3.5 h-3.5" />}
+                >
+                  Workspace
+                </Button>
+                <Button
+                  onClick={() => signOut()}
+                  variant="ghost"
+                  size="sm"
+                  leftIcon={<LogOut className="w-3.5 h-3.5" />}
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button to="/login" variant="ghost" size="sm">
+                  Log In
+                </Button>
+                <Button
+                  to="/signup"
+                  variant="primary"
+                  size="sm"
+                  rightIcon={<ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />}
+                >
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu & Direct Actions */}
           <div className="flex md:hidden items-center gap-2">
-            <Link
-              to="/login"
-              className="text-[11px] font-mono font-bold px-2 py-1 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:bg-brand-paper-tint"
-            >
-              Log In
-            </Link>
+            {user ? (
+              <Link
+                to={getDashboardPath()}
+                className="text-[11px] font-mono font-bold px-2 py-1 border-2 border-brand-dark bg-brand-teal text-white shadow-brutal-xs"
+              >
+                Workspace
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="text-[11px] font-mono font-bold px-2 py-1 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:bg-brand-paper-tint"
+              >
+                Log In
+              </Link>
+            )}
             <button
               type="button"
               onClick={toggleMobileMenu}
@@ -124,12 +164,39 @@ export const Navbar: React.FC = () => {
               );
             })}
             <div className="pt-2.5 border-t-2 border-brand-dark/20 flex flex-col gap-2 mt-1">
-              <Button to="/login" variant="outline" size="sm" fullWidth onClick={closeMobileMenu}>
-                Log In to Portal
-              </Button>
-              <Button to="/signup" variant="primary" size="sm" fullWidth onClick={closeMobileMenu}>
-                Sign Up for PoraPlan
-              </Button>
+              {user ? (
+                <>
+                  <Button
+                    to={getDashboardPath()}
+                    variant="primary"
+                    size="sm"
+                    fullWidth
+                    onClick={closeMobileMenu}
+                  >
+                    Open Workspace
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    fullWidth
+                    onClick={() => {
+                      closeMobileMenu();
+                      signOut();
+                    }}
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button to="/login" variant="outline" size="sm" fullWidth onClick={closeMobileMenu}>
+                    Log In to Portal
+                  </Button>
+                  <Button to="/signup" variant="primary" size="sm" fullWidth onClick={closeMobileMenu}>
+                    Sign Up for PoraPlan
+                  </Button>
+                </>
+              )}
             </div>
           </nav>
         </div>
