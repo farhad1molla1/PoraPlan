@@ -164,12 +164,12 @@ export const HowItWorksPage: React.FC = () => {
             </p>
           </div>
           <Button
-            to="/signup"
+            to="/login"
             variant="primary"
             size="md"
             rightIcon={<ArrowRight className="w-4 h-4 stroke-[2.5]" />}
           >
-            Get Started Now
+            Log In to Workspace
           </Button>
         </div>
       </section>

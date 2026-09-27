@@ -120,12 +120,12 @@ export const LandingPage: React.FC = () => {
               {/* CTAs */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
                 <Button
-                  to="/signup"
+                  to="/login"
                   variant="primary"
                   size="lg"
                   rightIcon={<ArrowRight className="w-4 h-4 stroke-[2.5]" />}
                 >
-                  Get Started
+                  Log In to Workspace
                 </Button>
                 <Button
                   to="/how-it-works"
@@ -351,17 +351,18 @@ export const LandingPage: React.FC = () => {
           </h2>
 
           <p className="text-base sm:text-lg md:text-xl text-brand-dark max-w-xl mx-auto font-sans leading-relaxed">
-            Join PoraPlan and take the guesswork out of daily studying. Know what to do, submit your work, and get guidance when you need it.
+            Take the guesswork out of daily studying. If you have your PoraPlan ID from your mentor, log in below.
           </p>
 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button
-              to="/signup"
+              to="/login"
               variant="dark"
               size="lg"
               className="w-full sm:w-auto"
+              rightIcon={<ArrowRight className="w-4 h-4 stroke-[2.5]" />}
             >
-              Get Started for Free
+              Log in with PoraPlan ID
             </Button>
             <Button
               to="/how-it-works"

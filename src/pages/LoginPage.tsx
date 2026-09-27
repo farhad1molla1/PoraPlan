@@ -26,7 +26,7 @@ const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' })
 );
 
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [poraplanId, setPoraplanId] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -36,9 +36,21 @@ export const LoginPage: React.FC = () => {
   const [resetEmail, setResetEmail] = useState('');
   const [isResetting, setIsResetting] = useState(false);
 
-  const { signIn, signInWithGoogle, resetPassword, user, role } = useAuth();
+  const { signInWithPoraPlanId, signInWithGoogle, resetPassword, user, role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Derive query parameter notices without triggering cascading renders in effects
+  const queryParams = new URLSearchParams(location.search);
+  const queryError = queryParams.get('error') === 'google_not_linked'
+    ? 'This Google account is not linked to a PoraPlan account. Please use your PoraPlan ID and password or contact your mentor.'
+    : null;
+  const queryResetSuccess = queryParams.get('reset') === 'true'
+    ? 'Your password has been reset. Please log in with your PoraPlan ID and new password.'
+    : null;
+
+  const displayError = errorMessage || queryError;
+  const displaySuccess = successNotice || queryResetSuccess;
 
   // If already authenticated, redirect to workspace
   useEffect(() => {
@@ -63,10 +75,10 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const { error, role: loggedInRole } = await signIn(email, password);
+      const { error, role: loggedInRole } = await signInWithPoraPlanId(poraplanId, password);
 
       if (error) {
-        setErrorMessage(error.message || 'Incorrect email or password. Please try again.');
+        setErrorMessage(error.message || 'Incorrect PoraPlan ID or password. Please try again.');
         setIsSubmitting(false);
         return;
       }
@@ -98,7 +110,7 @@ export const LoginPage: React.FC = () => {
         setErrorMessage(error.message || 'Google sign-in could not be initiated.');
         setIsGoogleLoading(false);
       }
-      // Browser redirects to Google OAuth
+      // Redirects to Google OAuth
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Google sign-in failed. Please try again.';
       setErrorMessage(msg);
@@ -111,19 +123,23 @@ export const LoginPage: React.FC = () => {
     setErrorMessage(null);
     setSuccessNotice(null);
 
-    if (!resetEmail) {
-      setErrorMessage('Please enter your email address to receive password reset instructions.');
+    const emailTrimmed = resetEmail.trim();
+    if (!emailTrimmed) {
+      setErrorMessage('Please enter the email address associated with your PoraPlan account.');
       return;
     }
 
     setIsResetting(true);
     try {
-      const { error } = await resetPassword(resetEmail);
+      const { error } = await resetPassword(emailTrimmed);
       if (error) {
-        setErrorMessage(error.message || 'Unable to send reset email. Please verify your address.');
+        setErrorMessage(error.message || 'Unable to send reset email. Please try again.');
       } else {
-        setSuccessNotice('Password reset email sent! Check your inbox for instructions.');
+        setSuccessNotice(
+          'If an account is associated with this email, password reset instructions have been sent. Please check your inbox.'
+        );
         setShowForgotPassword(false);
+        setResetEmail('');
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error sending reset email.';
@@ -151,8 +167,8 @@ export const LoginPage: React.FC = () => {
         {/* Minimal Auth Card */}
         <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8">
           
-          {/* Header with Logo */}
-          <div className="flex items-center gap-3 mb-5">
+          {/* Header with Official Logo */}
+          <div className="flex items-center gap-3 mb-6">
             <div className="h-10 w-10 p-0.5 bg-brand-paper border-2 border-brand-dark flex items-center justify-center shrink-0 shadow-brutal-xs">
               <img
                 src="/poraplan-logo.png"
@@ -177,75 +193,56 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {/* Feedback Alerts */}
-          {errorMessage && (
+          {displayError && (
             <div className="mb-4 p-3 border-2 border-brand-dark bg-red-50 text-xs font-sans text-red-900 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-red-700 shrink-0 mt-0.5 stroke-[2.5]" />
-              <span>{errorMessage}</span>
+              <span className="leading-relaxed">{displayError}</span>
             </div>
           )}
 
-          {successNotice && (
+          {displaySuccess && (
             <div className="mb-4 p-3 border-2 border-brand-dark bg-emerald-50 text-xs font-sans text-emerald-900 flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5 stroke-[2.5]" />
-              <span>{successNotice}</span>
+              <span className="leading-relaxed">{displaySuccess}</span>
             </div>
           )}
 
-          {/* Google Sign In Option */}
-          <div className="space-y-4">
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={isGoogleLoading || isSubmitting}
-              className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint text-xs sm:text-sm font-bold font-sans text-brand-dark shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-60"
-            >
-              {isGoogleLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-brand-dark" />
-              ) : (
-                <GoogleIcon className="w-4 h-4 shrink-0" />
-              )}
-              <span>Continue with Google</span>
-            </button>
-
-            {/* Visual Divider */}
-            <div className="relative flex items-center justify-center">
-              <div className="w-full border-t border-brand-dark/20" />
-              <span className="bg-brand-paper px-3 text-[11px] font-mono text-brand-muted uppercase">
-                OR
-              </span>
-              <div className="w-full border-t border-brand-dark/20" />
-            </div>
-
-            {/* Email / Password Form */}
-            {!showForgotPassword ? (
+          {!showForgotPassword ? (
+            <div className="space-y-4">
+              {/* Primary Method: PoraPlan ID + Password */}
               <form onSubmit={handleSubmit} className="space-y-3.5">
                 <div>
-                  <label htmlFor="login-email" className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1">
-                    Email address
+                  <label
+                    htmlFor="poraplan-id"
+                    className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1"
+                  >
+                    PoraPlan ID
                   </label>
                   <input
-                    id="login-email"
-                    type="email"
+                    id="poraplan-id"
+                    type="text"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="student@example.com"
+                    autoCapitalize="characters"
+                    autoComplete="username"
+                    value={poraplanId}
+                    onChange={(e) => setPoraplanId(e.target.value.toUpperCase())}
+                    placeholder="Enter your PoraPlan ID (e.g. PP001)"
                     className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label htmlFor="login-password" className="block text-xs font-mono font-bold uppercase text-brand-dark">
+                    <label
+                      htmlFor="login-password"
+                      className="block text-xs font-mono font-bold uppercase text-brand-dark"
+                    >
                       Password
                     </label>
                     <button
                       type="button"
-                      onClick={() => {
-                        setShowForgotPassword(true);
-                        setResetEmail(email);
-                      }}
-                      className="text-[11px] font-sans text-brand-teal hover:underline"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-[11px] font-sans text-brand-teal hover:underline font-semibold"
                     >
                       Forgot password?
                     </button>
@@ -254,9 +251,10 @@ export const LoginPage: React.FC = () => {
                     id="login-password"
                     type="password"
                     required
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
                   />
                 </div>
@@ -280,60 +278,94 @@ export const LoginPage: React.FC = () => {
                   </Button>
                 </div>
               </form>
-            ) : (
-              /* Forgot Password Form */
-              <form onSubmit={handleForgotPassword} className="space-y-3.5">
-                <div>
-                  <label htmlFor="reset-email" className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1">
-                    Enter your email address
-                  </label>
-                  <input
-                    id="reset-email"
-                    type="email"
-                    required
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    placeholder="student@example.com"
-                    className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
-                  />
-                  <p className="text-[11px] text-brand-muted mt-1 font-sans">
-                    We will send a password reset link to this address.
-                  </p>
-                </div>
 
-                <div className="flex items-center gap-2 pt-1">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowForgotPassword(false)}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="sm"
-                    className="flex-1"
-                    disabled={isResetting}
-                  >
-                    {isResetting ? 'Sending...' : 'Send reset link'}
-                  </Button>
-                </div>
-              </form>
-            )}
+              {/* Visual Divider */}
+              <div className="relative flex items-center justify-center my-3">
+                <div className="w-full border-t border-brand-dark/20" />
+                <span className="bg-brand-paper px-3 text-[11px] font-mono text-brand-muted uppercase">
+                  or
+                </span>
+                <div className="w-full border-t border-brand-dark/20" />
+              </div>
 
-            {/* Bottom Switch Link */}
-            <div className="pt-3 border-t border-brand-dark/20 text-center">
-              <p className="text-xs text-brand-dark/80 font-sans">
-                Don't have an account?{' '}
-                <Link to="/signup" className="font-bold text-brand-navy hover:text-brand-teal underline">
-                  Sign up
-                </Link>
-              </p>
+              {/* Secondary Method: Continue with Google */}
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={isGoogleLoading || isSubmitting}
+                className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint text-xs sm:text-sm font-bold font-sans text-brand-dark shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-60"
+              >
+                {isGoogleLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-brand-dark" />
+                ) : (
+                  <GoogleIcon className="w-4 h-4 shrink-0" />
+                )}
+                <span>Continue with Google</span>
+              </button>
+
+              {/* Controlled Model Guidance */}
+              <div className="pt-4 border-t border-brand-dark/20 text-center">
+                <p className="text-xs text-brand-dark font-sans leading-relaxed">
+                  <span className="font-bold text-brand-navy block mb-0.5">New to PoraPlan?</span>
+                  Your mentor will provide your PoraPlan ID.
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            /* Forgot Password Sub-View */
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div>
+                <h2 className="text-sm font-heading font-bold text-brand-navy mb-1">
+                  Reset your password
+                </h2>
+                <p className="text-xs text-brand-dark/80 font-sans leading-relaxed mb-3">
+                  Enter the email address associated with your PoraPlan account. We will send a secure password reset link.
+                </p>
+                <label
+                  htmlFor="reset-email"
+                  className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1"
+                >
+                  Associated email address
+                </label>
+                <input
+                  id="reset-email"
+                  type="email"
+                  required
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="student@example.com"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                />
+                <span className="text-[11px] text-brand-muted mt-1 block font-sans">
+                  Password reset requires access to your verified connected email address.
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setErrorMessage(null);
+                  }}
+                  className="flex-1"
+                >
+                  Back to Log in
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  className="flex-1"
+                  disabled={isResetting}
+                >
+                  {isResetting ? 'Sending...' : 'Send reset link'}
+                </Button>
+              </div>
+            </form>
+          )}
 
         </div>
 

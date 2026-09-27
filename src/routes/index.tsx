@@ -7,6 +7,7 @@ import { HowItWorksPage } from '../pages/HowItWorksPage';
 import { AboutPage } from '../pages/AboutPage';
 import { LoginPage } from '../pages/LoginPage';
 import { SignupPage } from '../pages/SignupPage';
+import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { StudentDashboardPage } from '../pages/dashboard/StudentDashboardPage';
@@ -55,6 +56,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="about" element={<AboutPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
+        <Route path="reset-password" element={<ResetPasswordPage />} />
       </Route>
 
       {/* Authenticated Workspace Shell (Protected with Role Guard) */}

@@ -96,19 +96,14 @@ export const Navbar: React.FC = () => {
                 </Button>
               </>
             ) : (
-              <>
-                <Button to="/login" variant="ghost" size="sm">
-                  Log In
-                </Button>
-                <Button
-                  to="/signup"
-                  variant="primary"
-                  size="sm"
-                  rightIcon={<ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />}
-                >
-                  Get Started
-                </Button>
-              </>
+              <Button
+                to="/login"
+                variant="primary"
+                size="sm"
+                rightIcon={<ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />}
+              >
+                Log In
+              </Button>
             )}
           </div>
 
@@ -188,14 +183,9 @@ export const Navbar: React.FC = () => {
                   </Button>
                 </>
               ) : (
-                <>
-                  <Button to="/login" variant="outline" size="sm" fullWidth onClick={closeMobileMenu}>
-                    Log In to Portal
-                  </Button>
-                  <Button to="/signup" variant="primary" size="sm" fullWidth onClick={closeMobileMenu}>
-                    Sign Up for PoraPlan
-                  </Button>
-                </>
+                <Button to="/login" variant="primary" size="sm" fullWidth onClick={closeMobileMenu}>
+                  Log In to Workspace
+                </Button>
               )}
             </div>
           </nav>

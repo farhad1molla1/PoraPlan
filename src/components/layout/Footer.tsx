@@ -8,7 +8,7 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
           {/* Brand Info */}
-          <div className="md:col-span-6 space-y-4">
+          <div className="md:col-span-4 space-y-4">
             <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 p-0.5 bg-brand-paper border-2 border-brand-dark flex items-center justify-center shadow-brutal-xs shrink-0">
                 <img
@@ -41,7 +41,7 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Quick Navigation */}
-          <div className="md:col-span-3 space-y-3">
+          <div className="md:col-span-2 space-y-3">
             <h3 className="font-mono text-xs uppercase tracking-widest text-brand-gold font-bold">
               Navigation
             </h3>
@@ -69,13 +69,44 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/login" className="text-brand-bg/80 hover:text-white hover:underline">
-                  Log In
+                  Log In with PoraPlan ID
                 </Link>
               </li>
+            </ul>
+            <p className="text-xs text-brand-bg/65 font-sans leading-relaxed pt-1">
+              PoraPlan IDs are provided directly by your assigned mentor or administrator.
+            </p>
+          </div>
+
+          {/* Contact PoraPlan */}
+          <div className="md:col-span-3 space-y-3">
+            <h3 className="font-mono text-xs uppercase tracking-widest text-brand-gold font-bold">
+              Contact PoraPlan
+            </h3>
+            <ul className="space-y-2 text-xs font-mono">
               <li>
-                <Link to="/signup" className="text-brand-bg/80 hover:text-white hover:underline">
-                  Create an Account
-                </Link>
+                <span className="text-brand-gold/80 block text-[10px] uppercase">Email</span>
+                <a
+                  href="mailto:poraplan.bd@gmail.com"
+                  className="text-brand-bg/90 hover:text-brand-gold underline transition-colors"
+                >
+                  poraplan.bd@gmail.com
+                </a>
+              </li>
+              <li>
+                <span className="text-brand-gold/80 block text-[10px] uppercase">Facebook</span>
+                <a
+                  href="https://www.facebook.com/profile.php?id=61593180002346"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-bg/90 hover:text-brand-gold underline transition-colors"
+                >
+                  PoraPlan
+                </a>
+              </li>
+              <li>
+                <span className="text-brand-gold/80 block text-[10px] uppercase">WhatsApp</span>
+                <span className="text-brand-bg/90">@PoraPlan</span>
               </li>
             </ul>
           </div>

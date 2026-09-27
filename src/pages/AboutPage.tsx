@@ -225,22 +225,53 @@ export const AboutPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Section 5: Closing CTA */}
+        {/* Section 5: How mentor support works */}
+        <section aria-labelledby="mentor-support" className="space-y-4">
+          <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-4">
+            <Badge variant="teal" size="sm">MENTOR SUPPORT</Badge>
+            
+            <h2 id="mentor-support" className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy">
+              How mentor support works
+            </h2>
+
+            <p className="text-sm sm:text-base text-brand-dark/90 leading-relaxed font-sans">
+              Mentorship at PoraPlan is focused on real academic guidance, not generic motivation.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="p-4 border-2 border-brand-dark bg-brand-paper-tint space-y-1.5 shadow-brutal-xs">
+                <h3 className="font-heading font-bold text-sm text-brand-navy">Checking your work</h3>
+                <p className="text-xs sm:text-sm text-brand-dark/80 font-sans leading-relaxed">
+                  Your mentor reviews each assignment and practice submission you turn in, pointing out exact calculation steps or conceptual gaps.
+                </p>
+              </div>
+
+              <div className="p-4 border-2 border-brand-dark bg-brand-paper-tint space-y-1.5 shadow-brutal-xs">
+                <h3 className="font-heading font-bold text-sm text-brand-navy">Clear doubt resolution</h3>
+                <p className="text-xs sm:text-sm text-brand-dark/80 font-sans leading-relaxed">
+                  When you get stuck on a topic, you don't stay stranded. Ask your mentor directly and receive simple, focused explanations.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 6: Closing CTA */}
         <section className="text-center p-8 sm:p-10 border-2 border-brand-dark bg-brand-gold shadow-brutal space-y-4">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-navy font-heading">
             Start studying with a clear plan today
           </h2>
           <p className="text-sm sm:text-base text-brand-dark max-w-lg mx-auto font-sans leading-relaxed">
-            Create an account in 30 seconds and see how simple structured studying can be.
+            Have your PoraPlan ID ready? Log in to your workspace or contact your mentor.
           </p>
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button
-              to="/signup"
+              to="/login"
               variant="dark"
               size="md"
               rightIcon={<ArrowRight className="w-4 h-4 stroke-[2.5]" />}
             >
-              Get Started for Free
+              Log In to Workspace
             </Button>
             <Button
               to="/how-it-works"

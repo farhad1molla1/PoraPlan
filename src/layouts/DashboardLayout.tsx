@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
-  const { user, profile, role, signOut } = useAuth();
+  const { user, profile, role, poraplanId, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -118,8 +118,8 @@ export const DashboardLayout: React.FC = () => {
               <span className="text-xs font-bold font-sans text-brand-dark leading-none truncate max-w-[120px]">
                 {userDisplayName}
               </span>
-              <span className="text-[10px] font-mono text-brand-muted leading-tight mt-0.5 truncate max-w-[120px]">
-                {user?.email}
+              <span className="text-[10px] font-mono text-brand-teal font-bold leading-tight mt-0.5 truncate max-w-[120px]">
+                {poraplanId || user?.email}
               </span>
             </div>
           </button>
@@ -299,18 +299,30 @@ export const DashboardLayout: React.FC = () => {
 
             <div className="space-y-3 font-mono text-xs">
               <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
+                <span className="text-[10px] text-brand-muted uppercase block">PoraPlan ID</span>
+                <span className="font-bold text-brand-navy text-sm font-mono">
+                  {poraplanId || profile?.poraplan_id || 'PP-MEMBER'}
+                </span>
+              </div>
+
+              <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
                 <span className="text-[10px] text-brand-muted uppercase block">Full Name</span>
                 <span className="font-bold text-brand-dark text-sm font-sans">{userDisplayName}</span>
               </div>
 
               <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
-                <span className="text-[10px] text-brand-muted uppercase block">Email Address</span>
-                <span className="font-bold text-brand-dark break-all">{user?.email}</span>
+                <span className="text-[10px] text-brand-muted uppercase block">Associated Email</span>
+                <span className="font-bold text-brand-dark break-all">
+                  {profile?.linked_email || user?.email}
+                </span>
+                <span className="text-[10px] text-brand-muted block font-sans mt-0.5">
+                  Used for Google sign-in and password recovery.
+                </span>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
-                  <span className="text-[10px] text-brand-muted uppercase block">Account Type</span>
+                  <span className="text-[10px] text-brand-muted uppercase block">Role</span>
                   <Badge variant={roleBadgeVariant} size="sm">
                     {roleLabel}
                   </Badge>
@@ -319,15 +331,10 @@ export const DashboardLayout: React.FC = () => {
                 <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
                   <span className="text-[10px] text-brand-muted uppercase block">Status</span>
                   <span className="font-bold text-brand-teal flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-brand-teal inline-block animate-pulse" />
-                    Active
+                    <span className="w-2 h-2 rounded-full bg-brand-teal inline-block" />
+                    {profile?.status === 'not_activated' ? 'Activating' : 'Active'}
                   </span>
                 </div>
-              </div>
-
-              <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
-                <span className="text-[10px] text-brand-muted uppercase block">Account ID</span>
-                <span className="text-[11px] text-brand-muted break-all">{user?.id}</span>
               </div>
             </div>
 

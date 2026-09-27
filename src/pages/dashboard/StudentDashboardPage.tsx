@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 export const StudentDashboardPage: React.FC = () => {
-  const { user, profile, role } = useAuth();
+  const { user, profile, role, poraplanId } = useAuth();
   const [mentors, setMentors] = useState<Profile[]>([]);
   const [loadingMentors, setLoadingMentors] = useState(() => Boolean(user?.id));
 
@@ -78,7 +78,9 @@ export const StudentDashboardPage: React.FC = () => {
                 {currentDate}
               </span>
               <span>•</span>
-              <span className="truncate max-w-[200px]">Account: {user?.email}</span>
+              <span className="font-bold text-brand-gold">
+                ID: {poraplanId || profile?.poraplan_id || 'PP001'}
+              </span>
               <span>•</span>
               <span className="uppercase text-brand-teal font-bold">{role || 'Student'}</span>
             </div>

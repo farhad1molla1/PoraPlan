@@ -7,12 +7,16 @@ export type Json =
   | Json[];
 
 export type UserRole = 'student' | 'mentor' | 'admin';
+export type AccountStatus = 'not_activated' | 'active' | 'suspended';
 
 export type Profile = {
   id: string;
+  poraplan_id?: string | null;
   full_name: string;
   email: string;
+  linked_email?: string | null;
   role: UserRole;
+  status?: AccountStatus;
   avatar_url?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -20,9 +24,12 @@ export type Profile = {
 
 export type ProfileInsert = {
   id: string;
+  poraplan_id?: string | null;
   full_name: string;
   email: string;
+  linked_email?: string | null;
   role?: UserRole;
+  status?: AccountStatus;
   avatar_url?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -30,9 +37,12 @@ export type ProfileInsert = {
 
 export type ProfileUpdate = {
   id?: string;
+  poraplan_id?: string | null;
   full_name?: string;
   email?: string;
+  linked_email?: string | null;
   role?: UserRole;
+  status?: AccountStatus;
   avatar_url?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -87,7 +97,35 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      resolve_poraplan_id_login: {
+        Args: {
+          p_poraplan_id: string;
+        };
+        Returns: {
+          auth_email: string;
+          account_status: string;
+          account_role: UserRole;
+          resolved_poraplan_id: string;
+        }[];
+      };
+      check_google_account_linked: {
+        Args: {
+          p_email: string;
+        };
+        Returns: {
+          is_linked: boolean;
+          resolved_poraplan_id: string;
+          account_role: UserRole;
+          account_status: string;
+        }[];
+      };
+      connect_personal_email: {
+        Args: {
+          p_user_id: string;
+          p_email: string;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
       user_role: UserRole;
