@@ -14,9 +14,9 @@ export const Navbar: React.FC = () => {
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   const getDashboardPath = () => {
-    if (role === 'mentor') return '/dashboard/mentor';
-    if (role === 'admin') return '/dashboard/admin';
-    return '/dashboard/student';
+    if (role === 'mentor') return '/mentor/dashboard';
+    if (role === 'admin') return '/admin/dashboard';
+    return '/student/dashboard';
   };
 
   return (

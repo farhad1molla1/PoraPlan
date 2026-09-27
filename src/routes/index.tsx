@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { RootLayout } from '../layouts/RootLayout';
+import { DashboardLayout } from '../layouts/DashboardLayout';
 import { LandingPage } from '../pages/LandingPage';
 import { HowItWorksPage } from '../pages/HowItWorksPage';
 import { AboutPage } from '../pages/AboutPage';
@@ -27,44 +28,46 @@ const DashboardRedirect: React.FC = () => {
           <p className="font-heading font-extrabold text-sm text-brand-navy">
             RESOLVING WORKSPACE ROUTE
           </p>
+          <span className="font-mono text-[11px] text-brand-muted mt-1 block">
+            Connecting session to PoraPlan security layer...
+          </span>
         </div>
       </div>
     );
   }
 
   if (role === 'mentor') {
-    return <Navigate to="/dashboard/mentor" replace />;
+    return <Navigate to="/mentor/dashboard" replace />;
   }
   if (role === 'admin') {
-    return <Navigate to="/dashboard/admin" replace />;
+    return <Navigate to="/admin/dashboard" replace />;
   }
-  return <Navigate to="/dashboard/student" replace />;
+  return <Navigate to="/student/dashboard" replace />;
 };
 
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<RootLayout />}>
-        {/* Public Routes */}
+      {/* Public Marketing & Informational Shell */}
+      <Route element={<RootLayout />}>
         <Route index element={<LandingPage />} />
         <Route path="how-it-works" element={<HowItWorksPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
+      </Route>
 
-        {/* Dynamic Role Router */}
+      {/* Authenticated Workspace Shell (Protected with Role Guard) */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        {/* Primary Student Sector */}
         <Route
-          path="dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardRedirect />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Student Workspace Sector */}
-        <Route
-          path="dashboard/student"
+          path="student/dashboard"
           element={
             <ProtectedRoute allowedRoles={['student', 'admin']}>
               <StudentDashboardPage />
@@ -72,9 +75,9 @@ export const AppRoutes: React.FC = () => {
           }
         />
 
-        {/* Mentor Workspace Sector */}
+        {/* Primary Mentor Sector */}
         <Route
-          path="dashboard/mentor"
+          path="mentor/dashboard"
           element={
             <ProtectedRoute allowedRoles={['mentor', 'admin']}>
               <MentorDashboardPage />
@@ -82,17 +85,37 @@ export const AppRoutes: React.FC = () => {
           }
         />
 
-        {/* System Admin Sector */}
+        {/* Primary Admin Sector */}
         <Route
-          path="dashboard/admin"
+          path="admin/dashboard"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminDashboardPage />
             </ProtectedRoute>
           }
         />
+      </Route>
 
-        {/* 404 Handler */}
+      {/* Dynamic Role Resolver */}
+      <Route
+        path="dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardRedirect />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Aliases for backwards compatibility */}
+      <Route path="dashboard/student" element={<Navigate to="/student/dashboard" replace />} />
+      <Route path="dashboard/mentor" element={<Navigate to="/mentor/dashboard" replace />} />
+      <Route path="dashboard/admin" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="student" element={<Navigate to="/student/dashboard" replace />} />
+      <Route path="mentor" element={<Navigate to="/mentor/dashboard" replace />} />
+      <Route path="admin" element={<Navigate to="/admin/dashboard" replace />} />
+
+      {/* 404 Catch-All Handler (wrapped in RootLayout) */}
+      <Route element={<RootLayout />}>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

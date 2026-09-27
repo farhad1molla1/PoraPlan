@@ -1,126 +1,152 @@
-# PoraPlan MVP (Phase 0: Project Foundation)
+# PoraPlan — Personal Study Assistance & Mentorship Platform
 
 > **Tagline:** You study. We organize how, what and when.  
-> **Product Context:** Personal Study Assistance & Mentorship platform.
+> **Product Purpose:** A structured academic planning, study habit tracking, and student-mentor collaboration platform built with a Neo-Brutalist Retro-Academic interface.
 
 ---
 
-## Overview
+## Current Architecture
 
-PoraPlan is a mobile-first Web App + PWA with a public landing website and private Student/Mentor dashboards.
+PoraPlan is built as a single-page application (SPA) with a public marketing presence and a role-guarded authenticated application shell. Backend services, authentication, and relational data persistence are powered by Supabase (PostgreSQL) with strict Row Level Security (RLS).
 
-This repository contains **Phase 0 Project Foundation**, providing a clean, scalable frontend architecture without backend dependencies.
-
-### Core Workflow Engine
 ```
-Plan → Study → Practice → Submit → Review → Feedback → Progress
+Client (React 19 + TypeScript + Vite)
+  ├── Public Website Shell (RootLayout)
+  │     └── Landing, How It Works, About, Login, Signup
+  └── Authenticated Workspace Shell (DashboardLayout)
+        ├── /student/dashboard (Student Sector)
+        ├── /mentor/dashboard  (Mentor Sector)
+        └── /admin/dashboard   (Admin Sector)
+                  │
+                  ▼
+         Supabase Backend (PostgreSQL)
+  ├── Supabase Auth (Email/Password, Session Persistence)
+  ├── profiles Table (Linked to auth.users, user_role enum)
+  ├── mentor_students Table (Pairings with no-self-mentoring check)
+  └── Strict RLS Policies (Isolated cross-tenant data access)
 ```
 
 ---
 
-## Design System: Neo-Brutalist Retro Academic
+## Current Tech Stack
 
-- **Deep Navy:** `#082B4C`
-- **Teal:** `#0BA7B4`
-- **Warm Gold:** `#F5A623`
-- **Off White:** `#F6FAFB`
-- **Dark Text:** `#172B3A`
-
-### Key Design Elements
-- High contrast, 2px-3px solid dark borders (`border-brand-dark`)
-- Hard offset shadows (`shadow-brutal`, `shadow-brutal-lg`)
-- Tactile interactive buttons with active depression offsets
-- Academic index cards, docket stamps, syllabus indicators, and subtle graph-paper pattern (`academic-grid-pattern`)
-- Mobile-first responsiveness prioritizing 360px, 390px, 430px viewports without horizontal overflow
-
----
-
-## Tech Stack
-
-- **Framework:** React 19 + TypeScript
-- **Bundler:** Vite 6 (configured with wasm-node for seamless cross-platform support)
-- **Styling:** Tailwind CSS v3
-- **Routing:** React Router v7
+- **Frontend Core:** React 19, TypeScript ~6.0, Vite 6 (configured with wasm-node for cross-platform portability)
+- **Styling & Design System:** Tailwind CSS v3 (Neo-Brutalist retro-academic theme, `#082B4C`, `#0BA7B4`, `#F5A623`, `#F6FAFB`, `#172B3A`)
+- **Routing:** React Router v7 with role-aware protected route guards
+- **Backend & Database:** Supabase (`@supabase/supabase-js` v2)
+- **Database Migrations:** Supabase CLI / PostgreSQL SQL migrations in `supabase/migrations/`
 - **Icons:** Lucide React
+- **Code Quality:** Oxlint
 
 ---
 
-## Public Routes
+## Current Development Phase
 
-| Route | Description |
-|---|---|
-| `/` | Landing page (Hero, PoraPlan principle, 7-step Core Workflow, CTA, Footer) |
-| `/how-it-works` | Full workflow specification and Student vs. Mentor role architecture |
-| `/about` | Educational philosophy, mission, and system specification dossier |
-| `/login` | Accessible portal sign-in preview (Phase 0 preview, no backend) |
-| `/signup` | Accessible student/mentor enrollment preview (Phase 0 preview, no backend) |
+**Phase 1 — Authenticated Application & Dashboard Foundation**
+
+All Phase 0 visual foundations and Phase 1 authentication/database foundations are implemented and synchronized. The project provides working authentication, database role triggers, strict RLS security, and dedicated authenticated shells for students and mentors.
 
 ---
 
-## Project Structure
+## Supabase, Auth, Roles & Security
 
-```
-d:/PoraPlan V0.1/
-├── public/
-│   └── favicon.svg           # Custom Neo-Brutalist academic favicon
-├── src/
-│   ├── assets/               # Static assets
-│   ├── components/
-│   │   ├── common/
-│   │   │   ├── Badge.tsx     # Retro-academic status stamps & tags
-│   │   │   ├── Button.tsx    # Tactile Neo-Brutalist button / link component
-│   │   │   ├── Card.tsx      # Strong-border cards with hard-edge shadows
-│   │   │   └── SectionHeading.tsx # Semantic headings with academic eyebrows
-│   │   └── layout/
-│   │       ├── Navbar.tsx    # Responsive header with mobile drawer menu
-│   │       └── Footer.tsx    # Deep Navy semantic footer with metadata
-│   ├── layouts/
-│   │   └── RootLayout.tsx    # App shell containing Navbar, Outlet, Footer
-│   ├── lib/
-│   │   ├── constants.ts      # App config, canonical workflow steps, nav links
-│   │   └── utils.ts          # Class helper utilities
-│   ├── pages/
-│   │   ├── LandingPage.tsx   # Landing page with study docket & 7 workflow steps
-│   │   ├── HowItWorksPage.tsx# Step-by-step learning engine specification
-│   │   ├── AboutPage.tsx     # Philosophy, mission, and platform specifications
-│   │   ├── LoginPage.tsx     # Accessible sign-in form (Phase 0 preview)
-│   │   ├── SignupPage.tsx    # Accessible enrollment form (Phase 0 preview)
-│   │   └── NotFoundPage.tsx  # Custom 404 syllabus handler
-│   ├── routes/
-│   │   └── index.tsx         # Route definitions for all 5 public endpoints
-│   ├── styles/
-│   │   └── index.css         # Tailwind base & retro-academic background utilities
-│   ├── types/
-│   │   └── index.ts          # TypeScript interfaces and prop types
-│   ├── App.tsx               # BrowserRouter wrapper
-│   └── main.tsx              # React DOM entry point
-├── package.json
-├── tailwind.config.js        # Brand color tokens and hard-offset shadows
-├── tsconfig.json
-└── vite.config.ts
-```
+### 1. Supabase Client
+- Instantiated in `src/lib/supabase.ts` using Vite client environment variables.
+- Utilizes the publishable anonymous key only (`VITE_SUPABASE_ANON_KEY`). Service role keys are never included in the frontend.
+- Provides fallback diagnostics (`isSupabaseConfigured()`, `testSupabaseConnection()`).
+
+### 2. Authentication & Session Persistence
+- Email and password authentication via `supabase.auth.signInWithPassword()` and `supabase.auth.signUp()`.
+- Client-side session persistence via Supabase Auth session listeners (`onAuthStateChange`).
+- Centralized auth state and profile hydration managed through `AuthContext` and `useAuth` hook.
+
+### 3. Roles
+- Supported user roles: `student`, `mentor`, `admin` (defined as `user_role` enum in PostgreSQL).
+- Signup automatically injects the selected role into user metadata.
+- A database trigger (`handle_new_user`) automatically provisions a record in `public.profiles` upon signup.
+
+### 4. Row Level Security (RLS) & Policies
+- **`public.profiles`**:
+  - Users can read and update their own profile (`auth.uid() = id`).
+  - Mentors can view profiles of assigned students only.
+  - Students can view profiles of assigned mentors only.
+  - Admins can view all profiles.
+- **`public.mentor_students`**:
+  - Mentors can view records where they are the assigned mentor (`auth.uid() = mentor_id`).
+  - Students can view records where they are the assigned student (`auth.uid() = student_id`).
+  - Check constraint prevents self-mentoring (`mentor_id != student_id`).
+  - Admins have full management access.
+  - Zero open `USING (true)` bypass policies.
 
 ---
 
-## Getting Started
+## Current Routes
 
-### Install Dependencies
+| Route | Access | Description |
+|---|---|---|
+| `/` | Public | Hero, 7-step Core Workflow, and platform introduction |
+| `/how-it-works` | Public | Step-by-step learning engine specification |
+| `/about` | Public | Educational philosophy and system dossier |
+| `/login` | Public (Unauthenticated) | Neo-brutalist authentication portal with role-aware redirect |
+| `/signup` | Public (Unauthenticated) | Registration with role selection (Student / Mentor) |
+| `/student/dashboard` | Protected (`student`, `admin`) | Student workspace: greeting, focus, tasks, progress placeholders, quick links |
+| `/mentor/dashboard` | Protected (`mentor`, `admin`) | Mentor workspace: student count, review queue, evaluations, student roster |
+| `/admin/dashboard` | Protected (`admin`) | System admin control sector placeholder |
+| `/dashboard` | Protected | Dynamic resolver redirecting to role workspace |
+
+---
+
+## Local Setup & Environment Variables
+
+### 1. Clone & Install
 ```bash
+git clone https://github.com/farhad1molla1/PoraPlan.git
+cd PoraPlan
 npm install
 ```
 
-### Run Development Server
+### 2. Configure Environment Variables
+Copy `.env.example` to `.env.local`:
 ```bash
+cp .env.example .env.local
+```
+Update `.env.local` with your Supabase credentials:
+```env
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+```
+> **Security Note:** Never commit `.env.local` or service role keys. The `.gitignore` excludes all `.env*` files except `.env.example`.
+
+### 3. Run Database Migrations
+Apply SQL files located in `supabase/migrations/` to your Supabase PostgreSQL instance:
+1. `20260927000001_profiles_schema.sql` (Profiles table, roles enum, triggers)
+2. `20260927000002_mentor_students_rls.sql` (Mentor-student pairings and RLS)
+
+### 4. Development & Build Commands
+```bash
+# Start development server
 npm run dev
-```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### Run Production Build & Type Check
-```bash
+# Run production build and TypeScript check
 npm run build
-```
 
-### Run Linter
-```bash
+# Run linter
 npm run lint
 ```
+
+---
+
+## Current Completed Milestones
+
+- [x] **Phase 0:** Neo-Brutalist design system, responsive landing page, how-it-works, about, public layouts.
+- [x] **Phase 1A:** Supabase client connection & environment configuration.
+- [x] **Phase 1B:** Profiles schema & role foundation with database triggers.
+- [x] **Phase 1C:** Mentor-student relationship schema & strict RLS policies.
+- [x] **Phase 1D:** Authentication engine (signup, login, logout, session persistence, role routing).
+- [x] **Phase 1E:** Authenticated student & mentor dashboard foundation shell with mobile-first navigation.
+
+---
+
+## Next Milestone
+
+- **Phase 2 (Milestone 1):** Academic Subjects & Daily Study Planning Engine (Subjects schema, daily routine scheduler, and study target models).

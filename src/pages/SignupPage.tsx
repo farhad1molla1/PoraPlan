@@ -24,11 +24,11 @@ export const SignupPage: React.FC = () => {
   useEffect(() => {
     if (user && currentRole) {
       if (currentRole === 'mentor') {
-        navigate('/dashboard/mentor', { replace: true });
+        navigate('/mentor/dashboard', { replace: true });
       } else if (currentRole === 'admin') {
-        navigate('/dashboard/admin', { replace: true });
+        navigate('/admin/dashboard', { replace: true });
       } else {
-        navigate('/dashboard/student', { replace: true });
+        navigate('/student/dashboard', { replace: true });
       }
     }
   }, [user, currentRole, navigate]);
@@ -61,7 +61,7 @@ export const SignupPage: React.FC = () => {
 
       setSuccessNotice('Account successfully created! Redirecting to your workspace...');
       setTimeout(() => {
-        const target = createdRole === 'mentor' ? '/dashboard/mentor' : '/dashboard/student';
+        const target = createdRole === 'mentor' ? '/mentor/dashboard' : '/student/dashboard';
         navigate(target);
       }, 1000);
     } catch (err: unknown) {

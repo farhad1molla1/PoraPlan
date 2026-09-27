@@ -23,11 +23,11 @@ export const LoginPage: React.FC = () => {
       if (from && from !== '/login') {
         navigate(from, { replace: true });
       } else if (role === 'mentor') {
-        navigate('/dashboard/mentor', { replace: true });
+        navigate('/mentor/dashboard', { replace: true });
       } else if (role === 'admin') {
-        navigate('/dashboard/admin', { replace: true });
+        navigate('/admin/dashboard', { replace: true });
       } else {
-        navigate('/dashboard/student', { replace: true });
+        navigate('/student/dashboard', { replace: true });
       }
     }
   }, [user, role, navigate, location]);
@@ -49,11 +49,11 @@ export const LoginPage: React.FC = () => {
       // Route based on role
       const targetRole = loggedInRole || role || 'student';
       if (targetRole === 'mentor') {
-        navigate('/dashboard/mentor');
+        navigate('/mentor/dashboard');
       } else if (targetRole === 'admin') {
-        navigate('/dashboard/admin');
+        navigate('/admin/dashboard');
       } else {
-        navigate('/dashboard/student');
+        navigate('/student/dashboard');
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An unexpected error occurred during sign in.';

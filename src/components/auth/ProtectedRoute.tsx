@@ -55,7 +55,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             </p>
           </div>
           <div className="pt-2">
-            <Link to={role === 'mentor' ? '/dashboard/mentor' : role === 'admin' ? '/dashboard/admin' : '/dashboard/student'}>
+            <Link to={role === 'mentor' ? '/mentor/dashboard' : role === 'admin' ? '/admin/dashboard' : '/student/dashboard'}>
               <Button variant="primary" size="sm" fullWidth leftIcon={<ArrowLeft className="w-3.5 h-3.5" />}>
                 Go To My Workspace
               </Button>

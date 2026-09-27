@@ -15,8 +15,8 @@ export const AdminDashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-140px)] py-8 px-4 sm:px-6 lg:px-8 academic-grid-pattern">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="w-full py-6 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-6">
         
         {/* Header Ribbon */}
         <div className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-6 shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-4">
