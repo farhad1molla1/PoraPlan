@@ -57,8 +57,16 @@ All Phase 0 visual foundations and Phase 1 authentication/database foundations a
 
 ### 2. Authentication & Session Persistence
 - Email and password authentication via `supabase.auth.signInWithPassword()` and `supabase.auth.signUp()`.
+- Google OAuth authentication via `supabase.auth.signInWithOAuth({ provider: 'google' })`.
+- Password reset flow via `supabase.auth.resetPasswordForEmail()`.
 - Client-side session persistence via Supabase Auth session listeners (`onAuthStateChange`).
 - Centralized auth state and profile hydration managed through `AuthContext` and `useAuth` hook.
+
+> **Google OAuth Configuration (One-Time Setup in Supabase Dashboard):**
+> 1. In Google Cloud Console, create OAuth 2.0 Client ID (Web Application).
+> 2. Add Authorized Redirect URI: `https://<your-supabase-project-id>.supabase.co/auth/v1/callback`.
+> 3. In your Supabase Dashboard, navigate to **Authentication → Providers → Google**, enable the toggle, and paste your Google **Client ID** and **Client Secret**.
+> 4. Add your application URL (e.g. `http://localhost:5173/**`) to **Authentication → URL Configuration → Redirect URLs**.
 
 ### 3. Roles
 - Supported user roles: `student`, `mentor`, `admin` (defined as `user_role` enum in PostgreSQL).

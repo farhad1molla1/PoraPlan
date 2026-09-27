@@ -169,6 +169,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [isConfigured, fetchUserProfile]
   );
 
+  const signInWithGoogle = useCallback(async (): Promise<{ error: Error | null }> => {
+    if (!isConfigured) {
+      return {
+        error: new Error(
+          'Supabase credentials are not configured yet in .env.local. Please provide valid VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.'
+        ),
+      };
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+
+      if (error) {
+        return { error };
+      }
+
+      return { error: null };
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      return { error };
+    }
+  }, [isConfigured]);
+
+  const resetPassword = useCallback(
+    async (email: string): Promise<{ error: Error | null }> => {
+      if (!isConfigured) {
+        return {
+          error: new Error(
+            'Supabase credentials are not configured yet in .env.local. Please provide valid VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.'
+          ),
+        };
+      }
+
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/login?reset=true`,
+        });
+
+        if (error) {
+          return { error };
+        }
+
+        return { error: null };
+      } catch (err: unknown) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        return { error };
+      }
+    },
+    [isConfigured]
+  );
+
   const signOut = useCallback(async (): Promise<void> => {
     if (isConfigured) {
       await supabase.auth.signOut();
@@ -191,11 +247,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loading,
       isConfigured,
       signIn,
+      signInWithGoogle,
+      resetPassword,
       signUp,
       signOut,
       refreshProfile,
     }),
-    [user, session, profile, role, loading, isConfigured, signIn, signUp, signOut, refreshProfile]
+    [
+      user,
+      session,
+      profile,
+      role,
+      loading,
+      isConfigured,
+      signIn,
+      signInWithGoogle,
+      resetPassword,
+      signUp,
+      signOut,
+      refreshProfile,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

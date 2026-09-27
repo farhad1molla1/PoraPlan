@@ -59,12 +59,9 @@ export const MentorDashboardPage: React.FC = () => {
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs uppercase text-brand-gold font-bold tracking-wider">
-                MENTOR SECTOR // SUPERVISION CONSOLE
+                MENTOR WORKSPACE
               </span>
-              <Badge variant="gold" size="sm">ACTIVE DOCKET</Badge>
-              <span className="font-mono text-[10px] text-brand-bg/60 hidden sm:inline">
-                // RLS ENFORCED
-              </span>
+              <Badge variant="gold" size="sm">ACTIVE SESSION</Badge>
             </div>
 
             <h1 id="mentor-greeting" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg">
@@ -86,20 +83,20 @@ export const MentorDashboardPage: React.FC = () => {
           <div className="flex items-center gap-2 shrink-0">
             <div className="px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-brand-dark text-xs font-mono font-bold shadow-brutal-xs flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-brand-teal" />
-              <span>Mentor-Student RLS Active</span>
+              <span>Mentor Account Verified</span>
             </div>
           </div>
         </section>
 
-        {/* Metrics Row (Transparent Placeholders & Real DB Count) */}
+        {/* Metrics Row */}
         <section aria-labelledby="mentor-metrics-title" className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 id="mentor-metrics-title" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy flex items-center gap-2">
               <Award className="w-4 h-4 text-brand-gold stroke-[2.5]" />
-              Mentorship Oversight Summary
+              Mentorship Summary
             </h2>
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted bg-brand-paper border border-brand-dark px-2 py-0.5 shadow-brutal-xs">
-              Live RLS Sync
+              STUDENT ROSTER
             </span>
           </div>
 
@@ -116,7 +113,7 @@ export const MentorDashboardPage: React.FC = () => {
                 {loadingStudents ? '--' : students.length} <span className="text-xs font-mono font-normal text-brand-muted">Students</span>
               </div>
               <span className="text-[10px] font-mono text-brand-teal font-bold mt-1">
-                {students.length > 0 ? 'Active Roster' : 'Awaiting Pairings'}
+                {students.length > 0 ? 'Active Students' : 'No Students Yet'}
               </span>
             </div>
 
@@ -156,15 +153,15 @@ export const MentorDashboardPage: React.FC = () => {
             <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                  SECURITY POLICY
+                  ACCOUNT STATUS
                 </span>
                 <ShieldCheck className="w-4 h-4 text-brand-teal stroke-[2.5]" />
               </div>
               <div className="font-heading font-extrabold text-base text-brand-navy truncate">
-                Isolated
+                Active
               </div>
               <span className="text-[10px] font-mono text-brand-muted mt-1">
-                Zero data leakage
+                Verified Mentor
               </span>
             </div>
           </div>
@@ -180,7 +177,7 @@ export const MentorDashboardPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-brand-navy stroke-[2.5]" />
               <h2 id="roster-title" className="font-heading font-extrabold text-base text-brand-navy">
-                Assigned Student Roster
+                Your Students
               </h2>
             </div>
             <Badge variant={students.length > 0 ? 'teal' : 'muted'} size="sm">
@@ -190,12 +187,12 @@ export const MentorDashboardPage: React.FC = () => {
 
           {loadingStudents ? (
             <div className="p-4 text-center font-mono text-xs text-brand-muted">
-              Querying assigned students through Row Level Security...
+              Loading your assigned students...
             </div>
           ) : students.length > 0 ? (
             <div className="space-y-3">
               <p className="text-xs text-brand-dark font-sans">
-                You have active mentorship oversight over the following student scholars:
+                You are the assigned mentor for the following students:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 {students.map((student) => (
@@ -226,7 +223,7 @@ export const MentorDashboardPage: React.FC = () => {
                   No Students Currently Assigned to Your Roster
                 </h3>
                 <p className="text-xs text-brand-muted font-sans mt-1 leading-relaxed">
-                  You currently have 0 assigned students. In PoraPlan's secure architecture, students are paired with mentors via administrator pairing. Once paired, their dossiers and problem set submissions will appear here.
+                  You currently have 0 assigned students. When students are paired with your mentor account, their names and study submissions will appear here.
                 </p>
               </div>
             </div>
@@ -262,15 +259,15 @@ export const MentorDashboardPage: React.FC = () => {
                     0 Submissions Awaiting Evaluation
                   </h3>
                   <p className="text-xs text-brand-muted font-sans mt-1 max-w-sm mx-auto leading-relaxed">
-                    When assigned students complete and submit problem sets, assignments, or reflection logs, they will queue here for rubric-based grading and mentor feedback.
+                    When assigned students complete and submit problem sets or assignments, they will queue here for grading and mentor feedback.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono text-brand-muted">
-              <span>Rubric Engine</span>
-              <span className="font-bold text-brand-dark">Phase 2 Docket</span>
+              <span>Student Submissions</span>
+              <span className="font-bold text-brand-dark">Review Queue</span>
             </div>
           </section>
 
@@ -300,15 +297,15 @@ export const MentorDashboardPage: React.FC = () => {
                     No Evaluations Scheduled For Today
                   </h3>
                   <p className="text-xs text-brand-muted font-sans mt-1 max-w-sm mx-auto leading-relaxed">
-                    Milestone evaluation checkpoints and weekly syncs will appear on your schedule as assigned students reach syllabus milestones.
+                    Check-in dates and syllabus milestone assessments will appear here as your students submit work.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono text-brand-muted">
-              <span>Schedule Engine</span>
-              <span className="font-bold text-brand-dark">Phase 2 Docket</span>
+              <span>Study Calendar</span>
+              <span className="font-bold text-brand-dark">Milestone Reviews</span>
             </div>
           </section>
 
@@ -318,7 +315,7 @@ export const MentorDashboardPage: React.FC = () => {
         <section aria-labelledby="mentor-actions-title" className="space-y-3">
           <h2 id="mentor-actions-title" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-brand-gold stroke-[2.5]" />
-            Quick Actions &amp; Specifications
+            Quick Actions
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -326,12 +323,12 @@ export const MentorDashboardPage: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                    ACTION DOCKET
+                    STUDY TASK
                   </span>
-                  <Badge variant="muted" size="sm">PHASE 2</Badge>
+                  <Badge variant="muted" size="sm">COMING SOON</Badge>
                 </div>
                 <h3 className="font-heading font-bold text-sm text-brand-navy">
-                  Assign Problem Target
+                  Assign Problem Set
                 </h3>
                 <p className="text-xs text-brand-muted mt-1 leading-relaxed">
                   Create structured study tasks and assign them to specific students.
@@ -346,15 +343,15 @@ export const MentorDashboardPage: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                    METHODOLOGY
+                    GUIDE
                   </span>
                   <ArrowRight className="w-4 h-4 text-brand-dark group-hover:text-brand-teal transition-colors" />
                 </div>
                 <h3 className="font-heading font-bold text-sm text-brand-navy">
-                  7-Step Mentorship Engine
+                  The 7-Step Study Cycle
                 </h3>
                 <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Review the evaluation rubric and review pipeline.
+                  Review the study cycle and evaluation guidelines.
                 </p>
               </div>
             </Link>
@@ -366,15 +363,15 @@ export const MentorDashboardPage: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                    DOCUMENTATION
+                    ABOUT
                   </span>
                   <ExternalLink className="w-4 h-4 text-brand-dark group-hover:text-brand-teal transition-colors" />
                 </div>
                 <h3 className="font-heading font-bold text-sm text-brand-navy">
-                  System Specifications
+                  About PoraPlan
                 </h3>
                 <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Platform architecture, pedagogy, and design rules.
+                  Learn about our mission and approach to student study assistance.
                 </p>
               </div>
             </Link>

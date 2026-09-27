@@ -10,18 +10,18 @@ export const NotFoundPage: React.FC = () => {
         <Card
           variant="paper"
           shadow="lg"
-          headerBar={<span>ERROR CODE // 404</span>}
+          headerBar={<span>PAGE NOT FOUND // 404</span>}
         >
           <div className="w-14 h-14 bg-brand-gold border-2 border-brand-dark flex items-center justify-center mx-auto mb-4 shadow-brutal-xs">
             <FileQuestion className="w-7 h-7 text-brand-dark stroke-[2.5]" />
           </div>
 
           <h1 className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy">
-            Syllabus Topic Not Found
+            Page Not Found
           </h1>
 
           <p className="text-xs sm:text-sm text-brand-dark/80 font-sans mt-2 mb-5">
-            The study page or docket you requested does not exist in the current PoraPlan course registry.
+            The page you requested doesn't exist or may have been moved.
           </p>
 
           <Button
@@ -30,7 +30,7 @@ export const NotFoundPage: React.FC = () => {
             fullWidth
             leftIcon={<ArrowLeft className="w-4 h-4 stroke-[2.5]" />}
           >
-            Return to PoraPlan Home
+            Return to Home
           </Button>
         </Card>
       </div>

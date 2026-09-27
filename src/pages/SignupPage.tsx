@@ -1,23 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, AlertTriangle, User, Award, ArrowRight, KeyRound, Loader2, CheckCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Loader2, CheckCircle2, User, Award } from 'lucide-react';
 import { Button } from '../components/common/Button';
-import { Badge } from '../components/common/Badge';
-import { APP_CONFIG } from '../lib/constants';
 import { useAuth } from '../hooks/useAuth';
 import type { UserRole } from '../types/database';
+
+const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+  <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      fill="#4285F4"
+      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.66-5.17 3.66-9.12z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.13C3.25 21.3 7.31 24 12 24z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.57H1.27C.46 8.19 0 10.03 0 12s.46 3.81 1.27 5.43l4.01-3.14z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.57l4.01 3.14c.95-2.83 3.6-4.96 6.72-4.96z"
+    />
+  </svg>
+);
 
 export const SignupPage: React.FC = () => {
   const [role, setRole] = useState<'student' | 'mentor'>('student');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [focusArea, setFocusArea] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
 
-  const { signUp, user, role: currentRole, isConfigured } = useAuth();
+  const { signUp, signInWithGoogle, user, role: currentRole } = useAuth();
   const navigate = useNavigate();
 
   // If already logged in, redirect to respective role workspace
@@ -43,13 +63,18 @@ export const SignupPage: React.FC = () => {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match. Please verify.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const { error, role: createdRole } = await signUp(
         email,
         password,
-        fullName,
+        fullName || (role === 'mentor' ? 'Academic Mentor' : 'Student Scholar'),
         role as UserRole
       );
 
@@ -59,309 +84,244 @@ export const SignupPage: React.FC = () => {
         return;
       }
 
-      setSuccessNotice('Account successfully created! Redirecting to your workspace...');
+      setSuccessNotice('Account created! Opening your workspace...');
       setTimeout(() => {
         const target = createdRole === 'mentor' ? '/mentor/dashboard' : '/student/dashboard';
         navigate(target);
       }, 1000);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'An unexpected error occurred during registration.';
+      const msg = err instanceof Error ? err.message : 'An error occurred during sign up.';
       setErrorMessage(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setErrorMessage(null);
+    setSuccessNotice(null);
+    setIsGoogleLoading(true);
+
+    try {
+      const { error } = await signInWithGoogle();
+      if (error) {
+        setErrorMessage(error.message || 'Google sign-in could not be initiated.');
+        setIsGoogleLoading(false);
+      }
+      // Redirects to Google OAuth
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Google sign-in failed. Please try again.';
+      setErrorMessage(msg);
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
-    <div className="w-full min-h-[calc(100vh-120px)] flex items-center justify-center py-6 sm:py-10 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern">
-      <div className="w-full max-w-4xl space-y-3">
+    <div className="w-full min-h-[calc(100vh-120px)] flex items-center justify-center py-8 sm:py-12 px-4 academic-grid-pattern">
+      <div className="w-full max-w-md space-y-4">
         
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between">
+        <div>
           <Link
             to="/"
             className="inline-flex items-center gap-1.5 font-mono text-xs uppercase font-bold text-brand-dark hover:text-brand-teal transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
-            Return to Home
+            Back to Home
           </Link>
-          <span className="font-mono text-[10px] text-brand-muted uppercase">
-            PP-REGISTRY // 01
-          </span>
         </div>
 
-        {/* 2-Column Split Neo-Brutalist Card */}
-        <div className="border-2 border-brand-dark shadow-brutal bg-brand-paper grid grid-cols-1 md:grid-cols-12 overflow-hidden">
+        {/* Minimal Auth Card */}
+        <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8">
           
-          {/* Brand & Visual Column (Desktop Left, Mobile Top) */}
-          <div className="md:col-span-5 bg-brand-navy text-brand-bg p-5 sm:p-7 flex flex-col justify-between border-b-2 md:border-b-0 md:border-r-2 border-brand-dark relative">
-            <div>
-              {/* Brand Logo & Mark */}
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="h-9 w-9 p-0.5 bg-brand-paper border-2 border-brand-dark flex items-center justify-center shrink-0 shadow-brutal-xs">
-                  <img
-                    src="/poraplan-logo.png"
-                    alt="PoraPlan Logo"
-                    className="h-full w-full object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      if (!target.src.includes('assets')) {
-                        target.src = '/assets/poraplan-logo.png';
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <h2 className="font-heading font-extrabold text-lg text-brand-bg leading-tight">
-                    {APP_CONFIG.name}
-                  </h2>
-                  <span className="text-[10px] font-mono text-brand-gold uppercase tracking-wider block">
-                    Study &amp; Mentorship
-                  </span>
-                </div>
-              </div>
-
-              {/* Headline Statement */}
-              <h3 className="font-heading font-extrabold text-lg text-brand-gold mt-2">
-                Start Your PoraPlan Journey
-              </h3>
-              <p className="mt-1.5 text-xs text-brand-bg/80 leading-relaxed font-sans">
-                Move away from chaotic study schedules. Join PoraPlan to participate in structured daily learning cycles.
-              </p>
-
-              {/* Roles Breakdown Box */}
-              <div className="mt-4 p-2.5 border border-brand-bg/25 bg-black/25 text-xs font-mono space-y-2.5">
-                <div>
-                  <span className="text-[10px] text-brand-teal font-bold uppercase tracking-wider block">
-                    FOR STUDENTS:
-                  </span>
-                  <p className="text-[11px] text-brand-bg/85 font-sans mt-0.5">
-                    Structured roadmaps, defined daily problem sets, and prompt review from mentors.
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-brand-bg/15">
-                  <span className="text-[10px] text-brand-gold font-bold uppercase tracking-wider block">
-                    FOR MENTORS:
-                  </span>
-                  <p className="text-[11px] text-brand-bg/85 font-sans mt-0.5">
-                    Evaluate genuine student submissions, identify errors, and guide conceptual development.
-                  </p>
-                </div>
-              </div>
+          {/* Header with Logo */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="h-10 w-10 p-0.5 bg-brand-paper border-2 border-brand-dark flex items-center justify-center shrink-0 shadow-brutal-xs">
+              <img
+                src="/poraplan-logo.png"
+                alt="PoraPlan Logo"
+                className="h-full w-full object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (!target.src.includes('assets')) {
+                    target.src = '/assets/poraplan-logo.png';
+                  }
+                }}
+              />
             </div>
-
-            <div className="mt-4 pt-3 border-t border-brand-bg/20 text-[10px] font-mono text-brand-bg/60">
-              STATUS: Phase 1 Auth Active
+            <div>
+              <h1 className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy leading-none">
+                Create your PoraPlan account
+              </h1>
+              <p className="text-xs text-brand-dark/75 font-sans mt-1">
+                Organize your study plan and daily tasks
+              </p>
             </div>
           </div>
 
-          {/* Form Column (Desktop Right, Mobile Bottom) */}
-          <div className="md:col-span-7 bg-brand-paper p-5 sm:p-7 flex flex-col justify-between">
+          {/* Feedback Alerts */}
+          {errorMessage && (
+            <div className="mb-4 p-3 border-2 border-brand-dark bg-red-50 text-xs font-sans text-red-900 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-red-700 shrink-0 mt-0.5 stroke-[2.5]" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
+          {successNotice && (
+            <div className="mb-4 p-3 border-2 border-brand-dark bg-emerald-50 text-xs font-sans text-emerald-900 flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5 stroke-[2.5]" />
+              <span>{successNotice}</span>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {/* Account Type Selector */}
             <div>
-              {/* Header Stamp */}
-              <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2.5 mb-3.5">
-                <span className="font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
-                  ACCOUNT REGISTRATION
-                </span>
-                <Badge variant="gold" size="sm">GET STARTED</Badge>
+              <label className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1.5">
+                I am joining as a
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRole('student')}
+                  className={`p-2 border-2 border-brand-dark text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all ${
+                    role === 'student'
+                      ? 'bg-brand-teal text-white shadow-brutal-xs'
+                      : 'bg-brand-paper hover:bg-brand-paper-tint text-brand-dark'
+                  }`}
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Student</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('mentor')}
+                  className={`p-2 border-2 border-brand-dark text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-all ${
+                    role === 'mentor'
+                      ? 'bg-brand-gold text-brand-dark shadow-brutal-xs'
+                      : 'bg-brand-paper hover:bg-brand-paper-tint text-brand-dark'
+                  }`}
+                >
+                  <Award className="w-3.5 h-3.5" />
+                  <span>Mentor</span>
+                </button>
               </div>
-
-              <h1 className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy mb-1">
-                Begin Your Registration
-              </h1>
-              <p className="text-xs text-brand-dark/75 font-sans mb-3.5">
-                Select your role to get started with PoraPlan.
-              </p>
-
-              {/* Status / Notice Banner */}
-              {!isConfigured && (
-                <div className="mb-3.5 p-2.5 border-2 border-brand-dark bg-brand-gold-light text-xs font-mono flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-brand-dark shrink-0 mt-0.5 stroke-[2.5]" />
-                  <div>
-                    <span className="font-bold text-brand-dark block text-[11px]">SUPABASE ENVIRONMENT PLACEHOLDER</span>
-                    <span className="text-brand-dark/80 font-sans text-[11px]">
-                      Add active project credentials in `.env.local` to execute live auth sessions against your Supabase project.
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {errorMessage && (
-                <div className="mb-3.5 p-2.5 border-2 border-brand-dark bg-red-100 text-xs font-mono text-red-900 flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-red-700 shrink-0 mt-0.5 stroke-[2.5]" />
-                  <div>
-                    <strong>Registration Error:</strong> {errorMessage}
-                  </div>
-                </div>
-              )}
-
-              {successNotice && (
-                <div className="mb-3.5 p-2.5 border-2 border-brand-dark bg-emerald-100 text-xs font-mono text-emerald-900 flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5 stroke-[2.5]" />
-                  <div>
-                    <strong>Success:</strong> {successNotice}
-                  </div>
-                </div>
-              )}
-
-              {/* Accessible Form */}
-              <form onSubmit={handleSubmit} className="space-y-3">
-                
-                {/* Tactile Role Selector */}
-                <div>
-                  <label className="block text-xs font-mono uppercase font-bold tracking-wider text-brand-dark mb-1.5">
-                    Select Your Academic Role
-                  </label>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setRole('student')}
-                      className={`p-2.5 border-2 border-brand-dark flex items-center justify-center gap-1.5 text-xs font-mono font-bold transition-all ${
-                        role === 'student'
-                          ? 'bg-brand-navy text-white shadow-brutal-xs -translate-x-0.5 -translate-y-0.5'
-                          : 'bg-brand-paper-tint text-brand-dark hover:bg-brand-paper'
-                      }`}
-                    >
-                      <User className="w-3.5 h-3.5 stroke-[2.5]" />
-                      <span>Student</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setRole('mentor')}
-                      className={`p-2.5 border-2 border-brand-dark flex items-center justify-center gap-1.5 text-xs font-mono font-bold transition-all ${
-                        role === 'mentor'
-                          ? 'bg-brand-teal text-white shadow-brutal-xs -translate-x-0.5 -translate-y-0.5'
-                          : 'bg-brand-paper-tint text-brand-dark hover:bg-brand-paper'
-                      }`}
-                    >
-                      <Award className="w-3.5 h-3.5 stroke-[2.5]" />
-                      <span>Mentor</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Full Name */}
-                <div>
-                  <label
-                    htmlFor="signup-name"
-                    className="block text-xs font-mono uppercase font-bold tracking-wider text-brand-dark mb-1"
-                  >
-                    Full Name
-                  </label>
-                  <input
-                    id="signup-name"
-                    name="fullName"
-                    type="text"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Alex Mercer"
-                    className="w-full px-3 py-2 bg-brand-bg border-2 border-brand-dark text-xs sm:text-sm text-brand-dark placeholder-brand-dark/40 font-mono shadow-brutal-xs focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-brand-dark"
-                  />
-                </div>
-
-                {/* Academic Email Address */}
-                <div>
-                  <label
-                    htmlFor="signup-email"
-                    className="block text-xs font-mono uppercase font-bold tracking-wider text-brand-dark mb-1"
-                  >
-                    Academic Email Address
-                  </label>
-                  <input
-                    id="signup-email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="alex.mercer@university.edu"
-                    className="w-full px-3 py-2 bg-brand-bg border-2 border-brand-dark text-xs sm:text-sm text-brand-dark placeholder-brand-dark/40 font-mono shadow-brutal-xs focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-brand-dark"
-                  />
-                </div>
-
-                {/* Password Field */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label
-                      htmlFor="signup-password"
-                      className="block text-xs font-mono uppercase font-bold tracking-wider text-brand-dark"
-                    >
-                      Password
-                    </label>
-                    <span className="text-[10px] font-mono text-brand-muted">
-                      Min 6 characters
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <input
-                      id="signup-password"
-                      name="password"
-                      type="password"
-                      autoComplete="new-password"
-                      required
-                      minLength={6}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••••"
-                      className="w-full px-3 py-2 bg-brand-bg border-2 border-brand-dark text-xs sm:text-sm text-brand-dark placeholder-brand-dark/40 font-mono shadow-brutal-xs focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-brand-dark"
-                    />
-                    <KeyRound className="w-3.5 h-3.5 text-brand-muted absolute right-3 top-2.5 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Target Field / Course */}
-                <div>
-                  <label
-                    htmlFor="signup-focus"
-                    className="block text-xs font-mono uppercase font-bold tracking-wider text-brand-dark mb-1"
-                  >
-                    {role === 'student' ? 'Target Syllabus / Exam Focus' : 'Area of Mentorship Expertise'}
-                  </label>
-                  <input
-                    id="signup-focus"
-                    name="focusArea"
-                    type="text"
-                    required
-                    value={focusArea}
-                    onChange={(e) => setFocusArea(e.target.value)}
-                    placeholder={role === 'student' ? 'e.g. Higher Secondary Physics or Calculus' : 'e.g. Applied Mathematics, Physics'}
-                    className="w-full px-3 py-2 bg-brand-bg border-2 border-brand-dark text-xs sm:text-sm text-brand-dark placeholder-brand-dark/40 font-mono shadow-brutal-xs focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-brand-dark"
-                  />
-                </div>
-
-                <div className="pt-1">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    fullWidth
-                    size="md"
-                    disabled={isSubmitting}
-                    rightIcon={
-                      isSubmitting ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
-                      )
-                    }
-                  >
-                    {isSubmitting ? 'Creating Account...' : 'Create My Account'}
-                  </Button>
-                </div>
-              </form>
             </div>
 
-            {/* Bottom Login Link */}
-            <div className="mt-5 pt-3 border-t-2 border-brand-dark/20 text-center text-xs">
-              <span className="text-brand-dark/80 font-sans">Already enrolled in PoraPlan? </span>
-              <Link
-                to="/login"
-                className="font-bold text-brand-navy font-mono underline hover:text-brand-teal ml-1"
-              >
-                Sign In to Portal →
-              </Link>
+            {/* Google Sign In Option */}
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={isGoogleLoading || isSubmitting}
+              className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint text-xs sm:text-sm font-bold font-sans text-brand-dark shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-60"
+            >
+              {isGoogleLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-brand-dark" />
+              ) : (
+                <GoogleIcon className="w-4 h-4 shrink-0" />
+              )}
+              <span>Continue with Google</span>
+            </button>
+
+            {/* Visual Divider */}
+            <div className="relative flex items-center justify-center">
+              <div className="w-full border-t border-brand-dark/20" />
+              <span className="bg-brand-paper px-3 text-[11px] font-mono text-brand-muted uppercase">
+                OR
+              </span>
+              <div className="w-full border-t border-brand-dark/20" />
+            </div>
+
+            {/* Registration Form */}
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <label htmlFor="signup-name" className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1">
+                  Full name
+                </label>
+                <input
+                  id="signup-name"
+                  type="text"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="e.g. Farhad Molla"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="signup-email" className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1">
+                  Email address
+                </label>
+                <input
+                  id="signup-email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="student@example.com"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="signup-password" className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1">
+                  Password
+                </label>
+                <input
+                  id="signup-password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="signup-confirm-password" className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1">
+                  Confirm password
+                </label>
+                <input
+                  id="signup-confirm-password"
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repeat your password"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                />
+              </div>
+
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                  disabled={isSubmitting || isGoogleLoading}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Creating account...
+                    </span>
+                  ) : (
+                    'Create account'
+                  )}
+                </Button>
+              </div>
+            </form>
+
+            {/* Bottom Switch Link */}
+            <div className="pt-3 border-t border-brand-dark/20 text-center">
+              <p className="text-xs text-brand-dark/80 font-sans">
+                Already have an account?{' '}
+                <Link to="/login" className="font-bold text-brand-navy hover:text-brand-teal underline">
+                  Log in
+                </Link>
+              </p>
             </div>
           </div>
 

@@ -63,12 +63,9 @@ export const StudentDashboardPage: React.FC = () => {
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs uppercase text-brand-gold font-bold tracking-wider">
-                STUDENT SECTOR // WORKSPACE
+                STUDENT WORKSPACE
               </span>
               <Badge variant="teal" size="sm">ACTIVE SESSION</Badge>
-              <span className="font-mono text-[10px] text-brand-bg/60 hidden sm:inline">
-                // RLS ENFORCED
-              </span>
             </div>
 
             <h1 id="student-greeting" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg">
@@ -90,12 +87,12 @@ export const StudentDashboardPage: React.FC = () => {
           <div className="flex items-center gap-2 shrink-0">
             <div className="px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-brand-dark text-xs font-mono font-bold shadow-brutal-xs flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-brand-teal" />
-              <span>RLS Protected</span>
+              <span>Secure Session</span>
             </div>
           </div>
         </section>
 
-        {/* Progress Summary Section (Clearly Marked Placeholders) */}
+        {/* Progress Summary Section */}
         <section id="progress" aria-labelledby="progress-title" className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 id="progress-title" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy flex items-center gap-2">
@@ -103,7 +100,7 @@ export const StudentDashboardPage: React.FC = () => {
               Study Progress Summary
             </h2>
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted bg-brand-paper border border-brand-dark px-2 py-0.5 shadow-brutal-xs">
-              Phase 1 Placeholder
+              STUDY OVERVIEW
             </span>
           </div>
 
@@ -120,7 +117,7 @@ export const StudentDashboardPage: React.FC = () => {
                 -- <span className="text-xs font-mono font-normal text-brand-muted">Days</span>
               </div>
               <span className="text-[10px] font-mono text-brand-muted mt-1">
-                Activates with daily logs
+                Starts on your first study session
               </span>
             </div>
 
@@ -136,7 +133,7 @@ export const StudentDashboardPage: React.FC = () => {
                 -- <span className="text-xs font-mono font-normal text-brand-muted">Active</span>
               </div>
               <span className="text-[10px] font-mono text-brand-muted mt-1">
-                Awaiting routine setup
+                No tasks set for today
               </span>
             </div>
 
@@ -152,7 +149,7 @@ export const StudentDashboardPage: React.FC = () => {
                 -- <span className="text-xs font-mono font-normal text-brand-muted">Sets</span>
               </div>
               <span className="text-[10px] font-mono text-brand-muted mt-1">
-                Queue opens Phase 2
+                No submissions yet
               </span>
             </div>
 
@@ -165,10 +162,10 @@ export const StudentDashboardPage: React.FC = () => {
                 <Users className="w-4 h-4 text-brand-gold stroke-[2.5]" />
               </div>
               <div className="font-heading font-extrabold text-sm sm:text-base text-brand-navy truncate">
-                {loadingMentors ? 'Querying...' : mentors.length > 0 ? mentors[0].full_name : 'Self-Paced'}
+                {loadingMentors ? 'Checking...' : mentors.length > 0 ? mentors[0].full_name : 'Self-Paced'}
               </div>
               <span className="text-[10px] font-mono text-brand-teal font-bold mt-1">
-                {mentors.length > 0 ? 'Assigned & Active' : 'No Mentor Assigned'}
+                {mentors.length > 0 ? 'Mentor Assigned' : 'Self-Paced Track'}
               </span>
             </div>
           </div>
@@ -191,7 +188,7 @@ export const StudentDashboardPage: React.FC = () => {
                     Today's Study Focus
                   </h2>
                 </div>
-                <Badge variant="muted" size="sm">EMPTY STATE</Badge>
+                <Badge variant="muted" size="sm">NO ACTIVE FOCUS</Badge>
               </div>
 
               {/* Explicit Empty State Card */}
@@ -204,15 +201,15 @@ export const StudentDashboardPage: React.FC = () => {
                     No Focus Goal Set For Today
                   </h3>
                   <p className="text-xs text-brand-muted font-sans mt-1 max-w-sm mx-auto leading-relaxed">
-                    Your daily focus block will define the primary subject module you study today. Study routines and target timers unlock in the next milestone.
+                    Your daily focus block will define the primary topic you study today. You can select topics and set study timers once your subjects are loaded.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono text-brand-muted">
-              <span>Feature Docket: Milestone 8</span>
-              <span className="font-bold text-brand-dark">Phase 2 Engine</span>
+              <span>Daily Study Routine</span>
+              <span className="font-bold text-brand-dark">Focus Session</span>
             </div>
           </section>
 
@@ -230,7 +227,7 @@ export const StudentDashboardPage: React.FC = () => {
                     Upcoming Tasks &amp; Queue
                   </h2>
                 </div>
-                <Badge variant="muted" size="sm">0 SCHEDULED</Badge>
+                <Badge variant="muted" size="sm">0 TASKS</Badge>
               </div>
 
               {/* Explicit Empty State Card */}
@@ -243,15 +240,15 @@ export const StudentDashboardPage: React.FC = () => {
                     Your Task Queue Is Empty
                   </h3>
                   <p className="text-xs text-brand-muted font-sans mt-1 max-w-sm mx-auto leading-relaxed">
-                    Tasks scheduled by you or assigned by your mentor will appear here in chronological priority order.
+                    Tasks scheduled by you or assigned by your mentor will appear here in order of priority.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono text-brand-muted">
-              <span>Task Engine: Supabase Models</span>
-              <span className="font-bold text-brand-dark">Phase 2 Engine</span>
+              <span>Study Tasks</span>
+              <span className="font-bold text-brand-dark">Assignment Queue</span>
             </div>
           </section>
 
@@ -267,22 +264,22 @@ export const StudentDashboardPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-brand-navy stroke-[2.5]" />
               <h2 id="mentorship-title" className="font-heading font-extrabold text-base text-brand-navy">
-                Academic Mentorship Status
+                Your Mentor
               </h2>
             </div>
             <Badge variant={mentors.length > 0 ? 'teal' : 'paper'} size="sm">
-              {loadingMentors ? 'CHECKING...' : mentors.length > 0 ? 'PAIRING ACTIVE' : 'SELF-PACED'}
+              {loadingMentors ? 'CHECKING...' : mentors.length > 0 ? 'MENTOR ASSIGNED' : 'SELF-PACED'}
             </Badge>
           </div>
 
           {loadingMentors ? (
             <div className="p-4 text-center font-mono text-xs text-brand-muted">
-              Querying database for assigned mentors...
+              Checking assigned mentor status...
             </div>
           ) : mentors.length > 0 ? (
             <div className="space-y-3">
               <p className="text-xs text-brand-dark font-sans leading-relaxed">
-                You have active mentor supervision. Your assigned mentor has secure RLS permission to review your study progress and assignment submissions:
+                You have an assigned mentor. Your mentor can review your submissions, answer your questions, and share feedback on your work:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 {mentors.map((mentor) => (
@@ -308,11 +305,11 @@ export const StudentDashboardPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <HelpCircle className="w-4 h-4 text-brand-teal stroke-[2.5]" />
                 <span className="font-mono text-xs font-bold uppercase text-brand-dark">
-                  Self-Paced Track (No Mentor Currently Assigned)
+                  Self-Paced Study Track
                 </span>
               </div>
               <p className="text-xs text-brand-dark/85 font-sans leading-relaxed">
-                You are currently studying on an independent self-paced track. When an administrator assigns a mentor to your profile, their evaluation notes, problem sets, and review docket will synchronize automatically via Row Level Security.
+                You are currently studying independently. When a mentor is paired with your account, their feedback, problem sets, and study guidance will appear here automatically.
               </p>
             </div>
           )}
@@ -322,7 +319,7 @@ export const StudentDashboardPage: React.FC = () => {
         <section aria-labelledby="quick-links-title" className="space-y-3">
           <h2 id="quick-links-title" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy flex items-center gap-2">
             <Compass className="w-4 h-4 text-brand-navy stroke-[2.5]" />
-            Quick Academic Links
+            Quick Links
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -333,12 +330,12 @@ export const StudentDashboardPage: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                    METHODOLOGY
+                    STUDY GUIDE
                   </span>
                   <ArrowRight className="w-4 h-4 text-brand-dark group-hover:text-brand-teal transition-colors" />
                 </div>
                 <h3 className="font-heading font-bold text-sm text-brand-navy">
-                  7-Step Core Workflow
+                  The 7-Step Study Cycle
                 </h3>
                 <p className="text-xs text-brand-muted mt-1 leading-relaxed">
                   Review the Plan → Study → Practice → Submit cycle.
@@ -353,15 +350,15 @@ export const StudentDashboardPage: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                    DOCUMENTATION
+                    ABOUT
                   </span>
                   <FileText className="w-4 h-4 text-brand-dark group-hover:text-brand-teal transition-colors" />
                 </div>
                 <h3 className="font-heading font-bold text-sm text-brand-navy">
-                  System Specifications
+                  About PoraPlan
                 </h3>
                 <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Platform architecture, pedagogy, and design rules.
+                  Learn why we built PoraPlan and how it helps students.
                 </p>
               </div>
             </Link>
@@ -370,15 +367,15 @@ export const StudentDashboardPage: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono text-[10px] uppercase font-bold text-brand-dark">
-                    SECURITY
+                    PRIVACY
                   </span>
                   <Sparkles className="w-4 h-4 text-brand-gold" />
                 </div>
                 <h3 className="font-heading font-bold text-sm text-brand-navy">
-                  Row Level Isolation
+                  Private &amp; Protected
                 </h3>
                 <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Your academic records are private and strictly isolated.
+                  Your study notes and submissions are strictly private.
                 </p>
               </div>
             </div>

@@ -88,22 +88,17 @@ export const DashboardLayout: React.FC = () => {
               />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="font-heading font-extrabold text-base sm:text-lg text-brand-navy tracking-tight leading-none">
-                  PoraPlan
-                </span>
-                <span className="font-mono text-[10px] text-brand-muted hidden sm:inline">
-                  // WORKSPACE
-                </span>
-              </div>
+              <span className="font-heading font-extrabold text-base sm:text-lg text-brand-navy tracking-tight leading-none">
+                PoraPlan
+              </span>
               <span className="font-mono text-[10px] text-brand-muted sm:hidden leading-none mt-0.5">
-                {roleLabel} Sector
+                {roleLabel}
               </span>
             </div>
           </Link>
 
           <Badge variant={roleBadgeVariant} size="sm" className="hidden sm:inline-flex">
-            {roleLabel} SECTOR
+            {roleLabel}
           </Badge>
         </div>
 
@@ -159,10 +154,10 @@ export const DashboardLayout: React.FC = () => {
           <div className="p-4 space-y-4">
             <div className="border-b-2 border-brand-dark/20 pb-3">
               <span className="font-mono text-[10px] uppercase font-bold text-brand-muted tracking-wider block">
-                NAVIGATE WORKSPACE
+                NAVIGATION
               </span>
               <span className="text-xs font-heading font-bold text-brand-navy">
-                {roleLabel} Docket
+                {roleLabel} Menu
               </span>
             </div>
 
@@ -210,7 +205,7 @@ export const DashboardLayout: React.FC = () => {
                 onClick={() => setProfileModalOpen(true)}
                 className="flex-1 py-1 px-2 border-2 border-brand-dark bg-brand-paper text-[11px] font-mono font-bold text-brand-dark hover:bg-brand-gold-light transition-colors shadow-brutal-xs text-center"
               >
-                Profile Docket
+                My Profile
               </button>
               <button
                 type="button"
@@ -228,10 +223,10 @@ export const DashboardLayout: React.FC = () => {
         <main className="flex-1 min-w-0 pb-20 md:pb-8" id="workspace-content">
           <Outlet />
 
-          {/* Academic Session Security Stamp */}
+          {/* Clean App Footer */}
           <footer className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-2 text-center">
             <p className="font-mono text-[10px] text-brand-muted">
-              PORAPLAN ACADEMIC SECURE SESSION // ENCRYPTED VIA SUPABASE RLS
+              PoraPlan Study System • You study. We organize how, what and when.
             </p>
           </footer>
         </main>
@@ -289,14 +284,14 @@ export const DashboardLayout: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-brand-gold stroke-[2.5]" />
                 <h2 id="profile-modal-title" className="font-heading font-extrabold text-lg text-brand-navy">
-                  Academic Profile Dossier
+                  My Profile
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={() => setProfileModalOpen(false)}
                 className="p-1 border-2 border-brand-dark bg-brand-paper-tint hover:bg-brand-paper shadow-brutal-xs"
-                aria-label="Close Profile Dossier"
+                aria-label="Close Profile"
               >
                 <X className="w-4 h-4 text-brand-dark" />
               </button>
@@ -309,29 +304,29 @@ export const DashboardLayout: React.FC = () => {
               </div>
 
               <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
-                <span className="text-[10px] text-brand-muted uppercase block">Account Email</span>
+                <span className="text-[10px] text-brand-muted uppercase block">Email Address</span>
                 <span className="font-bold text-brand-dark break-all">{user?.email}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
-                  <span className="text-[10px] text-brand-muted uppercase block">Platform Role</span>
+                  <span className="text-[10px] text-brand-muted uppercase block">Account Type</span>
                   <Badge variant={roleBadgeVariant} size="sm">
                     {roleLabel}
                   </Badge>
                 </div>
 
                 <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
-                  <span className="text-[10px] text-brand-muted uppercase block">Session State</span>
+                  <span className="text-[10px] text-brand-muted uppercase block">Status</span>
                   <span className="font-bold text-brand-teal flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-brand-teal inline-block animate-pulse" />
-                    AUTHENTICATED
+                    Active
                   </span>
                 </div>
               </div>
 
               <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
-                <span className="text-[10px] text-brand-muted uppercase block">User ID (UUID)</span>
+                <span className="text-[10px] text-brand-muted uppercase block">Account ID</span>
                 <span className="text-[11px] text-brand-muted break-all">{user?.id}</span>
               </div>
             </div>
@@ -343,7 +338,7 @@ export const DashboardLayout: React.FC = () => {
                 onClick={() => setProfileModalOpen(false)}
                 className="flex-1"
               >
-                Close Dossier
+                Close
               </Button>
               <Button
                 variant="primary"

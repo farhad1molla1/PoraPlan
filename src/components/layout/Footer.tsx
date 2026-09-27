@@ -35,9 +35,9 @@ export const Footer: React.FC = () => {
               {APP_CONFIG.tagline}
             </p>
 
-            <div className="inline-block p-2.5 border-2 border-brand-bg/20 bg-black/20 text-[11px] sm:text-xs font-mono text-brand-bg/70">
-              <span className="text-brand-gold font-bold">SYSTEM:</span> Personal Study Assistance &amp; Mentorship Platform
-            </div>
+            <p className="text-brand-bg/70 text-xs font-mono">
+              Personal Study Assistance &amp; Mentorship Platform
+            </p>
           </div>
 
           {/* Quick Navigation */}
@@ -48,7 +48,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/" className="text-brand-bg/80 hover:text-white hover:underline">
-                  Home (Landing)
+                  Home
                 </Link>
               </li>
               {NAV_LINKS.map(link => (
@@ -69,12 +69,12 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/login" className="text-brand-bg/80 hover:text-white hover:underline">
-                  Sign In
+                  Log In
                 </Link>
               </li>
               <li>
                 <Link to="/signup" className="text-brand-bg/80 hover:text-white hover:underline">
-                  Student &amp; Mentor Sign Up
+                  Create an Account
                 </Link>
               </li>
             </ul>
@@ -86,7 +86,7 @@ export const Footer: React.FC = () => {
           <p>© {new Date().getFullYear()} {APP_CONFIG.name}. {APP_CONFIG.descriptor}.</p>
           <p className="flex items-center gap-2">
             <span className="inline-block w-2 h-2 rounded-full bg-brand-teal"></span>
-            Mobile-First PWA Platform Ready
+            You study. We organize how, what and when.
           </p>
         </div>
       </div>

@@ -22,25 +22,25 @@ export const HowItWorksPage: React.FC = () => {
               Back to Home
             </Link>
             <span className="text-brand-muted font-mono text-xs">/</span>
-            <Badge variant="teal" size="sm">SPECIFICATION</Badge>
+            <Badge variant="teal" size="sm">HOW IT WORKS</Badge>
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-extrabold text-brand-navy tracking-tight">
             How PoraPlan Works
           </h1>
           <p className="mt-2.5 text-xs sm:text-base text-brand-dark/85 max-w-2xl font-sans">
-            A step-by-step breakdown of how our 7-stage learning engine transforms long-range academic syllabi into consistent, daily mastery.
+            A step-by-step look at how PoraPlan organizes your syllabus into a clear, manageable daily study routine.
           </p>
         </div>
       </section>
 
-      {/* Two Roles Overview: Student vs Mentor */}
+      {/* Two Roles Overview: Student & Mentor */}
       <section className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-6">
         <SectionHeading
-          badge="DUAL ARCHITECTURE"
-          eyebrow="// TWO COOPERATIVE ROLES"
-          title="Designed for Student Focus &amp; Mentor Oversight"
-          description="PoraPlan coordinates the workflow between the student executing daily tasks and the mentor validating academic standards."
+          badge="STUDENT &amp; MENTOR"
+          eyebrow="// HOW WE WORK TOGETHER"
+          title="You focus on studying. Your mentor keeps you on track."
+          description="PoraPlan connects your daily study tasks directly with mentor feedback so you never stay stuck."
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-12">
@@ -50,28 +50,28 @@ export const HowItWorksPage: React.FC = () => {
             headerBar={
               <div className="flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-brand-teal stroke-[2.5]" />
-                <span className="font-bold">THE STUDENT WORKSPACE</span>
+                <span className="font-bold">YOUR ROLE AS A STUDENT</span>
               </div>
             }
           >
             <h3 className="text-base sm:text-lg font-bold font-heading text-brand-navy mb-1.5">
-              Autonomous Daily Execution
+              Daily Focus, No Guesswork
             </h3>
             <p className="text-xs sm:text-sm text-brand-dark/80 mb-3 font-sans leading-relaxed">
-              Students receive a clear daily queue of study topics and problem sets, eliminating decision fatigue and procrastination.
+              Open your dashboard each day to a clear queue of topics and practice problems. No confusion about what to do next.
             </p>
             <ul className="space-y-1.5 text-[11px] sm:text-xs font-mono text-brand-dark">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-brand-teal shrink-0 stroke-[2.5]" />
-                <span>Follow customized topic roadmaps</span>
+                <span>Follow your personalized daily study plan</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-brand-teal shrink-0 stroke-[2.5]" />
-                <span>Submit daily practice tasks and solutions</span>
+                <span>Solve practice tasks and submit your solutions</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-brand-teal shrink-0 stroke-[2.5]" />
-                <span>Implement corrections based on mentor feedback</span>
+                <span>Review feedback to fix mistakes before exams</span>
               </li>
             </ul>
           </Card>
@@ -82,28 +82,28 @@ export const HowItWorksPage: React.FC = () => {
             headerBar={
               <div className="flex items-center gap-1.5">
                 <Award className="w-3.5 h-3.5 text-brand-gold stroke-[2.5]" />
-                <span className="font-bold">THE MENTOR DISPATCH</span>
+                <span className="font-bold">YOUR MENTOR'S ROLE</span>
               </div>
             }
           >
             <h3 className="text-base sm:text-lg font-bold font-heading text-brand-navy mb-1.5">
-              Targeted Quality Evaluation
+              Guidance &amp; Personal Feedback
             </h3>
             <p className="text-xs sm:text-sm text-brand-dark/80 mb-3 font-sans leading-relaxed">
-              Mentors don't just lecture; they evaluate actual practice submissions, clarify conceptual hurdles, and ensure pace alignment.
+              Your mentor doesn’t just give generic lectures. They review your actual work, answer questions, and help you master tough concepts.
             </p>
             <ul className="space-y-1.5 text-[11px] sm:text-xs font-mono text-brand-dark">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-brand-gold shrink-0 stroke-[2.5]" />
-                <span>Verify assignment accuracy and approach</span>
+                <span>Check your assignment accuracy and method</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-brand-gold shrink-0 stroke-[2.5]" />
-                <span>Deliver clear, constructive feedback</span>
+                <span>Provide clear, constructive advice on errors</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-brand-gold shrink-0 stroke-[2.5]" />
-                <span>Calibrate target milestone pacing</span>
+                <span>Keep your syllabus pace aligned with exam dates</span>
               </li>
             </ul>
           </Card>
@@ -113,10 +113,10 @@ export const HowItWorksPage: React.FC = () => {
         <div className="space-y-4 sm:space-y-6">
           <div className="border-b-2 border-brand-dark pb-3">
             <h2 className="text-xl sm:text-2xl font-bold font-heading text-brand-navy">
-              Detailed Workflow Walkthrough
+              The 7-Step Study Cycle
             </h2>
             <p className="text-[11px] sm:text-xs font-mono text-brand-muted mt-0.5">
-              // CANONICAL 7-STEP PROTOCOL
+              // HOW EACH CHAPTER IS COVERED
             </p>
           </div>
 
@@ -131,15 +131,10 @@ export const HowItWorksPage: React.FC = () => {
                     {step.stepNumber}
                   </div>
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono text-[10px] sm:text-xs font-bold text-brand-teal uppercase">
-                        [{step.code}]
-                      </span>
-                      <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy">
-                        {step.name}
-                      </h3>
-                    </div>
-                    <p className="text-xs sm:text-sm font-bold text-brand-dark/90 mt-0.5">
+                    <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy">
+                      {step.name}
+                    </h3>
+                    <p className="text-xs sm:text-sm font-bold text-brand-dark/90 mt-0.5 font-sans">
                       {step.shortDesc}
                     </p>
                     <p className="text-[11px] sm:text-xs text-brand-dark/75 mt-0.5 font-sans">
@@ -150,7 +145,7 @@ export const HowItWorksPage: React.FC = () => {
 
                 <div className="shrink-0 self-start md:self-center">
                   <Badge variant="paper" size="sm">
-                    STAGE {step.stepNumber}
+                    STEP {step.stepNumber}
                   </Badge>
                 </div>
               </div>
