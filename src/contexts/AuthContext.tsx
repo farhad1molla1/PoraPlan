@@ -11,15 +11,61 @@ import {
   authenticateMockPoraPlanId,
   getMockProfile,
   resetMockPassword,
+  getMockAccountById,
 } from '../lib/mockAuthStore';
 import type { Profile, UserRole, AccountStatus } from '../types/database';
 import { AuthContext } from './authContextDef';
 
+function getInitialMockState(isConfigured: boolean): {
+  user: User | null;
+  session: Session | null;
+  profile: Profile | null;
+} {
+  if (isConfigured || typeof window === 'undefined') {
+    return { user: null, session: null, profile: null };
+  }
+  try {
+    const cachedId = sessionStorage.getItem('poraplan_mock_session');
+    if (cachedId) {
+      const account = getMockAccountById(cachedId);
+      if (account) {
+        const mockProf = getMockProfile(account.id);
+        const mockUsr = {
+          id: account.id,
+          email: account.authEmail,
+          app_metadata: {},
+          user_metadata: {
+            full_name: account.fullName,
+            poraplan_id: account.poraplanId,
+            role: account.role,
+            status: account.status,
+          },
+          aud: 'authenticated',
+          created_at: new Date().toISOString(),
+        } as unknown as User;
+        const mockSess = {
+          access_token: 'mock-session-token',
+          token_type: 'bearer',
+          expires_in: 3600,
+          refresh_token: 'mock-refresh-token',
+          user: { id: account.id } as User,
+        } as unknown as Session;
+        return { user: mockUsr, session: mockSess, profile: mockProf };
+      }
+    }
+  } catch {
+    // Storage access restricted
+  }
+  return { user: null, session: null, profile: null };
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isConfigured = isSupabaseConfigured();
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const initialMock = getInitialMockState(isConfigured);
+
+  const [user, setUser] = useState<User | null>(initialMock.user);
+  const [session, setSession] = useState<Session | null>(initialMock.session);
+  const [profile, setProfile] = useState<Profile | null>(initialMock.profile);
   const [loading, setLoading] = useState(isConfigured);
 
   // Helper to fetch profile with fallbacks
@@ -178,6 +224,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           aud: 'authenticated',
           created_at: new Date().toISOString(),
         } as unknown as User);
+
+        try {
+          sessionStorage.setItem('poraplan_mock_session', account.id);
+        } catch {
+          // Ignore storage quota
+        }
 
         return { error: null, role: account.role };
       }
@@ -427,6 +479,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 
   const signOut = useCallback(async (): Promise<void> => {
+    try {
+      sessionStorage.removeItem('poraplan_mock_session');
+    } catch {
+      // Ignore storage error
+    }
     if (isConfigured) {
       await supabase.auth.signOut();
     }

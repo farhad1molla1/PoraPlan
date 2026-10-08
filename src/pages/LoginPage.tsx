@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
 
@@ -28,6 +28,7 @@ const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' })
 export const LoginPage: React.FC = () => {
   const [poraplanId, setPoraplanId] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -43,7 +44,7 @@ export const LoginPage: React.FC = () => {
   // Derive query parameter notices without triggering cascading renders in effects
   const queryParams = new URLSearchParams(location.search);
   const queryError = queryParams.get('error') === 'google_not_linked'
-    ? 'This Google account is not linked to a PoraPlan account. Please use your PoraPlan ID and password or contact your mentor.'
+    ? 'This Google account is not linked to an authorized PoraPlan account. Google login is only available for existing members whose Google account has been connected.'
     : null;
   const queryResetSuccess = queryParams.get('reset') === 'true'
     ? 'Your password has been reset. Please log in with your PoraPlan ID and new password.'
@@ -78,7 +79,14 @@ export const LoginPage: React.FC = () => {
       const { error, role: loggedInRole } = await signInWithPoraPlanId(poraplanId, password);
 
       if (error) {
-        setErrorMessage(error.message || 'Incorrect PoraPlan ID or password. Please try again.');
+        const raw = error.message || '';
+        if (raw.toLowerCase().includes('not recognized') || raw.toLowerCase().includes('not found')) {
+          setErrorMessage('This PoraPlan ID is not recognized. Please check your ID or contact your mentor.');
+        } else if (raw.toLowerCase().includes('suspended')) {
+          setErrorMessage('This account is currently suspended. Please contact your mentor or administrator.');
+        } else {
+          setErrorMessage('Your PoraPlan ID or password is incorrect.');
+        }
         setIsSubmitting(false);
         return;
       }
@@ -91,9 +99,8 @@ export const LoginPage: React.FC = () => {
       } else {
         navigate('/student/dashboard');
       }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Unable to sign in. Please try again.';
-      setErrorMessage(msg);
+    } catch {
+      setErrorMessage('Your PoraPlan ID or password is incorrect.');
     } finally {
       setIsSubmitting(false);
     }
@@ -247,16 +254,31 @@ export const LoginPage: React.FC = () => {
                       Forgot password?
                     </button>
                   </div>
-                  <input
-                    id="login-password"
-                    type="password"
-                    required
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
-                  />
+                  <div className="relative">
+                    <input
+                      id="login-password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      className="w-full px-3 py-2 pr-10 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-brand-muted hover:text-brand-dark focus:outline-none transition-colors"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      title={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4 stroke-[2.2]" />
+                      ) : (
+                        <Eye className="w-4 h-4 stroke-[2.2]" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="pt-1">

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ShieldCheck, Mail, MessageSquare, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShieldCheck, Mail, MessageSquare, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
 
 export const SignupPage: React.FC = () => {
   const [poraplanId, setPoraplanId] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [personalEmail, setPersonalEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -158,16 +159,31 @@ export const SignupPage: React.FC = () => {
               >
                 Initial Password
               </label>
-              <input
-                id="activation-password"
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your initial password"
-                className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
-              />
+              <div className="relative">
+                <input
+                  id="activation-password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your initial password"
+                  className="w-full px-3 py-2 pr-10 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-brand-muted hover:text-brand-dark focus:outline-none transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4 stroke-[2.2]" />
+                  ) : (
+                    <Eye className="w-4 h-4 stroke-[2.2]" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div>

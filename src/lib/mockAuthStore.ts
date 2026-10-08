@@ -1,4 +1,5 @@
 import type { Profile, UserRole, AccountStatus, ProfileUpdate } from '../types/database';
+import { sha256 } from './crypto';
 
 export interface MockAccountRecord {
   id: string;
@@ -6,11 +7,17 @@ export interface MockAccountRecord {
   fullName: string;
   authEmail: string;
   linkedEmail?: string;
-  password: string;
+  passwordHash: string;
   role: UserRole;
   status: AccountStatus;
   avatarUrl?: string;
 }
+
+/**
+ * Standard test account password hash (SHA-256 for 'password').
+ * Avoids storing plaintext passwords in frontend/source code.
+ */
+const DEFAULT_TEST_PASSWORD_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
 
 /**
  * In-memory pre-registered authorized accounts for local development and testing.
@@ -23,7 +30,7 @@ const initialAccounts: MockAccountRecord[] = [
     fullName: 'Fahim Rahman',
     authEmail: 'student.pp001@poraplan.internal',
     linkedEmail: 'student.fahim@gmail.com',
-    password: 'student123',
+    passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'student',
     status: 'active',
   },
@@ -33,7 +40,7 @@ const initialAccounts: MockAccountRecord[] = [
     fullName: 'Nusrat Jahan',
     authEmail: 'student.pp002@poraplan.internal',
     linkedEmail: undefined,
-    password: 'tempPassword002',
+    passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'student',
     status: 'not_activated',
   },
@@ -43,7 +50,7 @@ const initialAccounts: MockAccountRecord[] = [
     fullName: 'Tanvir Ahmed',
     authEmail: 'student.pp003@poraplan.internal',
     linkedEmail: 'tanvir.study@gmail.com',
-    password: 'studentPass3',
+    passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'student',
     status: 'active',
   },
@@ -53,7 +60,7 @@ const initialAccounts: MockAccountRecord[] = [
     fullName: 'Dr. Rafiqul Islam',
     authEmail: 'mentor.ppm001@poraplan.internal',
     linkedEmail: 'mentor.rafiq@gmail.com',
-    password: 'mentor123',
+    passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'mentor',
     status: 'active',
   },
@@ -63,7 +70,7 @@ const initialAccounts: MockAccountRecord[] = [
     fullName: 'Dr. Farhana Yasmin',
     authEmail: 'mentor.ppm002@poraplan.internal',
     linkedEmail: undefined,
-    password: 'tempMentor002',
+    passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'mentor',
     status: 'not_activated',
   },
@@ -73,7 +80,7 @@ const initialAccounts: MockAccountRecord[] = [
     fullName: 'PoraPlan System Admin',
     authEmail: 'admin.ppa001@poraplan.internal',
     linkedEmail: 'admin@poraplan.internal',
-    password: 'admin123',
+    passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'admin',
     status: 'active',
   },
@@ -119,7 +126,7 @@ export function authenticateMockPoraPlanId(
   if (accountIndex === -1) {
     return {
       account: null,
-      error: new Error('This PoraPlan ID is not recognized. Please verify your ID with your mentor.'),
+      error: new Error('This PoraPlan ID is not recognized. Please check your ID or contact your mentor.'),
     };
   }
 
@@ -132,10 +139,11 @@ export function authenticateMockPoraPlanId(
     };
   }
 
-  if (account.password !== password) {
+  const inputHash = sha256(password);
+  if (account.passwordHash !== inputHash) {
     return {
       account: null,
-      error: new Error('Incorrect password. Please verify and try again, or use password recovery if you have an associated email.'),
+      error: new Error('Your PoraPlan ID or password is incorrect.'),
     };
   }
 
@@ -148,6 +156,13 @@ export function authenticateMockPoraPlanId(
   }
 
   return { account: mockStore[accountIndex], error: null };
+}
+
+/**
+ * Get account by unique mock ID (for session recovery on refresh).
+ */
+export function getMockAccountById(id: string): MockAccountRecord | null {
+  return mockStore.find((acc) => acc.id === id) || null;
 }
 
 /**
@@ -223,7 +238,7 @@ export function resetMockPassword(
 
   mockStore[index] = {
     ...mockStore[index],
-    password: newPassword,
+    passwordHash: sha256(newPassword),
   };
 
   return { success: true, error: null };
@@ -272,6 +287,40 @@ export function updateMockProfile(
   };
 
   return { profile: getMockProfile(userId), error: null };
+}
+
+/**
+ * Admin helper to provision / pre-register a new member.
+ */
+export function adminRegisterMockMember(
+  poraplanId: string,
+  fullName: string,
+  email: string,
+  role: UserRole,
+  initialPassword = 'password'
+): { success: boolean; message: string } {
+  const cleanId = poraplanId.trim().toUpperCase();
+  if (!cleanId) {
+    return { success: false, message: 'Please provide a valid PoraPlan ID.' };
+  }
+
+  if (mockStore.some((acc) => acc.poraplanId.toUpperCase() === cleanId)) {
+    return { success: false, message: `PoraPlan ID ${cleanId} already exists.` };
+  }
+
+  const newRecord: MockAccountRecord = {
+    id: `mock-${role}-${cleanId.toLowerCase()}`,
+    poraplanId: cleanId,
+    fullName: fullName.trim() || 'New Member',
+    authEmail: email.trim().toLowerCase() || `${cleanId.toLowerCase()}@poraplan.internal`,
+    linkedEmail: undefined,
+    passwordHash: sha256(initialPassword),
+    role,
+    status: 'not_activated',
+  };
+
+  mockStore.push(newRecord);
+  return { success: true, message: `Member ${cleanId} (${role}) successfully pre-registered.` };
 }
 
 /**

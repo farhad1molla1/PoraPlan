@@ -6,6 +6,7 @@ import {
   connectMockPersonalEmail,
   getMockProfile,
   updateMockProfile,
+  adminRegisterMockMember,
 } from './mockAuthStore';
 
 export interface PoraPlanIdResolution {
@@ -290,4 +291,42 @@ export async function updateProfile(
  */
 export function isValidUserRole(role: string): role is UserRole {
   return role === 'student' || role === 'mentor' || role === 'admin';
+}
+
+/**
+ * Admin function to pre-register / provision a new PoraPlan member.
+ */
+export async function adminRegisterMember(
+  poraplanId: string,
+  fullName: string,
+  email: string,
+  role: UserRole
+): Promise<{ success: boolean; message: string }> {
+  if (!isSupabaseConfigured()) {
+    return adminRegisterMockMember(poraplanId, fullName, email, role);
+  }
+
+  try {
+    const { data, error } = await supabase.rpc('admin_register_member', {
+      p_poraplan_id: poraplanId.trim().toUpperCase(),
+      p_full_name: fullName.trim(),
+      p_email: email.trim().toLowerCase(),
+      p_role: role,
+      p_status: 'not_activated',
+    });
+
+    if (error) {
+      return { success: false, message: error.message };
+    }
+
+    const rows = Array.isArray(data) ? (data as Array<{ success: boolean; message: string }>) : [];
+    if (rows.length > 0) {
+      return { success: Boolean(rows[0].success), message: rows[0].message };
+    }
+
+    return { success: true, message: `Member ${poraplanId.toUpperCase()} successfully pre-registered.` };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { success: false, message: msg };
+  }
 }

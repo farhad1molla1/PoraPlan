@@ -126,6 +126,19 @@ export type Database = {
         };
         Returns: boolean;
       };
+      admin_register_member: {
+        Args: {
+          p_poraplan_id: string;
+          p_full_name: string;
+          p_email: string;
+          p_role: UserRole;
+          p_status?: string;
+        };
+        Returns: {
+          success: boolean;
+          message: string;
+        }[];
+      };
     };
     Enums: {
       user_role: UserRole;
