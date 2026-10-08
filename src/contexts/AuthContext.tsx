@@ -7,6 +7,11 @@ import {
   checkGoogleAccountLinked,
   connectPersonalEmail,
 } from '../lib/profiles';
+import {
+  authenticateMockPoraPlanId,
+  getMockProfile,
+  resetMockPassword,
+} from '../lib/mockAuthStore';
 import type { Profile, UserRole, AccountStatus } from '../types/database';
 import { AuthContext } from './authContextDef';
 
@@ -150,24 +155,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (!isConfigured) {
-        // Demo / unconfigured mode fallback
-        const upperId = cleanId.toUpperCase();
-        const isMentor = upperId.startsWith('PPM');
-        const isAdmin = upperId.startsWith('PPA');
-        const resolvedRole: UserRole = isAdmin ? 'admin' : isMentor ? 'mentor' : 'student';
+        // Local mode with strict pre-registered account verification
+        const { account, error: authError } = authenticateMockPoraPlanId(cleanId, password);
+        if (authError || !account) {
+          return {
+            error: authError || new Error('This PoraPlan ID is not recognized. Please verify your ID with your mentor.'),
+          };
+        }
 
-        const mockProfile: Profile = {
-          id: `mock-${cleanId.toLowerCase()}`,
-          poraplan_id: upperId,
-          full_name: `${upperId} Member`,
-          email: `${cleanId.toLowerCase()}@poraplan.internal`,
-          role: resolvedRole,
-          status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+        const mockProfile = getMockProfile(account.id);
         setProfile(mockProfile);
-        return { error: null, role: resolvedRole };
+        setUser({
+          id: account.id,
+          email: account.authEmail,
+          app_metadata: {},
+          user_metadata: {
+            full_name: account.fullName,
+            poraplan_id: account.poraplanId,
+            role: account.role,
+            status: account.status,
+          },
+          aud: 'authenticated',
+          created_at: new Date().toISOString(),
+        } as unknown as User);
+
+        return { error: null, role: account.role };
       }
 
       try {
@@ -318,7 +330,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = useCallback(async (): Promise<{ error: Error | null }> => {
     if (!isConfigured) {
       return {
-        error: new Error('Supabase credentials are not configured yet in .env.local.'),
+        error: new Error('Google sign-in requires live connection settings in .env.local.'),
       };
     }
 
@@ -374,6 +386,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateNewPassword = useCallback(
     async (newPassword: string): Promise<{ error: Error | null }> => {
       if (!isConfigured) {
+        if (user?.email) {
+          resetMockPassword(user.email, newPassword);
+        }
         return { error: null };
       }
 
@@ -388,7 +403,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error };
       }
     },
-    [isConfigured]
+    [isConfigured, user]
   );
 
   /**

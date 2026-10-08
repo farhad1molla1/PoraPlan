@@ -11,6 +11,7 @@ export const APP_CONFIG = {
 export const NAV_LINKS: NavItem[] = [
   { label: 'How It Works', href: '/how-it-works' },
   { label: 'About', href: '/about' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export const WORKFLOW_STEPS: WorkflowStep[] = [

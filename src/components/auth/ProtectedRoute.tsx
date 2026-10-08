@@ -23,10 +23,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         <div className="p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center max-w-sm">
           <div className="inline-block animate-spin w-8 h-8 border-4 border-brand-teal border-t-brand-navy rounded-full mb-3" />
           <p className="font-heading font-extrabold text-sm text-brand-navy">
-            VERIFYING ACADEMIC CREDENTIALS
+            LOADING WORKSPACE
           </p>
           <span className="font-mono text-[11px] text-brand-muted mt-1 block">
-            Connecting session to PoraPlan security layer...
+            Opening your study dashboard...
           </span>
         </div>
       </div>
@@ -38,8 +38,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // User signed in but has no registered PoraPlan profile (unlinked identity)
+  if (!role) {
+    return <Navigate to="/login?error=google_not_linked" replace />;
+  }
+
   // Role check if specific roles are required
-  if (allowedRoles && role && !allowedRoles.includes(role)) {
+  if (allowedRoles && !allowedRoles.includes(role)) {
     return (
       <div className="w-full min-h-[70vh] flex items-center justify-center p-4 academic-grid-pattern">
         <div className="max-w-md w-full border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 text-center space-y-4">
@@ -51,7 +56,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               ACCESS RESTRICTED
             </h2>
             <p className="text-xs text-brand-dark/80 mt-1 font-sans">
-              Your registered role (<span className="font-mono font-bold uppercase">{role}</span>) does not have permission to inspect this sector.
+              Your registered role (<span className="font-mono font-bold uppercase">{role}</span>) does not have access to this page.
             </p>
           </div>
           <div className="pt-2">

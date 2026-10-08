@@ -1,5 +1,6 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import type { Profile } from '../types/database';
+import { getMockAssignedStudents, getMockAssignedMentors } from './mockAuthStore';
 
 /**
  * Fetch students assigned to a specific mentor.
@@ -9,7 +10,8 @@ export async function getAssignedStudents(mentorId: string): Promise<{
   error: Error | null;
 }> {
   if (!isSupabaseConfigured()) {
-    return { students: [], error: new Error('Supabase client is not configured') };
+    const mockStudents = getMockAssignedStudents(mentorId);
+    return { students: mockStudents, error: null };
   }
 
   try {
@@ -51,7 +53,8 @@ export async function getAssignedMentors(studentId: string): Promise<{
   error: Error | null;
 }> {
   if (!isSupabaseConfigured()) {
-    return { mentors: [], error: new Error('Supabase client is not configured') };
+    const mockMentors = getMockAssignedMentors(studentId);
+    return { mentors: mockMentors, error: null };
   }
 
   try {

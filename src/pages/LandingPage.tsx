@@ -9,6 +9,8 @@ import {
   MessageSquare,
   HelpCircle,
   TrendingUp,
+  Mail,
+  ExternalLink,
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
@@ -343,7 +345,73 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. STUDENT-FRIENDLY CLOSING CTA */}
+      {/* 4. CONTACT SECTION */}
+      <section id="contact" className="py-12 sm:py-16 border-b-2 border-brand-dark bg-brand-paper">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            badge="CONTACT"
+            eyebrow="// REACH OUT TO PORAPLAN"
+            title="Have questions or need your PoraPlan ID?"
+            description="Our mentorship team is available to assist you. New to PoraPlan? Your mentor will provide your PoraPlan ID."
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-6">
+            <div className="p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="w-9 h-9 border-2 border-brand-dark bg-brand-teal-light flex items-center justify-center">
+                  <Mail className="w-4 h-4 text-brand-dark" />
+                </div>
+                <span className="font-mono text-[10px] uppercase font-bold text-brand-teal block">Email</span>
+                <h3 className="font-heading font-bold text-base text-brand-navy">Email Support</h3>
+                <p className="text-xs text-brand-dark/80 font-sans">For general inquiries and onboarding questions.</p>
+              </div>
+              <div className="pt-3 border-t border-brand-dark/20 mt-3">
+                <a href="mailto:poraplan.bd@gmail.com" className="font-mono text-xs font-bold text-brand-teal hover:underline break-all">
+                  poraplan.bd@gmail.com
+                </a>
+              </div>
+            </div>
+
+            <div className="p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="w-9 h-9 border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-center">
+                  <ExternalLink className="w-4 h-4 text-brand-dark" />
+                </div>
+                <span className="font-mono text-[10px] uppercase font-bold text-brand-navy block">Facebook</span>
+                <h3 className="font-heading font-bold text-base text-brand-navy">Official Page</h3>
+                <p className="text-xs text-brand-dark/80 font-sans">Platform announcements and updates.</p>
+              </div>
+              <div className="pt-3 border-t border-brand-dark/20 mt-3">
+                <a
+                  href="https://www.facebook.com/profile.php?id=61593180002346"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-xs font-bold text-brand-navy hover:text-brand-teal hover:underline inline-flex items-center gap-1"
+                >
+                  <span>facebook.com/PoraPlan</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+
+            <div className="p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="w-9 h-9 border-2 border-brand-dark bg-brand-gold-light flex items-center justify-center">
+                  <MessageSquare className="w-4 h-4 text-brand-dark" />
+                </div>
+                <span className="font-mono text-[10px] uppercase font-bold text-brand-gold-dark block">WhatsApp</span>
+                <h3 className="font-heading font-bold text-base text-brand-navy">Direct Chat</h3>
+                <p className="text-xs text-brand-dark/80 font-sans">Quick communication for students.</p>
+              </div>
+              <div className="pt-3 border-t border-brand-dark/20 mt-3 font-mono text-xs font-bold text-brand-dark">
+                @PoraPlan
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. STUDENT-FRIENDLY CLOSING CTA */}
       <section className="py-12 sm:py-16 md:py-20 bg-brand-gold border-b-2 border-brand-dark">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4 sm:space-y-6">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-brand-navy tracking-tight">

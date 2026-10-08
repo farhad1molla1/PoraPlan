@@ -23,7 +23,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs uppercase text-brand-gold font-bold tracking-wider">
-                ADMIN SECTOR // SYSTEM CONTROL
+                ADMIN WORKSPACE
               </span>
               <Badge variant="navy" size="sm" className="bg-brand-paper text-brand-dark">
                 ADMINISTRATOR
@@ -50,12 +50,12 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Phase 1 Verification Docket */}
+        {/* Administration Overview */}
         <div className="border-2 border-brand-dark bg-brand-paper p-6 shadow-brutal space-y-4">
           <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
             <h2 className="font-heading font-extrabold text-lg text-brand-navy flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-brand-teal stroke-[2.5]" />
-              Platform Administration Docket
+              Platform Administration Overview
             </h2>
             <Badge variant="teal" size="sm">SECURITY ACTIVE</Badge>
           </div>
@@ -65,11 +65,11 @@ export const AdminDashboardPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-brand-teal stroke-[2.5]" />
                 <span className="font-mono text-xs font-bold uppercase text-brand-dark">
-                  Authentication &amp; RLS
+                  Authentication &amp; Access Controls
                 </span>
               </div>
               <p className="text-xs text-brand-dark/80 font-sans">
-                Profiles and mentor_students security policies are enforced at the database level.
+                Profile records and mentorship relationships are strictly protected at the database level.
               </p>
             </div>
 
@@ -77,11 +77,11 @@ export const AdminDashboardPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Database className="w-4 h-4 text-brand-gold-dark stroke-[2.5]" />
                 <span className="font-mono text-xs font-bold uppercase text-brand-dark">
-                  Next Milestone (Phase 2)
+                  Administrative Operations
                 </span>
               </div>
               <p className="text-xs text-brand-dark/80 font-sans">
-                User pairing console, syllabus management, and global platform metrics unlock in subsequent milestones.
+                Student and mentor account management, study syllabus oversight, and platform metrics.
               </p>
             </div>
           </div>

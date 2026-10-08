@@ -18,12 +18,30 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
+  Mail,
 } from 'lucide-react';
 
 export const StudentDashboardPage: React.FC = () => {
-  const { user, profile, role, poraplanId } = useAuth();
+  const { user, profile, role, poraplanId, connectEmail } = useAuth();
   const [mentors, setMentors] = useState<Profile[]>([]);
   const [loadingMentors, setLoadingMentors] = useState(() => Boolean(user?.id));
+  const [emailInput, setEmailInput] = useState('');
+  const [isLinking, setIsLinking] = useState(false);
+  const [linkMsg, setLinkMsg] = useState<string | null>(null);
+
+  const handleLinkEmail = async () => {
+    if (!emailInput.trim()) return;
+    setIsLinking(true);
+    setLinkMsg(null);
+    const { error } = await connectEmail(emailInput.trim());
+    if (error) {
+      setLinkMsg(`Error: ${error.message}`);
+    } else {
+      setLinkMsg('Personal email linked successfully!');
+      setEmailInput('');
+    }
+    setIsLinking(false);
+  };
 
   // Fetch real mentor pairings from database
   useEffect(() => {
@@ -93,6 +111,44 @@ export const StudentDashboardPage: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {/* Email Link Prompt Banner for newly activated students without linked email */}
+        {!profile?.linked_email && (
+          <section
+            aria-label="Connect personal email"
+            className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-gold-light shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+          >
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-brand-navy">
+                <Mail className="w-3.5 h-3.5 text-brand-navy" />
+                <span>LINK YOUR PERSONAL EMAIL</span>
+              </div>
+              <p className="text-xs text-brand-dark/85 font-sans">
+                Connect your personal email address to enable password recovery and Google sign-in.
+              </p>
+              {linkMsg && (
+                <p className="text-[11px] font-sans font-bold text-emerald-800 pt-0.5">{linkMsg}</p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <input
+                type="email"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                placeholder="student@example.com"
+                className="px-2.5 py-1 text-xs border-2 border-brand-dark bg-brand-paper font-sans"
+              />
+              <button
+                type="button"
+                onClick={handleLinkEmail}
+                disabled={isLinking}
+                className="px-3 py-1 border-2 border-brand-dark bg-brand-navy text-brand-bg text-xs font-mono font-bold hover:bg-brand-dark shadow-brutal-xs"
+              >
+                {isLinking ? 'Linking...' : 'Connect'}
+              </button>
+            </div>
+          </section>
+        )}
 
         {/* Progress Summary Section */}
         <section id="progress" aria-labelledby="progress-title" className="space-y-3">

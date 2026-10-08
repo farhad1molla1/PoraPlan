@@ -1,5 +1,12 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import type { Profile, ProfileUpdate, UserRole, AccountStatus } from '../types/database';
+import {
+  resolveMockPoraPlanId,
+  checkMockGoogleLinked,
+  connectMockPersonalEmail,
+  getMockProfile,
+  updateMockProfile,
+} from './mockAuthStore';
 
 export interface PoraPlanIdResolution {
   authEmail: string;
@@ -16,7 +23,11 @@ export async function getProfile(userId: string): Promise<{
   error: Error | null;
 }> {
   if (!isSupabaseConfigured()) {
-    return { profile: null, error: new Error('Supabase client is not configured') };
+    const mockProfile = getMockProfile(userId);
+    if (mockProfile) {
+      return { profile: mockProfile, error: null };
+    }
+    return { profile: null, error: new Error('User profile not found') };
   }
 
   try {
@@ -40,6 +51,7 @@ export async function getProfile(userId: string): Promise<{
 /**
  * Resolves a PoraPlan ID (e.g. PP001, PPM001) to its corresponding auth credentials & status.
  * Uses the secure RPC function resolve_poraplan_id_login with fallback to profiles table.
+ * Rejects unauthorized or non-existent PoraPlan IDs (e.g. PP999).
  */
 export async function resolvePoraPlanIdLogin(poraplanId: string): Promise<{
   resolution: PoraPlanIdResolution | null;
@@ -47,22 +59,23 @@ export async function resolvePoraPlanIdLogin(poraplanId: string): Promise<{
 }> {
   const cleanId = poraplanId.trim();
   if (!cleanId) {
-    return { resolution: null, error: new Error('Please enter your PoraPlan ID') };
+    return { resolution: null, error: new Error('Please enter your PoraPlan ID.') };
   }
 
   if (!isSupabaseConfigured()) {
-    // In unconfigured / mock mode, allow standardized demonstration IDs
-    const upperId = cleanId.toUpperCase();
-    const isMentor = upperId.startsWith('PPM');
-    const isAdmin = upperId.startsWith('PPA');
-    const role: UserRole = isAdmin ? 'admin' : isMentor ? 'mentor' : 'student';
-
+    const mockRes = resolveMockPoraPlanId(cleanId);
+    if (!mockRes) {
+      return {
+        resolution: null,
+        error: new Error('This PoraPlan ID is not recognized. Please verify your ID with your mentor.'),
+      };
+    }
     return {
       resolution: {
-        authEmail: `${cleanId.toLowerCase()}@poraplan.internal`,
-        status: 'active',
-        role,
-        poraplanId: upperId,
+        authEmail: mockRes.authEmail,
+        status: mockRes.status,
+        role: mockRes.role,
+        poraplanId: mockRes.poraplanId,
       },
       error: null,
     };
@@ -88,7 +101,7 @@ export async function resolvePoraPlanIdLogin(poraplanId: string): Promise<{
       };
     }
 
-    // 2. Fallback direct query on profiles table (case-insensitive)
+    // 2. Direct query fallback on profiles table (case-insensitive)
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('email, status, role, poraplan_id')
@@ -112,10 +125,10 @@ export async function resolvePoraPlanIdLogin(poraplanId: string): Promise<{
       };
     }
 
-    // ID not found in database
+    // ID not found in database: unauthorized/invented ID
     return {
       resolution: null,
-      error: new Error('This PoraPlan ID was not found. Please verify your ID with your mentor.'),
+      error: new Error('This PoraPlan ID is not recognized. Please verify your ID with your mentor.'),
     };
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
@@ -135,12 +148,18 @@ export async function checkGoogleAccountLinked(email: string): Promise<{
 }> {
   const cleanEmail = email.trim().toLowerCase();
   if (!cleanEmail) {
-    return { isLinked: false, error: new Error('Invalid email provided') };
+    return { isLinked: false, error: new Error('Invalid email provided.') };
   }
 
   if (!isSupabaseConfigured()) {
-    // In mock/demo environment, allow testing
-    return { isLinked: true, role: 'student', status: 'active', error: null };
+    const mockCheck = checkMockGoogleLinked(cleanEmail);
+    return {
+      isLinked: mockCheck.isLinked,
+      poraplanId: mockCheck.poraplanId,
+      role: mockCheck.role,
+      status: mockCheck.status,
+      error: null,
+    };
   }
 
   try {
@@ -197,15 +216,20 @@ export async function connectPersonalEmail(
   userId: string,
   email: string
 ): Promise<{ success: boolean; error: Error | null }> {
+  const cleanEmail = email.trim().toLowerCase();
+  if (!cleanEmail) {
+    return { success: false, error: new Error('Please enter a valid email address.') };
+  }
+
   if (!isSupabaseConfigured()) {
-    return { success: true, error: null };
+    return connectMockPersonalEmail(userId, cleanEmail);
   }
 
   try {
     const { error } = await supabase
       .from('profiles')
       .update({
-        linked_email: email.trim().toLowerCase(),
+        linked_email: cleanEmail,
         status: 'active',
       })
       .eq('id', userId);
@@ -223,6 +247,7 @@ export async function connectPersonalEmail(
 
 /**
  * Update an existing profile for a user.
+ * Explicitly sanitizes inputs: users can never alter role or poraplan_id.
  */
 export async function updateProfile(
   userId: string,
@@ -231,14 +256,20 @@ export async function updateProfile(
   profile: Profile | null;
   error: Error | null;
 }> {
+  // Sanitize strictly: role cannot be altered by users
+  const sanitizedUpdates: ProfileUpdate = {};
+  if (updates.full_name !== undefined) sanitizedUpdates.full_name = updates.full_name;
+  if (updates.avatar_url !== undefined) sanitizedUpdates.avatar_url = updates.avatar_url;
+  if (updates.linked_email !== undefined) sanitizedUpdates.linked_email = updates.linked_email;
+
   if (!isSupabaseConfigured()) {
-    return { profile: null, error: new Error('Supabase client is not configured') };
+    return updateMockProfile(userId, sanitizedUpdates);
   }
 
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
+      .update(sanitizedUpdates)
       .eq('id', userId)
       .select()
       .single();

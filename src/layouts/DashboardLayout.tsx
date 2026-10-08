@@ -18,10 +18,27 @@ import {
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
-  const { user, profile, role, poraplanId, signOut } = useAuth();
+  const { user, profile, role, poraplanId, signOut, connectEmail } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [emailToLink, setEmailToLink] = useState('');
+  const [isLinkingEmail, setIsLinkingEmail] = useState(false);
+  const [emailLinkMessage, setEmailLinkMessage] = useState<string | null>(null);
+
+  const handleLinkEmail = async () => {
+    if (!emailToLink.trim()) return;
+    setIsLinkingEmail(true);
+    setEmailLinkMessage(null);
+    const { error } = await connectEmail(emailToLink.trim());
+    if (error) {
+      setEmailLinkMessage(`Error: ${error.message}`);
+    } else {
+      setEmailLinkMessage('Personal email successfully linked!');
+      setEmailToLink('');
+    }
+    setIsLinkingEmail(false);
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -310,11 +327,41 @@ export const DashboardLayout: React.FC = () => {
                 <span className="font-bold text-brand-dark text-sm font-sans">{userDisplayName}</span>
               </div>
 
-              <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
+              <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1.5">
                 <span className="text-[10px] text-brand-muted uppercase block">Associated Email</span>
-                <span className="font-bold text-brand-dark break-all">
-                  {profile?.linked_email || user?.email}
-                </span>
+                {profile?.linked_email ? (
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-brand-dark break-all">{profile.linked_email}</span>
+                    <Badge variant="teal" size="sm">LINKED</Badge>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <span className="text-xs text-brand-muted block font-sans">
+                      No personal email linked yet.
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="email"
+                        value={emailToLink}
+                        onChange={(e) => setEmailToLink(e.target.value)}
+                        placeholder="your.email@example.com"
+                        className="flex-1 px-2.5 py-1 text-xs border border-brand-dark bg-brand-paper font-sans"
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="primary"
+                        onClick={handleLinkEmail}
+                        disabled={isLinkingEmail}
+                      >
+                        {isLinkingEmail ? 'Linking...' : 'Connect'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {emailLinkMessage && (
+                  <p className="text-[11px] font-sans font-bold text-emerald-800">{emailLinkMessage}</p>
+                )}
                 <span className="text-[10px] text-brand-muted block font-sans mt-0.5">
                   Used for Google sign-in and password recovery.
                 </span>

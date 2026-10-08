@@ -5,6 +5,7 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import { LandingPage } from '../pages/LandingPage';
 import { HowItWorksPage } from '../pages/HowItWorksPage';
 import { AboutPage } from '../pages/AboutPage';
+import { ContactPage } from '../pages/ContactPage';
 import { LoginPage } from '../pages/LoginPage';
 import { SignupPage } from '../pages/SignupPage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
@@ -27,10 +28,10 @@ const DashboardRedirect: React.FC = () => {
         <div className="p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center max-w-sm">
           <div className="inline-block animate-spin w-8 h-8 border-4 border-brand-teal border-t-brand-navy rounded-full mb-3" />
           <p className="font-heading font-extrabold text-sm text-brand-navy">
-            RESOLVING WORKSPACE ROUTE
+            OPENING WORKSPACE
           </p>
           <span className="font-mono text-[11px] text-brand-muted mt-1 block">
-            Connecting session to PoraPlan security layer...
+            Loading your study dashboard...
           </span>
         </div>
       </div>
@@ -54,8 +55,10 @@ export const AppRoutes: React.FC = () => {
         <Route index element={<LandingPage />} />
         <Route path="how-it-works" element={<HowItWorksPage />} />
         <Route path="about" element={<AboutPage />} />
+        <Route path="contact" element={<ContactPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
+        <Route path="activate" element={<SignupPage />} />
         <Route path="reset-password" element={<ResetPasswordPage />} />
       </Route>
 
