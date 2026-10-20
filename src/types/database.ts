@@ -328,6 +328,78 @@ export type SubmissionUpdate = {
   updated_at?: string;
 };
 
+export type EvaluationFormat = 'oral' | 'written' | 'practical';
+export type EvaluationStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+
+export type Evaluation = {
+  id: string;
+  student_id: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  assignment_id?: string | null;
+  title: string;
+  description?: string | null;
+  format: EvaluationFormat;
+  status: EvaluationStatus;
+  scheduled_date: string;
+  scheduled_time?: string | null;
+  duration_minutes?: number | null;
+  total_points?: number | null;
+  score?: number | null;
+  feedback?: string | null;
+  recommendation?: string | null;
+  evaluated_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type EvaluationInsert = {
+  id?: string;
+  student_id: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  assignment_id?: string | null;
+  title: string;
+  description?: string | null;
+  format?: EvaluationFormat;
+  status?: EvaluationStatus;
+  scheduled_date: string;
+  scheduled_time?: string | null;
+  duration_minutes?: number | null;
+  total_points?: number | null;
+  score?: number | null;
+  feedback?: string | null;
+  recommendation?: string | null;
+  evaluated_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type EvaluationUpdate = {
+  id?: string;
+  student_id?: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  assignment_id?: string | null;
+  title?: string;
+  description?: string | null;
+  format?: EvaluationFormat;
+  status?: EvaluationStatus;
+  scheduled_date?: string;
+  scheduled_time?: string | null;
+  duration_minutes?: number | null;
+  total_points?: number | null;
+  score?: number | null;
+  feedback?: string | null;
+  recommendation?: string | null;
+  evaluated_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -516,6 +588,48 @@ export type Database = {
             columns: ['student_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      evaluations: {
+        Row: Evaluation;
+        Insert: EvaluationInsert;
+        Update: EvaluationUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'evaluations_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'evaluations_mentor_id_fkey';
+            columns: ['mentor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'evaluations_subject_id_fkey';
+            columns: ['subject_id'];
+            isOneToOne: false;
+            referencedRelation: 'subjects';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'evaluations_plan_id_fkey';
+            columns: ['plan_id'];
+            isOneToOne: false;
+            referencedRelation: 'study_plans';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'evaluations_assignment_id_fkey';
+            columns: ['assignment_id'];
+            isOneToOne: false;
+            referencedRelation: 'assignments';
             referencedColumns: ['id'];
           }
         ];

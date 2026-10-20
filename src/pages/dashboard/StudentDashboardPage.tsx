@@ -742,6 +742,17 @@ export const StudentDashboardPage: React.FC = () => {
               </ul>
             </div>
           </div>
+
+          <div className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono text-brand-muted">
+            <span>Step 6 &amp; 7: Feedback &amp; Progress</span>
+            <Link
+              to="/student/evaluations"
+              className="font-bold text-brand-navy hover:text-brand-teal transition-colors flex items-center gap-1"
+            >
+              <span>View Milestone Evaluations</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </section>
 
         {/* ========================================================================= */}

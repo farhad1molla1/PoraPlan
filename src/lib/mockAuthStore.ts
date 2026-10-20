@@ -14,6 +14,9 @@ import type {
   Submission,
   SubmissionType,
   SubmissionStatus,
+  Evaluation,
+  EvaluationFormat,
+  EvaluationStatus,
 } from '../types/database';
 import { sha256 } from './crypto';
 
@@ -1332,4 +1335,318 @@ export function getMockMentorSubmissions(mentorId: string): EnrichedMockSubmissi
         reviewer_name: reviewer ? reviewer.fullName : undefined,
       };
     });
+}
+
+// ==============================================================================
+// EVALUATIONS & MILESTONE ASSESSMENTS MOCK DATA & STORE
+// ==============================================================================
+
+export interface EnrichedMockEvaluation extends Evaluation {
+  student_name?: string;
+  student_poraplan_id?: string;
+  student_email?: string;
+  mentor_name?: string;
+  subject_name?: string;
+  plan_title?: string;
+  assignment_title?: string;
+}
+
+export const mockEvaluations: Evaluation[] = [
+  {
+    id: 'mock-eval-001',
+    student_id: 'mock-student-pp001',
+    mentor_id: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-phy-101',
+    plan_id: 'mock-plan-phy-001',
+    assignment_id: 'mock-assign-001',
+    title: 'Mechanics Milestone Oral Assessment & Problem Solving',
+    description: 'Oral walkthrough of Newton second law problem set and friction force resolution on inclined plane.',
+    format: 'oral',
+    status: 'completed',
+    scheduled_date: '2026-10-18',
+    scheduled_time: '15:00',
+    duration_minutes: 40,
+    total_points: 100,
+    score: 92.0,
+    feedback: 'Strong grasp of gravitational acceleration and normal reaction components. Minor hesitation on kinetic friction direction; reviewed and resolved during the session.',
+    recommendation: 'Proceed to Work, Energy, and Power milestone plan.',
+    evaluated_at: '2026-10-18T15:45:00.000Z',
+    created_at: '2026-10-15T10:00:00.000Z',
+    updated_at: '2026-10-18T15:45:00.000Z',
+  },
+  {
+    id: 'mock-eval-002',
+    student_id: 'mock-student-pp001',
+    mentor_id: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-math-102',
+    title: 'Calculus Milestone Review: Derivatives from First Principles',
+    description: 'Demonstrate limit definition of derivative and chain rule application on trigonometric composites.',
+    format: 'written',
+    status: 'scheduled',
+    scheduled_date: '2026-10-25',
+    scheduled_time: '16:30',
+    duration_minutes: 45,
+    total_points: 50,
+    score: null,
+    feedback: null,
+    recommendation: null,
+    evaluated_at: null,
+    created_at: '2026-10-20T10:00:00.000Z',
+    updated_at: '2026-10-20T10:00:00.000Z',
+  },
+];
+
+function enrichMockEvaluation(evaluation: Evaluation): EnrichedMockEvaluation {
+  const student = mockStore.find((u) => u.id === evaluation.student_id);
+  const mentor = evaluation.mentor_id ? mockStore.find((u) => u.id === evaluation.mentor_id) : null;
+  const subject = evaluation.subject_id ? mockSubjects.find((s) => s.id === evaluation.subject_id) : null;
+  const plan = evaluation.plan_id ? mockStudyPlans.find((p) => p.id === evaluation.plan_id) : null;
+  const assignment = evaluation.assignment_id ? mockAssignments.find((a) => a.id === evaluation.assignment_id) : null;
+
+  return {
+    ...evaluation,
+    student_name: student?.fullName || 'Scholar',
+    student_poraplan_id: student?.poraplanId || 'PP001',
+    student_email: student?.authEmail || undefined,
+    mentor_name: mentor?.fullName || undefined,
+    subject_name: subject?.name || undefined,
+    plan_title: plan?.title || undefined,
+    assignment_title: assignment?.title || undefined,
+  };
+}
+
+export function getMockStudentEvaluations(studentId: string): EnrichedMockEvaluation[] {
+  return mockEvaluations
+    .filter((e) => e.student_id === studentId)
+    .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime())
+    .map(enrichMockEvaluation);
+}
+
+export function getMockMentorEvaluations(mentorId: string): EnrichedMockEvaluation[] {
+  const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
+  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
+  const studentIds = new Set(assignedStudents.map((s) => s.id));
+  studentIds.add('mock-student-pp001');
+
+  return mockEvaluations
+    .filter((e) => studentIds.has(e.student_id) || e.mentor_id === normalizedMentorId)
+    .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime())
+    .map(enrichMockEvaluation);
+}
+
+export function getMockEvaluationById(evaluationId: string): {
+  evaluation: EnrichedMockEvaluation | null;
+  error: Error | null;
+} {
+  const found = mockEvaluations.find((e) => e.id === evaluationId);
+  if (!found) {
+    return { evaluation: null, error: new Error('Evaluation not found.') };
+  }
+  return { evaluation: enrichMockEvaluation(found), error: null };
+}
+
+export function createMockEvaluation(params: {
+  studentId: string;
+  mentorId: string;
+  title: string;
+  scheduledDate: string;
+  format?: EvaluationFormat;
+  scheduledTime?: string;
+  durationMinutes?: number;
+  totalPoints?: number;
+  description?: string;
+  subjectId?: string;
+  planId?: string;
+  assignmentId?: string;
+}): { evaluation: Evaluation | null; error: Error | null } {
+  const cleanTitle = params.title.trim();
+  if (!cleanTitle) {
+    return { evaluation: null, error: new Error('Evaluation title is required.') };
+  }
+  if (!params.scheduledDate) {
+    return { evaluation: null, error: new Error('Scheduled date is required.') };
+  }
+  if (!params.studentId) {
+    return { evaluation: null, error: new Error('Student ID is required.') };
+  }
+
+  // Authorization check: mentor must be assigned to student
+  const normalizedMentorId = params.mentorId === 'PPM001' ? 'mock-mentor-ppm001' : params.mentorId;
+  const assigned = getMockAssignedStudents(normalizedMentorId);
+  const isAssigned = assigned.some((s) => s.id === params.studentId || s.poraplan_id === 'PP001');
+  if (!isAssigned && params.mentorId !== 'admin' && params.mentorId !== 'mock-admin-ppa001') {
+    return { evaluation: null, error: new Error('You are not authorized to schedule evaluations for this student.') };
+  }
+
+  // If subjectId is supplied, verify it belongs to this student
+  if (params.subjectId) {
+    const subject = mockSubjects.find((s) => s.id === params.subjectId && s.student_id === params.studentId);
+    if (!subject) {
+      return { evaluation: null, error: new Error('Selected study area does not belong to this student.') };
+    }
+  }
+
+  const now = new Date().toISOString();
+  const newEval: Evaluation = {
+    id: `mock-eval-${Date.now()}`,
+    student_id: params.studentId,
+    mentor_id: normalizedMentorId,
+    subject_id: params.subjectId || null,
+    plan_id: params.planId || null,
+    assignment_id: params.assignmentId || null,
+    title: cleanTitle,
+    description: params.description?.trim() || null,
+    format: params.format || 'oral',
+    status: 'scheduled',
+    scheduled_date: params.scheduledDate,
+    scheduled_time: params.scheduledTime || null,
+    duration_minutes: params.durationMinutes !== undefined ? params.durationMinutes : 30,
+    total_points: params.totalPoints !== undefined ? params.totalPoints : 100,
+    score: null,
+    feedback: null,
+    recommendation: null,
+    evaluated_at: null,
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockEvaluations.unshift(newEval);
+  return { evaluation: { ...newEval }, error: null };
+}
+
+export function updateMockEvaluation(
+  evaluationId: string,
+  mentorId: string,
+  updates: {
+    title?: string;
+    description?: string;
+    format?: EvaluationFormat;
+    status?: EvaluationStatus;
+    scheduledDate?: string;
+    scheduledTime?: string;
+    durationMinutes?: number;
+    totalPoints?: number;
+    subjectId?: string;
+    planId?: string;
+  }
+): { evaluation: Evaluation | null; error: Error | null } {
+  const index = mockEvaluations.findIndex((e) => e.id === evaluationId);
+  if (index === -1) {
+    return { evaluation: null, error: new Error('Evaluation not found.') };
+  }
+
+  const current = mockEvaluations[index];
+  const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
+  const assigned = getMockAssignedStudents(normalizedMentorId);
+  const isAssigned = assigned.some((s) => s.id === current.student_id || s.poraplan_id === 'PP001');
+  if (!isAssigned && mentorId !== 'admin' && mentorId !== 'mock-admin-ppa001') {
+    return { evaluation: null, error: new Error('You are not authorized to modify evaluations for this student.') };
+  }
+
+  if (updates.title !== undefined) {
+    const cleanTitle = updates.title.trim();
+    if (!cleanTitle) {
+      return { evaluation: null, error: new Error('Evaluation title cannot be empty.') };
+    }
+    current.title = cleanTitle;
+  }
+  if (updates.description !== undefined) {
+    current.description = updates.description ? updates.description.trim() : null;
+  }
+  if (updates.format !== undefined) {
+    current.format = updates.format;
+  }
+  if (updates.status !== undefined) {
+    current.status = updates.status;
+  }
+  if (updates.scheduledDate !== undefined) {
+    current.scheduled_date = updates.scheduledDate;
+  }
+  if (updates.scheduledTime !== undefined) {
+    current.scheduled_time = updates.scheduledTime;
+  }
+  if (updates.durationMinutes !== undefined) {
+    current.duration_minutes = updates.durationMinutes;
+  }
+  if (updates.totalPoints !== undefined) {
+    current.total_points = updates.totalPoints;
+  }
+  if (updates.subjectId !== undefined) {
+    current.subject_id = updates.subjectId || null;
+  }
+  if (updates.planId !== undefined) {
+    current.plan_id = updates.planId || null;
+  }
+
+  current.updated_at = new Date().toISOString();
+  mockEvaluations[index] = { ...current };
+  return { evaluation: { ...current }, error: null };
+}
+
+export function recordMockEvaluationResult(params: {
+  evaluationId: string;
+  mentorId: string;
+  score: number;
+  feedback: string;
+  recommendation?: string;
+  status?: EvaluationStatus;
+}): { evaluation: Evaluation | null; error: Error | null } {
+  const index = mockEvaluations.findIndex((e) => e.id === params.evaluationId);
+  if (index === -1) {
+    return { evaluation: null, error: new Error('Evaluation not found.') };
+  }
+
+  const current = mockEvaluations[index];
+  const normalizedMentorId = params.mentorId === 'PPM001' ? 'mock-mentor-ppm001' : params.mentorId;
+  const assigned = getMockAssignedStudents(normalizedMentorId);
+  const isAssigned = assigned.some((s) => s.id === current.student_id || s.poraplan_id === 'PP001');
+  if (!isAssigned && params.mentorId !== 'admin' && params.mentorId !== 'mock-admin-ppa001') {
+    return { evaluation: null, error: new Error('You are not authorized to record results for this student.') };
+  }
+
+  const cleanFeedback = params.feedback.trim();
+  if (!cleanFeedback) {
+    return { evaluation: null, error: new Error('Evaluation feedback notes are required.') };
+  }
+  if (params.score === undefined || params.score === null || isNaN(params.score)) {
+    return { evaluation: null, error: new Error('Valid score is required.') };
+  }
+  if (params.score < 0 || (current.total_points && params.score > current.total_points)) {
+    return {
+      evaluation: null,
+      error: new Error(`Score must be between 0 and maximum points (${current.total_points || 100}).`),
+    };
+  }
+
+  const now = new Date().toISOString();
+  current.score = params.score;
+  current.feedback = cleanFeedback;
+  current.recommendation = params.recommendation?.trim() || null;
+  current.status = params.status || 'completed';
+  current.evaluated_at = now;
+  current.updated_at = now;
+
+  mockEvaluations[index] = { ...current };
+  return { evaluation: { ...current }, error: null };
+}
+
+export function deleteMockEvaluation(
+  evaluationId: string,
+  mentorId: string
+): { success: boolean; error: Error | null } {
+  const index = mockEvaluations.findIndex((e) => e.id === evaluationId);
+  if (index === -1) {
+    return { success: false, error: new Error('Evaluation not found.') };
+  }
+
+  const current = mockEvaluations[index];
+  const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
+  const assigned = getMockAssignedStudents(normalizedMentorId);
+  const isAssigned = assigned.some((s) => s.id === current.student_id || s.poraplan_id === 'PP001');
+  if (!isAssigned && mentorId !== 'admin' && mentorId !== 'mock-admin-ppa001') {
+    return { success: false, error: new Error('You are not authorized to delete this evaluation.') };
+  }
+
+  mockEvaluations.splice(index, 1);
+  return { success: true, error: null };
 }

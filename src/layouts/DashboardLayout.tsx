@@ -70,7 +70,7 @@ export const DashboardLayout: React.FC = () => {
     { label: "Today's Tasks", shortLabel: 'Tasks', to: '/student/tasks', icon: ListTodo },
     { label: 'Assignments', shortLabel: 'Practice', to: '/student/assignments', icon: FileText },
     { label: "Today's Focus", shortLabel: 'Focus', to: '/student/dashboard#focus', icon: Target },
-    { label: 'Upcoming Evaluation', shortLabel: 'Eval', to: '/student/dashboard#evaluations', icon: Calendar },
+    { label: 'Upcoming Evaluation', shortLabel: 'Eval', to: '/student/evaluations', icon: Calendar },
     { label: 'Mentorship', shortLabel: 'Mentor', to: '/student/dashboard#mentorship', icon: Users },
   ];
 
@@ -82,7 +82,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Assignments', shortLabel: 'Practice', to: '/mentor/assignments', icon: FileText },
     { label: 'Student Roster', shortLabel: 'Roster', to: '/mentor/dashboard#roster', icon: Users },
     { label: 'Review Queue', shortLabel: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
-    { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/dashboard#evaluations', icon: Calendar },
+    { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/evaluations', icon: Calendar },
   ];
 
   const adminNavItems = [
