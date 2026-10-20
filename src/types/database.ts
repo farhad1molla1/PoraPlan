@@ -51,7 +51,46 @@ export type ProfileUpdate = {
 export type MentorStudent = {
   mentor_id: string;
   student_id: string;
+  status?: string;
   created_at?: string;
+};
+
+export type SubjectStatus = 'active' | 'archived';
+
+export type Subject = {
+  id: string;
+  student_id: string;
+  created_by?: string | null;
+  name: string;
+  code?: string | null;
+  description?: string | null;
+  status: SubjectStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type SubjectInsert = {
+  id?: string;
+  student_id: string;
+  created_by?: string | null;
+  name: string;
+  code?: string | null;
+  description?: string | null;
+  status?: SubjectStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type SubjectUpdate = {
+  id?: string;
+  student_id?: string;
+  created_by?: string | null;
+  name?: string;
+  code?: string | null;
+  description?: string | null;
+  status?: SubjectStatus;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type Database = {
@@ -86,6 +125,27 @@ export type Database = {
           {
             foreignKeyName: 'mentor_students_student_id_fkey';
             columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      subjects: {
+        Row: Subject;
+        Insert: SubjectInsert;
+        Update: SubjectUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'subjects_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'subjects_created_by_fkey';
+            columns: ['created_by'];
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];

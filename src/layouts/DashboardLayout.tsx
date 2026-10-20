@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   X,
   Sparkles,
+  BookOpen,
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
@@ -62,6 +63,7 @@ export const DashboardLayout: React.FC = () => {
   // Desktop sidebar navigation links
   const studentNavItems = [
     { label: 'Overview', shortLabel: 'Home', to: '/student/dashboard', icon: LayoutDashboard },
+    { label: 'Study Areas', shortLabel: 'Subjects', to: '/student/subjects', icon: BookOpen },
     { label: "Today's Focus", shortLabel: 'Focus', to: '/student/dashboard#focus', icon: Target },
     { label: "Today's Tasks", shortLabel: 'Tasks', to: '/student/dashboard#tasks', icon: ListTodo },
     { label: 'Upcoming Evaluation', shortLabel: 'Eval', to: '/student/dashboard#evaluations', icon: Calendar },
@@ -70,6 +72,7 @@ export const DashboardLayout: React.FC = () => {
 
   const mentorNavItems = [
     { label: 'Overview', shortLabel: 'Home', to: '/mentor/dashboard', icon: LayoutDashboard },
+    { label: 'Study Areas', shortLabel: 'Subjects', to: '/mentor/subjects', icon: BookOpen },
     { label: 'Student Roster', shortLabel: 'Roster', to: '/mentor/dashboard#roster', icon: Users },
     { label: 'Review Queue', shortLabel: 'Reviews', to: '/mentor/dashboard#reviews', icon: FileCheck },
     { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/dashboard#evaluations', icon: Calendar },
@@ -182,7 +185,9 @@ export const DashboardLayout: React.FC = () => {
             <nav className="space-y-1.5" aria-label="Sidebar Navigation">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.to || (location.pathname + location.hash) === item.to;
+                const isExact = location.pathname === item.to || (location.pathname + location.hash) === item.to;
+                const isSubpath = item.to.includes('/subjects') && location.pathname.startsWith(item.to);
+                const isActive = isExact || isSubpath;
                 return (
                   <NavLink
                     key={item.label}
@@ -257,7 +262,9 @@ export const DashboardLayout: React.FC = () => {
       >
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.to || (location.pathname + location.hash) === item.to;
+          const isExact = location.pathname === item.to || (location.pathname + location.hash) === item.to;
+          const isSubpath = item.to.includes('/subjects') && location.pathname.startsWith(item.to);
+          const isActive = isExact || isSubpath;
           return (
             <Link
               key={item.label}

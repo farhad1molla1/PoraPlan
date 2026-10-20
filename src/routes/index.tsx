@@ -14,6 +14,9 @@ import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { StudentDashboardPage } from '../pages/dashboard/StudentDashboardPage';
 import { MentorDashboardPage } from '../pages/dashboard/MentorDashboardPage';
 import { AdminDashboardPage } from '../pages/dashboard/AdminDashboardPage';
+import { StudentSubjectsPage } from '../pages/dashboard/StudentSubjectsPage';
+import { MentorSubjectsPage } from '../pages/dashboard/MentorSubjectsPage';
+import { SubjectDetailPage } from '../pages/dashboard/SubjectDetailPage';
 import { useAuth } from '../hooks/useAuth';
 
 /**
@@ -79,6 +82,22 @@ export const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="student/subjects"
+          element={
+            <ProtectedRoute allowedRoles={['student', 'admin']}>
+              <StudentSubjectsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="student/subjects/:subjectId"
+          element={
+            <ProtectedRoute allowedRoles={['student', 'admin']}>
+              <SubjectDetailPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Primary Mentor Sector */}
         <Route
@@ -86,6 +105,22 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['mentor', 'admin']}>
               <MentorDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="mentor/subjects"
+          element={
+            <ProtectedRoute allowedRoles={['mentor', 'admin']}>
+              <MentorSubjectsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="mentor/subjects/:subjectId"
+          element={
+            <ProtectedRoute allowedRoles={['mentor', 'admin']}>
+              <SubjectDetailPage />
             </ProtectedRoute>
           }
         />

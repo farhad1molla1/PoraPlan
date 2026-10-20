@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getAssignedStudents } from '../../lib/mentorship';
 import type { Profile } from '../../types/database';
@@ -213,7 +214,7 @@ export const MentorDashboardPage: React.FC = () => {
             <div className="flex items-center gap-2 shrink-0 self-start">
               <div className="px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-brand-dark text-xs font-mono font-bold shadow-brutal-xs flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-brand-teal shrink-0" />
-                <span>Mentor RLS Verified</span>
+                <span>Verified Mentor Access</span>
               </div>
             </div>
           </div>
@@ -340,7 +341,7 @@ export const MentorDashboardPage: React.FC = () => {
                 {students.length > 0 ? 'Normal / Clear' : 'Roster Empty'}
               </div>
               <span className="text-[10px] font-mono text-brand-teal font-bold mt-1">
-                Strict RLS Active
+                Strict Authorization Active
               </span>
             </div>
           </div>
@@ -590,17 +591,9 @@ export const MentorDashboardPage: React.FC = () => {
               </div>
             </a>
 
-            {/* Action 2: Study Plans */}
-            <div
-              onClick={() => setActiveModule('study-plans')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setActiveModule('study-plans');
-                }
-              }}
+            {/* Action 2: Study Areas & Plans */}
+            <Link
+              to="/mentor/subjects"
               className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group cursor-pointer"
             >
               <div>
@@ -611,17 +604,17 @@ export const MentorDashboardPage: React.FC = () => {
                   <BookOpen className="w-4 h-4 text-brand-dark group-hover:text-brand-gold transition-colors" />
                 </div>
                 <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-gold transition-colors">
-                  Study Plans
+                  Study Areas
                 </h3>
                 <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Define curriculum milestones, weekly syllabus pacing, and study schedules.
+                  Configure curriculum study areas, syllabus milestones, and course pacing for students.
                 </p>
               </div>
               <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy">
-                <span>Module Details</span>
+                <span>Manage Study Areas</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </div>
-            </div>
+            </Link>
 
             {/* Action 3: Tasks */}
             <div
@@ -906,17 +899,22 @@ export const MentorDashboardPage: React.FC = () => {
               <div className="p-3.5 border-2 border-brand-dark bg-brand-teal-light/40 space-y-1 text-brand-dark font-sans text-xs">
                 <div className="flex items-center gap-1.5 font-bold font-mono text-[10px] uppercase text-brand-teal">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>RLS Security Verification</span>
+                  <span>Mentorship Relationship Verified</span>
                 </div>
                 <p className="leading-relaxed">
-                  Authorized mentorship relationship verified via <span className="font-mono text-[11px] font-bold">mentor_students</span> table. You have permission to inspect this student’s upcoming submissions and assign study plans.
+                  Authorized mentorship relationship verified. You have permission to manage this student’s study areas, inspect submissions, and schedule evaluations.
                 </p>
               </div>
             </div>
 
-            <div className="pt-2 flex justify-end border-t border-brand-dark/20">
+            <div className="pt-2 flex items-center justify-between gap-2 border-t border-brand-dark/20">
+              <Link to="/mentor/subjects" onClick={() => setSelectedStudent(null)}>
+                <Button variant="primary" size="sm" leftIcon={<BookOpen className="w-3.5 h-3.5" />}>
+                  Manage Study Areas
+                </Button>
+              </Link>
               <Button
-                variant="primary"
+                variant="outline"
                 size="sm"
                 onClick={() => setSelectedStudent(null)}
               >

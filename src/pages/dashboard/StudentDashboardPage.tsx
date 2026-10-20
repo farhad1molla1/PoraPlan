@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getAssignedMentors } from '../../lib/mentorship';
 import type { Profile } from '../../types/database';
@@ -186,7 +187,7 @@ export const StudentDashboardPage: React.FC = () => {
             <div className="flex items-center gap-2 shrink-0 self-start">
               <div className="px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-brand-dark text-xs font-mono font-bold shadow-brutal-xs flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-brand-teal shrink-0" />
-                <span>RLS Protected</span>
+                <span>Verified Scholar Access</span>
               </div>
             </div>
           </div>
@@ -748,17 +749,9 @@ export const StudentDashboardPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             
-            {/* Quick Link 1: My Study */}
-            <div
-              onClick={() => setActiveModal('my-study')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setActiveModal('my-study');
-                }
-              }}
+            {/* Quick Link 1: My Study Areas */}
+            <Link
+              to="/student/subjects"
               className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group cursor-pointer"
             >
               <div>
@@ -769,18 +762,18 @@ export const StudentDashboardPage: React.FC = () => {
                   <BookOpen className="w-4 h-4 text-brand-dark group-hover:text-brand-teal transition-colors" />
                 </div>
                 <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-teal transition-colors">
-                  My Study
+                  My Study Areas
                 </h3>
                 <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Access disciplined study routines, chapter-wise guidance, and syllabus milestone trackers.
+                  Access enrolled curriculum subjects, syllabus roadmaps, and chapter milestone trackers.
                 </p>
               </div>
 
               <div className="mt-4 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-teal">
-                <span>View Study Routine</span>
+                <span>Open Study Areas</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </div>
-            </div>
+            </Link>
 
             {/* Quick Link 2: Assignments */}
             <div
@@ -960,21 +953,26 @@ export const StudentDashboardPage: React.FC = () => {
 
               <div className="p-3.5 border-2 border-brand-dark bg-brand-paper-tint space-y-2">
                 <span className="font-mono text-[10px] font-bold uppercase text-brand-navy block">
-                  CURRENT SYLLABUS STATUS
+                  CURRICULUM STUDY AREAS
                 </span>
-                <p className="text-brand-muted leading-relaxed">
-                  Chapter-wise curriculum tracking and syllabus milestones are undergoing backend schema preparation. For now, use your <span className="font-bold text-brand-dark">Today's Study Focus</span> block to log and track your active study sessions.
+                <p className="text-brand-dark/90 leading-relaxed">
+                  Your syllabus is organized into dedicated curriculum study areas. Open your study areas to inspect enrolled courses and syllabus roadmaps.
                 </p>
               </div>
 
-              <div className="pt-2 flex justify-end">
+              <div className="pt-2 flex items-center justify-between gap-2">
                 <Button
-                  variant="primary"
+                  variant="outline"
                   size="sm"
                   onClick={() => setActiveModal(null)}
                 >
-                  Understood
+                  Close
                 </Button>
+                <Link to="/student/subjects" onClick={() => setActiveModal(null)}>
+                  <Button variant="primary" size="sm">
+                    Open My Study Areas
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import type { Profile, UserRole, AccountStatus, ProfileUpdate } from '../types/database';
+import type { Profile, UserRole, AccountStatus, ProfileUpdate, Subject } from '../types/database';
 import { sha256 } from './crypto';
 
 export interface MockAccountRecord {
@@ -342,4 +342,127 @@ export function getMockAssignedMentors(studentId: string): Profile[] {
     return mentor ? [mentor] : [];
   }
   return [];
+}
+
+/**
+ * In-memory mock subjects store.
+ */
+let mockSubjects: Subject[] = [
+  {
+    id: 'mock-sub-phy-101',
+    student_id: 'mock-student-pp001',
+    created_by: 'mock-mentor-ppm001',
+    name: 'Physics',
+    code: 'PHY-101',
+    description: 'Classical mechanics, Newtonian dynamics, and thermodynamics.',
+    status: 'active',
+    created_at: new Date('2026-10-01T10:00:00Z').toISOString(),
+    updated_at: new Date('2026-10-01T10:00:00Z').toISOString(),
+  },
+  {
+    id: 'mock-sub-math-102',
+    student_id: 'mock-student-pp001',
+    created_by: 'mock-mentor-ppm001',
+    name: 'Higher Mathematics',
+    code: 'MATH-102',
+    description: 'Calculus, coordinate geometry, and vector algebra.',
+    status: 'active',
+    created_at: new Date('2026-10-01T11:00:00Z').toISOString(),
+    updated_at: new Date('2026-10-01T11:00:00Z').toISOString(),
+  },
+];
+
+export function getMockStudentSubjects(studentId: string): Subject[] {
+  return mockSubjects
+    .filter((s) => s.student_id === studentId)
+    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+}
+
+export function getMockSubjectById(subjectId: string): Subject | null {
+  return mockSubjects.find((s) => s.id === subjectId) || null;
+}
+
+export function createMockSubject(params: {
+  studentId: string;
+  name: string;
+  code?: string;
+  description?: string;
+  createdBy?: string;
+}): { subject: Subject | null; error: Error | null } {
+  const cleanName = params.name.trim();
+  if (!cleanName) {
+    return { subject: null, error: new Error('Subject name is required.') };
+  }
+
+  // Prevent duplicate subject name for the same student
+  const exists = mockSubjects.some(
+    (s) => s.student_id === params.studentId && s.name.toLowerCase() === cleanName.toLowerCase()
+  );
+  if (exists) {
+    return { subject: null, error: new Error(`A study area named "${cleanName}" already exists for this student.`) };
+  }
+
+  const newSubject: Subject = {
+    id: `mock-sub-${Date.now()}`,
+    student_id: params.studentId,
+    created_by: params.createdBy || null,
+    name: cleanName,
+    code: params.code?.trim().toUpperCase() || null,
+    description: params.description?.trim() || null,
+    status: 'active',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  mockSubjects.push(newSubject);
+  return { subject: newSubject, error: null };
+}
+
+export function updateMockSubject(
+  subjectId: string,
+  updates: Partial<Pick<Subject, 'name' | 'code' | 'description' | 'status'>>
+): { subject: Subject | null; error: Error | null } {
+  const index = mockSubjects.findIndex((s) => s.id === subjectId);
+  if (index === -1) {
+    return { subject: null, error: new Error('Study area not found.') };
+  }
+
+  const current = mockSubjects[index];
+
+  if (updates.name !== undefined) {
+    const cleanName = updates.name.trim();
+    if (!cleanName) {
+      return { subject: null, error: new Error('Subject name cannot be empty.') };
+    }
+    const duplicate = mockSubjects.some(
+      (s) => s.id !== subjectId && s.student_id === current.student_id && s.name.toLowerCase() === cleanName.toLowerCase()
+    );
+    if (duplicate) {
+      return { subject: null, error: new Error(`A study area named "${cleanName}" already exists for this student.`) };
+    }
+    current.name = cleanName;
+  }
+
+  if (updates.code !== undefined) {
+    current.code = updates.code ? updates.code.trim().toUpperCase() : null;
+  }
+  if (updates.description !== undefined) {
+    current.description = updates.description ? updates.description.trim() : null;
+  }
+  if (updates.status !== undefined) {
+    current.status = updates.status;
+  }
+  current.updated_at = new Date().toISOString();
+
+  mockSubjects[index] = { ...current };
+  return { subject: { ...current }, error: null };
+}
+
+export function deleteMockSubject(subjectId: string): { success: boolean; error: Error | null } {
+  const index = mockSubjects.findIndex((s) => s.id === subjectId);
+  if (index === -1) {
+    return { success: false, error: new Error('Study area not found.') };
+  }
+  mockSubjects.splice(index, 1);
+  return { success: true, error: null };
 }
