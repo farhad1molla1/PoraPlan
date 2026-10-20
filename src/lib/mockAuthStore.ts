@@ -9,6 +9,11 @@ import type {
   StudyPlanItemStatus,
   Task,
   TaskPriority,
+  Assignment,
+  AssignmentStatus,
+  Submission,
+  SubmissionType,
+  SubmissionStatus,
 } from '../types/database';
 import { sha256 } from './crypto';
 
@@ -925,4 +930,327 @@ export function deleteMockTask(taskId: string): { success: boolean; error: Error
   }
   mockTasks.splice(index, 1);
   return { success: true, error: null };
+}
+
+// ==============================================================================
+// MOCK ASSIGNMENTS & SUBMISSIONS STORE (Milestone 10)
+// ==============================================================================
+
+export const mockAssignments: Assignment[] = [
+  {
+    id: 'mock-assign-001',
+    student_id: 'mock-student-pp001',
+    mentor_id: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-phy-101',
+    plan_id: 'mock-plan-phy-001',
+    title: 'Newtonian Mechanics Problem Set: Inclined Planes & Pulley Friction',
+    instructions: 'Solve problems 14, 18, and 22 from Giancoli Ch. 4. Clearly write free body diagrams for each body, show the coordinate system chosen, and state the algebraic solution before substituting numerical values.',
+    due_date: '2026-10-28',
+    total_points: 100,
+    status: 'published',
+    created_at: new Date('2026-10-04T12:00:00Z').toISOString(),
+    updated_at: new Date('2026-10-04T12:00:00Z').toISOString(),
+  },
+  {
+    id: 'mock-assign-002',
+    student_id: 'mock-student-pp001',
+    mentor_id: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-math-102',
+    plan_id: null,
+    title: 'Calculus Optimization & Critical Point Analysis',
+    instructions: 'Find local extrema and points of inflection for the polynomial f(x) = 2x^3 - 9x^2 + 12x - 3. Compute both the first and second derivative tests. Provide your reasoning in clear mathematical notation.',
+    due_date: '2026-10-31',
+    total_points: 50,
+    status: 'published',
+    created_at: new Date('2026-10-05T09:00:00Z').toISOString(),
+    updated_at: new Date('2026-10-05T09:00:00Z').toISOString(),
+  },
+];
+
+export const mockSubmissions: Submission[] = [
+  {
+    id: 'mock-subm-001',
+    assignment_id: 'mock-assign-001',
+    student_id: 'mock-student-pp001',
+    submission_type: 'text',
+    content: 'Derived acceleration equation: a = g(sin θ - μ cos θ). For m1 = 5kg, m2 = 3kg on 30° incline with μk = 0.15: System acceleration a = 1.84 m/s²; Tension T = 23.9 N. Free-body diagram scanned and verified.',
+    link_url: null,
+    file_name: null,
+    file_size: null,
+    status: 'submitted',
+    submitted_at: new Date('2026-10-20T14:30:00Z').toISOString(),
+    updated_at: new Date('2026-10-20T14:30:00Z').toISOString(),
+  },
+];
+
+export interface EnrichedMockAssignment extends Assignment {
+  subject_name?: string;
+  plan_title?: string;
+  submission?: Submission | null;
+}
+
+export function getMockStudentAssignments(studentId: string): EnrichedMockAssignment[] {
+  const normalizedId = studentId === 'PP001' ? 'mock-student-pp001' : studentId;
+  return mockAssignments
+    .filter((a) => a.student_id === normalizedId || a.student_id === studentId)
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+    .map((assignment) => {
+      const subject = assignment.subject_id ? mockSubjects.find((s) => s.id === assignment.subject_id) : null;
+      const plan = assignment.plan_id ? mockStudyPlans.find((p) => p.id === assignment.plan_id) : null;
+      const submission = mockSubmissions.find(
+        (sub) => sub.assignment_id === assignment.id && (sub.student_id === normalizedId || sub.student_id === studentId)
+      ) || null;
+
+      return {
+        ...assignment,
+        subject_name: subject ? subject.name : undefined,
+        plan_title: plan ? plan.title : undefined,
+        submission: submission ? { ...submission } : null,
+      };
+    });
+}
+
+export function getMockAssignmentById(assignmentId: string): {
+  assignment: Assignment | null;
+  subject: Subject | null;
+  plan: StudyPlan | null;
+  submission: Submission | null;
+} {
+  const assignment = mockAssignments.find((a) => a.id === assignmentId) || null;
+  if (!assignment) {
+    return { assignment: null, subject: null, plan: null, submission: null };
+  }
+  const subject = assignment.subject_id ? mockSubjects.find((s) => s.id === assignment.subject_id) || null : null;
+  const plan = assignment.plan_id ? mockStudyPlans.find((p) => p.id === assignment.plan_id) || null : null;
+  const submission = mockSubmissions.find((s) => s.assignment_id === assignmentId) || null;
+
+  return {
+    assignment: { ...assignment },
+    subject: subject ? { ...subject } : null,
+    plan: plan ? { ...plan } : null,
+    submission: submission ? { ...submission } : null,
+  };
+}
+
+export function createMockAssignment(params: {
+  studentId: string;
+  mentorId?: string;
+  subjectId?: string;
+  planId?: string;
+  title: string;
+  instructions?: string;
+  dueDate?: string;
+  totalPoints?: number;
+  status?: AssignmentStatus;
+}): { assignment: Assignment | null; error: Error | null } {
+  const cleanTitle = params.title.trim();
+  if (!cleanTitle) {
+    return { assignment: null, error: new Error('Assignment title is required.') };
+  }
+  if (!params.studentId) {
+    return { assignment: null, error: new Error('Student ID is required.') };
+  }
+
+  const normalizedStudentId = params.studentId === 'PP001' ? 'mock-student-pp001' : params.studentId;
+
+  // Validate subject ownership if provided
+  if (params.subjectId) {
+    const subject = mockSubjects.find((s) => s.id === params.subjectId);
+    if (!subject || (subject.student_id !== normalizedStudentId && subject.student_id !== params.studentId)) {
+      return { assignment: null, error: new Error('Selected study area does not belong to this student.') };
+    }
+  }
+
+  // Validate plan ownership if provided
+  if (params.planId) {
+    const plan = mockStudyPlans.find((p) => p.id === params.planId);
+    if (!plan || (plan.student_id !== normalizedStudentId && plan.student_id !== params.studentId)) {
+      return { assignment: null, error: new Error('Selected study plan does not belong to this student.') };
+    }
+  }
+
+  const assignmentId = `mock-assign-${Date.now()}`;
+  const now = new Date().toISOString();
+
+  const newAssignment: Assignment = {
+    id: assignmentId,
+    student_id: normalizedStudentId,
+    mentor_id: params.mentorId || null,
+    subject_id: params.subjectId || null,
+    plan_id: params.planId || null,
+    title: cleanTitle,
+    instructions: params.instructions?.trim() || null,
+    due_date: params.dueDate || null,
+    total_points: params.totalPoints !== undefined ? params.totalPoints : 100,
+    status: params.status || 'published',
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockAssignments.push(newAssignment);
+  return { assignment: { ...newAssignment }, error: null };
+}
+
+export function updateMockAssignment(
+  assignmentId: string,
+  updates: Partial<Pick<Assignment, 'title' | 'instructions' | 'subject_id' | 'plan_id' | 'due_date' | 'total_points' | 'status'>>
+): { assignment: Assignment | null; error: Error | null } {
+  const index = mockAssignments.findIndex((a) => a.id === assignmentId);
+  if (index === -1) {
+    return { assignment: null, error: new Error('Assignment not found.') };
+  }
+
+  const current = mockAssignments[index];
+
+  if (updates.title !== undefined) {
+    const cleanTitle = updates.title.trim();
+    if (!cleanTitle) {
+      return { assignment: null, error: new Error('Assignment title cannot be empty.') };
+    }
+    current.title = cleanTitle;
+  }
+  if (updates.instructions !== undefined) {
+    current.instructions = updates.instructions ? updates.instructions.trim() : null;
+  }
+  if (updates.subject_id !== undefined) {
+    if (updates.subject_id) {
+      const subject = mockSubjects.find((s) => s.id === updates.subject_id);
+      if (!subject || (subject.student_id !== current.student_id && subject.student_id !== 'mock-student-pp001')) {
+        return { assignment: null, error: new Error('Selected study area does not belong to this student.') };
+      }
+    }
+    current.subject_id = updates.subject_id || null;
+  }
+  if (updates.plan_id !== undefined) {
+    if (updates.plan_id) {
+      const plan = mockStudyPlans.find((p) => p.id === updates.plan_id);
+      if (!plan || (plan.student_id !== current.student_id && plan.student_id !== 'mock-student-pp001')) {
+        return { assignment: null, error: new Error('Selected study plan does not belong to this student.') };
+      }
+    }
+    current.plan_id = updates.plan_id || null;
+  }
+  if (updates.due_date !== undefined) {
+    current.due_date = updates.due_date || null;
+  }
+  if (updates.total_points !== undefined) {
+    current.total_points = updates.total_points;
+  }
+  if (updates.status !== undefined) {
+    current.status = updates.status;
+  }
+
+  current.updated_at = new Date().toISOString();
+  mockAssignments[index] = { ...current };
+
+  return { assignment: { ...current }, error: null };
+}
+
+export function deleteMockAssignment(assignmentId: string): { success: boolean; error: Error | null } {
+  const index = mockAssignments.findIndex((a) => a.id === assignmentId);
+  if (index === -1) {
+    return { success: false, error: new Error('Assignment not found.') };
+  }
+
+  // Also remove associated submissions
+  const subIndex = mockSubmissions.findIndex((s) => s.assignment_id === assignmentId);
+  if (subIndex !== -1) {
+    mockSubmissions.splice(subIndex, 1);
+  }
+
+  mockAssignments.splice(index, 1);
+  return { success: true, error: null };
+}
+
+export function submitMockAssignment(params: {
+  assignmentId: string;
+  studentId: string;
+  submissionType: SubmissionType;
+  content: string;
+  linkUrl?: string;
+  fileName?: string;
+  fileSize?: number;
+}): { submission: Submission | null; error: Error | null } {
+  const cleanContent = params.content.trim();
+  if (!cleanContent) {
+    return { submission: null, error: new Error('Submission content cannot be empty.') };
+  }
+  if (!params.assignmentId) {
+    return { submission: null, error: new Error('Assignment ID is required.') };
+  }
+  if (!params.studentId) {
+    return { submission: null, error: new Error('Student ID is required.') };
+  }
+
+  const normalizedStudentId = params.studentId === 'PP001' ? 'mock-student-pp001' : params.studentId;
+
+  const assignment = mockAssignments.find((a) => a.id === params.assignmentId);
+  if (!assignment) {
+    return { submission: null, error: new Error('Assignment not found.') };
+  }
+  if (assignment.student_id !== normalizedStudentId && assignment.student_id !== params.studentId) {
+    return { submission: null, error: new Error('You are not authorized to submit work for this assignment.') };
+  }
+  if (assignment.status === 'closed' || assignment.status === 'archived') {
+    return { submission: null, error: new Error('This assignment is closed for submissions.') };
+  }
+
+  if (params.submissionType === 'link') {
+    const url = params.linkUrl?.trim() || cleanContent;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return { submission: null, error: new Error('External link must start with http:// or https://') };
+    }
+  }
+
+  const now = new Date().toISOString();
+  const existingIndex = mockSubmissions.findIndex(
+    (s) => s.assignment_id === params.assignmentId && (s.student_id === normalizedStudentId || s.student_id === params.studentId)
+  );
+
+  if (existingIndex !== -1) {
+    // Update existing submission (prevent duplicates)
+    const current = mockSubmissions[existingIndex];
+    current.submission_type = params.submissionType;
+    current.content = cleanContent;
+    current.link_url = params.linkUrl?.trim() || (params.submissionType === 'link' ? cleanContent : null);
+    current.file_name = params.fileName || current.file_name;
+    current.file_size = params.fileSize || current.file_size;
+    current.status = 'submitted';
+    current.submitted_at = now;
+    current.updated_at = now;
+    mockSubmissions[existingIndex] = { ...current };
+    return { submission: { ...current }, error: null };
+  }
+
+  const newSubmission: Submission = {
+    id: `mock-subm-${Date.now()}`,
+    assignment_id: params.assignmentId,
+    student_id: normalizedStudentId,
+    submission_type: params.submissionType,
+    content: cleanContent,
+    link_url: params.linkUrl?.trim() || (params.submissionType === 'link' ? cleanContent : null),
+    file_name: params.fileName || null,
+    file_size: params.fileSize || null,
+    status: 'submitted',
+    submitted_at: now,
+    updated_at: now,
+  };
+
+  mockSubmissions.push(newSubmission);
+  return { submission: { ...newSubmission }, error: null };
+}
+
+export function updateMockSubmissionStatus(
+  submissionId: string,
+  status: SubmissionStatus
+): { submission: Submission | null; error: Error | null } {
+  const index = mockSubmissions.findIndex((s) => s.id === submissionId);
+  if (index === -1) {
+    return { submission: null, error: new Error('Submission not found.') };
+  }
+  const current = mockSubmissions[index];
+  current.status = status;
+  current.updated_at = new Date().toISOString();
+  mockSubmissions[index] = { ...current };
+  return { submission: { ...current }, error: null };
 }

@@ -340,23 +340,29 @@ export const SubjectDetailPage: React.FC = () => {
             </Link>
 
             {/* Component 3: Assignments */}
-            <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-navy">
-                  STEP 3 • PRACTICE
-                </span>
-                <FileText className="w-4 h-4 text-brand-navy stroke-[2.2]" />
+            <Link
+              to={isMentor ? '/mentor/assignments' : '/student/assignments'}
+              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase font-bold text-brand-navy">
+                    STEP 3 • PRACTICE
+                  </span>
+                  <FileText className="w-4 h-4 text-brand-navy stroke-[2.2]" />
+                </div>
+                <h3 className="font-heading font-bold text-sm text-brand-navy group-hover:text-brand-teal transition-colors">
+                  Practice Problem Sets
+                </h3>
+                <p className="text-xs text-brand-muted font-sans leading-relaxed">
+                  Handwritten assignments and numerical exercises submitted for mentor review.
+                </p>
               </div>
-              <h3 className="font-heading font-bold text-sm text-brand-navy">
-                Practice Problem Sets
-              </h3>
-              <p className="text-xs text-brand-muted font-sans leading-relaxed">
-                Handwritten assignments and numerical exercises submitted for mentor review.
-              </p>
-              <div className="pt-2 border-t border-brand-dark/20 font-mono text-[11px] text-brand-muted">
-                0 Assigned Sets
+              <div className="pt-2 border-t border-brand-dark/20 font-mono text-[11px] text-brand-teal font-bold flex items-center justify-between">
+                <span>Assignments Queue</span>
+                <span>→</span>
               </div>
-            </div>
+            </Link>
 
             {/* Component 4: Resources */}
             <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2">

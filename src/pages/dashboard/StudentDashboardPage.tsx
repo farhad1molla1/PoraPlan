@@ -813,16 +813,8 @@ export const StudentDashboardPage: React.FC = () => {
             </Link>
 
             {/* Quick Link 2: Assignments */}
-            <div
-              onClick={() => setActiveModal('assignments')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setActiveModal('assignments');
-                }
-              }}
+            <Link
+              to="/student/assignments"
               className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group cursor-pointer"
             >
               <div>
@@ -844,7 +836,7 @@ export const StudentDashboardPage: React.FC = () => {
                 <span>View Assignments Queue</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </div>
-            </div>
+            </Link>
 
             {/* Quick Link 3: Doubts */}
             <div

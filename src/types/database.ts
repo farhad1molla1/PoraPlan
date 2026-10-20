@@ -225,6 +225,97 @@ export type TaskUpdate = {
   updated_at?: string;
 };
 
+export type AssignmentStatus = 'draft' | 'published' | 'closed' | 'archived';
+export type SubmissionType = 'text' | 'link' | 'file';
+export type SubmissionStatus = 'submitted' | 'under_review' | 'reviewed';
+
+export type Assignment = {
+  id: string;
+  student_id: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  title: string;
+  instructions?: string | null;
+  due_date?: string | null;
+  total_points?: number | null;
+  status: AssignmentStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type AssignmentInsert = {
+  id?: string;
+  student_id: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  title: string;
+  instructions?: string | null;
+  due_date?: string | null;
+  total_points?: number | null;
+  status?: AssignmentStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type AssignmentUpdate = {
+  id?: string;
+  student_id?: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  title?: string;
+  instructions?: string | null;
+  due_date?: string | null;
+  total_points?: number | null;
+  status?: AssignmentStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type Submission = {
+  id: string;
+  assignment_id: string;
+  student_id: string;
+  submission_type: SubmissionType;
+  content: string;
+  link_url?: string | null;
+  file_name?: string | null;
+  file_size?: number | null;
+  status: SubmissionStatus;
+  submitted_at?: string;
+  updated_at?: string;
+};
+
+export type SubmissionInsert = {
+  id?: string;
+  assignment_id: string;
+  student_id: string;
+  submission_type?: SubmissionType;
+  content: string;
+  link_url?: string | null;
+  file_name?: string | null;
+  file_size?: number | null;
+  status?: SubmissionStatus;
+  submitted_at?: string;
+  updated_at?: string;
+};
+
+export type SubmissionUpdate = {
+  id?: string;
+  assignment_id?: string;
+  student_id?: string;
+  submission_type?: SubmissionType;
+  content?: string;
+  link_url?: string | null;
+  file_name?: string | null;
+  file_size?: number | null;
+  status?: SubmissionStatus;
+  submitted_at?: string;
+  updated_at?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -357,6 +448,62 @@ export type Database = {
             columns: ['plan_id'];
             isOneToOne: false;
             referencedRelation: 'study_plans';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      assignments: {
+        Row: Assignment;
+        Insert: AssignmentInsert;
+        Update: AssignmentUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'assignments_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'assignments_mentor_id_fkey';
+            columns: ['mentor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'assignments_subject_id_fkey';
+            columns: ['subject_id'];
+            isOneToOne: false;
+            referencedRelation: 'subjects';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'assignments_plan_id_fkey';
+            columns: ['plan_id'];
+            isOneToOne: false;
+            referencedRelation: 'study_plans';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      submissions: {
+        Row: Submission;
+        Insert: SubmissionInsert;
+        Update: SubmissionUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'submissions_assignment_id_fkey';
+            columns: ['assignment_id'];
+            isOneToOne: false;
+            referencedRelation: 'assignments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'submissions_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
             referencedColumns: ['id'];
           }
         ];
