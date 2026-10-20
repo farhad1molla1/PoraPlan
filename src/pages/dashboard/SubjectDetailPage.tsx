@@ -315,23 +315,29 @@ export const SubjectDetailPage: React.FC = () => {
             </Link>
 
             {/* Component 2: Tasks */}
-            <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-gold">
-                  STEP 2 • STUDY
-                </span>
-                <ListTodo className="w-4 h-4 text-brand-gold stroke-[2.2]" />
+            <Link
+              to={isMentor ? '/mentor/tasks' : '/student/tasks'}
+              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase font-bold text-brand-gold">
+                    STEP 2 • STUDY
+                  </span>
+                  <ListTodo className="w-4 h-4 text-brand-gold stroke-[2.2]" />
+                </div>
+                <h3 className="font-heading font-bold text-sm text-brand-navy group-hover:text-brand-gold transition-colors">
+                  Daily Study Tasks
+                </h3>
+                <p className="text-xs text-brand-muted font-sans leading-relaxed">
+                  Disciplined 50-minute study blocks and activity checkpoints.
+                </p>
               </div>
-              <h3 className="font-heading font-bold text-sm text-brand-navy">
-                Daily Study Tasks
-              </h3>
-              <p className="text-xs text-brand-muted font-sans leading-relaxed">
-                Disciplined 50-minute study blocks scheduled specifically for {subject.name}.
-              </p>
-              <div className="pt-2 border-t border-brand-dark/20 font-mono text-[11px] text-brand-muted">
-                0 Active Tasks
+              <div className="pt-2 border-t border-brand-dark/20 font-mono text-[11px] text-brand-gold font-bold flex items-center justify-between">
+                <span>Active Milestone</span>
+                <span>→</span>
               </div>
-            </div>
+            </Link>
 
             {/* Component 3: Assignments */}
             <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2">

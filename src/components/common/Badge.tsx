@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
 
-export type BadgeVariant = 'gold' | 'teal' | 'navy' | 'paper' | 'muted';
+export type BadgeVariant = 'gold' | 'teal' | 'navy' | 'paper' | 'muted' | 'danger';
 
 export interface BadgeProps {
   children: React.ReactNode;
@@ -30,6 +30,7 @@ export const Badge: React.FC<BadgeProps> = ({
     navy: 'bg-brand-navy text-brand-bg',
     paper: 'bg-brand-paper text-brand-dark',
     muted: 'bg-brand-paper-tint text-brand-muted',
+    danger: 'bg-red-600 text-white',
   };
 
   return (

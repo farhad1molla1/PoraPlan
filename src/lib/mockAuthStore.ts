@@ -7,6 +7,8 @@ import type {
   StudyPlan,
   StudyPlanItem,
   StudyPlanItemStatus,
+  Task,
+  TaskPriority,
 } from '../types/database';
 import { sha256 } from './crypto';
 
@@ -732,5 +734,195 @@ export function deleteMockStudyPlan(planId: string): { success: boolean; error: 
   }
   mockStudyPlans.splice(index, 1);
   mockStudyPlanItems = mockStudyPlanItems.filter((i) => i.plan_id !== planId);
+  return { success: true, error: null };
+}
+
+/**
+ * In-memory mock tasks store.
+ */
+let mockTasks: Task[] = [
+  {
+    id: 'mock-task-001',
+    student_id: 'mock-student-pp001',
+    created_by: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-phy-101',
+    plan_id: 'mock-plan-phy-001',
+    title: 'Review Giancoli Ch. 4 Newton\'s Laws & Draw FBDs',
+    description: 'Complete standard free body diagrams for 3 friction incline cases.',
+    priority: 'high',
+    status: 'in_progress',
+    due_date: '2026-10-25',
+    estimated_minutes: 60,
+    created_at: new Date('2026-10-03T10:00:00Z').toISOString(),
+    updated_at: new Date('2026-10-03T10:00:00Z').toISOString(),
+  },
+  {
+    id: 'mock-task-002',
+    student_id: 'mock-student-pp001',
+    created_by: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-phy-101',
+    plan_id: 'mock-plan-phy-001',
+    title: 'Practice 5 Pulley & Kinetic Friction Multi-Body Problems',
+    description: 'Calculate normal force and tension vectors for Atwood machine setups.',
+    priority: 'medium',
+    status: 'pending',
+    due_date: '2026-10-27',
+    estimated_minutes: 50,
+    created_at: new Date('2026-10-03T11:00:00Z').toISOString(),
+    updated_at: new Date('2026-10-03T11:00:00Z').toISOString(),
+  },
+];
+
+export function getMockStudentTasks(studentId: string): (Task & { subject_name?: string; plan_title?: string })[] {
+  return mockTasks
+    .filter((t) => t.student_id === studentId)
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+    .map((task) => {
+      const subject = task.subject_id ? mockSubjects.find((s) => s.id === task.subject_id) : null;
+      const plan = task.plan_id ? mockStudyPlans.find((p) => p.id === task.plan_id) : null;
+      return {
+        ...task,
+        subject_name: subject ? subject.name : undefined,
+        plan_title: plan ? plan.title : undefined,
+      };
+    });
+}
+
+export function getMockTaskById(taskId: string): Task | null {
+  const task = mockTasks.find((t) => t.id === taskId);
+  return task ? { ...task } : null;
+}
+
+export function createMockTask(params: {
+  studentId: string;
+  createdBy?: string;
+  subjectId?: string;
+  planId?: string;
+  title: string;
+  description?: string;
+  priority?: TaskPriority;
+  dueDate?: string;
+  estimatedMinutes?: number;
+}): { task: Task | null; error: Error | null } {
+  const cleanTitle = params.title.trim();
+  if (!cleanTitle) {
+    return { task: null, error: new Error('Task title is required.') };
+  }
+  if (!params.studentId) {
+    return { task: null, error: new Error('Student ID is required.') };
+  }
+
+  // Validate subject ownership if provided
+  if (params.subjectId) {
+    const subject = mockSubjects.find((s) => s.id === params.subjectId);
+    if (!subject || subject.student_id !== params.studentId) {
+      return { task: null, error: new Error('Selected study area does not belong to this student.') };
+    }
+  }
+
+  // Validate plan ownership if provided
+  if (params.planId) {
+    const plan = mockStudyPlans.find((p) => p.id === params.planId);
+    if (!plan || plan.student_id !== params.studentId) {
+      return { task: null, error: new Error('Selected study plan does not belong to this student.') };
+    }
+  }
+
+  const taskId = `mock-task-${Date.now()}`;
+  const now = new Date().toISOString();
+
+  const newTask: Task = {
+    id: taskId,
+    student_id: params.studentId,
+    created_by: params.createdBy || null,
+    subject_id: params.subjectId || null,
+    plan_id: params.planId || null,
+    title: cleanTitle,
+    description: params.description?.trim() || null,
+    priority: params.priority || 'medium',
+    status: 'pending',
+    due_date: params.dueDate || null,
+    estimated_minutes: params.estimatedMinutes && params.estimatedMinutes > 0 ? params.estimatedMinutes : null,
+    completed_at: null,
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockTasks.push(newTask);
+  return { task: { ...newTask }, error: null };
+}
+
+export function updateMockTask(
+  taskId: string,
+  updates: Partial<Pick<Task, 'title' | 'description' | 'subject_id' | 'plan_id' | 'priority' | 'status' | 'due_date' | 'estimated_minutes' | 'completed_at'>>
+): { task: Task | null; error: Error | null } {
+  const index = mockTasks.findIndex((t) => t.id === taskId);
+  if (index === -1) {
+    return { task: null, error: new Error('Task not found.') };
+  }
+
+  const current = mockTasks[index];
+
+  if (updates.title !== undefined) {
+    const cleanTitle = updates.title.trim();
+    if (!cleanTitle) {
+      return { task: null, error: new Error('Task title cannot be empty.') };
+    }
+    current.title = cleanTitle;
+  }
+  if (updates.description !== undefined) {
+    current.description = updates.description ? updates.description.trim() : null;
+  }
+  if (updates.subject_id !== undefined) {
+    if (updates.subject_id) {
+      const subject = mockSubjects.find((s) => s.id === updates.subject_id);
+      if (!subject || subject.student_id !== current.student_id) {
+        return { task: null, error: new Error('Selected study area does not belong to this student.') };
+      }
+    }
+    current.subject_id = updates.subject_id || null;
+  }
+  if (updates.plan_id !== undefined) {
+    if (updates.plan_id) {
+      const plan = mockStudyPlans.find((p) => p.id === updates.plan_id);
+      if (!plan || plan.student_id !== current.student_id) {
+        return { task: null, error: new Error('Selected study plan does not belong to this student.') };
+      }
+    }
+    current.plan_id = updates.plan_id || null;
+  }
+  if (updates.priority !== undefined) {
+    current.priority = updates.priority;
+  }
+  if (updates.status !== undefined) {
+    current.status = updates.status;
+    if (updates.status === 'completed' && !current.completed_at) {
+      current.completed_at = new Date().toISOString();
+    } else if (updates.status !== 'completed') {
+      current.completed_at = null;
+    }
+  }
+  if (updates.due_date !== undefined) {
+    current.due_date = updates.due_date || null;
+  }
+  if (updates.estimated_minutes !== undefined) {
+    current.estimated_minutes = updates.estimated_minutes && updates.estimated_minutes > 0 ? updates.estimated_minutes : null;
+  }
+  if (updates.completed_at !== undefined) {
+    current.completed_at = updates.completed_at;
+  }
+
+  current.updated_at = new Date().toISOString();
+  mockTasks[index] = { ...current };
+
+  return { task: { ...current }, error: null };
+}
+
+export function deleteMockTask(taskId: string): { success: boolean; error: Error | null } {
+  const index = mockTasks.findIndex((t) => t.id === taskId);
+  if (index === -1) {
+    return { success: false, error: new Error('Task not found.') };
+  }
+  mockTasks.splice(index, 1);
   return { success: true, error: null };
 }

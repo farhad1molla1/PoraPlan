@@ -66,8 +66,8 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Overview', shortLabel: 'Home', to: '/student/dashboard', icon: LayoutDashboard },
     { label: 'Study Areas', shortLabel: 'Subjects', to: '/student/subjects', icon: BookOpen },
     { label: 'Study Plans', shortLabel: 'Plans', to: '/student/plans', icon: Compass },
+    { label: "Today's Tasks", shortLabel: 'Tasks', to: '/student/tasks', icon: ListTodo },
     { label: "Today's Focus", shortLabel: 'Focus', to: '/student/dashboard#focus', icon: Target },
-    { label: "Today's Tasks", shortLabel: 'Tasks', to: '/student/dashboard#tasks', icon: ListTodo },
     { label: 'Upcoming Evaluation', shortLabel: 'Eval', to: '/student/dashboard#evaluations', icon: Calendar },
     { label: 'Mentorship', shortLabel: 'Mentor', to: '/student/dashboard#mentorship', icon: Users },
   ];
@@ -76,6 +76,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Overview', shortLabel: 'Home', to: '/mentor/dashboard', icon: LayoutDashboard },
     { label: 'Study Areas', shortLabel: 'Subjects', to: '/mentor/subjects', icon: BookOpen },
     { label: 'Study Plans', shortLabel: 'Plans', to: '/mentor/plans', icon: Compass },
+    { label: 'Tasks Queue', shortLabel: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
     { label: 'Student Roster', shortLabel: 'Roster', to: '/mentor/dashboard#roster', icon: Users },
     { label: 'Review Queue', shortLabel: 'Reviews', to: '/mentor/dashboard#reviews', icon: FileCheck },
     { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/dashboard#evaluations', icon: Calendar },

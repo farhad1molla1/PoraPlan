@@ -171,6 +171,60 @@ export type StudyPlanItemUpdate = {
   updated_at?: string;
 };
 
+export type TaskPriority = 'low' | 'medium' | 'high';
+export type TaskStatus = 'pending' | 'in_progress' | 'completed';
+
+export type Task = {
+  id: string;
+  student_id: string;
+  created_by?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  title: string;
+  description?: string | null;
+  priority: TaskPriority;
+  status: TaskStatus;
+  due_date?: string | null;
+  estimated_minutes?: number | null;
+  completed_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type TaskInsert = {
+  id?: string;
+  student_id: string;
+  created_by?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  title: string;
+  description?: string | null;
+  priority?: TaskPriority;
+  status?: TaskStatus;
+  due_date?: string | null;
+  estimated_minutes?: number | null;
+  completed_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type TaskUpdate = {
+  id?: string;
+  student_id?: string;
+  created_by?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  title?: string;
+  description?: string | null;
+  priority?: TaskPriority;
+  status?: TaskStatus;
+  due_date?: string | null;
+  estimated_minutes?: number | null;
+  completed_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -265,6 +319,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: 'study_plan_items_plan_id_fkey';
+            columns: ['plan_id'];
+            isOneToOne: false;
+            referencedRelation: 'study_plans';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      tasks: {
+        Row: Task;
+        Insert: TaskInsert;
+        Update: TaskUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'tasks_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tasks_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tasks_subject_id_fkey';
+            columns: ['subject_id'];
+            isOneToOne: false;
+            referencedRelation: 'subjects';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tasks_plan_id_fkey';
             columns: ['plan_id'];
             isOneToOne: false;
             referencedRelation: 'study_plans';

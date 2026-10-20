@@ -672,12 +672,23 @@ export const StudentDashboardPage: React.FC = () => {
                     <span className="text-brand-muted">50 min disciplined block</span>
                   </div>
                 </div>
+
+                <div className="pt-2">
+                  <Link to="/student/tasks">
+                    <Button variant="outline" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+                      Open Tasks Queue
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
 
             <div className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono text-brand-muted">
-              <span>Step 3: Practice &amp; Homework</span>
-              <span className="font-bold text-brand-dark">Queue Empty</span>
+              <span>Step 2: Study Activity</span>
+              <Link to="/student/tasks" className="font-bold text-brand-navy hover:text-brand-teal flex items-center gap-1">
+                <span>View All Tasks</span>
+                <ArrowRight className="w-3 h-3" />
+              </Link>
             </div>
           </section>
 

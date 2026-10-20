@@ -643,16 +643,8 @@ export const MentorDashboardPage: React.FC = () => {
             </Link>
 
             {/* Action 3: Tasks */}
-            <div
-              onClick={() => setActiveModule('tasks')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setActiveModule('tasks');
-                }
-              }}
+            <Link
+              to="/mentor/tasks"
               className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group cursor-pointer"
             >
               <div>
@@ -666,14 +658,14 @@ export const MentorDashboardPage: React.FC = () => {
                   Tasks
                 </h3>
                 <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Allocate daily prioritized study tasks and disciplined time blocks.
+                  Allocate daily prioritized study tasks, problem sets, and disciplined time blocks.
                 </p>
               </div>
               <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy">
-                <span>Module Details</span>
+                <span>Manage Tasks</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </div>
-            </div>
+            </Link>
 
             {/* Action 4: Assignments */}
             <div
