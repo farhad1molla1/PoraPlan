@@ -1254,3 +1254,82 @@ export function updateMockSubmissionStatus(
   mockSubmissions[index] = { ...current };
   return { submission: { ...current }, error: null };
 }
+
+export interface EnrichedMockSubmission extends Submission {
+  assignment_title?: string;
+  assignment_total_points?: number | null;
+  subject_name?: string;
+  student_name?: string;
+  student_poraplan_id?: string;
+  reviewer_name?: string;
+}
+
+export function reviewMockSubmission(params: {
+  submissionId: string;
+  mentorId: string;
+  status: SubmissionStatus;
+  feedback: string;
+  score?: number | null;
+}): { submission: Submission | null; error: Error | null } {
+  const cleanFeedback = params.feedback.trim();
+  if (!cleanFeedback) {
+    return { submission: null, error: new Error('Feedback comments are required.') };
+  }
+  if (!params.submissionId) {
+    return { submission: null, error: new Error('Submission ID is required.') };
+  }
+
+  const index = mockSubmissions.findIndex((s) => s.id === params.submissionId);
+  if (index === -1) {
+    return { submission: null, error: new Error('Submission not found.') };
+  }
+
+  const current = mockSubmissions[index];
+
+  // Verify mentor assignment to student
+  const normalizedMentorId = params.mentorId === 'PPM001' ? 'mock-mentor-ppm001' : params.mentorId;
+  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
+  const isAssigned = assignedStudents.some((s) => s.id === current.student_id || s.poraplan_id === 'PP001');
+
+  if (!isAssigned && params.mentorId !== 'admin' && params.mentorId !== 'mock-admin-ppa001') {
+    return { submission: null, error: new Error('You are not authorized to review submissions for this student.') };
+  }
+
+  const now = new Date().toISOString();
+  current.status = params.status || 'reviewed';
+  current.feedback = cleanFeedback;
+  current.score = params.score !== undefined ? params.score : null;
+  current.reviewed_by = normalizedMentorId;
+  current.reviewed_at = now;
+  current.updated_at = now;
+
+  mockSubmissions[index] = { ...current };
+  return { submission: { ...current }, error: null };
+}
+
+export function getMockMentorSubmissions(mentorId: string): EnrichedMockSubmission[] {
+  const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
+  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
+  const studentIds = new Set(assignedStudents.map((s) => s.id));
+  studentIds.add('mock-student-pp001');
+
+  return mockSubmissions
+    .filter((s) => studentIds.has(s.student_id))
+    .sort((a, b) => new Date(b.submitted_at || 0).getTime() - new Date(a.submitted_at || 0).getTime())
+    .map((sub) => {
+      const assignment = mockAssignments.find((a) => a.id === sub.assignment_id);
+      const student = mockStore.find((acc) => acc.id === sub.student_id);
+      const subject = assignment?.subject_id ? mockSubjects.find((s) => s.id === assignment.subject_id) : null;
+      const reviewer = sub.reviewed_by ? mockStore.find((acc) => acc.id === sub.reviewed_by) : null;
+
+      return {
+        ...sub,
+        assignment_title: assignment ? assignment.title : 'Assignment',
+        assignment_total_points: assignment?.total_points || 100,
+        subject_name: subject ? subject.name : undefined,
+        student_name: student ? student.fullName : 'Scholar',
+        student_poraplan_id: student ? student.poraplanId : 'PP001',
+        reviewer_name: reviewer ? reviewer.fullName : undefined,
+      };
+    });
+}

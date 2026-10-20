@@ -227,7 +227,7 @@ export type TaskUpdate = {
 
 export type AssignmentStatus = 'draft' | 'published' | 'closed' | 'archived';
 export type SubmissionType = 'text' | 'link' | 'file';
-export type SubmissionStatus = 'submitted' | 'under_review' | 'reviewed';
+export type SubmissionStatus = 'submitted' | 'under_review' | 'reviewed' | 'needs_revision';
 
 export type Assignment = {
   id: string;
@@ -284,6 +284,10 @@ export type Submission = {
   file_name?: string | null;
   file_size?: number | null;
   status: SubmissionStatus;
+  feedback?: string | null;
+  score?: number | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
   submitted_at?: string;
   updated_at?: string;
 };
@@ -298,6 +302,10 @@ export type SubmissionInsert = {
   file_name?: string | null;
   file_size?: number | null;
   status?: SubmissionStatus;
+  feedback?: string | null;
+  score?: number | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
   submitted_at?: string;
   updated_at?: string;
 };
@@ -312,6 +320,10 @@ export type SubmissionUpdate = {
   file_name?: string | null;
   file_size?: number | null;
   status?: SubmissionStatus;
+  feedback?: string | null;
+  score?: number | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
   submitted_at?: string;
   updated_at?: string;
 };

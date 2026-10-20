@@ -8,7 +8,7 @@ import {
   createAssignment,
   updateAssignment,
   deleteAssignment,
-  updateSubmissionStatus,
+  reviewSubmission,
   type AssignmentWithMeta,
 } from '../../lib/assignments';
 import type { Profile, Subject, StudyPlan, AssignmentStatus, SubmissionStatus } from '../../types/database';
@@ -71,6 +71,11 @@ export const MentorAssignmentsPage: React.FC = () => {
   // Review Submission Modal State
   const [reviewTarget, setReviewTarget] = useState<AssignmentWithMeta | null>(null);
   const [updatingReviewStatus, setUpdatingReviewStatus] = useState(false);
+  const [reviewFeedback, setReviewFeedback] = useState('');
+  const [reviewScore, setReviewScore] = useState('');
+  const [reviewStatus, setReviewStatus] = useState<SubmissionStatus>('reviewed');
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSuccess, setReviewSuccess] = useState<string | null>(null);
 
   const mentorId = user?.id || '';
 
@@ -281,18 +286,48 @@ export const MentorAssignmentsPage: React.FC = () => {
     }
   };
 
-  // Review Status Update
-  const handleUpdateSubmissionStatus = async (status: SubmissionStatus) => {
-    if (!reviewTarget?.submission) return;
-    setUpdatingReviewStatus(true);
+  // Open Review Evaluation Modal
+  const handleOpenReviewModal = (assignment: AssignmentWithMeta) => {
+    setReviewTarget(assignment);
+    setReviewFeedback(assignment.submission?.feedback || '');
+    setReviewScore(
+      assignment.submission?.score !== undefined && assignment.submission?.score !== null
+        ? String(assignment.submission.score)
+        : ''
+    );
+    setReviewStatus(assignment.submission?.status === 'needs_revision' ? 'needs_revision' : 'reviewed');
+    setReviewError(null);
+    setReviewSuccess(null);
+  };
 
-    const { submission, error } = await updateSubmissionStatus(reviewTarget.submission.id, status);
+  // Submit Mentor Evaluation & Feedback
+  const handleSaveReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewTarget?.submission) return;
+    if (!reviewFeedback.trim()) {
+      setReviewError('Feedback comments are required.');
+      return;
+    }
+
+    setUpdatingReviewStatus(true);
+    setReviewError(null);
+    setReviewSuccess(null);
+
+    const parsedScore = reviewScore.trim() ? parseFloat(reviewScore) : null;
+    const { submission, error } = await reviewSubmission({
+      submissionId: reviewTarget.submission.id,
+      mentorId,
+      status: reviewStatus,
+      feedback: reviewFeedback,
+      score: parsedScore,
+    });
+
     setUpdatingReviewStatus(false);
 
     if (error) {
-      setErrorMessage(error.message);
+      setReviewError(error.message);
     } else if (submission) {
-      // Update local state
+      setReviewSuccess('Review assessment and feedback saved successfully!');
       setReviewTarget({ ...reviewTarget, submission });
       loadStudentData(selectedStudentId);
     }
@@ -569,7 +604,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setReviewTarget(assignment)}
+                          onClick={() => handleOpenReviewModal(assignment)}
                           className="flex items-center gap-1 text-xs py-1"
                         >
                           <Eye className="w-3.5 h-3.5 text-brand-teal" />
@@ -598,7 +633,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                         <Button
                           variant="secondary"
                           size="sm"
-                          onClick={() => setReviewTarget(assignment)}
+                          onClick={() => handleOpenReviewModal(assignment)}
                           className="flex items-center gap-1"
                         >
                           <FileCheck className="w-3.5 h-3.5" />
@@ -913,44 +948,105 @@ export const MentorAssignmentsPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Status Progression Controls */}
+              {/* Mentor Feedback & Scoring Evaluation Form */}
               <div className="border-t-2 border-brand-dark pt-4">
-                <div className="text-[11px] font-mono text-brand-muted mb-2 font-bold uppercase">
-                  Mentor Review Status
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    variant={reviewTarget.submission.status === 'under_review' ? 'secondary' : 'outline'}
-                    size="sm"
-                    disabled={updatingReviewStatus}
-                    onClick={() => handleUpdateSubmissionStatus('under_review')}
-                  >
-                    Mark "Under Review"
-                  </Button>
-                  <Button
-                    variant={reviewTarget.submission.status === 'reviewed' ? 'primary' : 'outline'}
-                    size="sm"
-                    disabled={updatingReviewStatus}
-                    onClick={() => handleUpdateSubmissionStatus('reviewed')}
-                    className="flex items-center gap-1.5"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Mark "Reviewed"
-                  </Button>
-                </div>
-                <p className="text-[11px] text-brand-muted font-mono mt-2">
-                  Formal scoring and detailed rubric evaluation will be introduced in the upcoming Evaluation milestone.
-                </p>
-              </div>
+                <h4 className="font-heading font-black text-sm text-brand-navy uppercase mb-3 flex items-center gap-1.5">
+                  <FileCheck className="w-4 h-4 text-brand-teal" />
+                  Mentor Feedback &amp; Evaluation
+                </h4>
 
-              <div className="flex justify-end pt-3 border-t border-brand-dark/20">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setReviewTarget(null)}
-                >
-                  Close
-                </Button>
+                {reviewError && (
+                  <div className="bg-red-50 border-2 border-red-500 p-2.5 text-red-700 text-xs mb-3 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{reviewError}</span>
+                  </div>
+                )}
+
+                {reviewSuccess && (
+                  <div className="bg-teal-50 border-2 border-brand-teal p-2.5 text-brand-dark text-xs mb-3 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                    <span>{reviewSuccess}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleSaveReview} className="space-y-3">
+                  <div>
+                    <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                      Correction Notes &amp; Guidance *
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={reviewFeedback}
+                      onChange={(e) => setReviewFeedback(e.target.value)}
+                      placeholder="Detail calculation errors, conceptual gaps, notation advice, or commend strong derivation steps..."
+                      className="w-full bg-white border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                        Score / Points Awarded (Max {reviewTarget.total_points || 100})
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max={reviewTarget.total_points || 1000}
+                        step="0.5"
+                        value={reviewScore}
+                        onChange={(e) => setReviewScore(e.target.value)}
+                        placeholder="e.g. 85"
+                        className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                        Review Decision Status
+                      </label>
+                      <select
+                        value={reviewStatus}
+                        onChange={(e) => setReviewStatus(e.target.value as SubmissionStatus)}
+                        className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      >
+                        <option value="reviewed">Reviewed &amp; Approved</option>
+                        <option value="needs_revision">Needs Revision (Request Redo)</option>
+                        <option value="under_review">Keep Under Review</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-brand-dark/20">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setReviewTarget(null)}
+                    >
+                      Close
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="sm"
+                      disabled={updatingReviewStatus}
+                      className="flex items-center gap-1.5"
+                    >
+                      {updatingReviewStatus ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Saving Evaluation...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Save Review &amp; Feedback
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>

@@ -27,6 +27,7 @@ import {
   Clock,
   Paperclip,
   Edit3,
+  FileCheck,
 } from 'lucide-react';
 
 export const StudentAssignmentsPage: React.FC = () => {
@@ -447,53 +448,99 @@ export const StudentAssignmentsPage: React.FC = () => {
 
                   {/* Existing Submission Display */}
                   {hasSubmission && (
-                    <div className="mt-3 p-4 bg-teal-50 border-2 border-brand-teal text-brand-dark mb-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-mono text-xs font-bold text-brand-teal uppercase flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-brand-teal" />
-                          Your Submission ({assignment.submission?.submission_type.toUpperCase()})
-                        </span>
-                        <span className="font-mono text-[11px] text-brand-muted">
-                          Turned in:{' '}
-                          {assignment.submission?.submitted_at
-                            ? new Date(assignment.submission.submitted_at).toLocaleString()
-                            : 'Submitted'}
-                        </span>
-                      </div>
-
-                      {assignment.submission?.submission_type === 'link' ? (
-                        <div className="flex items-center gap-2 mt-1">
-                          <ExternalLink className="w-4 h-4 text-brand-teal flex-shrink-0" />
-                          <a
-                            href={assignment.submission.link_url || assignment.submission.content}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs sm:text-sm text-brand-teal font-mono underline break-all hover:text-brand-navy"
-                          >
-                            {assignment.submission.link_url || assignment.submission.content}
-                          </a>
+                    <div className="space-y-3 mb-4">
+                      {/* Revision Requested Notice */}
+                      {assignment.submission?.status === 'needs_revision' && (
+                        <div className="bg-red-50 border-2 border-red-500 p-3 text-red-800 text-xs flex items-start gap-2 shadow-brutal-xs">
+                          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <strong className="block font-bold">Revision Requested by Mentor</strong>
+                            <span>Please review the correction notes below and update your derivation or solution.</span>
+                          </div>
                         </div>
-                      ) : assignment.submission?.submission_type === 'file' ? (
-                        <div className="text-xs font-mono text-brand-navy">
-                          <div className="flex items-center gap-1.5">
-                            <Paperclip className="w-4 h-4 text-brand-teal" />
-                            <strong>{assignment.submission.file_name || 'Attached Document'}</strong>
-                            {assignment.submission.file_size && (
-                              <span className="text-brand-muted">
-                                ({Math.round(assignment.submission.file_size / 1024)} KB)
-                              </span>
+                      )}
+
+                      {/* Student's Submitted Content Box */}
+                      <div className="p-4 bg-teal-50 border-2 border-brand-teal text-brand-dark">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-mono text-xs font-bold text-brand-teal uppercase flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4 text-brand-teal" />
+                            Your Submission ({assignment.submission?.submission_type.toUpperCase()})
+                          </span>
+                          <span className="font-mono text-[11px] text-brand-muted">
+                            Turned in:{' '}
+                            {assignment.submission?.submitted_at
+                              ? new Date(assignment.submission.submitted_at).toLocaleString()
+                              : 'Submitted'}
+                          </span>
+                        </div>
+
+                        {assignment.submission?.submission_type === 'link' ? (
+                          <div className="flex items-center gap-2 mt-1">
+                            <ExternalLink className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                            <a
+                              href={assignment.submission.link_url || assignment.submission.content}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs sm:text-sm text-brand-teal font-mono underline break-all hover:text-brand-navy"
+                            >
+                              {assignment.submission.link_url || assignment.submission.content}
+                            </a>
+                          </div>
+                        ) : assignment.submission?.submission_type === 'file' ? (
+                          <div className="text-xs font-mono text-brand-navy">
+                            <div className="flex items-center gap-1.5">
+                              <Paperclip className="w-4 h-4 text-brand-teal" />
+                              <strong>{assignment.submission.file_name || 'Attached Document'}</strong>
+                              {assignment.submission.file_size && (
+                                <span className="text-brand-muted">
+                                  ({Math.round(assignment.submission.file_size / 1024)} KB)
+                                </span>
+                              )}
+                            </div>
+                            {assignment.submission.content && (
+                              <p className="text-xs text-brand-muted mt-1 font-sans">
+                                {assignment.submission.content}
+                              </p>
                             )}
                           </div>
-                          {assignment.submission.content && (
-                            <p className="text-xs text-brand-muted mt-1 font-sans">
-                              {assignment.submission.content}
-                            </p>
-                          )}
+                        ) : (
+                          <p className="text-xs sm:text-sm font-sans whitespace-pre-wrap text-brand-dark">
+                            {assignment.submission?.content}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Mentor Feedback & Score Display */}
+                      {assignment.submission?.feedback ? (
+                        <div className="p-4 bg-brand-paper-tint border-3 border-brand-navy space-y-2">
+                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-navy/20 pb-2">
+                            <span className="font-mono text-xs font-bold text-brand-navy uppercase flex items-center gap-1.5">
+                              <FileCheck className="w-4 h-4 text-brand-teal" />
+                              Mentor Evaluation &amp; Corrections
+                            </span>
+                            <div className="flex items-center gap-2">
+                              {assignment.submission.score !== undefined && assignment.submission.score !== null && (
+                                <Badge variant="teal" size="sm">
+                                  SCORE: {assignment.submission.score} / {assignment.total_points || 100} PTS
+                                </Badge>
+                              )}
+                              {assignment.submission.reviewed_at && (
+                                <span className="font-mono text-[11px] text-brand-muted">
+                                  Reviewed: {new Date(assignment.submission.reviewed_at).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-xs sm:text-sm font-sans text-brand-dark leading-relaxed whitespace-pre-wrap">
+                            {assignment.submission.feedback}
+                          </p>
                         </div>
                       ) : (
-                        <p className="text-xs sm:text-sm font-sans whitespace-pre-wrap text-brand-dark">
-                          {assignment.submission?.content}
-                        </p>
+                        <div className="p-3 bg-brand-paper border border-brand-dark/30 font-mono text-xs text-brand-muted flex items-center gap-2">
+                          <Clock className="w-3.5 h-3.5 text-brand-gold" />
+                          <span>Status: <strong>Awaiting Mentor Review</strong> — your submission is in the mentor queue.</span>
+                        </div>
                       )}
                     </div>
                   )}

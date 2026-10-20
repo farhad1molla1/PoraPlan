@@ -18,7 +18,18 @@ import {
   deleteMockAssignment,
   submitMockAssignment,
   updateMockSubmissionStatus,
+  reviewMockSubmission,
+  getMockMentorSubmissions,
 } from './mockAuthStore';
+
+export type SubmissionWithMeta = Submission & {
+  assignment_title?: string;
+  assignment_total_points?: number | null;
+  subject_name?: string;
+  student_name?: string;
+  student_poraplan_id?: string;
+  reviewer_name?: string;
+};
 
 export type AssignmentWithMeta = Assignment & {
   subject_name?: string;
@@ -389,5 +400,112 @@ export async function updateSubmissionStatus(
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { submission: null, error };
+  }
+}
+
+/**
+ * Mentor reviews a submission: saves feedback, optional score, reviewer, and timestamp.
+ */
+export async function reviewSubmission(params: {
+  submissionId: string;
+  mentorId: string;
+  status: SubmissionStatus;
+  feedback: string;
+  score?: number | null;
+}): Promise<{ submission: Submission | null; error: Error | null }> {
+  if (!params.submissionId) {
+    return { submission: null, error: new Error('Submission ID is required.') };
+  }
+  const cleanFeedback = params.feedback.trim();
+  if (!cleanFeedback) {
+    return { submission: null, error: new Error('Feedback comments are required.') };
+  }
+
+  if (!isSupabaseConfigured()) {
+    return reviewMockSubmission(params);
+  }
+
+  try {
+    const now = new Date().toISOString();
+    const payload = {
+      status: params.status || 'reviewed',
+      feedback: cleanFeedback,
+      score: params.score !== undefined ? params.score : null,
+      reviewed_by: params.mentorId,
+      reviewed_at: now,
+      updated_at: now,
+    };
+
+    const { data, error } = await supabase
+      .from('submissions')
+      .update(payload)
+      .eq('id', params.submissionId)
+      .select()
+      .single();
+
+    if (error) {
+      return { submission: null, error };
+    }
+
+    return { submission: data, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { submission: null, error };
+  }
+}
+
+/**
+ * Mentor queries all submissions across assigned students (Review Queue).
+ */
+export async function getMentorReviewQueue(mentorId: string): Promise<{
+  submissions: SubmissionWithMeta[];
+  error: Error | null;
+}> {
+  if (!mentorId) {
+    return { submissions: [], error: new Error('Mentor ID is required.') };
+  }
+
+  if (!isSupabaseConfigured()) {
+    const list = getMockMentorSubmissions(mentorId);
+    return { submissions: list as SubmissionWithMeta[], error: null };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('submissions')
+      .select('*, assignments(title, total_points, subjects(name)), profiles!student_id(full_name, poraplan_id)')
+      .order('submitted_at', { ascending: false });
+
+    if (error) {
+      return { submissions: [], error };
+    }
+
+    const submissions: SubmissionWithMeta[] = (data || []).map((row: any) => ({
+      id: row.id,
+      assignment_id: row.assignment_id,
+      student_id: row.student_id,
+      submission_type: row.submission_type,
+      content: row.content,
+      link_url: row.link_url,
+      file_name: row.file_name,
+      file_size: row.file_size,
+      status: row.status,
+      feedback: row.feedback,
+      score: row.score,
+      reviewed_by: row.reviewed_by,
+      reviewed_at: row.reviewed_at,
+      submitted_at: row.submitted_at,
+      updated_at: row.updated_at,
+      assignment_title: row.assignments?.title || 'Assignment',
+      assignment_total_points: row.assignments?.total_points || 100,
+      subject_name: row.assignments?.subjects?.name || undefined,
+      student_name: row.profiles?.full_name || 'Scholar',
+      student_poraplan_id: row.profiles?.poraplan_id || undefined,
+    }));
+
+    return { submissions, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { submissions: [], error };
   }
 }

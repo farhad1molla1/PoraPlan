@@ -81,7 +81,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Tasks Queue', shortLabel: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
     { label: 'Assignments', shortLabel: 'Practice', to: '/mentor/assignments', icon: FileText },
     { label: 'Student Roster', shortLabel: 'Roster', to: '/mentor/dashboard#roster', icon: Users },
-    { label: 'Review Queue', shortLabel: 'Reviews', to: '/mentor/dashboard#reviews', icon: FileCheck },
+    { label: 'Review Queue', shortLabel: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
     { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/dashboard#evaluations', icon: Calendar },
   ];
 
