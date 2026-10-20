@@ -747,7 +747,7 @@ export const StudentDashboardPage: React.FC = () => {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             
             {/* Quick Link 1: My Study Areas */}
             <Link
@@ -757,7 +757,7 @@ export const StudentDashboardPage: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
-                    STEP 1 &amp; 2 • PLAN &amp; STUDY
+                    STEP 1 • CURRICULUM
                   </span>
                   <BookOpen className="w-4 h-4 text-brand-dark group-hover:text-brand-teal transition-colors" />
                 </div>
@@ -765,12 +765,38 @@ export const StudentDashboardPage: React.FC = () => {
                   My Study Areas
                 </h3>
                 <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Access enrolled curriculum subjects, syllabus roadmaps, and chapter milestone trackers.
+                  Access enrolled curriculum subjects and active academic course descriptions.
                 </p>
               </div>
 
               <div className="mt-4 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-teal">
                 <span>Open Study Areas</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </div>
+            </Link>
+
+            {/* Quick Link 2: Study Plans */}
+            <Link
+              to="/student/plans"
+              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group cursor-pointer"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-mono text-[10px] uppercase font-bold text-brand-gold">
+                    STEP 1 • ROADMAPS
+                  </span>
+                  <Compass className="w-4 h-4 text-brand-dark group-hover:text-brand-gold transition-colors" />
+                </div>
+                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-gold transition-colors">
+                  My Study Plans
+                </h3>
+                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
+                  View structured study roadmaps, chapter milestones, and study instructions from mentors.
+                </p>
+              </div>
+
+              <div className="mt-4 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-gold">
+                <span>Open Study Plans</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </div>
             </Link>

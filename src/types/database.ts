@@ -93,6 +93,84 @@ export type SubjectUpdate = {
   updated_at?: string;
 };
 
+export type StudyPlanStatus = 'active' | 'completed' | 'archived';
+export type StudyPlanItemStatus = 'pending' | 'in_progress' | 'completed';
+
+export type StudyPlan = {
+  id: string;
+  student_id: string;
+  created_by?: string | null;
+  subject_id?: string | null;
+  title: string;
+  description?: string | null;
+  status: StudyPlanStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type StudyPlanInsert = {
+  id?: string;
+  student_id: string;
+  created_by?: string | null;
+  subject_id?: string | null;
+  title: string;
+  description?: string | null;
+  status?: StudyPlanStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type StudyPlanUpdate = {
+  id?: string;
+  student_id?: string;
+  created_by?: string | null;
+  subject_id?: string | null;
+  title?: string;
+  description?: string | null;
+  status?: StudyPlanStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type StudyPlanItem = {
+  id: string;
+  plan_id: string;
+  title: string;
+  instructions?: string | null;
+  estimated_minutes?: number | null;
+  target_date?: string | null;
+  item_order: number;
+  status: StudyPlanItemStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type StudyPlanItemInsert = {
+  id?: string;
+  plan_id: string;
+  title: string;
+  instructions?: string | null;
+  estimated_minutes?: number | null;
+  target_date?: string | null;
+  item_order?: number;
+  status?: StudyPlanItemStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type StudyPlanItemUpdate = {
+  id?: string;
+  plan_id?: string;
+  title?: string;
+  instructions?: string | null;
+  estimated_minutes?: number | null;
+  target_date?: string | null;
+  item_order?: number;
+  status?: StudyPlanItemStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -148,6 +226,48 @@ export type Database = {
             columns: ['created_by'];
             isOneToOne: false;
             referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      study_plans: {
+        Row: StudyPlan;
+        Insert: StudyPlanInsert;
+        Update: StudyPlanUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'study_plans_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'study_plans_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'study_plans_subject_id_fkey';
+            columns: ['subject_id'];
+            isOneToOne: false;
+            referencedRelation: 'subjects';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      study_plan_items: {
+        Row: StudyPlanItem;
+        Insert: StudyPlanItemInsert;
+        Update: StudyPlanItemUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'study_plan_items_plan_id_fkey';
+            columns: ['plan_id'];
+            isOneToOne: false;
+            referencedRelation: 'study_plans';
             referencedColumns: ['id'];
           }
         ];

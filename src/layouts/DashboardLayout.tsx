@@ -16,6 +16,7 @@ import {
   X,
   Sparkles,
   BookOpen,
+  Compass,
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
@@ -64,6 +65,7 @@ export const DashboardLayout: React.FC = () => {
   const studentNavItems = [
     { label: 'Overview', shortLabel: 'Home', to: '/student/dashboard', icon: LayoutDashboard },
     { label: 'Study Areas', shortLabel: 'Subjects', to: '/student/subjects', icon: BookOpen },
+    { label: 'Study Plans', shortLabel: 'Plans', to: '/student/plans', icon: Compass },
     { label: "Today's Focus", shortLabel: 'Focus', to: '/student/dashboard#focus', icon: Target },
     { label: "Today's Tasks", shortLabel: 'Tasks', to: '/student/dashboard#tasks', icon: ListTodo },
     { label: 'Upcoming Evaluation', shortLabel: 'Eval', to: '/student/dashboard#evaluations', icon: Calendar },
@@ -73,6 +75,7 @@ export const DashboardLayout: React.FC = () => {
   const mentorNavItems = [
     { label: 'Overview', shortLabel: 'Home', to: '/mentor/dashboard', icon: LayoutDashboard },
     { label: 'Study Areas', shortLabel: 'Subjects', to: '/mentor/subjects', icon: BookOpen },
+    { label: 'Study Plans', shortLabel: 'Plans', to: '/mentor/plans', icon: Compass },
     { label: 'Student Roster', shortLabel: 'Roster', to: '/mentor/dashboard#roster', icon: Users },
     { label: 'Review Queue', shortLabel: 'Reviews', to: '/mentor/dashboard#reviews', icon: FileCheck },
     { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/dashboard#evaluations', icon: Calendar },

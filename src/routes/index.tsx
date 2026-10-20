@@ -17,6 +17,9 @@ import { AdminDashboardPage } from '../pages/dashboard/AdminDashboardPage';
 import { StudentSubjectsPage } from '../pages/dashboard/StudentSubjectsPage';
 import { MentorSubjectsPage } from '../pages/dashboard/MentorSubjectsPage';
 import { SubjectDetailPage } from '../pages/dashboard/SubjectDetailPage';
+import { StudentPlansPage } from '../pages/dashboard/StudentPlansPage';
+import { MentorPlansPage } from '../pages/dashboard/MentorPlansPage';
+import { PlanDetailPage } from '../pages/dashboard/PlanDetailPage';
 import { useAuth } from '../hooks/useAuth';
 
 /**
@@ -83,6 +86,22 @@ export const AppRoutes: React.FC = () => {
           }
         />
         <Route
+          path="student/plans"
+          element={
+            <ProtectedRoute allowedRoles={['student', 'admin']}>
+              <StudentPlansPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="student/plans/:planId"
+          element={
+            <ProtectedRoute allowedRoles={['student', 'admin']}>
+              <PlanDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="student/subjects"
           element={
             <ProtectedRoute allowedRoles={['student', 'admin']}>
@@ -105,6 +124,22 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['mentor', 'admin']}>
               <MentorDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="mentor/plans"
+          element={
+            <ProtectedRoute allowedRoles={['mentor', 'admin']}>
+              <MentorPlansPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="mentor/plans/:planId"
+          element={
+            <ProtectedRoute allowedRoles={['mentor', 'admin']}>
+              <PlanDetailPage />
             </ProtectedRoute>
           }
         />

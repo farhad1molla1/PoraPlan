@@ -289,24 +289,30 @@ export const SubjectDetailPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {/* Component 1: Topics */}
-            <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
-                  STEP 1 • PLAN
-                </span>
-                <CheckCircle2 className="w-4 h-4 text-brand-teal stroke-[2.2]" />
+            {/* Component 1: Topics & Study Plans */}
+            <Link
+              to={isMentor ? '/mentor/plans' : '/student/plans'}
+              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
+                    STEP 1 • PLAN
+                  </span>
+                  <CheckCircle2 className="w-4 h-4 text-brand-teal stroke-[2.2]" />
+                </div>
+                <h3 className="font-heading font-bold text-sm text-brand-navy group-hover:text-brand-teal transition-colors">
+                  Topics &amp; Study Plans
+                </h3>
+                <p className="text-xs text-brand-muted font-sans leading-relaxed">
+                  Sequenced chapter milestones and study roadmaps calibrated by mentors.
+                </p>
               </div>
-              <h3 className="font-heading font-bold text-sm text-brand-navy">
-                Topics &amp; Milestones
-              </h3>
-              <p className="text-xs text-brand-muted font-sans leading-relaxed">
-                Chapter breakdown and syllabus milestones will be configured in the upcoming Study Plans milestone.
-              </p>
-              <div className="pt-2 border-t border-brand-dark/20 font-mono text-[11px] text-brand-dark font-bold">
-                Status: Pending Plan
+              <div className="pt-2 border-t border-brand-dark/20 font-mono text-[11px] text-brand-teal font-bold flex items-center justify-between">
+                <span>Active Milestone</span>
+                <span>→</span>
               </div>
-            </div>
+            </Link>
 
             {/* Component 2: Tasks */}
             <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2">

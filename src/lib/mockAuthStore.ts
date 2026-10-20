@@ -1,4 +1,13 @@
-import type { Profile, UserRole, AccountStatus, ProfileUpdate, Subject } from '../types/database';
+import type {
+  Profile,
+  UserRole,
+  AccountStatus,
+  ProfileUpdate,
+  Subject,
+  StudyPlan,
+  StudyPlanItem,
+  StudyPlanItemStatus,
+} from '../types/database';
 import { sha256 } from './crypto';
 
 export interface MockAccountRecord {
@@ -464,5 +473,264 @@ export function deleteMockSubject(subjectId: string): { success: boolean; error:
     return { success: false, error: new Error('Study area not found.') };
   }
   mockSubjects.splice(index, 1);
+  return { success: true, error: null };
+}
+
+/**
+ * In-memory mock study plans store.
+ */
+let mockStudyPlans: StudyPlan[] = [
+  {
+    id: 'mock-plan-phy-001',
+    student_id: 'mock-student-pp001',
+    created_by: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-phy-101',
+    title: 'Newtonian Mechanics & Dynamics Milestone',
+    description: 'Core foundation of classical mechanics covering Newton\'s laws of motion, friction, and work-energy theorem.',
+    status: 'active',
+    created_at: new Date('2026-10-02T10:00:00Z').toISOString(),
+    updated_at: new Date('2026-10-02T10:00:00Z').toISOString(),
+  },
+];
+
+let mockStudyPlanItems: StudyPlanItem[] = [
+  {
+    id: 'mock-plan-item-001',
+    plan_id: 'mock-plan-phy-001',
+    title: 'Newton\'s First & Second Laws with Free Body Diagrams',
+    instructions: 'Review Giancoli Ch. 4 or Resnick & Halliday Ch. 5. Draw FBDs for inclined planes.',
+    estimated_minutes: 60,
+    target_date: '2026-10-25',
+    item_order: 1,
+    status: 'in_progress',
+    created_at: new Date('2026-10-02T10:00:00Z').toISOString(),
+    updated_at: new Date('2026-10-02T10:00:00Z').toISOString(),
+  },
+  {
+    id: 'mock-plan-item-002',
+    plan_id: 'mock-plan-phy-001',
+    title: 'Frictional Forces (Static vs Kinetic) & Pulleys',
+    instructions: 'Solve 5 multi-body friction problems with friction coefficients.',
+    estimated_minutes: 45,
+    target_date: '2026-10-27',
+    item_order: 2,
+    status: 'pending',
+    created_at: new Date('2026-10-02T10:00:00Z').toISOString(),
+    updated_at: new Date('2026-10-02T10:00:00Z').toISOString(),
+  },
+  {
+    id: 'mock-plan-item-003',
+    plan_id: 'mock-plan-phy-001',
+    title: 'Work-Energy Theorem & Conservation of Energy',
+    instructions: 'Derive the work-kinetic energy relation; analyze conservative vs non-conservative forces.',
+    estimated_minutes: 90,
+    target_date: '2026-10-30',
+    item_order: 3,
+    status: 'pending',
+    created_at: new Date('2026-10-02T10:00:00Z').toISOString(),
+    updated_at: new Date('2026-10-02T10:00:00Z').toISOString(),
+  },
+];
+
+export function getMockStudentStudyPlans(studentId: string): (StudyPlan & { items_count: number; subject_name?: string })[] {
+  return mockStudyPlans
+    .filter((p) => p.student_id === studentId)
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+    .map((plan) => {
+      const itemsCount = mockStudyPlanItems.filter((item) => item.plan_id === plan.id).length;
+      const subject = plan.subject_id ? mockSubjects.find((s) => s.id === plan.subject_id) : null;
+      return {
+        ...plan,
+        items_count: itemsCount,
+        subject_name: subject ? subject.name : undefined,
+      };
+    });
+}
+
+export function getMockStudyPlanById(planId: string): {
+  plan: StudyPlan | null;
+  items: StudyPlanItem[];
+  subject: Subject | null;
+} {
+  const plan = mockStudyPlans.find((p) => p.id === planId) || null;
+  if (!plan) {
+    return { plan: null, items: [], subject: null };
+  }
+  const items = mockStudyPlanItems
+    .filter((item) => item.plan_id === planId)
+    .sort((a, b) => a.item_order - b.item_order);
+  const subject = plan.subject_id ? mockSubjects.find((s) => s.id === plan.subject_id) || null : null;
+
+  return { plan: { ...plan }, items: items.map((i) => ({ ...i })), subject };
+}
+
+export function createMockStudyPlan(params: {
+  studentId: string;
+  createdBy?: string;
+  subjectId?: string;
+  title: string;
+  description?: string;
+  items?: {
+    title: string;
+    instructions?: string;
+    estimated_minutes?: number;
+    target_date?: string;
+  }[];
+}): {
+  plan: StudyPlan | null;
+  items: StudyPlanItem[];
+  error: Error | null;
+} {
+  const cleanTitle = params.title.trim();
+  if (!cleanTitle) {
+    return { plan: null, items: [], error: new Error('Plan title is required.') };
+  }
+  if (!params.studentId) {
+    return { plan: null, items: [], error: new Error('Student ID is required.') };
+  }
+
+  // If subjectId is supplied, verify it belongs to this student
+  if (params.subjectId) {
+    const subject = mockSubjects.find((s) => s.id === params.subjectId);
+    if (!subject || subject.student_id !== params.studentId) {
+      return { plan: null, items: [], error: new Error('Selected study area does not belong to this student.') };
+    }
+  }
+
+  const planId = `mock-plan-${Date.now()}`;
+  const now = new Date().toISOString();
+
+  const newPlan: StudyPlan = {
+    id: planId,
+    student_id: params.studentId,
+    created_by: params.createdBy || null,
+    subject_id: params.subjectId || null,
+    title: cleanTitle,
+    description: params.description?.trim() || null,
+    status: 'active',
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockStudyPlans.push(newPlan);
+
+  const createdItems: StudyPlanItem[] = [];
+  if (params.items && params.items.length > 0) {
+    params.items.forEach((item, idx) => {
+      const itemTitle = item.title.trim();
+      if (!itemTitle) return; // skip empty item titles
+
+      const newItem: StudyPlanItem = {
+        id: `mock-plan-item-${Date.now()}-${idx}`,
+        plan_id: planId,
+        title: itemTitle,
+        instructions: item.instructions?.trim() || null,
+        estimated_minutes: item.estimated_minutes && item.estimated_minutes > 0 ? item.estimated_minutes : null,
+        target_date: item.target_date || null,
+        item_order: idx + 1,
+        status: 'pending',
+        created_at: now,
+        updated_at: now,
+      };
+      mockStudyPlanItems.push(newItem);
+      createdItems.push(newItem);
+    });
+  }
+
+  return { plan: newPlan, items: createdItems, error: null };
+}
+
+export function updateMockStudyPlan(
+  planId: string,
+  updates: Partial<Pick<StudyPlan, 'title' | 'description' | 'subject_id' | 'status'>>,
+  items?: {
+    id?: string;
+    title: string;
+    instructions?: string;
+    estimated_minutes?: number;
+    target_date?: string;
+    status?: StudyPlanItemStatus;
+  }[]
+): {
+  plan: StudyPlan | null;
+  items: StudyPlanItem[];
+  error: Error | null;
+} {
+  const index = mockStudyPlans.findIndex((p) => p.id === planId);
+  if (index === -1) {
+    return { plan: null, items: [], error: new Error('Study plan not found.') };
+  }
+
+  const current = mockStudyPlans[index];
+
+  if (updates.title !== undefined) {
+    const cleanTitle = updates.title.trim();
+    if (!cleanTitle) {
+      return { plan: null, items: [], error: new Error('Plan title cannot be empty.') };
+    }
+    current.title = cleanTitle;
+  }
+  if (updates.description !== undefined) {
+    current.description = updates.description ? updates.description.trim() : null;
+  }
+  if (updates.subject_id !== undefined) {
+    if (updates.subject_id) {
+      const sub = mockSubjects.find((s) => s.id === updates.subject_id);
+      if (!sub || sub.student_id !== current.student_id) {
+        return { plan: null, items: [], error: new Error('Selected study area does not belong to this student.') };
+      }
+    }
+    current.subject_id = updates.subject_id || null;
+  }
+  if (updates.status !== undefined) {
+    current.status = updates.status;
+  }
+  current.updated_at = new Date().toISOString();
+  mockStudyPlans[index] = { ...current };
+
+  // Replace or update items if provided
+  if (items !== undefined) {
+    // Remove old items for this plan
+    mockStudyPlanItems = mockStudyPlanItems.filter((i) => i.plan_id !== planId);
+    const now = new Date().toISOString();
+
+    const newItems: StudyPlanItem[] = [];
+    items.forEach((item, idx) => {
+      const itemTitle = item.title.trim();
+      if (!itemTitle) return;
+
+      const newItem: StudyPlanItem = {
+        id: item.id || `mock-plan-item-${Date.now()}-${idx}`,
+        plan_id: planId,
+        title: itemTitle,
+        instructions: item.instructions?.trim() || null,
+        estimated_minutes: item.estimated_minutes && item.estimated_minutes > 0 ? item.estimated_minutes : null,
+        target_date: item.target_date || null,
+        item_order: idx + 1,
+        status: item.status || 'pending',
+        created_at: now,
+        updated_at: now,
+      };
+      mockStudyPlanItems.push(newItem);
+      newItems.push(newItem);
+    });
+
+    return { plan: { ...current }, items: newItems, error: null };
+  }
+
+  const existingItems = mockStudyPlanItems
+    .filter((i) => i.plan_id === planId)
+    .sort((a, b) => a.item_order - b.item_order);
+
+  return { plan: { ...current }, items: existingItems, error: null };
+}
+
+export function deleteMockStudyPlan(planId: string): { success: boolean; error: Error | null } {
+  const index = mockStudyPlans.findIndex((p) => p.id === planId);
+  if (index === -1) {
+    return { success: false, error: new Error('Study plan not found.') };
+  }
+  mockStudyPlans.splice(index, 1);
+  mockStudyPlanItems = mockStudyPlanItems.filter((i) => i.plan_id !== planId);
   return { success: true, error: null };
 }
