@@ -61,21 +61,22 @@ export const DashboardLayout: React.FC = () => {
 
   // Desktop sidebar navigation links
   const studentNavItems = [
-    { label: 'Overview', to: '/student/dashboard', icon: LayoutDashboard },
-    { label: "Today's Focus", to: '/student/dashboard#focus', icon: Target },
-    { label: 'Upcoming Tasks', to: '/student/dashboard#tasks', icon: ListTodo },
-    { label: 'Mentorship', to: '/student/dashboard#mentorship', icon: Users },
+    { label: 'Overview', shortLabel: 'Home', to: '/student/dashboard', icon: LayoutDashboard },
+    { label: "Today's Focus", shortLabel: 'Focus', to: '/student/dashboard#focus', icon: Target },
+    { label: "Today's Tasks", shortLabel: 'Tasks', to: '/student/dashboard#tasks', icon: ListTodo },
+    { label: 'Upcoming Evaluation', shortLabel: 'Eval', to: '/student/dashboard#evaluations', icon: Calendar },
+    { label: 'Mentorship', shortLabel: 'Mentor', to: '/student/dashboard#mentorship', icon: Users },
   ];
 
   const mentorNavItems = [
-    { label: 'Overview', to: '/mentor/dashboard', icon: LayoutDashboard },
-    { label: 'Student Roster', to: '/mentor/dashboard#roster', icon: Users },
-    { label: 'Review Queue', to: '/mentor/dashboard#reviews', icon: FileCheck },
-    { label: 'Evaluations', to: '/mentor/dashboard#evaluations', icon: Calendar },
+    { label: 'Overview', shortLabel: 'Home', to: '/mentor/dashboard', icon: LayoutDashboard },
+    { label: 'Student Roster', shortLabel: 'Roster', to: '/mentor/dashboard#roster', icon: Users },
+    { label: 'Review Queue', shortLabel: 'Reviews', to: '/mentor/dashboard#reviews', icon: FileCheck },
+    { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/dashboard#evaluations', icon: Calendar },
   ];
 
   const adminNavItems = [
-    { label: 'Admin Console', to: '/admin/dashboard', icon: ShieldCheck },
+    { label: 'Admin Console', shortLabel: 'Admin', to: '/admin/dashboard', icon: ShieldCheck },
   ];
 
   const navItems = isStudent ? studentNavItems : isMentor ? mentorNavItems : adminNavItems;
@@ -269,7 +270,7 @@ export const DashboardLayout: React.FC = () => {
             >
               <Icon className="w-4 h-4 stroke-[2.2]" />
               <span className="text-[10px] font-mono mt-0.5 leading-none truncate max-w-[70px]">
-                {item.label}
+                {item.shortLabel || item.label}
               </span>
             </Link>
           );
