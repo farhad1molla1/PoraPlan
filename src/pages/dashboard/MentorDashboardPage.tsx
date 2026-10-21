@@ -27,6 +27,7 @@ import {
   Mail,
   CheckCircle2,
   Compass,
+  TrendingUp,
 } from 'lucide-react';
 
 type ModuleType =
@@ -550,7 +551,13 @@ export const MentorDashboardPage: React.FC = () => {
             </div>
 
             <div className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono text-brand-muted">
-              <span>Step 6 &amp; 7: Feedback &amp; Progress</span>
+              <Link
+                to="/mentor/progress"
+                className="font-bold text-brand-navy hover:text-brand-teal transition-colors flex items-center gap-1"
+              >
+                <TrendingUp className="w-3.5 h-3.5 text-brand-teal" />
+                <span>Scholars Progress</span>
+              </Link>
               <Link
                 to="/mentor/evaluations"
                 className="font-bold text-brand-navy hover:text-brand-teal transition-colors flex items-center gap-1"

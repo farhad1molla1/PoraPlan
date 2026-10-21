@@ -779,6 +779,22 @@ let mockTasks: Task[] = [
     created_at: new Date('2026-10-03T11:00:00Z').toISOString(),
     updated_at: new Date('2026-10-03T11:00:00Z').toISOString(),
   },
+  {
+    id: 'mock-task-003',
+    student_id: 'mock-student-pp001',
+    created_by: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-phy-101',
+    plan_id: 'mock-plan-phy-001',
+    title: 'Read Vectors & 1D Kinematics Overview',
+    description: 'Read Halliday & Resnick Chapter 2 and summarize kinematic formulas.',
+    priority: 'medium',
+    status: 'completed',
+    due_date: '2026-10-15',
+    estimated_minutes: 45,
+    completed_at: new Date('2026-10-14T16:30:00Z').toISOString(),
+    created_at: new Date('2026-10-01T09:00:00Z').toISOString(),
+    updated_at: new Date('2026-10-14T16:30:00Z').toISOString(),
+  },
 ];
 
 export function getMockStudentTasks(studentId: string): (Task & { subject_name?: string; plan_title?: string })[] {
@@ -1649,4 +1665,465 @@ export function deleteMockEvaluation(
 
   mockEvaluations.splice(index, 1);
   return { success: true, error: null };
+}
+
+// ==============================================================================
+// PROGRESS TRACKING MOCK STORE & AGGREGATIONS (Milestone 13)
+// ==============================================================================
+
+export type MockActivityType =
+  | 'task_completed'
+  | 'task_created'
+  | 'assignment_submitted'
+  | 'assignment_reviewed'
+  | 'evaluation_completed'
+  | 'evaluation_scheduled';
+
+export interface MockAcademicActivityItem {
+  id: string;
+  type: MockActivityType;
+  title: string;
+  timestamp: string;
+  subjectName?: string;
+  details?: string;
+  statusBadge?: {
+    label: string;
+    variant: 'teal' | 'gold' | 'navy' | 'paper' | 'muted';
+  };
+}
+
+export interface MockSubjectProgressItem {
+  subjectId: string;
+  subjectName: string;
+  subjectCode?: string | null;
+  status: 'active' | 'archived';
+  tasks: {
+    total: number;
+    completed: number;
+    completionRate: number;
+  };
+  assignments: {
+    total: number;
+    submitted: number;
+    reviewed: number;
+  };
+  evaluations: {
+    total: number;
+    completed: number;
+    averageScorePercentage: number | null;
+  };
+  studyPlansCount: number;
+}
+
+export interface MockStudentProgressSummary {
+  studentId: string;
+  studentName?: string;
+  poraplanId?: string;
+  tasks: {
+    total: number;
+    completed: number;
+    inProgress: number;
+    pending: number;
+    completionRate: number;
+  };
+  assignments: {
+    totalAssigned: number;
+    submitted: number;
+    unsubmitted: number;
+    pendingReview: number;
+    reviewed: number;
+    submissionRate: number;
+    averageScorePercentage: number | null;
+  };
+  evaluations: {
+    total: number;
+    completed: number;
+    scheduled: number;
+    inProgress: number;
+    cancelled: number;
+    completionRate: number;
+    averageScorePercentage: number | null;
+  };
+  studyPlans: {
+    totalPlans: number;
+    activePlans: number;
+    completedPlans: number;
+    totalItems: number;
+    completedItems: number;
+    itemCompletionRate: number;
+  };
+  subjectsProgress: MockSubjectProgressItem[];
+  recentActivity: MockAcademicActivityItem[];
+}
+
+export interface MockScholarProgressOverview {
+  studentId: string;
+  studentName: string;
+  poraplanId: string;
+  studentEmail?: string;
+  tasks: {
+    total: number;
+    completed: number;
+    completionRate: number;
+  };
+  assignments: {
+    totalAssigned: number;
+    submitted: number;
+    pendingReview: number;
+  };
+  evaluations: {
+    total: number;
+    completed: number;
+    scheduled: number;
+  };
+  studyPlansCount: number;
+  subjectsCount: number;
+  lastActiveTimestamp?: string | null;
+}
+
+export function getMockStudentAcademicProgress(studentId: string): MockStudentProgressSummary {
+  const normalizedStudentId = studentId === 'PP001' ? 'mock-student-pp001' : studentId;
+  const student = mockStore.find((u) => u.id === normalizedStudentId || u.poraplanId === studentId);
+
+  const studentTasks = mockTasks.filter(
+    (t) => t.student_id === normalizedStudentId || t.student_id === studentId
+  );
+  const studentAssignments = mockAssignments.filter(
+    (a) => a.student_id === normalizedStudentId || a.student_id === studentId
+  );
+  const studentSubmissions = mockSubmissions.filter(
+    (s) => s.student_id === normalizedStudentId || s.student_id === studentId
+  );
+  const studentEvaluations = mockEvaluations.filter(
+    (e) => e.student_id === normalizedStudentId || e.student_id === studentId
+  );
+  const studentSubjects = mockSubjects.filter(
+    (s) => s.student_id === normalizedStudentId || s.student_id === studentId
+  );
+  const studentPlans = mockStudyPlans.filter(
+    (p) => p.student_id === normalizedStudentId || p.student_id === studentId
+  );
+
+  // 1. Task metrics
+  const totalTasks = studentTasks.length;
+  const completedTasks = studentTasks.filter((t) => t.status === 'completed').length;
+  const inProgressTasks = studentTasks.filter((t) => t.status === 'in_progress').length;
+  const pendingTasks = studentTasks.filter((t) => t.status === 'pending').length;
+  const taskCompletionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  // 2. Assignment & Practice metrics
+  const totalAssigned = studentAssignments.length;
+  const submittedCount = studentSubmissions.length;
+  const unsubmittedCount = Math.max(0, totalAssigned - submittedCount);
+  const pendingReviewCount = studentSubmissions.filter(
+    (s) => s.status === 'submitted' || s.status === 'under_review'
+  ).length;
+  const reviewedCount = studentSubmissions.filter(
+    (s) => s.status === 'reviewed' || s.status === 'needs_revision'
+  ).length;
+  const submissionRate = totalAssigned > 0 ? Math.round((submittedCount / totalAssigned) * 100) : 0;
+
+  const gradedSubmissions = studentSubmissions.filter((s) => {
+    const parentAssignment = studentAssignments.find((a) => a.id === s.assignment_id);
+    const maxPts = parentAssignment?.total_points;
+    return (
+      (s.status === 'reviewed' || s.status === 'needs_revision') &&
+      s.score !== null &&
+      s.score !== undefined &&
+      typeof maxPts === 'number' &&
+      maxPts > 0
+    );
+  });
+
+  let averageAssignmentScore: number | null = null;
+  if (gradedSubmissions.length > 0) {
+    const sumPct = gradedSubmissions.reduce((acc, s) => {
+      const parentAssignment = studentAssignments.find((a) => a.id === s.assignment_id);
+      const maxPts = Number(parentAssignment?.total_points || 100);
+      return acc + (Number(s.score) / maxPts) * 100;
+    }, 0);
+    averageAssignmentScore = Math.round((sumPct / gradedSubmissions.length) * 10) / 10;
+  }
+
+  // 3. Milestone Evaluations metrics
+  const totalEvaluations = studentEvaluations.length;
+  const completedEvaluations = studentEvaluations.filter((e) => e.status === 'completed').length;
+  const scheduledEvaluations = studentEvaluations.filter((e) => e.status === 'scheduled').length;
+  const inProgressEvaluations = studentEvaluations.filter((e) => e.status === 'in_progress').length;
+  const cancelledEvaluations = studentEvaluations.filter((e) => e.status === 'cancelled').length;
+  const nonCancelledEvals = totalEvaluations - cancelledEvaluations;
+  const evaluationCompletionRate =
+    nonCancelledEvals > 0 ? Math.round((completedEvaluations / nonCancelledEvals) * 100) : 0;
+
+  const gradedEvaluations = studentEvaluations.filter(
+    (e) =>
+      e.status === 'completed' &&
+      e.score !== null &&
+      e.score !== undefined &&
+      e.total_points &&
+      Number(e.total_points) > 0
+  );
+  let averageEvaluationScore: number | null = null;
+  if (gradedEvaluations.length > 0) {
+    const sumEvalPct = gradedEvaluations.reduce((acc, e) => {
+      const maxPts = Number(e.total_points || 100);
+      return acc + (Number(e.score) / maxPts) * 100;
+    }, 0);
+    averageEvaluationScore = Math.round((sumEvalPct / gradedEvaluations.length) * 10) / 10;
+  }
+
+  // 4. Study Plans & Syllabus items
+  const totalPlans = studentPlans.length;
+  const activePlans = studentPlans.filter((p) => p.status === 'active').length;
+  const completedPlans = studentPlans.filter((p) => p.status === 'completed').length;
+
+  const studentPlanIds = new Set(studentPlans.map((p) => p.id));
+  const planItems = mockStudyPlanItems.filter((item) => studentPlanIds.has(item.plan_id));
+  const totalPlanItems = planItems.length;
+  const completedPlanItems = planItems.filter((item) => item.status === 'completed').length;
+  const itemCompletionRate =
+    totalPlanItems > 0 ? Math.round((completedPlanItems / totalPlanItems) * 100) : 0;
+
+  // 5. Subject-wise breakdown
+  const subjectsProgress: MockSubjectProgressItem[] = studentSubjects.map((subj) => {
+    const subjTasks = studentTasks.filter((t) => t.subject_id === subj.id);
+    const subjCompletedTasks = subjTasks.filter((t) => t.status === 'completed').length;
+    const subjTaskRate =
+      subjTasks.length > 0 ? Math.round((subjCompletedTasks / subjTasks.length) * 100) : 0;
+
+    const subjAssignments = studentAssignments.filter((a) => a.subject_id === subj.id);
+    const subjSubmissions = studentSubmissions.filter((s) => {
+      const parentAssign = studentAssignments.find((a) => a.id === s.assignment_id);
+      return parentAssign?.subject_id === subj.id;
+    });
+    const subjReviewedSubmissions = subjSubmissions.filter(
+      (s) => s.status === 'reviewed' || s.status === 'needs_revision'
+    ).length;
+
+    const subjEvaluations = studentEvaluations.filter((e) => e.subject_id === subj.id);
+    const subjCompletedEvals = subjEvaluations.filter((e) => e.status === 'completed');
+    const subjGradedEvals = subjCompletedEvals.filter(
+      (e) =>
+        e.score !== null &&
+        e.score !== undefined &&
+        e.total_points &&
+        Number(e.total_points) > 0
+    );
+    let subjAvgScore: number | null = null;
+    if (subjGradedEvals.length > 0) {
+      const sumPct = subjGradedEvals.reduce(
+        (acc, e) => acc + (Number(e.score) / Number(e.total_points)) * 100,
+        0
+      );
+      subjAvgScore = Math.round((sumPct / subjGradedEvals.length) * 10) / 10;
+    }
+
+    const subjPlans = studentPlans.filter((p) => p.subject_id === subj.id);
+
+    return {
+      subjectId: subj.id,
+      subjectName: subj.name,
+      subjectCode: subj.code,
+      status: subj.status,
+      tasks: {
+        total: subjTasks.length,
+        completed: subjCompletedTasks,
+        completionRate: subjTaskRate,
+      },
+      assignments: {
+        total: subjAssignments.length,
+        submitted: subjSubmissions.length,
+        reviewed: subjReviewedSubmissions,
+      },
+      evaluations: {
+        total: subjEvaluations.length,
+        completed: subjCompletedEvals.length,
+        averageScorePercentage: subjAvgScore,
+      },
+      studyPlansCount: subjPlans.length,
+    };
+  });
+
+  // 6. Chronological Recent Activity
+  const activityList: MockAcademicActivityItem[] = [];
+
+  studentTasks.forEach((t) => {
+    const subj = studentSubjects.find((s) => s.id === t.subject_id);
+    if (t.completed_at) {
+      activityList.push({
+        id: `act-task-comp-${t.id}`,
+        type: 'task_completed',
+        title: `Completed Study Task: ${t.title}`,
+        timestamp: t.completed_at,
+        subjectName: subj?.name,
+        details: 'Task marked completed by scholar.',
+        statusBadge: { label: 'Task Done', variant: 'teal' },
+      });
+    } else if (t.created_at) {
+      activityList.push({
+        id: `act-task-creat-${t.id}`,
+        type: 'task_created',
+        title: `Assigned Study Task: ${t.title}`,
+        timestamp: t.created_at,
+        subjectName: subj?.name,
+        details: `Priority: ${t.priority.toUpperCase()}`,
+        statusBadge: { label: 'Task Active', variant: 'paper' },
+      });
+    }
+  });
+
+  studentSubmissions.forEach((s) => {
+    const parent = studentAssignments.find((a) => a.id === s.assignment_id);
+    const title = parent?.title || 'Practice Set';
+    const subj = studentSubjects.find((sub) => sub.id === parent?.subject_id);
+
+    if (s.reviewed_at) {
+      const scoreStr = s.score !== null ? `Score: ${s.score} pts.` : '';
+      activityList.push({
+        id: `act-subm-rev-${s.id}`,
+        type: 'assignment_reviewed',
+        title: `Mentor Feedback Received: ${title}`,
+        timestamp: s.reviewed_at,
+        subjectName: subj?.name,
+        details: s.feedback ? `${s.feedback} ${scoreStr}`.trim() : scoreStr,
+        statusBadge: {
+          label: s.status === 'needs_revision' ? 'Revision Needed' : 'Reviewed',
+          variant: s.status === 'needs_revision' ? 'gold' : 'teal',
+        },
+      });
+    } else if (s.submitted_at) {
+      activityList.push({
+        id: `act-subm-sub-${s.id}`,
+        type: 'assignment_submitted',
+        title: `Submitted Practice Solution: ${title}`,
+        timestamp: s.submitted_at,
+        subjectName: subj?.name,
+        details: `Type: ${s.submission_type.toUpperCase()}`,
+        statusBadge: { label: 'Submitted', variant: 'navy' },
+      });
+    }
+  });
+
+  studentEvaluations.forEach((e) => {
+    const subj = studentSubjects.find((s) => s.id === e.subject_id);
+    if (e.evaluated_at && e.status === 'completed') {
+      const scoreStr = e.score !== null ? `Result: ${e.score} / ${e.total_points ?? 100}` : '';
+      activityList.push({
+        id: `act-eval-comp-${e.id}`,
+        type: 'evaluation_completed',
+        title: `Milestone Assessment Completed: ${e.title}`,
+        timestamp: e.evaluated_at,
+        subjectName: subj?.name,
+        details: e.feedback ? `${e.feedback} ${scoreStr}`.trim() : scoreStr,
+        statusBadge: { label: 'Graded', variant: 'teal' },
+      });
+    } else if (e.created_at) {
+      activityList.push({
+        id: `act-eval-sched-${e.id}`,
+        type: 'evaluation_scheduled',
+        title: `Milestone Assessment Scheduled: ${e.title}`,
+        timestamp: e.created_at,
+        subjectName: subj?.name,
+        details: `Format: ${e.format.toUpperCase()} · Scheduled for ${e.scheduled_date}`,
+        statusBadge: { label: 'Scheduled', variant: 'gold' },
+      });
+    }
+  });
+
+  activityList.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  return {
+    studentId: normalizedStudentId,
+    studentName: student?.fullName,
+    poraplanId: student?.poraplanId,
+    tasks: {
+      total: totalTasks,
+      completed: completedTasks,
+      inProgress: inProgressTasks,
+      pending: pendingTasks,
+      completionRate: taskCompletionRate,
+    },
+    assignments: {
+      totalAssigned,
+      submitted: submittedCount,
+      unsubmitted: unsubmittedCount,
+      pendingReview: pendingReviewCount,
+      reviewed: reviewedCount,
+      submissionRate,
+      averageScorePercentage: averageAssignmentScore,
+    },
+    evaluations: {
+      total: totalEvaluations,
+      completed: completedEvaluations,
+      scheduled: scheduledEvaluations,
+      inProgress: inProgressEvaluations,
+      cancelled: cancelledEvaluations,
+      completionRate: evaluationCompletionRate,
+      averageScorePercentage: averageEvaluationScore,
+    },
+    studyPlans: {
+      totalPlans,
+      activePlans,
+      completedPlans,
+      totalItems: totalPlanItems,
+      completedItems: completedPlanItems,
+      itemCompletionRate,
+    },
+    subjectsProgress,
+    recentActivity: activityList.slice(0, 15),
+  };
+}
+
+export function getMockMentorScholarsProgress(mentorId: string): MockScholarProgressOverview[] {
+  const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
+  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
+
+  return assignedStudents.map((student) => {
+    const progress = getMockStudentAcademicProgress(student.id);
+    const lastActivity =
+      progress.recentActivity.length > 0 ? progress.recentActivity[0].timestamp : null;
+
+    return {
+      studentId: student.id,
+      studentName: student.full_name,
+      poraplanId: student.poraplan_id || 'PP001',
+      studentEmail: student.email,
+      tasks: {
+        total: progress.tasks.total,
+        completed: progress.tasks.completed,
+        completionRate: progress.tasks.completionRate,
+      },
+      assignments: {
+        totalAssigned: progress.assignments.totalAssigned,
+        submitted: progress.assignments.submitted,
+        pendingReview: progress.assignments.pendingReview,
+      },
+      evaluations: {
+        total: progress.evaluations.total,
+        completed: progress.evaluations.completed,
+        scheduled: progress.evaluations.scheduled,
+      },
+      studyPlansCount: progress.studyPlans.totalPlans,
+      subjectsCount: progress.subjectsProgress.length,
+      lastActiveTimestamp: lastActivity,
+    };
+  });
+}
+
+export function getMockScholarProgressDetail(
+  mentorId: string,
+  studentId: string
+): { summary: MockStudentProgressSummary | null; error: Error | null } {
+  const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
+  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
+  const isAssigned = assignedStudents.some(
+    (s) => s.id === studentId || s.poraplan_id === studentId || studentId === 'mock-student-pp001'
+  );
+
+  if (!isAssigned && mentorId !== 'admin' && mentorId !== 'mock-admin-ppa001') {
+    return { summary: null, error: new Error('You are not authorized to view progress for this student.') };
+  }
+
+  const summary = getMockStudentAcademicProgress(studentId);
+  return { summary, error: null };
 }

@@ -352,9 +352,14 @@ export const StudentDashboardPage: React.FC = () => {
               <TrendingUp className="w-4 h-4 text-brand-teal stroke-[2.5]" />
               Basic Progress Summary
             </h2>
-            <span className="font-mono text-[10px] uppercase font-bold text-brand-muted bg-brand-paper border border-brand-dark px-2 py-0.5 shadow-brutal-xs">
-              HONEST METRICS
-            </span>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/student/progress"
+                className="font-mono text-xs font-bold text-brand-navy hover:underline flex items-center gap-1 bg-brand-paper px-2 py-0.5 border border-brand-dark shadow-brutal-xs"
+              >
+                Full Progress Report <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
