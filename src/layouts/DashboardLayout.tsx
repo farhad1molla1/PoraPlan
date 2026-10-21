@@ -21,6 +21,7 @@ import {
   TrendingUp,
   BookMarked,
   HelpCircle,
+  Megaphone,
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
@@ -77,6 +78,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Academic Progress', shortLabel: 'Progress', to: '/student/progress', icon: TrendingUp },
     { label: 'Study Resources', shortLabel: 'Library', to: '/student/resources', icon: BookMarked },
     { label: 'Doubts & Inquiries', shortLabel: 'Doubts', to: '/student/doubts', icon: HelpCircle },
+    { label: 'Announcements', shortLabel: 'Notices', to: '/student/announcements', icon: Megaphone },
     { label: 'Mentorship', shortLabel: 'Mentor', to: '/student/dashboard#mentorship', icon: Users },
   ];
 
@@ -92,6 +94,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Scholar Progress', shortLabel: 'Progress', to: '/mentor/progress', icon: TrendingUp },
     { label: 'Resource Library', shortLabel: 'Library', to: '/mentor/resources', icon: BookMarked },
     { label: 'Doubts Desk', shortLabel: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
+    { label: 'Announcements Desk', shortLabel: 'Notices', to: '/mentor/announcements', icon: Megaphone },
   ];
 
   const adminNavItems = [

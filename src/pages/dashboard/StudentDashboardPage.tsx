@@ -29,6 +29,7 @@ import {
   Edit3,
   Trash2,
   BookMarked,
+  Megaphone,
 } from 'lucide-react';
 
 export const StudentDashboardPage: React.FC = () => {
@@ -775,7 +776,7 @@ export const StudentDashboardPage: React.FC = () => {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             
             {/* Quick Link 1: My Study Areas */}
             <Link
@@ -881,10 +882,10 @@ export const StudentDashboardPage: React.FC = () => {
               </div>
             </Link>
 
-            {/* Quick Link 4: Learning Resources */}
+            {/* Quick Link 5: Learning Resources */}
             <Link
               to="/student/resources"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group cursor-pointer sm:col-span-2 lg:col-span-1"
+              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group cursor-pointer"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -903,6 +904,32 @@ export const StudentDashboardPage: React.FC = () => {
 
               <div className="mt-4 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-teal">
                 <span>Open Reference Library</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </div>
+            </Link>
+
+            {/* Quick Link 6: Announcements Desk */}
+            <Link
+              to="/student/announcements"
+              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group cursor-pointer"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-mono text-[10px] uppercase font-bold text-brand-gold">
+                    BROADCAST &amp; NOTICES
+                  </span>
+                  <Megaphone className="w-4 h-4 text-brand-dark group-hover:text-brand-gold transition-colors" />
+                </div>
+                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-gold transition-colors">
+                  Announcements Desk
+                </h3>
+                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
+                  Academic directives, faculty consultations, and platform bulletins requiring confirmation.
+                </p>
+              </div>
+
+              <div className="mt-4 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-gold">
+                <span>View Bulletins &amp; Notices</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </div>
             </Link>

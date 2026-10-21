@@ -527,6 +527,69 @@ export type DoubtResponseInsert = {
   created_at?: string;
 };
 
+export type AnnouncementScope = 'individual' | 'assigned_students' | 'platform';
+export type AnnouncementPriority = 'normal' | 'important' | 'urgent';
+export type AnnouncementStatus = 'published' | 'archived';
+
+export type Announcement = {
+  id: string;
+  author_id: string;
+  title: string;
+  content: string;
+  target_scope: AnnouncementScope;
+  student_id?: string | null;
+  subject_id?: string | null;
+  priority: AnnouncementPriority;
+  status: AnnouncementStatus;
+  published_at: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type AnnouncementInsert = {
+  id?: string;
+  author_id: string;
+  title: string;
+  content: string;
+  target_scope?: AnnouncementScope;
+  student_id?: string | null;
+  subject_id?: string | null;
+  priority?: AnnouncementPriority;
+  status?: AnnouncementStatus;
+  published_at?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type AnnouncementUpdate = {
+  id?: string;
+  author_id?: string;
+  title?: string;
+  content?: string;
+  target_scope?: AnnouncementScope;
+  student_id?: string | null;
+  subject_id?: string | null;
+  priority?: AnnouncementPriority;
+  status?: AnnouncementStatus;
+  published_at?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type AnnouncementAcknowledgment = {
+  id: string;
+  announcement_id: string;
+  student_id: string;
+  acknowledged_at: string;
+};
+
+export type AnnouncementAcknowledgmentInsert = {
+  id?: string;
+  announcement_id: string;
+  student_id: string;
+  acknowledged_at?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -860,6 +923,55 @@ export type Database = {
           {
             foreignKeyName: 'doubt_responses_author_id_fkey';
             columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      announcements: {
+        Row: Announcement;
+        Insert: AnnouncementInsert;
+        Update: AnnouncementUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'announcements_author_id_fkey';
+            columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'announcements_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'announcements_subject_id_fkey';
+            columns: ['subject_id'];
+            isOneToOne: false;
+            referencedRelation: 'subjects';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      announcement_acknowledgments: {
+        Row: AnnouncementAcknowledgment;
+        Insert: AnnouncementAcknowledgmentInsert;
+        Update: Partial<AnnouncementAcknowledgmentInsert>;
+        Relationships: [
+          {
+            foreignKeyName: 'announcement_acknowledgments_announcement_id_fkey';
+            columns: ['announcement_id'];
+            isOneToOne: false;
+            referencedRelation: 'announcements';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'announcement_acknowledgments_student_id_fkey';
+            columns: ['student_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];

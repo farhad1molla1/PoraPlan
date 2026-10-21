@@ -24,6 +24,12 @@ import type {
   DoubtStatus,
   DoubtPriority,
   DoubtResponse,
+  Announcement,
+  AnnouncementUpdate,
+  AnnouncementScope,
+  AnnouncementPriority,
+  AnnouncementStatus,
+  AnnouncementAcknowledgment,
 } from '../types/database';
 import { sha256 } from './crypto';
 
@@ -2730,3 +2736,479 @@ export function deleteMockDoubt(
 
   return { success: true, error: null };
 }
+
+// ==============================================================================
+// ANNOUNCEMENTS & NOTICES DESK MOCK DATA & REPOSITORY
+// ==============================================================================
+
+function normalizeId(id: string): string {
+  if (id === 'PP001') return 'mock-student-pp001';
+  if (id === 'PP002') return 'mock-student-pp002';
+  if (id === 'PP003') return 'mock-student-pp003';
+  if (id === 'PPM001') return 'mock-mentor-ppm001';
+  if (id === 'PPM002') return 'mock-mentor-ppm002';
+  if (id === 'PPA001' || id === 'admin') return 'mock-admin-ppa001';
+  return id;
+}
+
+export interface EnrichedMockAnnouncementAcknowledgment {
+  id: string;
+  announcement_id: string;
+  student_id: string;
+  student_name: string;
+  student_poraplan_id: string;
+  acknowledged_at: string;
+}
+
+export interface EnrichedMockAnnouncement extends Announcement {
+  author_name?: string;
+  author_role?: UserRole;
+  author_poraplan_id?: string;
+  student_name?: string;
+  student_poraplan_id?: string;
+  subject_name?: string;
+  subject_code?: string | null;
+  is_acknowledged?: boolean;
+  acknowledged_at?: string | null;
+  acknowledgments_count?: number;
+  acknowledgments?: EnrichedMockAnnouncementAcknowledgment[];
+}
+
+export const mockAnnouncements: Announcement[] = [
+  {
+    id: 'mock-announcement-001',
+    author_id: 'mock-admin-ppa001',
+    title: 'Welcome to PoraPlan Autumn Academic Session 2026',
+    content: 'Welcome all scholars and mentors! Please review your academic timelines, ensure all baseline diagnostics are completed, and sync with your assigned mentors for personalized study plan scheduling.',
+    target_scope: 'platform',
+    student_id: null,
+    subject_id: null,
+    priority: 'urgent',
+    status: 'published',
+    published_at: '2026-10-05T08:00:00Z',
+    created_at: '2026-10-05T08:00:00Z',
+    updated_at: '2026-10-05T08:00:00Z',
+  },
+  {
+    id: 'mock-announcement-002',
+    author_id: 'mock-mentor-ppm001',
+    title: 'Physics Lab & Advanced Problem Set 3 Consultation Hours',
+    content: 'Office hours for rotational dynamics, moment of inertia calculations, and Atwood machine problem sets will be held this Thursday at 16:00 UTC. Submit any preliminary inquiries via the Doubts Desk in advance.',
+    target_scope: 'assigned_students',
+    student_id: null,
+    subject_id: 'mock-sub-phy-101',
+    priority: 'important',
+    status: 'published',
+    published_at: '2026-10-14T10:00:00Z',
+    created_at: '2026-10-14T10:00:00Z',
+    updated_at: '2026-10-14T10:00:00Z',
+  },
+  {
+    id: 'mock-announcement-003',
+    author_id: 'mock-mentor-ppm001',
+    title: 'Personalized Focus: Angular Momentum & Precession Problem Set',
+    content: 'Fahim, please pay special attention to problem 4.2 in the new assignment regarding gyroscope precession angular velocity. Acknowledge this notice once you have reviewed the reference notes.',
+    target_scope: 'individual',
+    student_id: 'mock-student-pp001',
+    subject_id: 'mock-sub-phy-101',
+    priority: 'normal',
+    status: 'published',
+    published_at: '2026-10-16T15:30:00Z',
+    created_at: '2026-10-16T15:30:00Z',
+    updated_at: '2026-10-16T15:30:00Z',
+  },
+];
+
+export const mockAnnouncementAcknowledgments: AnnouncementAcknowledgment[] = [
+  {
+    id: 'mock-ack-001',
+    announcement_id: 'mock-announcement-001',
+    student_id: 'mock-student-pp001',
+    acknowledged_at: '2026-10-05T09:12:00Z',
+  },
+];
+
+export function getMockStudentAnnouncements(studentId: string): EnrichedMockAnnouncement[] {
+  const normalizedId = normalizeId(studentId);
+  const student = mockStore.find((u) => u.id === normalizedId);
+
+  return mockAnnouncements
+    .filter((a) => {
+      // Students only view published announcements
+      if (a.status !== 'published') return false;
+
+      // Platform-wide announcements are visible to all students
+      if (a.target_scope === 'platform') return true;
+
+      // Individual target: student must match
+      if (a.target_scope === 'individual') {
+        return a.student_id === normalizedId || (student && a.student_id === student.poraplanId);
+      }
+
+      // Assigned students target: student must be in author's assigned roster
+      if (a.target_scope === 'assigned_students') {
+        const assigned = getMockAssignedStudents(a.author_id);
+        return assigned.some((s) => s.id === normalizedId || (student && s.poraplan_id === student.poraplanId));
+      }
+
+      return false;
+    })
+    .map((a) => {
+      const author = mockStore.find((u) => u.id === a.author_id);
+      const subject = a.subject_id ? mockSubjects.find((s) => s.id === a.subject_id) : null;
+      const ack = mockAnnouncementAcknowledgments.find(
+        (ack) => ack.announcement_id === a.id && (ack.student_id === normalizedId || (student && ack.student_id === student.poraplanId))
+      );
+
+      return {
+        ...a,
+        author_name: author?.fullName || 'Academic Faculty',
+        author_role: author?.role,
+        author_poraplan_id: author?.poraplanId,
+        subject_name: subject?.name,
+        subject_code: subject?.code,
+        is_acknowledged: Boolean(ack),
+        acknowledged_at: ack?.acknowledged_at || null,
+      };
+    })
+    .sort((a, b) => new Date(b.published_at || b.created_at || 0).getTime() - new Date(a.published_at || a.created_at || 0).getTime());
+}
+
+export function getMockMentorAnnouncements(mentorId: string): EnrichedMockAnnouncement[] {
+  const normalizedId = normalizeId(mentorId);
+  const user = mockStore.find((u) => u.id === normalizedId);
+  const isAdmin = user?.role === 'admin' || normalizedId === 'mock-admin-ppa001';
+
+  return mockAnnouncements
+    .filter((a) => {
+      if (isAdmin) return true;
+      return a.author_id === normalizedId;
+    })
+    .map((a) => {
+      const author = mockStore.find((u) => u.id === a.author_id);
+      const targetStudent = a.student_id ? mockStore.find((u) => u.id === a.student_id || u.poraplanId === a.student_id) : null;
+      const subject = a.subject_id ? mockSubjects.find((s) => s.id === a.subject_id) : null;
+
+      const acks: EnrichedMockAnnouncementAcknowledgment[] = mockAnnouncementAcknowledgments
+        .filter((ack) => ack.announcement_id === a.id)
+        .map((ack) => {
+          const s = mockStore.find((u) => u.id === ack.student_id || u.poraplanId === ack.student_id);
+          return {
+            id: ack.id,
+            announcement_id: ack.announcement_id,
+            student_id: ack.student_id,
+            student_name: s?.fullName || 'Scholar',
+            student_poraplan_id: s?.poraplanId || '',
+            acknowledged_at: ack.acknowledged_at,
+          };
+        });
+
+      return {
+        ...a,
+        author_name: author?.fullName || 'Academic Faculty',
+        author_role: author?.role,
+        author_poraplan_id: author?.poraplanId,
+        student_name: targetStudent?.fullName,
+        student_poraplan_id: targetStudent?.poraplanId,
+        subject_name: subject?.name,
+        subject_code: subject?.code,
+        acknowledgments_count: acks.length,
+        acknowledgments: acks,
+      };
+    })
+    .sort((a, b) => new Date(b.published_at || b.created_at || 0).getTime() - new Date(a.published_at || a.created_at || 0).getTime());
+}
+
+export function getMockAnnouncementById(
+  announcementId: string,
+  viewerId: string
+): { announcement: EnrichedMockAnnouncement | null; error: Error | null } {
+  const a = mockAnnouncements.find((item) => item.id === announcementId);
+  if (!a) {
+    return { announcement: null, error: new Error('Announcement not found.') };
+  }
+
+  const normalizedViewerId = normalizeId(viewerId);
+  const viewer = mockStore.find((u) => u.id === normalizedViewerId);
+  const isAdmin = viewer?.role === 'admin' || normalizedViewerId === 'mock-admin-ppa001';
+  const isAuthor = a.author_id === normalizedViewerId;
+
+  if (viewer?.role === 'student') {
+    if (a.status !== 'published') {
+      return { announcement: null, error: new Error('Announcement not found.') };
+    }
+    const isPlatform = a.target_scope === 'platform';
+    const isIndividual = a.target_scope === 'individual' && (a.student_id === normalizedViewerId || a.student_id === viewer.poraplanId);
+    const assigned = getMockAssignedStudents(a.author_id);
+    const isAssigned = a.target_scope === 'assigned_students' && assigned.some((s) => s.id === normalizedViewerId || s.poraplan_id === viewer.poraplanId);
+
+    if (!isPlatform && !isIndividual && !isAssigned) {
+      return { announcement: null, error: new Error('You are not authorized to view this announcement.') };
+    }
+  } else if (!isAdmin && !isAuthor) {
+    return { announcement: null, error: new Error('You are not authorized to view this announcement.') };
+  }
+
+  const author = mockStore.find((u) => u.id === a.author_id);
+  const targetStudent = a.student_id ? mockStore.find((u) => u.id === a.student_id || u.poraplanId === a.student_id) : null;
+  const subject = a.subject_id ? mockSubjects.find((s) => s.id === a.subject_id) : null;
+  const ack = viewer?.role === 'student'
+    ? mockAnnouncementAcknowledgments.find((ack) => ack.announcement_id === a.id && ack.student_id === normalizedViewerId)
+    : undefined;
+
+  const acks: EnrichedMockAnnouncementAcknowledgment[] = mockAnnouncementAcknowledgments
+    .filter((ack) => ack.announcement_id === a.id)
+    .map((ack) => {
+      const s = mockStore.find((u) => u.id === ack.student_id || u.poraplanId === ack.student_id);
+      return {
+        id: ack.id,
+        announcement_id: ack.announcement_id,
+        student_id: ack.student_id,
+        student_name: s?.fullName || 'Scholar',
+        student_poraplan_id: s?.poraplanId || '',
+        acknowledged_at: ack.acknowledged_at,
+      };
+    });
+
+  return {
+    announcement: {
+      ...a,
+      author_name: author?.fullName || 'Academic Faculty',
+      author_role: author?.role,
+      author_poraplan_id: author?.poraplanId,
+      student_name: targetStudent?.fullName,
+      student_poraplan_id: targetStudent?.poraplanId,
+      subject_name: subject?.name,
+      subject_code: subject?.code,
+      is_acknowledged: Boolean(ack),
+      acknowledged_at: ack?.acknowledged_at || null,
+      acknowledgments_count: acks.length,
+      acknowledgments: acks,
+    },
+    error: null,
+  };
+}
+
+export function createMockAnnouncement(data: {
+  authorId: string;
+  title: string;
+  content: string;
+  targetScope?: AnnouncementScope;
+  studentId?: string | null;
+  subjectId?: string | null;
+  priority?: AnnouncementPriority;
+  status?: AnnouncementStatus;
+}): { announcement: Announcement | null; error: Error | null } {
+  const normalizedAuthorId = normalizeId(data.authorId);
+  const author = mockStore.find((u) => u.id === normalizedAuthorId);
+  if (!author) {
+    return { announcement: null, error: new Error('Author account not found.') };
+  }
+
+  const cleanTitle = data.title?.trim();
+  if (!cleanTitle) {
+    return { announcement: null, error: new Error('Announcement title is required.') };
+  }
+
+  const cleanContent = data.content?.trim();
+  if (!cleanContent) {
+    return { announcement: null, error: new Error('Announcement content is required.') };
+  }
+
+  const scope: AnnouncementScope = data.targetScope || 'assigned_students';
+  const priority: AnnouncementPriority = data.priority || 'normal';
+  const status: AnnouncementStatus = data.status || 'published';
+
+  // Security: only platform administrators can create platform-wide announcements
+  if (scope === 'platform' && author.role !== 'admin') {
+    return {
+      announcement: null,
+      error: new Error('Only platform administrators are authorized to publish platform-wide announcements.'),
+    };
+  }
+
+  // Security: individual target requires studentId and mentor can only target assigned students
+  let normalizedStudentId: string | null = null;
+  if (scope === 'individual') {
+    if (!data.studentId) {
+      return {
+        announcement: null,
+        error: new Error('Individual announcements require a target student to be selected.'),
+      };
+    }
+    normalizedStudentId = normalizeId(data.studentId);
+    if (author.role === 'mentor') {
+      const assigned = getMockAssignedStudents(normalizedAuthorId);
+      const isAssigned = assigned.some(
+        (s) => s.id === normalizedStudentId || s.poraplan_id === data.studentId
+      );
+      if (!isAssigned) {
+        return {
+          announcement: null,
+          error: new Error('Mentors can only create targeted announcements for their assigned scholars.'),
+        };
+      }
+    }
+  }
+
+  // Validate subject if provided
+  if (data.subjectId) {
+    const subjectExists = mockSubjects.some((s) => s.id === data.subjectId);
+    if (!subjectExists) {
+      return { announcement: null, error: new Error('Specified study area does not exist.') };
+    }
+  }
+
+  const now = new Date().toISOString();
+  const newAnnouncement: Announcement = {
+    id: `mock-announcement-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    author_id: normalizedAuthorId,
+    title: cleanTitle,
+    content: cleanContent,
+    target_scope: scope,
+    student_id: normalizedStudentId,
+    subject_id: data.subjectId || null,
+    priority,
+    status,
+    published_at: now,
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockAnnouncements.unshift(newAnnouncement);
+  return { announcement: { ...newAnnouncement }, error: null };
+}
+
+export function updateMockAnnouncement(
+  announcementId: string,
+  userId: string,
+  updates: Partial<AnnouncementUpdate>
+): { announcement: Announcement | null; error: Error | null } {
+  const index = mockAnnouncements.findIndex((a) => a.id === announcementId);
+  if (index === -1) {
+    return { announcement: null, error: new Error('Announcement not found.') };
+  }
+
+  const normalizedUserId = normalizeId(userId);
+  const user = mockStore.find((u) => u.id === normalizedUserId);
+  const current = mockAnnouncements[index];
+
+  const isAuthor = current.author_id === normalizedUserId;
+  const isAdmin = user?.role === 'admin' || normalizedUserId === 'mock-admin-ppa001';
+
+  if (!isAuthor && !isAdmin) {
+    return { announcement: null, error: new Error('You are not authorized to update this announcement.') };
+  }
+
+  const cleanTitle = updates.title !== undefined ? updates.title.trim() : current.title;
+  if (!cleanTitle) {
+    return { announcement: null, error: new Error('Announcement title cannot be empty.') };
+  }
+
+  const cleanContent = updates.content !== undefined ? updates.content.trim() : current.content;
+  if (!cleanContent) {
+    return { announcement: null, error: new Error('Announcement content cannot be empty.') };
+  }
+
+  const now = new Date().toISOString();
+  const updated: Announcement = {
+    ...current,
+    title: cleanTitle,
+    content: cleanContent,
+    priority: updates.priority || current.priority,
+    status: updates.status || current.status,
+    subject_id: updates.subject_id !== undefined ? updates.subject_id : current.subject_id,
+    updated_at: now,
+  };
+
+  mockAnnouncements[index] = updated;
+  return { announcement: { ...updated }, error: null };
+}
+
+export function acknowledgeMockAnnouncement(
+  announcementId: string,
+  studentId: string
+): { acknowledgment: AnnouncementAcknowledgment | null; error: Error | null } {
+  const normalizedStudentId = normalizeId(studentId);
+  const student = mockStore.find((u) => u.id === normalizedStudentId);
+  if (!student) {
+    return { acknowledgment: null, error: new Error('Student account not found.') };
+  }
+
+  const announcement = mockAnnouncements.find((a) => a.id === announcementId);
+  if (!announcement) {
+    return { acknowledgment: null, error: new Error('Announcement not found.') };
+  }
+
+  if (announcement.status !== 'published') {
+    return { acknowledgment: null, error: new Error('Archived announcements cannot be acknowledged.') };
+  }
+
+  // Verify student is an authorized recipient
+  let authorized = false;
+  if (announcement.target_scope === 'platform') {
+    authorized = true;
+  } else if (announcement.target_scope === 'individual') {
+    authorized = announcement.student_id === normalizedStudentId || announcement.student_id === student.poraplanId;
+  } else if (announcement.target_scope === 'assigned_students') {
+    const assigned = getMockAssignedStudents(announcement.author_id);
+    authorized = assigned.some((s) => s.id === normalizedStudentId || s.poraplan_id === student.poraplanId);
+  }
+
+  if (!authorized) {
+    return {
+      acknowledgment: null,
+      error: new Error('You are not authorized to acknowledge an announcement not targeted to you.'),
+    };
+  }
+
+  // If already acknowledged, return existing record idempotently
+  const existing = mockAnnouncementAcknowledgments.find(
+    (ack) => ack.announcement_id === announcementId && ack.student_id === normalizedStudentId
+  );
+  if (existing) {
+    return { acknowledgment: { ...existing }, error: null };
+  }
+
+  const newAck: AnnouncementAcknowledgment = {
+    id: `mock-ack-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    announcement_id: announcementId,
+    student_id: normalizedStudentId,
+    acknowledged_at: new Date().toISOString(),
+  };
+
+  mockAnnouncementAcknowledgments.push(newAck);
+  return { acknowledgment: { ...newAck }, error: null };
+}
+
+export function deleteMockAnnouncement(
+  announcementId: string,
+  userId: string
+): { success: boolean; error: Error | null } {
+  const index = mockAnnouncements.findIndex((a) => a.id === announcementId);
+  if (index === -1) {
+    return { success: false, error: new Error('Announcement not found.') };
+  }
+
+  const normalizedUserId = normalizeId(userId);
+  const user = mockStore.find((u) => u.id === normalizedUserId);
+  const current = mockAnnouncements[index];
+
+  const isAuthor = current.author_id === normalizedUserId;
+  const isAdmin = user?.role === 'admin' || normalizedUserId === 'mock-admin-ppa001';
+
+  if (!isAuthor && !isAdmin) {
+    return { success: false, error: new Error('You are not authorized to delete this announcement.') };
+  }
+
+  mockAnnouncements.splice(index, 1);
+  // Cascade delete acknowledgments
+  for (let i = mockAnnouncementAcknowledgments.length - 1; i >= 0; i--) {
+    if (mockAnnouncementAcknowledgments[i].announcement_id === announcementId) {
+      mockAnnouncementAcknowledgments.splice(i, 1);
+    }
+  }
+
+  return { success: true, error: null };
+}
+

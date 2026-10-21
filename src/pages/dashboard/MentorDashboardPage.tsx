@@ -812,16 +812,8 @@ export const MentorDashboardPage: React.FC = () => {
             </Link>
 
             {/* Action 9: Announcements */}
-            <div
-              onClick={() => setActiveModule('announcements')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setActiveModule('announcements');
-                }
-              }}
+            <Link
+              to="/mentor/announcements"
               className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group cursor-pointer"
             >
               <div>
@@ -832,17 +824,17 @@ export const MentorDashboardPage: React.FC = () => {
                   <Megaphone className="w-4 h-4 text-brand-dark group-hover:text-brand-gold transition-colors" />
                 </div>
                 <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-gold transition-colors">
-                  Announcements
+                  Announcements Desk
                 </h3>
                 <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Broadcast schedule updates and syllabus reminders to your student roster.
+                  Broadcast schedule updates, directives, and track scholar confirmations.
                 </p>
               </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy">
-                <span>Module Details</span>
+              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-gold">
+                <span>Open Announcements Desk</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </div>
-            </div>
+            </Link>
 
           </div>
         </section>
