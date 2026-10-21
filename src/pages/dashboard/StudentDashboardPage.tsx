@@ -856,16 +856,8 @@ export const StudentDashboardPage: React.FC = () => {
             </Link>
 
             {/* Quick Link 3: Doubts */}
-            <div
-              onClick={() => setActiveModal('doubts')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setActiveModal('doubts');
-                }
-              }}
+            <Link
+              to="/student/doubts"
               className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group cursor-pointer"
             >
               <div>
@@ -887,7 +879,7 @@ export const StudentDashboardPage: React.FC = () => {
                 <span>Ask Mentor A Doubt</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </div>
-            </div>
+            </Link>
 
             {/* Quick Link 4: Learning Resources */}
             <Link

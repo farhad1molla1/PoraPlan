@@ -457,6 +457,76 @@ export type ResourceUpdate = {
   updated_at?: string;
 };
 
+export type DoubtStatus = 'open' | 'answered' | 'resolved';
+export type DoubtPriority = 'low' | 'normal' | 'high' | 'urgent';
+
+export type Doubt = {
+  id: string;
+  student_id: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  task_id?: string | null;
+  assignment_id?: string | null;
+  title: string;
+  question: string;
+  priority: DoubtPriority;
+  status: DoubtStatus;
+  resolved_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type DoubtInsert = {
+  id?: string;
+  student_id: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  task_id?: string | null;
+  assignment_id?: string | null;
+  title: string;
+  question: string;
+  priority?: DoubtPriority;
+  status?: DoubtStatus;
+  resolved_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type DoubtUpdate = {
+  id?: string;
+  student_id?: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  task_id?: string | null;
+  assignment_id?: string | null;
+  title?: string;
+  question?: string;
+  priority?: DoubtPriority;
+  status?: DoubtStatus;
+  resolved_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type DoubtResponse = {
+  id: string;
+  doubt_id: string;
+  author_id: string;
+  message: string;
+  created_at?: string;
+};
+
+export type DoubtResponseInsert = {
+  id?: string;
+  doubt_id: string;
+  author_id: string;
+  message: string;
+  created_at?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -722,6 +792,76 @@ export type Database = {
             columns: ['plan_id'];
             isOneToOne: false;
             referencedRelation: 'study_plans';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      doubts: {
+        Row: Doubt;
+        Insert: DoubtInsert;
+        Update: DoubtUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'doubts_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'doubts_mentor_id_fkey';
+            columns: ['mentor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'doubts_subject_id_fkey';
+            columns: ['subject_id'];
+            isOneToOne: false;
+            referencedRelation: 'subjects';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'doubts_plan_id_fkey';
+            columns: ['plan_id'];
+            isOneToOne: false;
+            referencedRelation: 'study_plans';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'doubts_task_id_fkey';
+            columns: ['task_id'];
+            isOneToOne: false;
+            referencedRelation: 'tasks';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'doubts_assignment_id_fkey';
+            columns: ['assignment_id'];
+            isOneToOne: false;
+            referencedRelation: 'assignments';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      doubt_responses: {
+        Row: DoubtResponse;
+        Insert: DoubtResponseInsert;
+        Update: Partial<DoubtResponseInsert>;
+        Relationships: [
+          {
+            foreignKeyName: 'doubt_responses_doubt_id_fkey';
+            columns: ['doubt_id'];
+            isOneToOne: false;
+            referencedRelation: 'doubts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'doubt_responses_author_id_fkey';
+            columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
             referencedColumns: ['id'];
           }
         ];

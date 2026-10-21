@@ -20,6 +20,7 @@ import {
   Compass,
   TrendingUp,
   BookMarked,
+  HelpCircle,
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
@@ -75,6 +76,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Upcoming Evaluation', shortLabel: 'Eval', to: '/student/evaluations', icon: Calendar },
     { label: 'Academic Progress', shortLabel: 'Progress', to: '/student/progress', icon: TrendingUp },
     { label: 'Study Resources', shortLabel: 'Library', to: '/student/resources', icon: BookMarked },
+    { label: 'Doubts & Inquiries', shortLabel: 'Doubts', to: '/student/doubts', icon: HelpCircle },
     { label: 'Mentorship', shortLabel: 'Mentor', to: '/student/dashboard#mentorship', icon: Users },
   ];
 
@@ -89,6 +91,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/evaluations', icon: Calendar },
     { label: 'Scholar Progress', shortLabel: 'Progress', to: '/mentor/progress', icon: TrendingUp },
     { label: 'Resource Library', shortLabel: 'Library', to: '/mentor/resources', icon: BookMarked },
+    { label: 'Doubts Desk', shortLabel: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
   ];
 
   const adminNavItems = [

@@ -20,6 +20,10 @@ import type {
   Resource,
   ResourceType,
   ResourceStatus,
+  Doubt,
+  DoubtStatus,
+  DoubtPriority,
+  DoubtResponse,
 } from '../types/database';
 import { sha256 } from './crypto';
 
@@ -2407,5 +2411,322 @@ export function deleteMockResource(
   }
 
   mockResources.splice(index, 1);
+  return { success: true, error: null };
+}
+
+// ==============================================================================
+// DOUBTS & ACADEMIC INQUIRIES MOCK DATA & REPOSITORY
+// ==============================================================================
+
+export interface EnrichedMockDoubtResponse extends DoubtResponse {
+  author_name?: string;
+  author_role?: UserRole;
+  author_poraplan_id?: string;
+}
+
+export interface EnrichedMockDoubt extends Doubt {
+  student_name?: string;
+  student_poraplan_id?: string;
+  mentor_name?: string;
+  subject_name?: string;
+  subject_code?: string;
+  plan_title?: string;
+  task_title?: string;
+  assignment_title?: string;
+  responses?: EnrichedMockDoubtResponse[];
+  responses_count?: number;
+  latest_response?: EnrichedMockDoubtResponse;
+}
+
+export const mockDoubts: Doubt[] = [
+  {
+    id: 'mock-doubt-001',
+    student_id: 'mock-student-pp001',
+    mentor_id: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-phy-101',
+    plan_id: 'mock-plan-phy-001',
+    task_id: 'mock-task-002',
+    assignment_id: 'mock-assign-001',
+    title: 'Normal force and friction on a double-incline Atwood setup',
+    question: 'When both masses are on different inclines connected by a massless rope over a frictionless pulley, does the normal force of mass 1 affect the tension equation directly or only through the friction term mu * N1?',
+    priority: 'high',
+    status: 'answered',
+    resolved_at: null,
+    created_at: '2026-10-12T09:30:00Z',
+    updated_at: '2026-10-12T11:15:00Z',
+  },
+  {
+    id: 'mock-doubt-002',
+    student_id: 'mock-student-pp001',
+    mentor_id: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-math-102',
+    plan_id: null,
+    task_id: null,
+    assignment_id: null,
+    title: 'Concavity inflection points when second derivative equals zero vs undefined',
+    question: 'If f\'\'(x) = 0 but does not change sign around c, is x = c still considered an inflection point, or must there always be a sign alternation?',
+    priority: 'normal',
+    status: 'open',
+    resolved_at: null,
+    created_at: '2026-10-15T14:00:00Z',
+    updated_at: '2026-10-15T14:00:00Z',
+  },
+];
+
+export const mockDoubtResponses: DoubtResponse[] = [
+  {
+    id: 'mock-resp-001',
+    doubt_id: 'mock-doubt-001',
+    author_id: 'mock-mentor-ppm001',
+    message: 'Great question. The normal force N1 = m1*g*cos(theta1) acts perpendicular to the incline surface, so it does not appear directly in the parallel equation of motion. It only couples into the system acceleration via kinetic friction fk = mu_k * N1. Keep your coordinate axes rotated along each incline surface.',
+    created_at: '2026-10-12T11:15:00Z',
+  },
+];
+
+function enrichMockDoubt(d: Doubt): EnrichedMockDoubt {
+  const student = mockStore.find((s) => s.id === d.student_id);
+  const mentor = d.mentor_id ? mockStore.find((m) => m.id === d.mentor_id) : null;
+  const subject = d.subject_id ? mockSubjects.find((s) => s.id === d.subject_id) : null;
+  const plan = d.plan_id ? mockStudyPlans.find((p) => p.id === d.plan_id) : null;
+  const task = d.task_id ? mockTasks.find((t) => t.id === d.task_id) : null;
+  const assignment = d.assignment_id ? mockAssignments.find((a) => a.id === d.assignment_id) : null;
+
+  const responses = mockDoubtResponses
+    .filter((r) => r.doubt_id === d.id)
+    .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
+    .map((r) => {
+      const author = mockStore.find((u) => u.id === r.author_id);
+      return {
+        ...r,
+        author_name: author?.fullName || 'User',
+        author_role: author?.role,
+        author_poraplan_id: author?.poraplanId,
+      };
+    });
+
+  const latest_response = responses.length > 0 ? responses[responses.length - 1] : undefined;
+
+  return {
+    ...d,
+    student_name: student?.fullName || 'Scholar',
+    student_poraplan_id: student?.poraplanId || 'PP001',
+    mentor_name: mentor?.fullName || undefined,
+    subject_name: subject?.name || undefined,
+    subject_code: subject?.code || undefined,
+    plan_title: plan?.title || undefined,
+    task_title: task?.title || undefined,
+    assignment_title: assignment?.title || undefined,
+    responses,
+    responses_count: responses.length,
+    latest_response,
+  };
+}
+
+export function getMockStudentDoubts(studentId: string): EnrichedMockDoubt[] {
+  const normalizedId = studentId === 'PP001' ? 'mock-student-pp001' : studentId;
+  return mockDoubts
+    .filter((d) => d.student_id === normalizedId || d.student_id === studentId)
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+    .map(enrichMockDoubt);
+}
+
+export function getMockMentorDoubts(mentorId: string): EnrichedMockDoubt[] {
+  const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
+  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
+  const studentIds = new Set(assignedStudents.map((s) => s.id));
+  if (normalizedMentorId === 'mock-mentor-ppm001' || assignedStudents.some((s) => s.poraplan_id === 'PP001' || s.id === 'mock-student-pp001')) {
+    studentIds.add('mock-student-pp001');
+  }
+
+  if (studentIds.size === 0 && mentorId !== 'admin' && mentorId !== 'mock-admin-ppa001') {
+    return [];
+  }
+
+  return mockDoubts
+    .filter((d) => studentIds.has(d.student_id) || (mentorId === 'admin' || mentorId === 'mock-admin-ppa001'))
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+    .map(enrichMockDoubt);
+}
+
+export function getMockDoubtById(doubtId: string): EnrichedMockDoubt | null {
+  const doubt = mockDoubts.find((d) => d.id === doubtId);
+  if (!doubt) return null;
+  return enrichMockDoubt(doubt);
+}
+
+export function createMockDoubt(params: {
+  studentId: string;
+  title: string;
+  question: string;
+  subjectId?: string;
+  planId?: string;
+  taskId?: string;
+  assignmentId?: string;
+  priority?: DoubtPriority;
+}): { doubt: Doubt | null; error: Error | null } {
+  const cleanTitle = params.title?.trim();
+  if (!cleanTitle) {
+    return { doubt: null, error: new Error('Doubt title is required.') };
+  }
+  const cleanQuestion = params.question?.trim();
+  if (!cleanQuestion) {
+    return { doubt: null, error: new Error('Doubt inquiry question is required.') };
+  }
+  if (!params.studentId) {
+    return { doubt: null, error: new Error('Student ID is required.') };
+  }
+
+  const normalizedStudentId = params.studentId === 'PP001' ? 'mock-student-pp001' : params.studentId;
+
+  // Validate subject ownership if supplied
+  if (params.subjectId) {
+    const subject = mockSubjects.find((s) => s.id === params.subjectId);
+    if (!subject || (subject.student_id !== normalizedStudentId && subject.student_id !== params.studentId)) {
+      return { doubt: null, error: new Error('Selected study area does not belong to this student.') };
+    }
+  }
+
+  // Find assigned mentor if any
+  const mentors = getMockAssignedMentors(normalizedStudentId);
+  const mentorId = mentors.length > 0 ? mentors[0].id : null;
+
+  const doubtId = `mock-doubt-${Date.now()}`;
+  const now = new Date().toISOString();
+
+  const newDoubt: Doubt = {
+    id: doubtId,
+    student_id: normalizedStudentId,
+    mentor_id: mentorId,
+    subject_id: params.subjectId || null,
+    plan_id: params.planId || null,
+    task_id: params.taskId || null,
+    assignment_id: params.assignmentId || null,
+    title: cleanTitle,
+    question: cleanQuestion,
+    priority: params.priority || 'normal',
+    status: 'open',
+    resolved_at: null,
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockDoubts.unshift(newDoubt);
+  return { doubt: { ...newDoubt }, error: null };
+}
+
+export function addMockDoubtResponse(params: {
+  doubtId: string;
+  authorId: string;
+  message: string;
+}): { response: DoubtResponse | null; error: Error | null } {
+  const cleanMessage = params.message?.trim();
+  if (!cleanMessage) {
+    return { response: null, error: new Error('Response message cannot be empty.') };
+  }
+
+  const doubtIndex = mockDoubts.findIndex((d) => d.id === params.doubtId);
+  if (doubtIndex === -1) {
+    return { response: null, error: new Error('Doubt not found.') };
+  }
+
+  const doubt = mockDoubts[doubtIndex];
+  const normalizedAuthorId = params.authorId === 'PPM001' ? 'mock-mentor-ppm001' : params.authorId === 'PP001' ? 'mock-student-pp001' : params.authorId;
+
+  // Authorization check: must be student owner, assigned mentor, or admin
+  const isStudentOwner = doubt.student_id === normalizedAuthorId || doubt.student_id === params.authorId;
+  const isAssignedMentor = getMockAssignedStudents(normalizedAuthorId).some(
+    (s) => s.id === doubt.student_id || s.poraplan_id === 'PP001'
+  ) || normalizedAuthorId === 'mock-mentor-ppm001' && doubt.student_id === 'mock-student-pp001';
+  const isAdmin = normalizedAuthorId === 'admin' || normalizedAuthorId === 'mock-admin-ppa001';
+
+  if (!isStudentOwner && !isAssignedMentor && !isAdmin) {
+    return { response: null, error: new Error('You are not authorized to respond to this doubt.') };
+  }
+
+  const responseId = `mock-resp-${Date.now()}`;
+  const now = new Date().toISOString();
+
+  const newResponse: DoubtResponse = {
+    id: responseId,
+    doubt_id: doubt.id,
+    author_id: normalizedAuthorId,
+    message: cleanMessage,
+    created_at: now,
+  };
+
+  mockDoubtResponses.push(newResponse);
+
+  // Auto transition to answered if mentor/admin responded and doubt was open
+  if ((isAssignedMentor || isAdmin) && doubt.status === 'open') {
+    doubt.status = 'answered';
+  }
+  doubt.updated_at = now;
+  mockDoubts[doubtIndex] = { ...doubt };
+
+  return { response: { ...newResponse }, error: null };
+}
+
+export function updateMockDoubtStatus(
+  doubtId: string,
+  userId: string,
+  status: DoubtStatus
+): { doubt: Doubt | null; error: Error | null } {
+  const doubtIndex = mockDoubts.findIndex((d) => d.id === doubtId);
+  if (doubtIndex === -1) {
+    return { doubt: null, error: new Error('Doubt not found.') };
+  }
+
+  const doubt = mockDoubts[doubtIndex];
+  const normalizedUserId = userId === 'PPM001' ? 'mock-mentor-ppm001' : userId === 'PP001' ? 'mock-student-pp001' : userId;
+
+  const isStudentOwner = doubt.student_id === normalizedUserId || doubt.student_id === userId;
+  const isAssignedMentor = getMockAssignedStudents(normalizedUserId).some(
+    (s) => s.id === doubt.student_id || s.poraplan_id === 'PP001'
+  ) || normalizedUserId === 'mock-mentor-ppm001' && doubt.student_id === 'mock-student-pp001';
+  const isAdmin = normalizedUserId === 'admin' || normalizedUserId === 'mock-admin-ppa001';
+
+  if (!isStudentOwner && !isAssignedMentor && !isAdmin) {
+    return { doubt: null, error: new Error('You are not authorized to update this doubt.') };
+  }
+
+  const now = new Date().toISOString();
+  doubt.status = status;
+  if (status === 'resolved') {
+    doubt.resolved_at = now;
+  } else {
+    doubt.resolved_at = null;
+  }
+  doubt.updated_at = now;
+  mockDoubts[doubtIndex] = { ...doubt };
+
+  return { doubt: { ...doubt }, error: null };
+}
+
+export function deleteMockDoubt(
+  doubtId: string,
+  userId: string
+): { success: boolean; error: Error | null } {
+  const doubtIndex = mockDoubts.findIndex((d) => d.id === doubtId);
+  if (doubtIndex === -1) {
+    return { success: false, error: new Error('Doubt not found.') };
+  }
+
+  const doubt = mockDoubts[doubtIndex];
+  const normalizedUserId = userId === 'PP001' ? 'mock-student-pp001' : userId;
+  const isStudentOwner = doubt.student_id === normalizedUserId || doubt.student_id === userId;
+  const isAdmin = userId === 'admin' || userId === 'mock-admin-ppa001';
+
+  if (!isStudentOwner && !isAdmin) {
+    return { success: false, error: new Error('You are not authorized to delete this doubt.') };
+  }
+
+  mockDoubts.splice(doubtIndex, 1);
+  // Cascade delete responses
+  for (let i = mockDoubtResponses.length - 1; i >= 0; i--) {
+    if (mockDoubtResponses[i].doubt_id === doubtId) {
+      mockDoubtResponses.splice(i, 1);
+    }
+  }
+
   return { success: true, error: null };
 }
