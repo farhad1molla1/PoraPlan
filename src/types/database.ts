@@ -400,6 +400,63 @@ export type EvaluationUpdate = {
   updated_at?: string;
 };
 
+export type ResourceType = 'link' | 'file' | 'note';
+export type ResourceStatus = 'active' | 'archived';
+
+export type Resource = {
+  id: string;
+  student_id: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  title: string;
+  description?: string | null;
+  resource_type: ResourceType;
+  url?: string | null;
+  file_name?: string | null;
+  file_size?: number | null;
+  content?: string | null;
+  status: ResourceStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ResourceInsert = {
+  id?: string;
+  student_id: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  title: string;
+  description?: string | null;
+  resource_type?: ResourceType;
+  url?: string | null;
+  file_name?: string | null;
+  file_size?: number | null;
+  content?: string | null;
+  status?: ResourceStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ResourceUpdate = {
+  id?: string;
+  student_id?: string;
+  mentor_id?: string | null;
+  subject_id?: string | null;
+  plan_id?: string | null;
+  title?: string;
+  description?: string | null;
+  resource_type?: ResourceType;
+  url?: string | null;
+  file_name?: string | null;
+  file_size?: number | null;
+  content?: string | null;
+  status?: ResourceStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -630,6 +687,41 @@ export type Database = {
             columns: ['assignment_id'];
             isOneToOne: false;
             referencedRelation: 'assignments';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      resources: {
+        Row: Resource;
+        Insert: ResourceInsert;
+        Update: ResourceUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'resources_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'resources_mentor_id_fkey';
+            columns: ['mentor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'resources_subject_id_fkey';
+            columns: ['subject_id'];
+            isOneToOne: false;
+            referencedRelation: 'subjects';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'resources_plan_id_fkey';
+            columns: ['plan_id'];
+            isOneToOne: false;
+            referencedRelation: 'study_plans';
             referencedColumns: ['id'];
           }
         ];

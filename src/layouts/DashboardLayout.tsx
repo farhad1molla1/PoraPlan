@@ -19,6 +19,7 @@ import {
   BookOpen,
   Compass,
   TrendingUp,
+  BookMarked,
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
@@ -73,6 +74,7 @@ export const DashboardLayout: React.FC = () => {
     { label: "Today's Focus", shortLabel: 'Focus', to: '/student/dashboard#focus', icon: Target },
     { label: 'Upcoming Evaluation', shortLabel: 'Eval', to: '/student/evaluations', icon: Calendar },
     { label: 'Academic Progress', shortLabel: 'Progress', to: '/student/progress', icon: TrendingUp },
+    { label: 'Study Resources', shortLabel: 'Library', to: '/student/resources', icon: BookMarked },
     { label: 'Mentorship', shortLabel: 'Mentor', to: '/student/dashboard#mentorship', icon: Users },
   ];
 
@@ -86,6 +88,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Review Queue', shortLabel: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
     { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/evaluations', icon: Calendar },
     { label: 'Scholar Progress', shortLabel: 'Progress', to: '/mentor/progress', icon: TrendingUp },
+    { label: 'Resource Library', shortLabel: 'Library', to: '/mentor/resources', icon: BookMarked },
   ];
 
   const adminNavItems = [

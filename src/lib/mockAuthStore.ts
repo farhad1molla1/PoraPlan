@@ -17,6 +17,9 @@ import type {
   Evaluation,
   EvaluationFormat,
   EvaluationStatus,
+  Resource,
+  ResourceType,
+  ResourceStatus,
 } from '../types/database';
 import { sha256 } from './crypto';
 
@@ -2126,4 +2129,283 @@ export function getMockScholarProgressDetail(
 
   const summary = getMockStudentAcademicProgress(studentId);
   return { summary, error: null };
+}
+
+// ==============================================================================
+// ACADEMIC RESOURCES MOCK STORE & CRUD METHODS (Milestone 14)
+// ==============================================================================
+
+export interface EnrichedMockResource extends Resource {
+  student_name?: string;
+  student_poraplan_id?: string;
+  mentor_name?: string;
+  subject_name?: string;
+  plan_title?: string;
+}
+
+export const mockResources: Resource[] = [
+  {
+    id: 'mock-res-001',
+    student_id: 'mock-student-pp001',
+    mentor_id: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-phy-101',
+    plan_id: 'mock-plan-phy-001',
+    title: 'Halliday & Resnick Mechanics Formula Sheet & Vector Summary',
+    description: 'Core formulas for 1D/2D kinematics, Newton second law applications, inclined planes with friction, and Atwood machines.',
+    resource_type: 'link',
+    url: 'https://ocw.mit.edu/courses/physics-i-classical-mechanics/resources/formula-sheet.pdf',
+    file_name: 'Mechanics_CheatSheet_v2.pdf',
+    file_size: 154820,
+    content: null,
+    status: 'active',
+    created_at: '2026-10-06T10:00:00Z',
+    updated_at: '2026-10-06T10:00:00Z',
+  },
+  {
+    id: 'mock-res-002',
+    student_id: 'mock-student-pp001',
+    mentor_id: 'mock-mentor-ppm001',
+    subject_id: 'mock-sub-math-102',
+    plan_id: null,
+    title: 'Differential Calculus: Critical Point Analysis & Derivative Rules',
+    description: 'Quick reference notes on chain rule, quotient rule, product rule, and second derivative concavity test.',
+    resource_type: 'note',
+    url: null,
+    file_name: null,
+    file_size: null,
+    content: '1. Product Rule: (fg)\' = f\'g + fg\'\n2. Quotient Rule: (f/g)\' = (f\'g - fg\') / g²\n3. Chain Rule: (f ∘ g)\' = f\'(g(x)) · g\'(x)\n4. Concavity: f\'\'(x) > 0 => Concave Up (Local Min); f\'\'(x) < 0 => Concave Down (Local Max)',
+    status: 'active',
+    created_at: '2026-10-08T14:30:00Z',
+    updated_at: '2026-10-08T14:30:00Z',
+  },
+];
+
+export function getMockStudentResources(studentId: string): EnrichedMockResource[] {
+  const normalizedId = studentId === 'PP001' ? 'mock-student-pp001' : studentId;
+  return mockResources
+    .filter((r) => r.student_id === normalizedId || r.student_id === studentId)
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+    .map((res) => {
+      const subject = res.subject_id ? mockSubjects.find((s) => s.id === res.subject_id) : null;
+      const plan = res.plan_id ? mockStudyPlans.find((p) => p.id === res.plan_id) : null;
+      const mentor = res.mentor_id ? mockStore.find((m) => m.id === res.mentor_id) : null;
+
+      return {
+        ...res,
+        subject_name: subject?.name,
+        plan_title: plan?.title,
+        mentor_name: mentor?.fullName,
+      };
+    });
+}
+
+export function getMockMentorResources(mentorId: string): EnrichedMockResource[] {
+  const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
+  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
+  const studentIds = new Set(assignedStudents.map((s) => s.id));
+  if (normalizedMentorId === 'mock-mentor-ppm001' || assignedStudents.some((s) => s.poraplan_id === 'PP001' || s.id === 'mock-student-pp001')) {
+    studentIds.add('mock-student-pp001');
+  }
+
+  return mockResources
+    .filter((r) => studentIds.has(r.student_id) || r.mentor_id === normalizedMentorId)
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+    .map((res) => {
+      const student = mockStore.find((s) => s.id === res.student_id);
+      const subject = res.subject_id ? mockSubjects.find((s) => s.id === res.subject_id) : null;
+      const plan = res.plan_id ? mockStudyPlans.find((p) => p.id === res.plan_id) : null;
+
+      return {
+        ...res,
+        student_name: student?.fullName || 'Scholar',
+        student_poraplan_id: student?.poraplanId || 'PP001',
+        subject_name: subject?.name,
+        plan_title: plan?.title,
+      };
+    });
+}
+
+export function getMockResourceById(resourceId: string): EnrichedMockResource | null {
+  const resource = mockResources.find((r) => r.id === resourceId);
+  if (!resource) return null;
+
+  const student = mockStore.find((s) => s.id === resource.student_id);
+  const subject = resource.subject_id ? mockSubjects.find((s) => s.id === resource.subject_id) : null;
+  const plan = resource.plan_id ? mockStudyPlans.find((p) => p.id === resource.plan_id) : null;
+  const mentor = resource.mentor_id ? mockStore.find((m) => m.id === resource.mentor_id) : null;
+
+  return {
+    ...resource,
+    student_name: student?.fullName,
+    student_poraplan_id: student?.poraplanId,
+    subject_name: subject?.name,
+    plan_title: plan?.title,
+    mentor_name: mentor?.fullName,
+  };
+}
+
+export function createMockResource(params: {
+  studentId: string;
+  mentorId?: string;
+  subjectId?: string;
+  planId?: string;
+  title: string;
+  description?: string;
+  resourceType: ResourceType;
+  url?: string;
+  fileName?: string;
+  fileSize?: number;
+  content?: string;
+  status?: ResourceStatus;
+}): { resource: Resource | null; error: Error | null } {
+  const cleanTitle = params.title?.trim();
+  if (!cleanTitle) {
+    return { resource: null, error: new Error('Resource title is required.') };
+  }
+  if (!params.studentId) {
+    return { resource: null, error: new Error('Student ID is required.') };
+  }
+
+  const normalizedStudentId = params.studentId === 'PP001' ? 'mock-student-pp001' : params.studentId;
+
+  // Validate mentor assignment
+  if (params.mentorId && params.mentorId !== 'admin' && params.mentorId !== 'mock-admin-ppa001') {
+    const normalizedMentorId = params.mentorId === 'PPM001' ? 'mock-mentor-ppm001' : params.mentorId;
+    const assignedStudents = getMockAssignedStudents(normalizedMentorId);
+    const isAssigned = assignedStudents.some((s) => s.id === normalizedStudentId || s.poraplan_id === 'PP001');
+    if (!isAssigned) {
+      return { resource: null, error: new Error('You are not authorized to create resources for this student.') };
+    }
+  }
+
+  // Validate URL protocol if link
+  if (params.resourceType === 'link' && params.url) {
+    const cleanUrl = params.url.trim();
+    if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+      return { resource: null, error: new Error('Resource URL must start with http:// or https://') };
+    }
+  }
+
+  // Validate subject ownership if provided
+  if (params.subjectId) {
+    const subject = mockSubjects.find((s) => s.id === params.subjectId);
+    if (!subject || (subject.student_id !== normalizedStudentId && subject.student_id !== params.studentId)) {
+      return { resource: null, error: new Error('Selected study area does not belong to this student.') };
+    }
+  }
+
+  const resourceId = `mock-res-${Date.now()}`;
+  const now = new Date().toISOString();
+
+  const newResource: Resource = {
+    id: resourceId,
+    student_id: normalizedStudentId,
+    mentor_id: params.mentorId || null,
+    subject_id: params.subjectId || null,
+    plan_id: params.planId || null,
+    title: cleanTitle,
+    description: params.description?.trim() || null,
+    resource_type: params.resourceType || 'link',
+    url: params.url?.trim() || null,
+    file_name: params.fileName?.trim() || null,
+    file_size: params.fileSize !== undefined ? params.fileSize : null,
+    content: params.content?.trim() || null,
+    status: params.status || 'active',
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockResources.push(newResource);
+  return { resource: { ...newResource }, error: null };
+}
+
+export function updateMockResource(
+  resourceId: string,
+  mentorId: string,
+  updates: Partial<Pick<Resource, 'title' | 'description' | 'subject_id' | 'plan_id' | 'resource_type' | 'url' | 'file_name' | 'file_size' | 'content' | 'status'>>
+): { resource: Resource | null; error: Error | null } {
+  const index = mockResources.findIndex((r) => r.id === resourceId);
+  if (index === -1) {
+    return { resource: null, error: new Error('Resource not found.') };
+  }
+
+  const current = mockResources[index];
+  const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
+  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
+  const isAssigned = assignedStudents.some((s) => s.id === current.student_id || s.poraplan_id === 'PP001');
+
+  if (!isAssigned && mentorId !== 'admin' && mentorId !== 'mock-admin-ppa001' && current.mentor_id !== normalizedMentorId) {
+    return { resource: null, error: new Error('You are not authorized to update this resource.') };
+  }
+
+  if (updates.title !== undefined) {
+    const cleanTitle = updates.title.trim();
+    if (!cleanTitle) {
+      return { resource: null, error: new Error('Resource title cannot be empty.') };
+    }
+    current.title = cleanTitle;
+  }
+
+  if (updates.description !== undefined) {
+    current.description = updates.description?.trim() || null;
+  }
+  if (updates.subject_id !== undefined) {
+    current.subject_id = updates.subject_id || null;
+  }
+  if (updates.plan_id !== undefined) {
+    current.plan_id = updates.plan_id || null;
+  }
+  if (updates.resource_type !== undefined) {
+    current.resource_type = updates.resource_type;
+  }
+  if (updates.url !== undefined) {
+    if (updates.url) {
+      const cleanUrl = updates.url.trim();
+      if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+        return { resource: null, error: new Error('Resource URL must start with http:// or https://') };
+      }
+      current.url = cleanUrl;
+    } else {
+      current.url = null;
+    }
+  }
+  if (updates.file_name !== undefined) {
+    current.file_name = updates.file_name || null;
+  }
+  if (updates.file_size !== undefined) {
+    current.file_size = updates.file_size;
+  }
+  if (updates.content !== undefined) {
+    current.content = updates.content || null;
+  }
+  if (updates.status !== undefined) {
+    current.status = updates.status;
+  }
+
+  current.updated_at = new Date().toISOString();
+  mockResources[index] = { ...current };
+
+  return { resource: { ...current }, error: null };
+}
+
+export function deleteMockResource(
+  resourceId: string,
+  mentorId: string
+): { success: boolean; error: Error | null } {
+  const index = mockResources.findIndex((r) => r.id === resourceId);
+  if (index === -1) {
+    return { success: false, error: new Error('Resource not found.') };
+  }
+
+  const current = mockResources[index];
+  const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
+  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
+  const isAssigned = assignedStudents.some((s) => s.id === current.student_id || s.poraplan_id === 'PP001');
+
+  if (!isAssigned && mentorId !== 'admin' && mentorId !== 'mock-admin-ppa001' && current.mentor_id !== normalizedMentorId) {
+    return { success: false, error: new Error('You are not authorized to delete this resource.') };
+  }
+
+  mockResources.splice(index, 1);
+  return { success: true, error: null };
 }

@@ -28,6 +28,7 @@ import {
   Check,
   Edit3,
   Trash2,
+  BookMarked,
 } from 'lucide-react';
 
 export const StudentDashboardPage: React.FC = () => {
@@ -887,6 +888,32 @@ export const StudentDashboardPage: React.FC = () => {
                 <ChevronRight className="w-3.5 h-3.5" />
               </div>
             </div>
+
+            {/* Quick Link 4: Learning Resources */}
+            <Link
+              to="/student/resources"
+              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group cursor-pointer sm:col-span-2 lg:col-span-1"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
+                    STUDY REFERENCE
+                  </span>
+                  <BookMarked className="w-4 h-4 text-brand-dark group-hover:text-brand-teal transition-colors" />
+                </div>
+                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-teal transition-colors">
+                  Formula &amp; Resources
+                </h3>
+                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
+                  Formula cheatsheets, textbook reference sheets, and web materials curated by mentors.
+                </p>
+              </div>
+
+              <div className="mt-4 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-teal">
+                <span>Open Reference Library</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </div>
+            </Link>
 
           </div>
         </section>

@@ -29,6 +29,8 @@ import { StudentEvaluationsPage } from '../pages/dashboard/StudentEvaluationsPag
 import { MentorEvaluationsPage } from '../pages/dashboard/MentorEvaluationsPage';
 import { StudentProgressPage } from '../pages/dashboard/StudentProgressPage';
 import { MentorProgressPage } from '../pages/dashboard/MentorProgressPage';
+import { StudentResourcesPage } from '../pages/dashboard/StudentResourcesPage';
+import { MentorResourcesPage } from '../pages/dashboard/MentorResourcesPage';
 import { useAuth } from '../hooks/useAuth';
 
 /**
@@ -127,6 +129,14 @@ export const AppRoutes: React.FC = () => {
           }
         />
         <Route
+          path="student/resources"
+          element={
+            <ProtectedRoute allowedRoles={['student', 'admin']}>
+              <StudentResourcesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="student/plans"
           element={
             <ProtectedRoute allowedRoles={['student', 'admin']}>
@@ -205,6 +215,14 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['mentor', 'admin']}>
               <MentorProgressPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="mentor/resources"
+          element={
+            <ProtectedRoute allowedRoles={['mentor', 'admin']}>
+              <MentorResourcesPage />
             </ProtectedRoute>
           }
         />
