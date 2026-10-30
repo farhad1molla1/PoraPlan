@@ -450,9 +450,11 @@ export const MentorPlansPage: React.FC = () => {
                     <div className="font-heading font-extrabold text-xs tracking-tight">
                       {student.full_name}
                     </div>
-                    <div className="font-mono text-[10px] opacity-80 mt-0.5 flex items-center gap-1">
-                      <span>ID: {student.poraplan_id || 'PP001'}</span>
-                    </div>
+                    {student.poraplan_id && (
+                      <div className="font-mono text-[10px] opacity-80 mt-0.5 flex items-center gap-1">
+                        <span>ID: {student.poraplan_id}</span>
+                      </div>
+                    )}
                   </button>
                 );
               })}
@@ -468,9 +470,11 @@ export const MentorPlansPage: React.FC = () => {
                 <h2 className="font-heading font-extrabold text-base text-brand-navy">
                   Study Plans for {activeStudent.full_name}
                 </h2>
-                <span className="font-mono text-xs text-brand-muted">
-                  Student ID: {activeStudent.poraplan_id || 'PP001'}
-                </span>
+                {activeStudent.poraplan_id && (
+                  <span className="font-mono text-xs text-brand-muted">
+                    Student ID: {activeStudent.poraplan_id}
+                  </span>
+                )}
               </div>
 
               <span className="font-mono text-xs font-bold bg-brand-paper border border-brand-dark px-2.5 py-1 shadow-brutal-xs">

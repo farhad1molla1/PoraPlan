@@ -256,7 +256,7 @@ export const PlanDetailPage: React.FC = () => {
               <div>
                 <span className="text-[10px] text-brand-muted block uppercase">Assigned Student</span>
                 <span className="font-bold text-brand-navy">
-                  {studentProfile ? `${studentProfile.full_name} (${studentProfile.poraplan_id || 'PP001'})` : 'Student Scholar'}
+                  {studentProfile ? `${studentProfile.full_name}${studentProfile.poraplan_id ? ` (${studentProfile.poraplan_id})` : ''}` : 'Student'}
                 </span>
               </div>
             </div>
@@ -266,7 +266,7 @@ export const PlanDetailPage: React.FC = () => {
               <div>
                 <span className="text-[10px] text-brand-muted block uppercase">Supervising Mentor</span>
                 <span className="font-bold text-brand-navy">
-                  {mentorProfile ? `${mentorProfile.full_name} (${mentorProfile.poraplan_id || 'PPM001'})` : 'Assigned Mentor'}
+                  {mentorProfile ? `${mentorProfile.full_name}${mentorProfile.poraplan_id ? ` (${mentorProfile.poraplan_id})` : ''}` : 'Assigned Mentor'}
                 </span>
               </div>
             </div>

@@ -89,7 +89,7 @@ export const MentorDashboardPage: React.FC = () => {
   });
 
   const mentorName = profile?.full_name || user?.user_metadata?.full_name || 'Academic Mentor';
-  const mentorIdDisplay = poraplanId || profile?.poraplan_id || 'PPM001';
+  const mentorIdDisplay = poraplanId || profile?.poraplan_id || '';
 
   // Derived real attention metrics
   const pendingReviews = reviews.filter((r) => r.status === 'submitted' || r.status === 'under_review');
@@ -125,10 +125,14 @@ export const MentorDashboardPage: React.FC = () => {
                   <Calendar className="w-3.5 h-3.5 text-brand-gold shrink-0" />
                   {currentDate}
                 </span>
-                <span>•</span>
-                <span className="font-bold text-brand-gold">
-                  ID: {mentorIdDisplay}
-                </span>
+                {mentorIdDisplay && (
+                  <>
+                    <span>•</span>
+                    <span className="font-bold text-brand-gold">
+                      ID: {mentorIdDisplay}
+                    </span>
+                  </>
+                )}
                 <span>•</span>
                 <span className="uppercase text-brand-gold font-bold">{role || 'Mentor'}</span>
               </div>
@@ -337,10 +341,14 @@ export const MentorDashboardPage: React.FC = () => {
                           </h3>
                         </div>
                         <div className="flex items-center gap-2 text-xs font-mono text-brand-muted">
-                          <span className="font-bold text-brand-gold">
-                            ID: {student.poraplan_id || 'PP001'}
-                          </span>
-                          <span>•</span>
+                          {student.poraplan_id && (
+                            <>
+                              <span className="font-bold text-brand-gold">
+                                ID: {student.poraplan_id}
+                              </span>
+                              <span>•</span>
+                            </>
+                          )}
                           <span className="truncate max-w-[180px]">{student.email}</span>
                         </div>
                       </div>
@@ -818,7 +826,7 @@ export const MentorDashboardPage: React.FC = () => {
                 <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
                   <span className="text-[10px] text-brand-muted uppercase block font-bold">PoraPlan ID</span>
                   <span className="font-bold text-brand-gold text-sm">
-                    {selectedStudent.poraplan_id || 'PP001'}
+                    {selectedStudent.poraplan_id || '-'}
                   </span>
                 </div>
 

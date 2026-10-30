@@ -414,7 +414,7 @@ export const DashboardLayout: React.FC = () => {
               <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
                 <span className="text-[10px] text-brand-muted uppercase block">PoraPlan ID</span>
                 <span className="font-bold text-brand-navy text-sm font-mono">
-                  {poraplanId || profile?.poraplan_id || 'PP-MEMBER'}
+                  {poraplanId || profile?.poraplan_id || '-'}
                 </span>
               </div>
 

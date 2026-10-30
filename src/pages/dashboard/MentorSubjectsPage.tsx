@@ -342,7 +342,7 @@ export const MentorSubjectsPage: React.FC = () => {
               >
                 {students.map((student) => (
                   <option key={student.id} value={student.id}>
-                    {student.full_name} ({student.poraplan_id || 'Student'})
+                    {student.full_name}{student.poraplan_id ? ` (${student.poraplan_id})` : ''}
                   </option>
                 ))}
               </select>
@@ -355,8 +355,12 @@ export const MentorSubjectsPage: React.FC = () => {
             <div className="p-2.5 border border-brand-dark/20 bg-brand-paper-tint text-xs font-mono flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-brand-navy">{activeStudent.full_name}</span>
-                <span>•</span>
-                <span className="text-brand-gold font-bold">{activeStudent.poraplan_id || 'PP001'}</span>
+                {activeStudent.poraplan_id && (
+                  <>
+                    <span>•</span>
+                    <span className="text-brand-gold font-bold">{activeStudent.poraplan_id}</span>
+                  </>
+                )}
                 <span>•</span>
                 <span className="text-brand-muted truncate max-w-[200px]">{activeStudent.email}</span>
               </div>
@@ -532,7 +536,7 @@ export const MentorSubjectsPage: React.FC = () => {
                   Assigning to Student:
                 </span>
                 <span className="text-xs font-bold text-brand-navy font-heading">
-                  {activeStudent?.full_name} ({activeStudent?.poraplan_id || 'PP001'})
+                  {activeStudent?.full_name}{activeStudent?.poraplan_id ? ` (${activeStudent.poraplan_id})` : ''}
                 </span>
               </div>
 

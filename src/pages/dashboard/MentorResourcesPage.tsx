@@ -369,7 +369,7 @@ export const MentorResourcesPage: React.FC = () => {
               <option value="all">All Assigned Students ({students.length})</option>
               {students.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.full_name} ({s.poraplan_id || 'PP000'})
+                  {s.full_name}{s.poraplan_id ? ` (${s.poraplan_id})` : ''}
                 </option>
               ))}
             </select>
@@ -609,7 +609,7 @@ export const MentorResourcesPage: React.FC = () => {
                 >
                   {students.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.full_name} ({s.poraplan_id || 'PP000'})
+                      {s.full_name}{s.poraplan_id ? ` (${s.poraplan_id})` : ''}
                     </option>
                   ))}
                 </select>

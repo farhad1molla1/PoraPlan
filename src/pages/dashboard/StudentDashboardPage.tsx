@@ -156,10 +156,14 @@ export const StudentDashboardPage: React.FC = () => {
                   <Calendar className="w-3.5 h-3.5 text-brand-gold shrink-0" />
                   {currentDate}
                 </span>
-                <span>•</span>
-                <span className="font-bold text-brand-gold">
-                  ID: {poraplanId || profile?.poraplan_id || 'PP001'}
-                </span>
+                {(poraplanId || profile?.poraplan_id) && (
+                  <>
+                    <span>•</span>
+                    <span className="font-bold text-brand-gold">
+                      ID: {poraplanId || profile?.poraplan_id}
+                    </span>
+                  </>
+                )}
                 <span>•</span>
                 <span className="uppercase text-brand-teal font-bold">{role || 'Student'}</span>
               </div>

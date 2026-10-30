@@ -160,12 +160,14 @@ export const StudentTasksPage: React.FC = () => {
                 <Users className="w-3.5 h-3.5 text-brand-gold" />
                 <span>Assigned Mentor:</span>
                 <strong className="text-brand-gold font-bold">
-                  {assignedMentor.full_name} ({assignedMentor.poraplan_id || 'PPM001'})
+                  {assignedMentor.full_name}{assignedMentor.poraplan_id ? ` (${assignedMentor.poraplan_id})` : ''}
                 </strong>
               </div>
-              <div className="text-[11px] text-brand-paper/70">
-                Student ID: <span className="text-brand-teal-light font-bold">{profile?.poraplan_id || 'PP001'}</span>
-              </div>
+              {profile?.poraplan_id && (
+                <div className="text-[11px] text-brand-paper/70">
+                  Student ID: <span className="text-brand-teal-light font-bold">{profile.poraplan_id}</span>
+                </div>
+              )}
             </div>
           )}
         </section>

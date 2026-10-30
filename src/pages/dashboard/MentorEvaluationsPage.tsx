@@ -517,7 +517,7 @@ export const MentorEvaluationsPage: React.FC = () => {
               <option value="all">All Assigned Students ({students.length})</option>
               {students.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.full_name} ({s.poraplan_id || 'Student'})
+                  {s.full_name}{s.poraplan_id ? ` (${s.poraplan_id})` : ''}
                 </option>
               ))}
             </select>
@@ -613,7 +613,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-brand-muted">
                       <span className="font-bold text-brand-teal flex items-center gap-1">
                         <Users className="w-3.5 h-3.5" />
-                        Student: {item.student_name} ({item.student_poraplan_id || 'PP001'})
+                        Student: {item.student_name}{item.student_poraplan_id ? ` (${item.student_poraplan_id})` : ''}
                       </span>
                       <span>•</span>
                       <span className="flex items-center gap-1 text-brand-dark font-medium">
@@ -813,7 +813,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                 >
                   {students.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.full_name} ({s.poraplan_id || 'PP001'}) — {s.email}
+                      {s.full_name}{s.poraplan_id ? ` (${s.poraplan_id})` : ''} — {s.email}
                     </option>
                   ))}
                 </select>
@@ -1131,7 +1131,9 @@ export const MentorEvaluationsPage: React.FC = () => {
                   {activeEval.student_name}
                 </div>
                 <div className="font-mono text-[11px] text-brand-muted">
-                  ID: {activeEval.student_poraplan_id || 'PP001'} • {activeEval.student_email || 'student@poraplan.internal'}
+                  {activeEval.student_poraplan_id ? `ID: ${activeEval.student_poraplan_id}` : ''}
+                  {activeEval.student_poraplan_id && activeEval.student_email ? ' • ' : ''}
+                  {activeEval.student_email || ''}
                 </div>
               </div>
 

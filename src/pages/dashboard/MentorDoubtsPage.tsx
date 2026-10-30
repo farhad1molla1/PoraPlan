@@ -279,7 +279,7 @@ export const MentorDoubtsPage: React.FC = () => {
               <option value="all">All Assigned Students</option>
               {students.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.full_name} ({s.poraplan_id || 'PP'})
+                  {s.full_name}{s.poraplan_id ? ` (${s.poraplan_id})` : ''}
                 </option>
               ))}
             </select>
@@ -353,7 +353,7 @@ export const MentorDoubtsPage: React.FC = () => {
                       {/* Scholar Badge */}
                       <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-white text-brand-navy flex items-center gap-1">
                         <User className="w-3 h-3 text-brand-teal" />
-                        {doubt.student_name} ({doubt.student_poraplan_id || 'PP'})
+                        {doubt.student_name}{doubt.student_poraplan_id ? ` (${doubt.student_poraplan_id})` : ''}
                       </span>
 
                       {/* Status Badge */}
@@ -442,7 +442,7 @@ export const MentorDoubtsPage: React.FC = () => {
                 <div>
                   <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
                     <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-white text-brand-navy">
-                      Student: {activeDoubt.student_name} ({activeDoubt.student_poraplan_id || 'PP'})
+                      Student: {activeDoubt.student_name}{activeDoubt.student_poraplan_id ? ` (${activeDoubt.student_poraplan_id})` : ''}
                     </span>
 
                     {activeDoubt.subject_name && (

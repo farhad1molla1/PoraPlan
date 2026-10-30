@@ -177,6 +177,19 @@ Apply SQL files located in `supabase/migrations/` to your Supabase PostgreSQL in
 1. `20260927000001_profiles_schema.sql` (Profiles table, roles enum, triggers)
 2. `20260927000002_mentor_students_rls.sql` (Mentor-student pairings and strict RLS)
 3. `20260927000003_controlled_poraplan_accounts.sql` (PoraPlan ID, account status, linkage verifiers)
+4. `20260927000004_role_protection_and_security.sql` (Role authorization hardening)
+5. `20260927000005_provision_test_accounts.sql` (Initial test accounts)
+6. `20261021000001_subjects_schema.sql` (University course subjects)
+7. `20261021000002_study_plans_schema.sql` (Study plans and roadmaps)
+8. `20261021000003_tasks_schema.sql` (Daily study tasks)
+9. `20261021000004_assignments_schema.sql` (Assignments and problem sets)
+10. `20261021000005_mentor_review_and_feedback_schema.sql` (Submissions and qualitative review)
+11. `20261021000006_evaluations_schema.sql` (Evaluation check-ins and progress calibration)
+12. `20261021000007_progress_tracking_indexes.sql` (Study cycle and progress tracking indexes)
+13. `20261021000008_resources_schema.sql` (Curated study resources)
+14. `20261021000009_doubts_schema.sql` (Academic doubt clarification threads)
+15. `20261021000010_announcements_schema.sql` (Mentor and platform announcements)
+16. `20261021000011_notifications_schema.sql` (In-app real-time notification feeds)
 
 ### 4. Development & Build Commands
 ```bash
@@ -192,12 +205,35 @@ npm run lint
 
 ---
 
-## Completed Milestones
+## Communication & Notification Architecture
 
-- [x] **Phase 0:** Neo-Brutalist design system, responsive landing page, how-it-works, about, public layouts.
-- [x] **Phase 1A:** Supabase client connection & environment configuration.
-- [x] **Phase 1B:** Profiles schema & role foundation with database triggers.
-- [x] **Phase 1C:** Mentor-student relationship schema & strict RLS policies.
-- [x] **Phase 1D:** Authentication engine & role routing.
-- [x] **Phase 1E:** Authenticated student & mentor dashboard foundation shell with mobile-first navigation.
-- [x] **Phase 1F:** Controlled PoraPlan account model (PoraPlan IDs, Google login for existing members, secure password recovery, contact info, removal of public self-signup).
+### In-App Notification System (Current MVP)
+- Real-time in-app notification center for all student and mentor events.
+- Triggered automatically upon successful mentor actions:
+  - New daily study task assigned.
+  - New assignment or problem set published.
+  - Qualitative submission review and feedback recorded.
+  - Evaluation session scheduled or completed.
+  - Mentor response posted to a student doubt inquiry.
+  - Cohort or individual announcement dispatched.
+- Enforces strict recipient isolation via Supabase Row Level Security (RLS) with offline mock fallback.
+
+### WhatsApp Mentorship & Future Automated Notifications
+- **Direct Mentorship Channel (Current MVP):** WhatsApp serves as an immediate, real-life communication channel between students and mentors for rapid check-ins, coordination, and urgent study queries. Direct chat links connect members to authorized mentors without claiming automatic delivery.
+- **Automated Delivery (Planned Future Integration):** Automated notification dispatch to a student's verified WhatsApp phone number is designed as an optional future backend integration using the official Meta WhatsApp Business Cloud API. This will require:
+  - A verified Meta Business Account and dedicated business phone number.
+  - Meta-approved outbound message templates (for task alerts, assignment notices, and evaluation reminders).
+  - Server-side execution (e.g. Supabase Edge Functions) to protect access tokens and API secrets outside client-side bundles.
+  - User opt-in and phone-number verification.
+  - In the current MVP, all notifications remain reliably delivered through the in-app notification desk.
+
+---
+
+## Core Application Modules
+
+- **Personal Study Assistance:** Structured daily study plans and tasks organized by mentors from university syllabi.
+- **Practice & Submissions:** Targeted problem sets and assignments with qualitative mentor review.
+- **Evaluations & Check-ins:** Periodic reviews via Google Meet, Zoom, or written feedback to check understanding and calibrate pace.
+- **Doubt Resolution:** Direct question-and-answer threads between students and assigned mentors.
+- **Curated Resources:** Mentor-curated lecture notes, reference sheets, and textbook excerpts.
+- **Progress Tracking:** Real-time visibility into completed tasks, submitted assignments, and evaluations.
