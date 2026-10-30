@@ -32,6 +32,19 @@ import type {
   AnnouncementAcknowledgment,
   Notification,
   NotificationType,
+  Program,
+  ProgramInsert,
+  ProgramUpdate,
+  Cohort,
+  CohortInsert,
+  CohortUpdate,
+  ProgramCurriculumSection,
+  ProgramCurriculumSectionInsert,
+  ProgramCurriculumSectionUpdate,
+  ProgramCurriculumTopic,
+  ProgramCurriculumTopicInsert,
+  ProgramCurriculumTopicUpdate,
+  CurriculumSectionWithTopics,
 } from '../types/database';
 import { sha256 } from './crypto';
 
@@ -3611,5 +3624,598 @@ export function deleteMockNotification(
   }
 
   mockNotifications.splice(index, 1);
+  return { success: true, error: null };
+}
+
+// ==============================================================================
+// Milestone 2: Mock Program, Cohort, and Curriculum Management Store
+// ==============================================================================
+
+const mockPrograms: Program[] = [
+  {
+    id: 'prog-academic-01',
+    name: 'PoraPlan Academic Program 0.1 (Beta)',
+    slug: 'academic-program-0-1-beta',
+    category: 'academic_mentorship',
+    short_description: 'Comprehensive semester academic assistance, structured syllabus organization, daily target planning, and dedicated mentor supervision.',
+    description: 'PoraPlan Academic Program provides students with personal 1-on-1 and small-cohort academic mentorship. We review your syllabus, organize learning resources, structure daily tasks, and conduct weekly evaluations to keep you consistent and ahead of semester exams.',
+    learning_objectives: [
+      'Build consistent, disciplined daily study habits without burnout',
+      'Systematic breakdown of semester syllabus and complex course outlines',
+      'Weekly mentor review, doubt clearing, and continuous exam preparation',
+    ],
+    target_audience: 'Undergraduate university students seeking structured study routines and personalized academic guidance.',
+    prerequisites: 'Currently enrolled in university semester coursework. Commitment of 2-3 hours of focused daily study.',
+    duration: 'Full Academic Semester (4 Months)',
+    delivery_mode: 'Hybrid (Personal Online Mentorship & Asynchronous Tracking)',
+    cover_image_url: null,
+    publication_status: 'published',
+    enrollment_status: 'open',
+    display_order: 1,
+    created_by: 'mock-admin-ppa001',
+    created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'prog-skillsprint-git',
+    name: 'SkillSprint — Git, GitHub & Modern Version Control',
+    slug: 'skillsprint-git-github',
+    category: 'skillsprint',
+    short_description: 'A hands-on, project-driven sprint to master Git CLI, team collaboration workflows, branching models, and pull request hygiene.',
+    description: 'Master practical industry version control fundamentals. From initialization, branching strategies, rebase vs merge, to full GitHub collaborative workflows with pull requests and code reviews.',
+    learning_objectives: [
+      'Master Git branch management and merge conflict resolution',
+      'Collaborative GitHub workflow: PRs, code reviews, and releases',
+      'Essential daily developer CLI habits and terminal speed',
+    ],
+    target_audience: 'CS students, junior developers, and self-taught programmers seeking workplace-ready Git fluency.',
+    prerequisites: 'Basic command line familiarity. Laptop with Git installed.',
+    duration: '3 Weeks Intensive',
+    delivery_mode: 'Hands-on Sprint (Live Code Labs + Practical Exercises)',
+    cover_image_url: null,
+    publication_status: 'published',
+    enrollment_status: 'open',
+    display_order: 2,
+    created_by: 'mock-admin-ppa001',
+    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'prog-skillsprint-c-fundamentals',
+    name: 'SkillSprint — C Programming & Problem Solving Fundamentals',
+    slug: 'skillsprint-c-programming',
+    category: 'skillsprint',
+    short_description: 'Foundational programming concepts, memory pointers, dynamic arrays, and structured problem solving in C.',
+    description: 'Designed specifically for university students taking introductory programming. Bridges theoretical lectures with practical problem solving.',
+    learning_objectives: [
+      'Deconstruct complex programming logic into clean algorithmic steps',
+      'Deep conceptual clarity on pointers, memory allocation, and structs',
+      'Preparation for university lab exams and programming contests',
+    ],
+    target_audience: 'First-year university students tackling CSE 101/103 or beginners learning programming.',
+    prerequisites: 'No prior programming experience required.',
+    duration: '4 Weeks',
+    delivery_mode: 'Structured Cohort Sprint',
+    cover_image_url: null,
+    publication_status: 'draft',
+    enrollment_status: 'closed',
+    display_order: 3,
+    created_by: 'mock-admin-ppa001',
+    created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
+
+const mockCohorts: Cohort[] = [
+  {
+    id: 'cohort-uu-cse-b67',
+    program_id: 'prog-academic-01',
+    name: 'UU CSE Batch 67 — Fall 2026',
+    code: 'UU-CSE-B67-F26',
+    description: 'Specialized academic mentorship cohort for Uttara University CSE Batch 67 students covering core Fall 2026 courses.',
+    start_date: '2026-10-01',
+    end_date: '2027-02-15',
+    capacity: 30,
+    status: 'active',
+    created_by: 'mock-admin-ppa001',
+    created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'cohort-git-sprint-01',
+    program_id: 'prog-skillsprint-git',
+    name: 'Sprint Cohort 01 — Git Foundations',
+    code: 'GIT-SPRINT-01',
+    description: 'Inaugural SkillSprint cohort focusing on Git CLI mastery and GitHub team collaboration.',
+    start_date: '2026-11-15',
+    end_date: '2026-12-06',
+    capacity: 25,
+    status: 'planned',
+    created_by: 'mock-admin-ppa001',
+    created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
+
+const mockCurriculumSections: ProgramCurriculumSection[] = [
+  {
+    id: 'sec-acad-01',
+    program_id: 'prog-academic-01',
+    title: 'Phase 1: Academic Diagnostic & Study Routine Formulation',
+    description: 'Initial assessment of syllabus materials, academic baseline, and establishing structured weekly study blocks.',
+    display_order: 1,
+    created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'sec-acad-02',
+    program_id: 'prog-academic-01',
+    title: 'Phase 2: Core Course Syllabus Roadmap & Daily Targets',
+    description: 'Deep dive into semester coursework, breaking complex lectures into daily bite-sized tasks and practice exercises.',
+    display_order: 2,
+    created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'sec-acad-03',
+    program_id: 'prog-academic-01',
+    title: 'Phase 3: Midterm & Final Exam Preparation Sprints',
+    description: 'Targeted revision routines, past question analysis, timed mock exams, and prompt mentor feedback.',
+    display_order: 3,
+    created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'sec-git-01',
+    program_id: 'prog-skillsprint-git',
+    title: 'Module 1: Version Control Foundations & Local Git',
+    description: 'Setting up Git, repository anatomy, staging, committing, and inspecting commit history.',
+    display_order: 1,
+    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'sec-git-02',
+    program_id: 'prog-skillsprint-git',
+    title: 'Module 2: Branching, Merging & Remote Collaboration',
+    description: 'Feature branching models, resolving merge conflicts, remotes, GitHub pull requests, and code review etiquette.',
+    display_order: 2,
+    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
+
+const mockCurriculumTopics: ProgramCurriculumTopic[] = [
+  // Academic Phase 1
+  {
+    id: 'top-acad-01-01',
+    section_id: 'sec-acad-01',
+    title: '1-on-1 Academic Diagnostic Session',
+    description: 'Review current academic goals, past university grades, and identify challenge areas.',
+    display_order: 1,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'top-acad-01-02',
+    section_id: 'sec-acad-01',
+    title: 'Course Outlines & Syllabus Cataloging',
+    description: 'Organize course handouts, lecture slide repositories, and required textbook readings.',
+    display_order: 2,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'top-acad-01-03',
+    section_id: 'sec-acad-01',
+    title: 'Weekly Study Schedule Formulation',
+    description: 'Lock in realistic daily study hours and WhatsApp check-in milestones.',
+    display_order: 3,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  // Academic Phase 2
+  {
+    id: 'top-acad-02-01',
+    section_id: 'sec-acad-02',
+    title: 'Weekly Target Planning & Task Breakdown',
+    description: 'Mentor assigns Monday-to-Saturday targets with concrete practice problems.',
+    display_order: 1,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'top-acad-02-02',
+    section_id: 'sec-acad-02',
+    title: 'Daily Doubt Logging & Rapid Response',
+    description: 'Submitting questions and code snippets with screenshot attachments for mentor review.',
+    display_order: 2,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'top-acad-02-03',
+    section_id: 'sec-acad-02',
+    title: 'Concept Checks & Weekly Progress Tracking',
+    description: 'Regular mini-evaluations to confirm understanding before moving to subsequent topics.',
+    display_order: 3,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  // Academic Phase 3
+  {
+    id: 'top-acad-03-01',
+    section_id: 'sec-acad-03',
+    title: 'University Past Exam Paper Review',
+    description: 'Analyzing high-frequency question patterns from the last 5 semester exams.',
+    display_order: 1,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'top-acad-03-02',
+    section_id: 'sec-acad-03',
+    title: 'Timed Simulation & Mock Examinations',
+    description: 'Simulating exam conditions with mentor grading and feedback on presentation.',
+    display_order: 2,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  // Git Module 1
+  {
+    id: 'top-git-01-01',
+    section_id: 'sec-git-01',
+    title: 'What is Version Control & Git Architecture',
+    description: 'Working directory, staging area, and commit tree concepts.',
+    display_order: 1,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'top-git-01-02',
+    section_id: 'sec-git-01',
+    title: 'Essential Commands & Diff Inspection',
+    description: 'git init, status, add, commit, diff, and log formatting.',
+    display_order: 2,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  // Git Module 2
+  {
+    id: 'top-git-02-01',
+    section_id: 'sec-git-02',
+    title: 'Branching Strategies & Conflict Resolution',
+    description: 'Creating branches, merging changes, and resolving conflict markers calmly.',
+    display_order: 1,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'top-git-02-02',
+    section_id: 'sec-git-02',
+    title: 'GitHub Pull Requests & Team Collaboration',
+    description: 'Forking, branching, crafting meaningful PR descriptions, and addressing reviews.',
+    display_order: 2,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
+
+// --- Mock Program CRUD Functions ---
+
+export function getMockPrograms(options?: {
+  category?: string;
+  status?: string;
+  includeUnpublished?: boolean;
+}): Program[] {
+  let list = [...mockPrograms];
+
+  if (!options?.includeUnpublished) {
+    list = list.filter((p) => p.publication_status === 'published');
+  }
+
+  if (options?.category && options.category !== 'all') {
+    list = list.filter((p) => p.category === options.category);
+  }
+
+  if (options?.status && options.status !== 'all') {
+    list = list.filter((p) => p.publication_status === options.status);
+  }
+
+  return list.sort((a, b) => a.display_order - b.display_order);
+}
+
+export function getMockProgramBySlug(slug: string): Program | null {
+  return mockPrograms.find((p) => p.slug === slug) || null;
+}
+
+export function getMockProgramById(id: string): Program | null {
+  return mockPrograms.find((p) => p.id === id) || null;
+}
+
+export function createMockProgram(program: ProgramInsert): { program: Program | null; error: Error | null } {
+  const existing = mockPrograms.find((p) => p.slug === program.slug);
+  if (existing) {
+    return { program: null, error: new Error(`A program with slug '${program.slug}' already exists.`) };
+  }
+
+  const now = new Date().toISOString();
+  const newProgram: Program = {
+    id: program.id || `prog-${Date.now()}`,
+    name: program.name,
+    slug: program.slug,
+    category: program.category,
+    short_description: program.short_description,
+    description: program.description || null,
+    learning_objectives: program.learning_objectives || [],
+    target_audience: program.target_audience || null,
+    prerequisites: program.prerequisites || null,
+    duration: program.duration || null,
+    delivery_mode: program.delivery_mode || null,
+    cover_image_url: program.cover_image_url || null,
+    publication_status: program.publication_status || 'draft',
+    enrollment_status: program.enrollment_status || 'closed',
+    display_order: program.display_order ?? (mockPrograms.length + 1),
+    created_by: program.created_by || 'mock-admin-ppa001',
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockPrograms.push(newProgram);
+  return { program: newProgram, error: null };
+}
+
+export function updateMockProgram(
+  id: string,
+  updates: ProgramUpdate
+): { program: Program | null; error: Error | null } {
+  const index = mockPrograms.findIndex((p) => p.id === id);
+  if (index === -1) {
+    return { program: null, error: new Error('Program not found.') };
+  }
+
+  if (updates.slug && updates.slug !== mockPrograms[index].slug) {
+    const slugCollision = mockPrograms.find((p) => p.slug === updates.slug && p.id !== id);
+    if (slugCollision) {
+      return { program: null, error: new Error(`Slug '${updates.slug}' is already in use by another program.`) };
+    }
+  }
+
+  mockPrograms[index] = {
+    ...mockPrograms[index],
+    ...updates,
+    updated_at: new Date().toISOString(),
+  };
+
+  return { program: mockPrograms[index], error: null };
+}
+
+export function deleteMockProgram(id: string): { success: boolean; error: Error | null } {
+  const index = mockPrograms.findIndex((p) => p.id === id);
+  if (index === -1) {
+    return { success: false, error: new Error('Program not found.') };
+  }
+
+  mockPrograms.splice(index, 1);
+  return { success: true, error: null };
+}
+
+// --- Mock Cohort CRUD Functions ---
+
+export function getMockCohorts(programId?: string): Cohort[] {
+  let list = [...mockCohorts];
+  if (programId) {
+    list = list.filter((c) => c.program_id === programId);
+  }
+  return list;
+}
+
+export function createMockCohort(cohort: CohortInsert): { cohort: Cohort | null; error: Error | null } {
+  const existingCode = mockCohorts.find((c) => c.code.toUpperCase() === cohort.code.trim().toUpperCase());
+  if (existingCode) {
+    return { cohort: null, error: new Error(`Cohort code '${cohort.code}' already exists.`) };
+  }
+
+  const now = new Date().toISOString();
+  const newCohort: Cohort = {
+    id: cohort.id || `cohort-${Date.now()}`,
+    program_id: cohort.program_id,
+    name: cohort.name.trim(),
+    code: cohort.code.trim().toUpperCase(),
+    description: cohort.description || null,
+    start_date: cohort.start_date || null,
+    end_date: cohort.end_date || null,
+    capacity: cohort.capacity ?? null,
+    status: cohort.status || 'planned',
+    created_by: cohort.created_by || 'mock-admin-ppa001',
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockCohorts.push(newCohort);
+  return { cohort: newCohort, error: null };
+}
+
+export function updateMockCohort(
+  id: string,
+  updates: CohortUpdate
+): { cohort: Cohort | null; error: Error | null } {
+  const index = mockCohorts.findIndex((c) => c.id === id);
+  if (index === -1) {
+    return { cohort: null, error: new Error('Cohort not found.') };
+  }
+
+  if (updates.code && updates.code.toUpperCase() !== mockCohorts[index].code) {
+    const codeCollision = mockCohorts.find(
+      (c) => c.code.toUpperCase() === updates.code?.trim().toUpperCase() && c.id !== id
+    );
+    if (codeCollision) {
+      return { cohort: null, error: new Error(`Cohort code '${updates.code}' is already taken.`) };
+    }
+  }
+
+  mockCohorts[index] = {
+    ...mockCohorts[index],
+    ...updates,
+    code: updates.code ? updates.code.trim().toUpperCase() : mockCohorts[index].code,
+    updated_at: new Date().toISOString(),
+  };
+
+  return { cohort: mockCohorts[index], error: null };
+}
+
+export function deleteMockCohort(id: string): { success: boolean; error: Error | null } {
+  const index = mockCohorts.findIndex((c) => c.id === id);
+  if (index === -1) {
+    return { success: false, error: new Error('Cohort not found.') };
+  }
+
+  mockCohorts.splice(index, 1);
+  return { success: true, error: null };
+}
+
+// --- Mock Curriculum CRUD Functions ---
+
+export function getMockProgramCurriculum(programId: string): CurriculumSectionWithTopics[] {
+  const sections = mockCurriculumSections
+    .filter((s) => s.program_id === programId)
+    .sort((a, b) => a.display_order - b.display_order);
+
+  return sections.map((sec) => ({
+    ...sec,
+    topics: mockCurriculumTopics
+      .filter((t) => t.section_id === sec.id)
+      .sort((a, b) => a.display_order - b.display_order),
+  }));
+}
+
+export function createMockCurriculumSection(
+  section: ProgramCurriculumSectionInsert
+): { section: ProgramCurriculumSection | null; error: Error | null } {
+  const now = new Date().toISOString();
+  const existingInProg = mockCurriculumSections.filter((s) => s.program_id === section.program_id);
+  const newSection: ProgramCurriculumSection = {
+    id: section.id || `sec-${Date.now()}`,
+    program_id: section.program_id,
+    title: section.title.trim(),
+    description: section.description || null,
+    display_order: section.display_order ?? (existingInProg.length + 1),
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockCurriculumSections.push(newSection);
+  return { section: newSection, error: null };
+}
+
+export function updateMockCurriculumSection(
+  id: string,
+  updates: ProgramCurriculumSectionUpdate
+): { section: ProgramCurriculumSection | null; error: Error | null } {
+  const index = mockCurriculumSections.findIndex((s) => s.id === id);
+  if (index === -1) {
+    return { section: null, error: new Error('Curriculum section not found.') };
+  }
+
+  mockCurriculumSections[index] = {
+    ...mockCurriculumSections[index],
+    ...updates,
+    updated_at: new Date().toISOString(),
+  };
+
+  return { section: mockCurriculumSections[index], error: null };
+}
+
+export function deleteMockCurriculumSection(id: string): { success: boolean; error: Error | null } {
+  const index = mockCurriculumSections.findIndex((s) => s.id === id);
+  if (index === -1) {
+    return { success: false, error: new Error('Curriculum section not found.') };
+  }
+
+  // Delete associated topics
+  for (let i = mockCurriculumTopics.length - 1; i >= 0; i--) {
+    if (mockCurriculumTopics[i].section_id === id) {
+      mockCurriculumTopics.splice(i, 1);
+    }
+  }
+
+  mockCurriculumSections.splice(index, 1);
+  return { success: true, error: null };
+}
+
+export function reorderMockCurriculumSections(
+  programId: string,
+  sectionIds: string[]
+): { success: boolean; error: Error | null } {
+  sectionIds.forEach((secId, idx) => {
+    const sec = mockCurriculumSections.find((s) => s.id === secId && s.program_id === programId);
+    if (sec) {
+      sec.display_order = idx + 1;
+      sec.updated_at = new Date().toISOString();
+    }
+  });
+
+  return { success: true, error: null };
+}
+
+export function createMockCurriculumTopic(
+  topic: ProgramCurriculumTopicInsert
+): { topic: ProgramCurriculumTopic | null; error: Error | null } {
+  const now = new Date().toISOString();
+  const existingInSec = mockCurriculumTopics.filter((t) => t.section_id === topic.section_id);
+  const newTopic: ProgramCurriculumTopic = {
+    id: topic.id || `top-${Date.now()}`,
+    section_id: topic.section_id,
+    title: topic.title.trim(),
+    description: topic.description || null,
+    display_order: topic.display_order ?? (existingInSec.length + 1),
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockCurriculumTopics.push(newTopic);
+  return { topic: newTopic, error: null };
+}
+
+export function updateMockCurriculumTopic(
+  id: string,
+  updates: ProgramCurriculumTopicUpdate
+): { topic: ProgramCurriculumTopic | null; error: Error | null } {
+  const index = mockCurriculumTopics.findIndex((t) => t.id === id);
+  if (index === -1) {
+    return { topic: null, error: new Error('Curriculum topic not found.') };
+  }
+
+  mockCurriculumTopics[index] = {
+    ...mockCurriculumTopics[index],
+    ...updates,
+    updated_at: new Date().toISOString(),
+  };
+
+  return { topic: mockCurriculumTopics[index], error: null };
+}
+
+export function deleteMockCurriculumTopic(id: string): { success: boolean; error: Error | null } {
+  const index = mockCurriculumTopics.findIndex((t) => t.id === id);
+  if (index === -1) {
+    return { success: false, error: new Error('Curriculum topic not found.') };
+  }
+
+  mockCurriculumTopics.splice(index, 1);
+  return { success: true, error: null };
+}
+
+export function reorderMockCurriculumTopics(
+  sectionId: string,
+  topicIds: string[]
+): { success: boolean; error: Error | null } {
+  topicIds.forEach((tId, idx) => {
+    const top = mockCurriculumTopics.find((t) => t.id === tId && t.section_id === sectionId);
+    if (top) {
+      top.display_order = idx + 1;
+      top.updated_at = new Date().toISOString();
+    }
+  });
+
   return { success: true, error: null };
 }

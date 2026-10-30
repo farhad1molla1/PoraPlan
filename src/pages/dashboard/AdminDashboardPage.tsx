@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
-import { ShieldCheck, LogOut, CheckCircle, Database, UserPlus, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { ShieldCheck, LogOut, CheckCircle, Database, UserPlus, AlertCircle, CheckCircle2, Loader2, GraduationCap, ArrowRight } from 'lucide-react';
 import { adminRegisterMember } from '../../lib/profiles';
 import type { UserRole } from '../../types/database';
 
@@ -122,6 +122,36 @@ export const AdminDashboardPage: React.FC = () => {
                 Student and mentor account management, study syllabus oversight, and platform metrics.
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Milestone 2: Program & Cohort Management Desk Banner */}
+        <div className="border-2 border-brand-dark bg-brand-paper p-6 shadow-brutal space-y-4">
+          <div className="border-b-2 border-brand-dark pb-3 flex items-center justify-between">
+            <div className="space-y-0.5">
+              <h2 className="font-heading font-extrabold text-lg text-brand-navy flex items-center gap-2">
+                <GraduationCap className="w-5 h-5 text-brand-gold stroke-[2.5]" />
+                Program &amp; Cohort Management System
+              </h2>
+              <p className="text-xs text-brand-dark/80 font-sans">
+                Manage Academic Mentorship &amp; SkillSprint programs, publication status, enrollment flags, and curriculum modules.
+              </p>
+            </div>
+            <Badge variant="gold" size="sm">MILESTONE 2</Badge>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-1">
+            <p className="text-xs font-mono text-brand-muted max-w-xl">
+              Configure curriculum roadmaps, schedule upcoming cohort batches, and manage public visibility.
+            </p>
+            <Button
+              to="/admin/programs"
+              variant="primary"
+              size="sm"
+              rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+            >
+              Open Program Manager
+            </Button>
           </div>
         </div>
 

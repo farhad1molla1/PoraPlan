@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { RootLayout } from '../layouts/RootLayout';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { LandingPage } from '../pages/LandingPage';
+import { ProgramsPage } from '../pages/ProgramsPage';
+import { ProgramDetailPage } from '../pages/ProgramDetailPage';
 import { HowItWorksPage } from '../pages/HowItWorksPage';
 import { AboutPage } from '../pages/AboutPage';
 import { ContactPage } from '../pages/ContactPage';
@@ -14,6 +16,7 @@ import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { StudentDashboardPage } from '../pages/dashboard/StudentDashboardPage';
 import { MentorDashboardPage } from '../pages/dashboard/MentorDashboardPage';
 import { AdminDashboardPage } from '../pages/dashboard/AdminDashboardPage';
+import { AdminProgramsPage } from '../pages/dashboard/AdminProgramsPage';
 import { StudentSubjectsPage } from '../pages/dashboard/StudentSubjectsPage';
 import { MentorSubjectsPage } from '../pages/dashboard/MentorSubjectsPage';
 import { SubjectDetailPage } from '../pages/dashboard/SubjectDetailPage';
@@ -76,6 +79,8 @@ export const AppRoutes: React.FC = () => {
       {/* Public Marketing & Informational Shell */}
       <Route element={<RootLayout />}>
         <Route index element={<LandingPage />} />
+        <Route path="programs" element={<ProgramsPage />} />
+        <Route path="programs/:slug" element={<ProgramDetailPage />} />
         <Route path="how-it-works" element={<HowItWorksPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
@@ -311,6 +316,14 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/programs"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminProgramsPage />
             </ProtectedRoute>
           }
         />

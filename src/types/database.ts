@@ -75,6 +75,140 @@ export type ProfileUpdate = {
   updated_at?: string;
 };
 
+export type ProgramCategory = 'academic_mentorship' | 'skillsprint';
+export type ProgramPublicationStatus = 'draft' | 'published' | 'archived';
+export type ProgramEnrollmentStatus = 'open' | 'closed';
+export type CohortStatus = 'planned' | 'active' | 'completed' | 'archived';
+
+export type Program = {
+  id: string;
+  name: string;
+  slug: string;
+  category: ProgramCategory;
+  short_description: string;
+  description?: string | null;
+  learning_objectives: string[];
+  target_audience?: string | null;
+  prerequisites?: string | null;
+  duration?: string | null;
+  delivery_mode?: string | null;
+  cover_image_url?: string | null;
+  publication_status: ProgramPublicationStatus;
+  enrollment_status: ProgramEnrollmentStatus;
+  display_order: number;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProgramInsert = {
+  id?: string;
+  name: string;
+  slug: string;
+  category: ProgramCategory;
+  short_description: string;
+  description?: string | null;
+  learning_objectives?: string[];
+  target_audience?: string | null;
+  prerequisites?: string | null;
+  duration?: string | null;
+  delivery_mode?: string | null;
+  cover_image_url?: string | null;
+  publication_status?: ProgramPublicationStatus;
+  enrollment_status?: ProgramEnrollmentStatus;
+  display_order?: number;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProgramUpdate = Partial<ProgramInsert>;
+
+export type Cohort = {
+  id: string;
+  program_id: string;
+  name: string;
+  code: string;
+  description?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  capacity?: number | null;
+  status: CohortStatus;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type CohortInsert = {
+  id?: string;
+  program_id: string;
+  name: string;
+  code: string;
+  description?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  capacity?: number | null;
+  status?: CohortStatus;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type CohortUpdate = Partial<CohortInsert>;
+
+export type ProgramCurriculumSection = {
+  id: string;
+  program_id: string;
+  title: string;
+  description?: string | null;
+  display_order: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProgramCurriculumSectionInsert = {
+  id?: string;
+  program_id: string;
+  title: string;
+  description?: string | null;
+  display_order?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProgramCurriculumSectionUpdate = Partial<ProgramCurriculumSectionInsert>;
+
+export type ProgramCurriculumTopic = {
+  id: string;
+  section_id: string;
+  title: string;
+  description?: string | null;
+  display_order: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProgramCurriculumTopicInsert = {
+  id?: string;
+  section_id: string;
+  title: string;
+  description?: string | null;
+  display_order?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProgramCurriculumTopicUpdate = Partial<ProgramCurriculumTopicInsert>;
+
+export type CurriculumSectionWithTopics = ProgramCurriculumSection & {
+  topics: ProgramCurriculumTopic[];
+};
+
+export type ProgramWithCurriculumAndCohorts = Program & {
+  cohorts: Cohort[];
+  curriculum: CurriculumSectionWithTopics[];
+};
+
 export type MentorStudent = {
   mentor_id: string;
   student_id: string;
@@ -1075,6 +1209,69 @@ export type Database = {
             columns: ['actor_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      programs: {
+        Row: Program;
+        Insert: ProgramInsert;
+        Update: ProgramUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'programs_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      cohorts: {
+        Row: Cohort;
+        Insert: CohortInsert;
+        Update: CohortUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'cohorts_program_id_fkey';
+            columns: ['program_id'];
+            isOneToOne: false;
+            referencedRelation: 'programs';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'cohorts_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      program_curriculum_sections: {
+        Row: ProgramCurriculumSection;
+        Insert: ProgramCurriculumSectionInsert;
+        Update: ProgramCurriculumSectionUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'program_curriculum_sections_program_id_fkey';
+            columns: ['program_id'];
+            isOneToOne: false;
+            referencedRelation: 'programs';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      program_curriculum_topics: {
+        Row: ProgramCurriculumTopic;
+        Insert: ProgramCurriculumTopicInsert;
+        Update: ProgramCurriculumTopicUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'program_curriculum_topics_section_id_fkey';
+            columns: ['section_id'];
+            isOneToOne: false;
+            referencedRelation: 'program_curriculum_sections';
             referencedColumns: ['id'];
           }
         ];

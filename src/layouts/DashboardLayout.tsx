@@ -21,6 +21,7 @@ import {
   HelpCircle,
   Megaphone,
   Bell,
+  GraduationCap,
 } from 'lucide-react';
 import { getUnreadNotificationCount } from '../lib/notifications';
 
@@ -123,6 +124,7 @@ export const DashboardLayout: React.FC = () => {
 
   const adminNavItems = [
     { label: 'Admin Console', shortLabel: 'Admin', to: '/admin/dashboard', icon: ShieldCheck },
+    { label: 'Programs & Cohorts', shortLabel: 'Programs', to: '/admin/programs', icon: GraduationCap },
     { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
 
