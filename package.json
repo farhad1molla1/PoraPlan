@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "test": "jiti scripts/verify_milestone_5_1.ts",
+    "test": "jiti scripts/verify_milestone_5_2.ts",
     "preview": "vite preview",
     "postinstall": "node -e \"const fs=require('fs'); if(fs.existsSync('node_modules/@rollup/wasm-node')) { fs.cpSync('node_modules/@rollup/wasm-node', 'node_modules/rollup', {recursive: true, force: true}); }\""
   },

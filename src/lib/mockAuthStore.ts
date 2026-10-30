@@ -3344,6 +3344,19 @@ export function updateMockAnnouncement(
     return { announcement: null, error: new Error('You are not authorized to update this announcement.') };
   }
 
+  // Security checks (Milestone 5.2): Mentors cannot elevate to platform scope or retarget unauthorized students
+  if (!isAdmin) {
+    if (updates.target_scope === 'platform') {
+      return { announcement: null, error: new Error('Mentors cannot change announcement scope to platform-wide.') };
+    }
+    if (updates.target_scope === 'individual' || updates.student_id) {
+      const targetStudent = updates.student_id || current.student_id;
+      if (!targetStudent || !isMockAuthorizedMentorForStudent(normalizedUserId, targetStudent, (current as any).program_id)) {
+        return { announcement: null, error: new Error('Cannot direct announcement to unauthorized student.') };
+      }
+    }
+  }
+
   const cleanTitle = updates.title !== undefined ? updates.title.trim() : current.title;
   if (!cleanTitle) {
     return { announcement: null, error: new Error('Announcement title cannot be empty.') };
@@ -4716,7 +4729,21 @@ export function getMockEffectiveMentorForStudent(
     const callerAcc = mockStore.find((u) => u.id === normalizedCallerId);
     const isAdmin = callerAcc?.role === 'admin' || normalizedCallerId === 'mock-admin-ppa001' || callerId === 'admin';
     if (!isAdmin && normalizedCallerId !== normalizedStudentId) {
-      const isMentor = isMockAuthorizedMentorForStudent(normalizedCallerId, normalizedStudentId, programId || null);
+      // MENTOR CALLER RULES (Milestone 5.2):
+      // 1. Program ID is REQUIRED for mentor callers (no NULL program queries allowed)
+      if (!programId) {
+        return {
+          student_id: studentId,
+          mentor: null,
+          assignment_type: 'none',
+          assignment_id: null,
+          cohort: null,
+          program: null,
+          assigned_at: null,
+          notes: null,
+        };
+      }
+      const isMentor = isMockAuthorizedMentorForStudent(normalizedCallerId, normalizedStudentId, programId);
       if (!isMentor) {
         return {
           student_id: studentId,
@@ -5104,14 +5131,18 @@ export function adminAssignMockIndividualMentor(
     return { success: false, message: 'Student is not actively enrolled in this program.' };
   }
 
-  // Enforce cohort validation
+  // Enforce cohort validation (Strict Milestone 5.2 rules)
   let resolvedCohortId = activeEnrollment.cohort_id || null;
   if (cohortId) {
     const cohortObj = getMockCohorts().find((c) => c.id === cohortId && c.program_id === programId);
     if (!cohortObj) {
       return { success: false, message: 'Specified cohort does not belong to the selected program.' };
     }
-    if (activeEnrollment.cohort_id && activeEnrollment.cohort_id !== cohortId) {
+    // If student enrollment has no cohort, reject arbitrary cohort assignment
+    if (!activeEnrollment.cohort_id) {
+      return { success: false, message: 'Student is enrolled without a cohort; cannot assign a cohort-specific mentor.' };
+    }
+    if (activeEnrollment.cohort_id !== cohortId) {
       return { success: false, message: 'Specified cohort does not match student active enrollment cohort.' };
     }
     resolvedCohortId = cohortId;
