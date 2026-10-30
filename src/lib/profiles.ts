@@ -248,7 +248,7 @@ export async function connectPersonalEmail(
 
 /**
  * Update an existing profile for a user.
- * Explicitly sanitizes inputs: users can never alter role or poraplan_id.
+ * Explicitly sanitizes inputs: users can never alter role, poraplan_id, or status.
  */
 export async function updateProfile(
   userId: string,
@@ -257,11 +257,20 @@ export async function updateProfile(
   profile: Profile | null;
   error: Error | null;
 }> {
-  // Sanitize strictly: role cannot be altered by users
+  // Sanitize strictly: role, poraplan_id, and status cannot be altered by users
   const sanitizedUpdates: ProfileUpdate = {};
-  if (updates.full_name !== undefined) sanitizedUpdates.full_name = updates.full_name;
+  if (updates.full_name !== undefined) sanitizedUpdates.full_name = updates.full_name.trim();
   if (updates.avatar_url !== undefined) sanitizedUpdates.avatar_url = updates.avatar_url;
-  if (updates.linked_email !== undefined) sanitizedUpdates.linked_email = updates.linked_email;
+  if (updates.linked_email !== undefined) sanitizedUpdates.linked_email = updates.linked_email?.trim().toLowerCase() || null;
+  if (updates.whatsapp_number !== undefined) sanitizedUpdates.whatsapp_number = updates.whatsapp_number?.trim() || null;
+  if (updates.university !== undefined) sanitizedUpdates.university = updates.university?.trim() || null;
+  if (updates.department !== undefined) sanitizedUpdates.department = updates.department?.trim() || null;
+  if (updates.batch !== undefined) sanitizedUpdates.batch = updates.batch?.trim() || null;
+  if (updates.current_semester !== undefined) sanitizedUpdates.current_semester = updates.current_semester?.trim() || null;
+  if (updates.academic_background !== undefined) sanitizedUpdates.academic_background = updates.academic_background?.trim() || null;
+  if (updates.expertise !== undefined) sanitizedUpdates.expertise = updates.expertise?.trim() || null;
+  if (updates.mentoring_subjects !== undefined) sanitizedUpdates.mentoring_subjects = updates.mentoring_subjects?.trim() || null;
+  if (updates.bio !== undefined) sanitizedUpdates.bio = updates.bio?.trim() || null;
 
   if (!isSupabaseConfigured()) {
     return updateMockProfile(userId, sanitizedUpdates);
@@ -283,6 +292,84 @@ export async function updateProfile(
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { profile: null, error };
+  }
+}
+
+/**
+ * Upload an avatar image for a user to Supabase Storage or mock data store.
+ * Validates file size (max 2MB) and image types.
+ */
+export async function uploadAvatar(
+  userId: string,
+  file: File
+): Promise<{ avatarUrl: string | null; error: Error | null }> {
+  // Validation: allowed MIME types
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!allowedTypes.includes(file.type)) {
+    return {
+      avatarUrl: null,
+      error: new Error('Please upload an image file (JPEG, PNG, WebP, or GIF).'),
+    };
+  }
+
+  // Validation: size max 2MB
+  const MAX_SIZE_BYTES = 2 * 1024 * 1024;
+  if (file.size > MAX_SIZE_BYTES) {
+    return {
+      avatarUrl: null,
+      error: new Error('Image size must be less than 2MB.'),
+    };
+  }
+
+  // Mock / offline fallback: convert to base64 Data URL
+  if (!isSupabaseConfigured()) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const dataUrl = reader.result as string;
+        // Also persist in mock store
+        updateMockProfile(userId, { avatar_url: dataUrl });
+        resolve({ avatarUrl: dataUrl, error: null });
+      };
+      reader.onerror = () => {
+        resolve({ avatarUrl: null, error: new Error('Failed to read image file.') });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  try {
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const cleanExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(fileExt) ? fileExt : 'jpg';
+    const filePath = `${userId}/${Date.now()}.${cleanExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, {
+        upsert: true,
+        contentType: file.type,
+      });
+
+    if (uploadError) {
+      return { avatarUrl: null, error: uploadError };
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    const avatarUrl = publicUrlData.publicUrl;
+
+    // Automatically sync profile avatar_url
+    await supabase
+      .from('profiles')
+      .update({ avatar_url: avatarUrl })
+      .eq('id', userId);
+
+    return { avatarUrl, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { avatarUrl: null, error };
   }
 }
 

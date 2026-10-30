@@ -36,6 +36,7 @@ import { MentorDoubtsPage } from '../pages/dashboard/MentorDoubtsPage';
 import { StudentAnnouncementsPage } from '../pages/dashboard/StudentAnnouncementsPage';
 import { MentorAnnouncementsPage } from '../pages/dashboard/MentorAnnouncementsPage';
 import { StudentNotificationsPage } from '../pages/dashboard/StudentNotificationsPage';
+import { ProfilePage } from '../pages/dashboard/ProfilePage';
 import { useAuth } from '../hooks/useAuth';
 
 /**
@@ -313,6 +314,12 @@ export const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           }
         />
+
+        {/* Dedicated Profile & Identity Sector (All Authenticated Members) */}
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="student/profile" element={<ProfilePage />} />
+        <Route path="mentor/profile" element={<ProfilePage />} />
+        <Route path="admin/profile" element={<ProfilePage />} />
       </Route>
 
       {/* Dynamic Role Resolver */}

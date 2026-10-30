@@ -45,6 +45,15 @@ export interface MockAccountRecord {
   role: UserRole;
   status: AccountStatus;
   avatarUrl?: string;
+  whatsappNumber?: string;
+  university?: string;
+  department?: string;
+  batch?: string;
+  currentSemester?: string;
+  academicBackground?: string;
+  expertise?: string;
+  mentoringSubjects?: string;
+  bio?: string;
 }
 
 /**
@@ -67,6 +76,12 @@ const initialAccounts: MockAccountRecord[] = [
     passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'student',
     status: 'active',
+    whatsappNumber: '+8801712345678',
+    university: 'Dhaka University',
+    department: 'Computer Science & Engineering',
+    batch: '2023',
+    currentSemester: '4th Semester',
+    bio: 'Focusing on algorithmic problem solving, core computer science subjects, and daily study discipline with PoraPlan mentor.',
   },
   {
     id: 'mock-student-pp002',
@@ -77,6 +92,12 @@ const initialAccounts: MockAccountRecord[] = [
     passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'student',
     status: 'not_activated',
+    whatsappNumber: '+8801812345679',
+    university: 'BUET',
+    department: 'Electrical & Electronic Engineering',
+    batch: '2024',
+    currentSemester: '2nd Semester',
+    bio: 'Working to establish steady daily study rhythm and tackle circuit analysis with mentor guidance.',
   },
   {
     id: 'mock-student-pp003',
@@ -87,6 +108,12 @@ const initialAccounts: MockAccountRecord[] = [
     passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'student',
     status: 'active',
+    whatsappNumber: '+8801912345680',
+    university: 'NSU',
+    department: 'BBA - Finance',
+    batch: '2022',
+    currentSemester: '6th Semester',
+    bio: 'Focusing on corporate financial planning and quantitative analysis coursework.',
   },
   {
     id: 'mock-mentor-ppm001',
@@ -97,6 +124,13 @@ const initialAccounts: MockAccountRecord[] = [
     passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'mentor',
     status: 'active',
+    whatsappNumber: '+8801700112233',
+    university: 'Dhaka University',
+    department: 'Computer Science & Engineering',
+    academicBackground: 'Ph.D. in Computer Science, M.Sc. in Software Systems',
+    expertise: 'Data Structures, Algorithms, Discrete Mathematics, Academic Routine Structuring',
+    mentoringSubjects: 'Data Structures (CSE-201), Discrete Mathematics (CSE-205), Algorithm Design',
+    bio: 'Senior academic mentor with 8+ years experience guiding undergraduate students in building structured study systems, breaking down challenging curricula, and maintaining consistent academic momentum.',
   },
   {
     id: 'mock-mentor-ppm002',
@@ -107,6 +141,13 @@ const initialAccounts: MockAccountRecord[] = [
     passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'mentor',
     status: 'not_activated',
+    whatsappNumber: '+8801800112244',
+    university: 'BUET',
+    department: 'Mathematics',
+    academicBackground: 'Ph.D. in Applied Mathematics',
+    expertise: 'Calculus, Linear Algebra, Differential Equations',
+    mentoringSubjects: 'Calculus I & II, Linear Algebra',
+    bio: 'Passionate about helping engineering and science students turn abstract formulas into intuitive, daily manageable practice.',
   },
   {
     id: 'mock-admin-ppa001',
@@ -117,6 +158,8 @@ const initialAccounts: MockAccountRecord[] = [
     passwordHash: DEFAULT_TEST_PASSWORD_HASH,
     role: 'admin',
     status: 'active',
+    whatsappNumber: '+8801700000001',
+    bio: 'Central academic administration and student-mentor coordination desk for PoraPlan.',
   },
 ];
 
@@ -294,6 +337,15 @@ export function getMockProfile(userId: string): Profile | null {
     role: account.role,
     status: account.status,
     avatar_url: account.avatarUrl || null,
+    whatsapp_number: account.whatsappNumber || null,
+    university: account.university || null,
+    department: account.department || null,
+    batch: account.batch || null,
+    current_semester: account.currentSemester || null,
+    academic_background: account.academicBackground || null,
+    expertise: account.expertise || null,
+    mentoring_subjects: account.mentoringSubjects || null,
+    bio: account.bio || null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -311,13 +363,22 @@ export function updateMockProfile(
     return { profile: null, error: new Error('Account not found.') };
   }
 
-  // Explicit security: never allow role or ID change from profile update
+  // Explicit security: never allow role, poraplan_id, or status change from profile update
   const current = mockStore[index];
   mockStore[index] = {
     ...current,
     fullName: updates.full_name !== undefined ? updates.full_name : current.fullName,
     avatarUrl: updates.avatar_url !== undefined ? (updates.avatar_url ?? undefined) : current.avatarUrl,
     linkedEmail: updates.linked_email !== undefined ? (updates.linked_email ?? undefined) : current.linkedEmail,
+    whatsappNumber: updates.whatsapp_number !== undefined ? (updates.whatsapp_number ?? undefined) : current.whatsappNumber,
+    university: updates.university !== undefined ? (updates.university ?? undefined) : current.university,
+    department: updates.department !== undefined ? (updates.department ?? undefined) : current.department,
+    batch: updates.batch !== undefined ? (updates.batch ?? undefined) : current.batch,
+    currentSemester: updates.current_semester !== undefined ? (updates.current_semester ?? undefined) : current.currentSemester,
+    academicBackground: updates.academic_background !== undefined ? (updates.academic_background ?? undefined) : current.academicBackground,
+    expertise: updates.expertise !== undefined ? (updates.expertise ?? undefined) : current.expertise,
+    mentoringSubjects: updates.mentoring_subjects !== undefined ? (updates.mentoring_subjects ?? undefined) : current.mentoringSubjects,
+    bio: updates.bio !== undefined ? (updates.bio ?? undefined) : current.bio,
   };
 
   return { profile: getMockProfile(userId), error: null };

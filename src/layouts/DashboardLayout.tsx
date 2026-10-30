@@ -103,6 +103,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Announcements', shortLabel: 'Notices', to: '/student/announcements', icon: Megaphone },
     { label: 'Notifications', shortLabel: 'Alerts', to: '/student/notifications', icon: Bell, badgeCount: unreadNotifCount },
     { label: 'Subjects', shortLabel: 'Subjects', to: '/student/subjects', icon: BookOpen },
+    { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
 
   const mentorNavItems = [
@@ -117,10 +118,12 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Doubts', shortLabel: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/mentor/announcements', icon: Megaphone },
     { label: 'Subjects', shortLabel: 'Subjects', to: '/mentor/subjects', icon: BookOpen },
+    { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
 
   const adminNavItems = [
     { label: 'Admin Console', shortLabel: 'Admin', to: '/admin/dashboard', icon: ShieldCheck },
+    { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
 
   // Mobile navigation: top essential daily actions
@@ -208,8 +211,12 @@ export const DashboardLayout: React.FC = () => {
             className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform text-left"
             title="View Profile Details"
           >
-            <div className="w-6 h-6 sm:w-7 sm:h-7 bg-brand-navy text-brand-bg font-heading font-extrabold text-xs flex items-center justify-center border border-brand-dark">
-              {userInitials}
+            <div className="w-6 h-6 sm:w-7 sm:h-7 bg-brand-navy text-brand-bg font-heading font-extrabold text-xs flex items-center justify-center border border-brand-dark overflow-hidden">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                userInitials
+              )}
             </div>
             <div className="hidden sm:flex flex-col pr-1">
               <span className="text-xs font-bold font-sans text-brand-dark leading-none truncate max-w-[120px]">
@@ -290,8 +297,12 @@ export const DashboardLayout: React.FC = () => {
           {/* Sidebar Footer User Card */}
           <div className="p-3.5 border-t-2 border-brand-dark bg-brand-paper-tint space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-brand-gold border-2 border-brand-dark font-mono font-bold text-xs flex items-center justify-center shrink-0">
-                {userInitials}
+              <div className="w-8 h-8 bg-brand-gold border-2 border-brand-dark font-mono font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  userInitials
+                )}
               </div>
               <div className="overflow-hidden">
                 <p className="text-xs font-heading font-extrabold text-brand-navy truncate">
@@ -304,13 +315,12 @@ export const DashboardLayout: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-1.5 pt-1">
-              <button
-                type="button"
-                onClick={() => setProfileModalOpen(true)}
+              <Link
+                to="/profile"
                 className="flex-1 py-1 px-2 border-2 border-brand-dark bg-brand-paper text-[11px] font-mono font-bold text-brand-dark hover:bg-brand-gold-light transition-colors shadow-brutal-xs text-center"
               >
                 My Profile
-              </button>
+              </Link>
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -481,24 +491,36 @@ export const DashboardLayout: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-2 flex items-center justify-between gap-3 border-t-2 border-brand-dark">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setProfileModalOpen(false)}
-                className="flex-1"
-              >
-                Close
-              </Button>
+            <div className="pt-2 flex flex-col gap-2 border-t-2 border-brand-dark">
               <Button
                 variant="primary"
                 size="sm"
-                onClick={handleSignOut}
-                leftIcon={<LogOut className="w-3.5 h-3.5" />}
-                className="flex-1"
+                to="/profile"
+                onClick={() => setProfileModalOpen(false)}
+                className="w-full"
+                leftIcon={<Sparkles className="w-3.5 h-3.5" />}
               >
-                Sign Out
+                Open Full Academic Profile
               </Button>
+              <div className="flex items-center justify-between gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setProfileModalOpen(false)}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  leftIcon={<LogOut className="w-3.5 h-3.5" />}
+                  className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  Sign Out
+                </Button>
+              </div>
             </div>
           </div>
         </div>
