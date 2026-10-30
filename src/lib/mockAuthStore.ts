@@ -30,6 +30,8 @@ import type {
   AnnouncementPriority,
   AnnouncementStatus,
   AnnouncementAcknowledgment,
+  Notification,
+  NotificationType,
 } from '../types/database';
 import { sha256 } from './crypto';
 
@@ -660,6 +662,18 @@ export function createMockStudyPlan(params: {
     });
   }
 
+  if (params.createdBy && params.createdBy !== params.studentId) {
+    createMockNotification({
+      recipientId: params.studentId,
+      actorId: params.createdBy,
+      type: 'plan_updated',
+      title: 'Study Plan Assigned',
+      message: `Mentor published study plan "${cleanTitle}"`,
+      link: '/student/plans',
+      idempotencyKey: `plan:${planId}`,
+    });
+  }
+
   return { plan: newPlan, items: createdItems, error: null };
 }
 
@@ -886,6 +900,19 @@ export function createMockTask(params: {
   };
 
   mockTasks.push(newTask);
+
+  if (params.createdBy && params.createdBy !== params.studentId) {
+    createMockNotification({
+      recipientId: params.studentId,
+      actorId: params.createdBy,
+      type: 'task_created',
+      title: 'New Task Assigned',
+      message: `Mentor assigned task "${cleanTitle}"`,
+      link: '/student/tasks',
+      idempotencyKey: `task:${taskId}`,
+    });
+  }
+
   return { task: { ...newTask }, error: null };
 }
 
@@ -1120,6 +1147,19 @@ export function createMockAssignment(params: {
   };
 
   mockAssignments.push(newAssignment);
+
+  if (newAssignment.status === 'published') {
+    createMockNotification({
+      recipientId: params.studentId,
+      actorId: params.mentorId,
+      type: 'assignment_created',
+      title: 'New Assignment Published',
+      message: `Mentor assigned "${cleanTitle}" (${newAssignment.total_points || 100} pts)`,
+      link: '/student/assignments',
+      idempotencyKey: `assignment:${assignmentId}`,
+    });
+  }
+
   return { assignment: { ...newAssignment }, error: null };
 }
 
@@ -1336,6 +1376,20 @@ export function reviewMockSubmission(params: {
   current.updated_at = now;
 
   mockSubmissions[index] = { ...current };
+
+  const assignment = mockAssignments.find((a) => a.id === current.assignment_id);
+  const assignmentTitle = assignment?.title || 'Assignment';
+
+  createMockNotification({
+    recipientId: current.student_id,
+    actorId: normalizedMentorId,
+    type: 'submission_reviewed',
+    title: 'Submission Reviewed',
+    message: `Mentor reviewed your submission for "${assignmentTitle}"${params.score !== undefined && params.score !== null ? ` — Score: ${params.score}` : ''}`,
+    link: '/student/assignments',
+    idempotencyKey: `submission_review:${params.submissionId}`,
+  });
+
   return { submission: { ...current }, error: null };
 }
 
@@ -1540,6 +1594,17 @@ export function createMockEvaluation(params: {
   };
 
   mockEvaluations.unshift(newEval);
+
+  createMockNotification({
+    recipientId: params.studentId,
+    actorId: normalizedMentorId,
+    type: 'evaluation_published',
+    title: 'Evaluation Scheduled',
+    message: `Mentor scheduled evaluation "${cleanTitle}" for ${params.scheduledDate}`,
+    link: '/student/evaluations',
+    idempotencyKey: `evaluation:${newEval.id}`,
+  });
+
   return { evaluation: { ...newEval }, error: null };
 }
 
@@ -1656,6 +1721,17 @@ export function recordMockEvaluationResult(params: {
   current.updated_at = now;
 
   mockEvaluations[index] = { ...current };
+
+  createMockNotification({
+    recipientId: current.student_id,
+    actorId: normalizedMentorId,
+    type: 'evaluation_published',
+    title: 'Evaluation Result Published',
+    message: `Mentor published score ${params.score}/${current.total_points || 100} for "${current.title}"`,
+    link: '/student/evaluations',
+    idempotencyKey: `evaluation_result:${params.evaluationId}`,
+  });
+
   return { evaluation: { ...current }, error: null };
 }
 
@@ -2326,6 +2402,17 @@ export function createMockResource(params: {
   };
 
   mockResources.push(newResource);
+
+  createMockNotification({
+    recipientId: normalizedStudentId,
+    actorId: params.mentorId || null,
+    type: 'resource_published',
+    title: 'New Resource Added',
+    message: `Mentor added a new learning resource: "${cleanTitle}"`,
+    link: '/student/resources',
+    idempotencyKey: `resource:${resourceId}`,
+  });
+
   return { resource: { ...newResource }, error: null };
 }
 
@@ -2668,6 +2755,19 @@ export function addMockDoubtResponse(params: {
   }
   doubt.updated_at = now;
   mockDoubts[doubtIndex] = { ...doubt };
+
+  if (isAssignedMentor || isAdmin) {
+    const authorUser = mockStore.find((u) => u.id === normalizedAuthorId);
+    createMockNotification({
+      recipientId: doubt.student_id,
+      actorId: normalizedAuthorId,
+      type: 'doubt_replied',
+      title: 'Mentor Replied to Your Doubt',
+      message: `${authorUser?.fullName || 'Mentor'} replied to "${doubt.title}"`,
+      link: '/student/doubts',
+      idempotencyKey: `doubt_reply:${responseId}`,
+    });
+  }
 
   return { response: { ...newResponse }, error: null };
 }
@@ -3076,6 +3176,34 @@ export function createMockAnnouncement(data: {
   };
 
   mockAnnouncements.unshift(newAnnouncement);
+
+  if (status === 'published') {
+    const authorUser = mockStore.find((u) => u.id === normalizedAuthorId);
+    const authorName = authorUser?.fullName || 'Academic Faculty';
+
+    let recipients: string[] = [];
+    if (scope === 'individual' && normalizedStudentId) {
+      recipients = [normalizedStudentId];
+    } else if (scope === 'assigned_students') {
+      const assigned = getMockAssignedStudents(normalizedAuthorId);
+      recipients = assigned.map((s) => s.id);
+    } else if (scope === 'platform') {
+      recipients = mockStore.filter((u) => u.role === 'student').map((u) => u.id);
+    }
+
+    recipients.forEach((recId) => {
+      createMockNotification({
+        recipientId: recId,
+        actorId: normalizedAuthorId,
+        type: 'announcement_published',
+        title: cleanTitle,
+        message: `${authorName} published an announcement`,
+        link: '/student/announcements',
+        idempotencyKey: `announcement:${newAnnouncement.id}:${recId}`,
+      });
+    });
+  }
+
   return { announcement: { ...newAnnouncement }, error: null };
 }
 
@@ -3212,3 +3340,215 @@ export function deleteMockAnnouncement(
   return { success: true, error: null };
 }
 
+// ==============================================================================
+// NOTIFICATIONS DESK MOCK DATA & REPOSITORY (Milestone 17)
+// ==============================================================================
+
+export interface EnrichedMockNotification extends Notification {
+  actor_name?: string;
+  actor_role?: UserRole;
+  actor_poraplan_id?: string;
+}
+
+export const mockNotifications: Notification[] = [
+  {
+    id: 'mock-notif-001',
+    recipient_id: 'mock-student-pp001',
+    actor_id: 'mock-mentor-ppm001',
+    type: 'doubt_replied',
+    title: 'Mentor Replied to Your Doubt',
+    message: 'Dr. Rafiqul Islam replied to "Normal force and friction on a double-incline Atwood setup"',
+    link: '/student/doubts',
+    read: false,
+    read_at: null,
+    idempotency_key: 'doubt_reply:mock-resp-001',
+    created_at: '2026-10-12T11:16:00Z',
+  },
+  {
+    id: 'mock-notif-002',
+    recipient_id: 'mock-student-pp001',
+    actor_id: 'mock-admin-ppa001',
+    type: 'announcement_published',
+    title: 'Welcome to PoraPlan Autumn Academic Session 2026',
+    message: 'PoraPlan System Admin broadcast an urgent platform directive',
+    link: '/student/announcements',
+    read: true,
+    read_at: '2026-10-05T09:12:00Z',
+    idempotency_key: 'announcement:mock-announcement-001:mock-student-pp001',
+    created_at: '2026-10-05T08:01:00Z',
+  },
+];
+
+export function getMockStudentNotifications(studentId: string): EnrichedMockNotification[] {
+  const normalizedId = normalizeId(studentId);
+  const student = mockStore.find((u) => u.id === normalizedId);
+
+  return mockNotifications
+    .filter((n) => n.recipient_id === normalizedId || (student && n.recipient_id === student.poraplanId))
+    .map((n) => {
+      const actor = n.actor_id ? mockStore.find((u) => u.id === n.actor_id) : null;
+      return {
+        ...n,
+        actor_name: actor?.fullName || (n.type === 'system' ? 'PoraPlan System' : 'Academic Faculty'),
+        actor_role: actor?.role,
+        actor_poraplan_id: actor?.poraplanId,
+      };
+    })
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+}
+
+export function getMockUnreadNotificationCount(studentId: string): number {
+  const normalizedId = normalizeId(studentId);
+  const student = mockStore.find((u) => u.id === normalizedId);
+
+  return mockNotifications.filter(
+    (n) => !n.read && (n.recipient_id === normalizedId || (student && n.recipient_id === student.poraplanId))
+  ).length;
+}
+
+export function createMockNotification(data: {
+  recipientId: string;
+  actorId?: string | null;
+  type: NotificationType;
+  title: string;
+  message: string;
+  link?: string | null;
+  idempotencyKey?: string | null;
+}): { notification: Notification | null; error: Error | null } {
+  const normalizedRecipientId = normalizeId(data.recipientId);
+  const recipient = mockStore.find((u) => u.id === normalizedRecipientId);
+  if (!recipient) {
+    return { notification: null, error: new Error('Recipient account not found.') };
+  }
+
+  const cleanTitle = data.title?.trim();
+  if (!cleanTitle) {
+    return { notification: null, error: new Error('Notification title is required.') };
+  }
+  const cleanMessage = data.message?.trim();
+  if (!cleanMessage) {
+    return { notification: null, error: new Error('Notification message is required.') };
+  }
+
+  // Safe internal link validation
+  if (data.link) {
+    if (!data.link.startsWith('/') || data.link.startsWith('//') || data.link.includes(':')) {
+      return { notification: null, error: new Error('Notification link must be a safe internal route.') };
+    }
+  }
+
+  const normalizedActorId = data.actorId ? normalizeId(data.actorId) : null;
+
+  // Actor role & roster check
+  if (normalizedActorId) {
+    const actor = mockStore.find((u) => u.id === normalizedActorId);
+    if (actor?.role === 'student') {
+      return { notification: null, error: new Error('Students are not authorized to create notifications.') };
+    }
+    if (actor?.role === 'mentor') {
+      const assigned = getMockAssignedStudents(normalizedActorId);
+      const isAssigned = assigned.some(
+        (s) => s.id === normalizedRecipientId || (recipient && s.poraplan_id === recipient.poraplanId)
+      );
+      if (!isAssigned) {
+        return { notification: null, error: new Error('Mentors can only notify students assigned to them.') };
+      }
+    }
+  }
+
+  // Idempotency check: prevent duplicate notifications
+  if (data.idempotencyKey) {
+    const existing = mockNotifications.find(
+      (n) => n.recipient_id === normalizedRecipientId && n.idempotency_key === data.idempotencyKey
+    );
+    if (existing) {
+      return { notification: { ...existing }, error: null };
+    }
+  }
+
+  const now = new Date().toISOString();
+
+  const newNotification: Notification = {
+    id: `mock-notif-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    recipient_id: normalizedRecipientId,
+    actor_id: normalizedActorId,
+    type: data.type,
+    title: cleanTitle,
+    message: cleanMessage,
+    link: data.link || null,
+    read: false,
+    read_at: null,
+    idempotency_key: data.idempotencyKey || null,
+    created_at: now,
+  };
+
+  mockNotifications.unshift(newNotification);
+  return { notification: { ...newNotification }, error: null };
+}
+
+export function markMockNotificationAsRead(
+  notificationId: string,
+  studentId: string
+): { notification: Notification | null; error: Error | null } {
+  const normalizedStudentId = normalizeId(studentId);
+  const student = mockStore.find((u) => u.id === normalizedStudentId);
+
+  const index = mockNotifications.findIndex(
+    (n) => n.id === notificationId && (n.recipient_id === normalizedStudentId || (student && n.recipient_id === student.poraplanId))
+  );
+
+  if (index === -1) {
+    return { notification: null, error: new Error('Notification not found or access denied.') };
+  }
+
+  const current = mockNotifications[index];
+  if (!current.read) {
+    current.read = true;
+    current.read_at = new Date().toISOString();
+    mockNotifications[index] = { ...current };
+  }
+
+  return { notification: { ...mockNotifications[index] }, error: null };
+}
+
+export function markAllMockNotificationsAsRead(
+  studentId: string
+): { count: number; error: Error | null } {
+  const normalizedStudentId = normalizeId(studentId);
+  const student = mockStore.find((u) => u.id === normalizedStudentId);
+  const now = new Date().toISOString();
+  let updatedCount = 0;
+
+  for (let i = 0; i < mockNotifications.length; i++) {
+    const n = mockNotifications[i];
+    if ((n.recipient_id === normalizedStudentId || (student && n.recipient_id === student.poraplanId)) && !n.read) {
+      mockNotifications[i] = {
+        ...n,
+        read: true,
+        read_at: now,
+      };
+      updatedCount++;
+    }
+  }
+
+  return { count: updatedCount, error: null };
+}
+
+export function deleteMockNotification(
+  notificationId: string,
+  studentId: string
+): { success: boolean; error: Error | null } {
+  const normalizedStudentId = normalizeId(studentId);
+  const student = mockStore.find((u) => u.id === normalizedStudentId);
+
+  const index = mockNotifications.findIndex(
+    (n) => n.id === notificationId && (n.recipient_id === normalizedStudentId || (student && n.recipient_id === student.poraplanId))
+  );
+
+  if (index === -1) {
+    return { success: false, error: new Error('Notification not found or access denied.') };
+  }
+
+  mockNotifications.splice(index, 1);
+  return { success: true, error: null };
+}

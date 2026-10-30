@@ -23,6 +23,7 @@ import {
   deleteMockDoubt,
 } from './mockAuthStore';
 import { getAssignedStudents } from './mentorship';
+import { createNotification } from './notifications';
 
 export interface DoubtResponseWithAuthor extends DoubtResponse {
   author_name?: string;
@@ -410,6 +411,25 @@ export async function addDoubtResponse(params: {
 
     if (error) {
       return { response: null, error };
+    }
+
+    // Notify student if respondent is mentor or admin
+    const { data: parentDoubt } = await supabase
+      .from('doubts')
+      .select('student_id, title')
+      .eq('id', params.doubtId)
+      .single();
+
+    if (parentDoubt && parentDoubt.student_id !== params.authorId) {
+      createNotification({
+        recipientId: parentDoubt.student_id,
+        actorId: params.authorId,
+        type: 'doubt_replied',
+        title: 'Mentor Replied to Your Doubt',
+        message: `Mentor replied to "${parentDoubt.title}"`,
+        link: '/student/doubts',
+        idempotencyKey: `doubt_reply:${data.id}`,
+      }).catch(() => {});
     }
 
     return { response: data, error: null };

@@ -14,6 +14,7 @@ import {
   updateMockStudyPlan,
   deleteMockStudyPlan,
 } from './mockAuthStore';
+import { createNotification } from './notifications';
 
 export type StudyPlanWithMeta = StudyPlan & {
   items_count: number;
@@ -228,6 +229,18 @@ export async function createStudyPlan(params: {
           createdItems.push(...(insertedItems as StudyPlanItem[]));
         }
       }
+    }
+
+    if (params.createdBy && params.createdBy !== params.studentId) {
+      createNotification({
+        recipientId: params.studentId,
+        actorId: params.createdBy,
+        type: 'plan_updated',
+        title: 'Study Plan Assigned',
+        message: `Mentor published study plan "${cleanTitle}"`,
+        link: '/student/plans',
+        idempotencyKey: `plan:${newPlan.id}`,
+      }).catch(() => {});
     }
 
     return { plan: newPlan as StudyPlan, items: createdItems, error: null };

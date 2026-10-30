@@ -16,6 +16,7 @@ import {
   updateMockResource,
   deleteMockResource,
 } from './mockAuthStore';
+import { createNotification } from './notifications';
 
 export type ResourceWithMeta = Resource & {
   student_name?: string;
@@ -261,6 +262,16 @@ export async function createResource(params: {
     if (error) {
       return { resource: null, error };
     }
+
+    createNotification({
+      recipientId: params.studentId,
+      actorId: params.mentorId || null,
+      type: 'resource_published',
+      title: 'New Resource Added',
+      message: `Mentor added a new learning resource: "${cleanTitle}"`,
+      link: '/student/resources',
+      idempotencyKey: `resource:${data.id}`,
+    }).catch(() => {});
 
     return { resource: data as Resource, error: null };
   } catch (err: unknown) {

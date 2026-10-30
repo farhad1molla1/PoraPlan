@@ -25,6 +25,7 @@ import {
   acknowledgeMockAnnouncement,
   deleteMockAnnouncement,
 } from './mockAuthStore';
+import { createNotification } from './notifications';
 
 export interface AnnouncementAcknowledgmentWithScholar extends AnnouncementAcknowledgment {
   student_name?: string;
@@ -329,6 +330,43 @@ export async function createAnnouncement(input: {
 
     if (error) {
       return { announcement: null, error };
+    }
+
+    if (payload.status === 'published') {
+      (async () => {
+        try {
+          let recipients: string[] = [];
+          if (payload.target_scope === 'individual' && payload.student_id) {
+            recipients = [payload.student_id];
+          } else if (payload.target_scope === 'assigned_students') {
+            const { data: assignments } = await supabase
+              .from('mentor_students')
+              .select('student_id')
+              .eq('mentor_id', input.authorId);
+            recipients = (assignments || []).map((r: any) => r.student_id);
+          } else if (payload.target_scope === 'platform') {
+            const { data: students } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('role', 'student');
+            recipients = (students || []).map((s: any) => s.id);
+          }
+
+          for (const recipientId of recipients) {
+            await createNotification({
+              recipientId,
+              actorId: input.authorId,
+              type: 'announcement_published',
+              title: payload.title,
+              message: 'Academic faculty published an announcement',
+              link: '/student/announcements',
+              idempotencyKey: `announcement:${data.id}:${recipientId}`,
+            });
+          }
+        } catch {
+          // Non-blocking notification dispatch
+        }
+      })();
     }
 
     return { announcement: data as Announcement, error: null };

@@ -22,7 +22,9 @@ import {
   BookMarked,
   HelpCircle,
   Megaphone,
+  Bell,
 } from 'lucide-react';
+import { getUnreadNotificationCount } from '../lib/notifications';
 
 export const DashboardLayout: React.FC = () => {
   const { user, profile, role, poraplanId, signOut, connectEmail } = useAuth();
@@ -32,6 +34,30 @@ export const DashboardLayout: React.FC = () => {
   const [emailToLink, setEmailToLink] = useState('');
   const [isLinkingEmail, setIsLinkingEmail] = useState(false);
   const [emailLinkMessage, setEmailLinkMessage] = useState<string | null>(null);
+  const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);
+
+  // Poll/fetch unread notification count for active student
+  React.useEffect(() => {
+    let isMounted = true;
+    const fetchUnread = async () => {
+      const studentId = profile?.id || user?.id;
+      if (studentId && role === 'student') {
+        const { count } = await getUnreadNotificationCount(studentId);
+        if (isMounted) setUnreadNotifCount(count || 0);
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 15000);
+    const handleUpdate = () => {
+      fetchUnread();
+    };
+    window.addEventListener('notifications-updated', handleUpdate);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('notifications-updated', handleUpdate);
+    };
+  }, [profile?.id, user?.id, role, location.pathname]);
 
   const handleLinkEmail = async () => {
     if (!emailToLink.trim()) return;
@@ -79,6 +105,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Study Resources', shortLabel: 'Library', to: '/student/resources', icon: BookMarked },
     { label: 'Doubts & Inquiries', shortLabel: 'Doubts', to: '/student/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/student/announcements', icon: Megaphone },
+    { label: 'Notifications', shortLabel: 'Alerts', to: '/student/notifications', icon: Bell, badgeCount: unreadNotifCount },
     { label: 'Mentorship', shortLabel: 'Mentor', to: '/student/dashboard#mentorship', icon: Users },
   ];
 
@@ -144,6 +171,23 @@ export const DashboardLayout: React.FC = () => {
 
         {/* User profile controls & Sign Out */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Notifications Center Bell for Students */}
+          {isStudent && (
+            <Link
+              to="/student/notifications"
+              className="relative p-2 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex items-center justify-center text-brand-dark hover:text-brand-navy"
+              title="Notifications Center"
+              aria-label={`Notifications Center, ${unreadNotifCount} unread`}
+            >
+              <Bell className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              {unreadNotifCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-brand-coral text-white font-mono font-bold text-[10px] leading-tight flex items-center justify-center border border-brand-dark shadow-xs">
+                  {unreadNotifCount > 99 ? '99+' : unreadNotifCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           {/* Profile Trigger Button */}
           <button
             type="button"
@@ -219,6 +263,11 @@ export const DashboardLayout: React.FC = () => {
                   >
                     <Icon className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.2]" />
                     <span>{item.label}</span>
+                    {Boolean((item as any).badgeCount && (item as any).badgeCount > 0) && (
+                      <span className="ml-auto px-1.5 py-0.2 text-[9px] font-mono font-bold bg-brand-coral text-white border border-brand-dark">
+                        {(item as any).badgeCount}
+                      </span>
+                    )}
                   </NavLink>
                 );
               })}
@@ -288,13 +337,20 @@ export const DashboardLayout: React.FC = () => {
             <Link
               key={item.label}
               to={item.to}
-              className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors border-r last:border-r-0 border-brand-dark/20 ${
+              className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors border-r last:border-r-0 border-brand-dark/20 relative ${
                 isActive
                   ? 'bg-brand-teal-light text-brand-navy font-bold'
                   : 'text-brand-muted hover:text-brand-dark'
               }`}
             >
-              <Icon className="w-4 h-4 stroke-[2.2]" />
+              <div className="relative">
+                <Icon className="w-4 h-4 stroke-[2.2]" />
+                {Boolean((item as any).badgeCount && (item as any).badgeCount > 0) && (
+                  <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px] px-0.5 bg-brand-coral text-white font-mono font-bold text-[8px] flex items-center justify-center rounded-full border border-brand-dark">
+                    {(item as any).badgeCount}
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] font-mono mt-0.5 leading-none truncate max-w-[70px]">
                 {item.shortLabel || item.label}
               </span>

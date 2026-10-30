@@ -35,6 +35,7 @@ import { StudentDoubtsPage } from '../pages/dashboard/StudentDoubtsPage';
 import { MentorDoubtsPage } from '../pages/dashboard/MentorDoubtsPage';
 import { StudentAnnouncementsPage } from '../pages/dashboard/StudentAnnouncementsPage';
 import { MentorAnnouncementsPage } from '../pages/dashboard/MentorAnnouncementsPage';
+import { StudentNotificationsPage } from '../pages/dashboard/StudentNotificationsPage';
 import { useAuth } from '../hooks/useAuth';
 
 /**
@@ -153,6 +154,14 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['student', 'admin']}>
               <StudentAnnouncementsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="student/notifications"
+          element={
+            <ProtectedRoute allowedRoles={['student', 'admin']}>
+              <StudentNotificationsPage />
             </ProtectedRoute>
           }
         />

@@ -21,6 +21,7 @@ import {
   reviewMockSubmission,
   getMockMentorSubmissions,
 } from './mockAuthStore';
+import { createNotification } from './notifications';
 
 export type SubmissionWithMeta = Submission & {
   assignment_title?: string;
@@ -219,6 +220,18 @@ export async function createAssignment(params: {
 
     if (error) {
       return { assignment: null, error };
+    }
+
+    if (insertPayload.status === 'published') {
+      createNotification({
+        recipientId: params.studentId,
+        actorId: params.mentorId || null,
+        type: 'assignment_created',
+        title: 'New Assignment Published',
+        message: `Mentor assigned "${cleanTitle}" (${insertPayload.total_points || 100} pts)`,
+        link: '/student/assignments',
+        idempotencyKey: `assignment:${data.id}`,
+      }).catch(() => {});
     }
 
     return { assignment: data, error: null };
@@ -445,6 +458,18 @@ export async function reviewSubmission(params: {
 
     if (error) {
       return { submission: null, error };
+    }
+
+    if (data?.student_id) {
+      createNotification({
+        recipientId: data.student_id,
+        actorId: params.mentorId,
+        type: 'submission_reviewed',
+        title: 'Submission Reviewed',
+        message: `Mentor reviewed your assignment submission${params.score !== undefined && params.score !== null ? ` — Score: ${params.score}` : ''}`,
+        link: '/student/assignments',
+        idempotencyKey: `submission_review:${params.submissionId}`,
+      }).catch(() => {});
     }
 
     return { submission: data, error: null };

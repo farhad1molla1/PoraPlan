@@ -15,6 +15,7 @@ import {
   updateMockTask,
   deleteMockTask,
 } from './mockAuthStore';
+import { createNotification } from './notifications';
 
 export type TaskWithMeta = Task & {
   subject_name?: string;
@@ -206,6 +207,18 @@ export async function createTask(params: {
 
     if (error) {
       return { task: null, error };
+    }
+
+    if (params.createdBy && params.createdBy !== params.studentId) {
+      createNotification({
+        recipientId: params.studentId,
+        actorId: params.createdBy,
+        type: 'task_created',
+        title: 'New Task Assigned',
+        message: `Mentor assigned task "${cleanTitle}"`,
+        link: '/student/tasks',
+        idempotencyKey: `task:${data.id}`,
+      }).catch(() => {});
     }
 
     return { task: data as Task, error: null };

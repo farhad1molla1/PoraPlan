@@ -590,6 +590,59 @@ export type AnnouncementAcknowledgmentInsert = {
   acknowledged_at?: string;
 };
 
+export type NotificationType =
+  | 'task_created'
+  | 'assignment_created'
+  | 'resource_published'
+  | 'evaluation_published'
+  | 'submission_reviewed'
+  | 'doubt_replied'
+  | 'announcement_published'
+  | 'plan_updated'
+  | 'system';
+
+export type Notification = {
+  id: string;
+  recipient_id: string;
+  actor_id?: string | null;
+  type: NotificationType;
+  title: string;
+  message: string;
+  link?: string | null;
+  read: boolean;
+  read_at?: string | null;
+  idempotency_key?: string | null;
+  created_at: string;
+};
+
+export type NotificationInsert = {
+  id?: string;
+  recipient_id: string;
+  actor_id?: string | null;
+  type: NotificationType;
+  title: string;
+  message: string;
+  link?: string | null;
+  read?: boolean;
+  read_at?: string | null;
+  idempotency_key?: string | null;
+  created_at?: string;
+};
+
+export type NotificationUpdate = {
+  id?: string;
+  recipient_id?: string;
+  actor_id?: string | null;
+  type?: NotificationType;
+  title?: string;
+  message?: string;
+  link?: string | null;
+  read?: boolean;
+  read_at?: string | null;
+  idempotency_key?: string | null;
+  created_at?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -972,6 +1025,27 @@ export type Database = {
           {
             foreignKeyName: 'announcement_acknowledgments_student_id_fkey';
             columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      notifications: {
+        Row: Notification;
+        Insert: NotificationInsert;
+        Update: NotificationUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'notifications_recipient_id_fkey';
+            columns: ['recipient_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notifications_actor_id_fkey';
+            columns: ['actor_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];

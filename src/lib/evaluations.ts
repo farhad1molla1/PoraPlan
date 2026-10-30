@@ -18,6 +18,7 @@ import {
   recordMockEvaluationResult,
   deleteMockEvaluation,
 } from './mockAuthStore';
+import { createNotification } from './notifications';
 
 export type EvaluationWithMeta = Evaluation & {
   student_name?: string;
@@ -280,6 +281,16 @@ export async function createEvaluation(params: {
       return { evaluation: null, error };
     }
 
+    createNotification({
+      recipientId: params.studentId,
+      actorId: params.mentorId,
+      type: 'evaluation_published',
+      title: 'Evaluation Scheduled',
+      message: `Mentor scheduled evaluation "${cleanTitle}" for ${params.scheduledDate}`,
+      link: '/student/evaluations',
+      idempotencyKey: `evaluation:${data.id}`,
+    }).catch(() => {});
+
     return { evaluation: data, error: null };
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
@@ -413,6 +424,18 @@ export async function recordEvaluationResult(params: {
 
     if (error) {
       return { evaluation: null, error };
+    }
+
+    if (data?.student_id) {
+      createNotification({
+        recipientId: data.student_id,
+        actorId: params.mentorId,
+        type: 'evaluation_published',
+        title: 'Evaluation Result Published',
+        message: `Mentor published score ${params.score}/${data.total_points || 100} for "${data.title}"`,
+        link: '/student/evaluations',
+        idempotencyKey: `evaluation_result:${params.evaluationId}`,
+      }).catch(() => {});
     }
 
     return { evaluation: data, error: null };
