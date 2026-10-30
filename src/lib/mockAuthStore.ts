@@ -4696,11 +4696,42 @@ export function getMockStudentMentorAssignmentById(id: string): StudentMentorAss
 /**
  * Resolves the effective mentor for a given student according to precedence:
  * Individual Override ?? Cohort Default ?? None
+ *
+ * Security Hardening (Milestone 5.1):
+ * If callerId is provided, restricts access to:
+ * 1. The student themselves (callerId === studentId)
+ * 2. Platform Admin
+ * 3. An authorized mentor for the student in the target program
  */
 export function getMockEffectiveMentorForStudent(
   studentId: string,
-  programId?: string
+  programId?: string,
+  callerId?: string
 ): EffectiveMentorResolution {
+  const normalizedStudentId = studentId === 'PP001' ? 'mock-student-pp001' : studentId;
+  const normalizedCallerId = callerId === 'PP001' ? 'mock-student-pp001' : callerId === 'PPM001' ? 'mock-mentor-ppm001' : callerId;
+
+  // Caller authorization verification
+  if (normalizedCallerId) {
+    const callerAcc = mockStore.find((u) => u.id === normalizedCallerId);
+    const isAdmin = callerAcc?.role === 'admin' || normalizedCallerId === 'mock-admin-ppa001' || callerId === 'admin';
+    if (!isAdmin && normalizedCallerId !== normalizedStudentId) {
+      const isMentor = isMockAuthorizedMentorForStudent(normalizedCallerId, normalizedStudentId, programId || null);
+      if (!isMentor) {
+        return {
+          student_id: studentId,
+          mentor: null,
+          assignment_type: 'none',
+          assignment_id: null,
+          cohort: null,
+          program: null,
+          assigned_at: null,
+          notes: null,
+        };
+      }
+    }
+  }
+
   // 1. Check for active individual override
   const override = mockStudentMentorAssignments.find(
     (sma) => sma.student_id === studentId && sma.is_active && (!programId || sma.program_id === programId)
@@ -4859,10 +4890,21 @@ export function getMockEffectiveStudentsForMentor(mentorId: string): {
 export function isMockAuthorizedMentorForStudent(
   mentorId: string,
   studentId: string,
-  programId?: string | null
+  programId?: string | null,
+  callerId?: string
 ): boolean {
   const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
   const normalizedStudentId = studentId === 'PP001' ? 'mock-student-pp001' : studentId;
+  const normalizedCallerId = callerId === 'PP001' ? 'mock-student-pp001' : callerId === 'PPM001' ? 'mock-mentor-ppm001' : callerId;
+
+  // Caller check if callerId provided (Security Hardening: prevent arbitrary caller probing)
+  if (normalizedCallerId) {
+    const callerAcc = mockStore.find((u) => u.id === normalizedCallerId);
+    const isCallerAdmin = callerAcc?.role === 'admin' || normalizedCallerId === 'mock-admin-ppa001' || callerId === 'admin';
+    if (!isCallerAdmin && normalizedCallerId !== normalizedMentorId && normalizedCallerId !== normalizedStudentId) {
+      return false;
+    }
+  }
 
   // 1. Identify admin caller (platform-wide oversight)
   const callerAcc = mockStore.find((u) => u.id === normalizedMentorId);
@@ -5062,6 +5104,19 @@ export function adminAssignMockIndividualMentor(
     return { success: false, message: 'Student is not actively enrolled in this program.' };
   }
 
+  // Enforce cohort validation
+  let resolvedCohortId = activeEnrollment.cohort_id || null;
+  if (cohortId) {
+    const cohortObj = getMockCohorts().find((c) => c.id === cohortId && c.program_id === programId);
+    if (!cohortObj) {
+      return { success: false, message: 'Specified cohort does not belong to the selected program.' };
+    }
+    if (activeEnrollment.cohort_id && activeEnrollment.cohort_id !== cohortId) {
+      return { success: false, message: 'Specified cohort does not match student active enrollment cohort.' };
+    }
+    resolvedCohortId = cohortId;
+  }
+
   const mentor = mockStore.find((m) => m.id === mentorId);
   if (!mentor || mentor.role !== 'mentor') {
     return { success: false, message: 'Selected user is not an active mentor.' };
@@ -5103,7 +5158,7 @@ export function adminAssignMockIndividualMentor(
     student_id: studentId,
     mentor_id: mentorId,
     program_id: programId,
-    cohort_id: cohortId || activeEnrollment.cohort_id || null,
+    cohort_id: resolvedCohortId,
     assignment_type: 'individual',
     assigned_by: 'mock-admin-ppa001',
     assigned_at: new Date().toISOString(),

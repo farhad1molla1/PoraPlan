@@ -234,10 +234,11 @@ export async function getStudentMentorAssignments(filters?: {
 
 export async function getEffectiveMentor(
   studentId: string,
-  programId?: string
+  programId?: string,
+  callerId?: string
 ): Promise<{ resolution: EffectiveMentorResolution; error: Error | null }> {
   if (!isSupabaseConfigured()) {
-    const res = getMockEffectiveMentorForStudent(studentId, programId);
+    const res = getMockEffectiveMentorForStudent(studentId, programId, callerId);
     return { resolution: res, error: null };
   }
 
