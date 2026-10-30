@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getAssignedStudents } from '../../lib/mentorship';
+import { getEffectiveStudentsForMentor } from '../../lib/mentorAssignments';
 import { getMentorReviewQueue, type SubmissionWithMeta } from '../../lib/assignments';
 import { getMentorDoubts, type DoubtWithMeta } from '../../lib/doubts';
 import { getMentorEvaluations, type EvaluationWithMeta } from '../../lib/evaluations';
@@ -31,6 +32,7 @@ import {
   TrendingUp,
   FolderKanban,
   Loader2,
+  Phone,
 } from 'lucide-react';
 
 export const MentorDashboardPage: React.FC = () => {
@@ -38,6 +40,15 @@ export const MentorDashboardPage: React.FC = () => {
   const mentorId = user?.id || '';
 
   const [students, setStudents] = useState<Profile[]>([]);
+  const [assignedStudentRecords, setAssignedStudentRecords] = useState<
+    {
+      student: Profile;
+      cohort: any;
+      program: any;
+      assignmentType: 'individual' | 'cohort';
+      assignedAt: string;
+    }[]
+  >([]);
   const [reviews, setReviews] = useState<SubmissionWithMeta[]>([]);
   const [doubts, setDoubts] = useState<DoubtWithMeta[]>([]);
   const [evaluations, setEvaluations] = useState<EvaluationWithMeta[]>([]);
@@ -52,18 +63,32 @@ export const MentorDashboardPage: React.FC = () => {
 
     let isMounted = true;
     Promise.all([
+      getEffectiveStudentsForMentor(mentorId),
       getAssignedStudents(mentorId),
       getMentorReviewQueue(mentorId),
       getMentorDoubts(mentorId),
       getMentorEvaluations(mentorId),
     ])
-      .then(([studentsRes, reviewsRes, doubtsRes, evalsRes]) => {
+      .then(([effRes, studentsRes, reviewsRes, doubtsRes, evalsRes]) => {
         if (!isMounted) return;
-        if (studentsRes.error) {
+        if (effRes.students && effRes.students.length > 0) {
+          setAssignedStudentRecords(effRes.students);
+          setStudents(effRes.students.map((item) => item.student));
+        } else if (studentsRes.students) {
+          setStudents(studentsRes.students);
+          setAssignedStudentRecords(
+            studentsRes.students.map((s) => ({
+              student: s,
+              cohort: null,
+              program: null,
+              assignmentType: 'cohort',
+              assignedAt: new Date().toISOString(),
+            }))
+          );
+        } else if (studentsRes.error) {
           setErrorMessage(studentsRes.error.message);
-        } else {
-          setStudents(studentsRes.students || []);
         }
+
         setReviews(reviewsRes.submissions || []);
         setDoubts(doubtsRes.doubts || []);
         setEvaluations(evalsRes.evaluations || []);
@@ -327,70 +352,101 @@ export const MentorDashboardPage: React.FC = () => {
                 You organize the study routine, assign tasks, review practice submissions, and solve doubts for these students:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                {students.map((student) => (
-                  <div
-                    key={student.id}
-                    className="p-4 border-2 border-brand-dark bg-brand-paper-tint flex flex-col justify-between gap-3 shadow-brutal-xs"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-1.5">
-                          <GraduationCap className="w-4 h-4 text-brand-teal shrink-0" />
-                          <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
-                            {student.full_name}
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs font-mono text-brand-muted">
-                          {student.poraplan_id && (
-                            <>
-                              <span className="font-bold text-brand-gold">
-                                ID: {student.poraplan_id}
-                              </span>
-                              <span>•</span>
-                            </>
+                {students.map((student) => {
+                  const record = assignedStudentRecords.find((r) => r.student.id === student.id);
+                  const isIndividual = record?.assignmentType === 'individual';
+
+                  return (
+                    <div
+                      key={student.id}
+                      className="p-4 border-2 border-brand-dark bg-brand-paper-tint flex flex-col justify-between gap-3 shadow-brutal-xs"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1.5">
+                            <GraduationCap className="w-4 h-4 text-brand-teal shrink-0" />
+                            <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
+                              {student.full_name}
+                            </h3>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs font-mono text-brand-muted">
+                            {student.poraplan_id && (
+                              <>
+                                <span className="font-bold text-brand-gold">
+                                  ID: {student.poraplan_id}
+                                </span>
+                                <span>•</span>
+                              </>
+                            )}
+                            <span className="truncate max-w-[180px]">{student.email}</span>
+                          </div>
+                          {student.university && (
+                            <div className="text-[11px] text-brand-dark/70 font-sans">
+                              {student.university} {student.department ? `(${student.department})` : ''}
+                            </div>
                           )}
-                          <span className="truncate max-w-[180px]">{student.email}</span>
+                          {record?.cohort && (
+                            <div className="text-[11px] font-mono text-brand-teal font-semibold pt-0.5">
+                              {record.program?.name || 'Program'} • {record.cohort.name}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col items-end gap-1">
+                          <Badge variant={isIndividual ? 'teal' : 'gold'} size="sm" className="font-bold text-[10px]">
+                            {isIndividual ? 'INDIVIDUAL' : 'COHORT'}
+                          </Badge>
+                          {student.whatsapp_number && (
+                            <a
+                              href={`https://wa.me/${student.whatsapp_number.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] text-emerald-700 hover:underline flex items-center gap-1 font-mono font-bold"
+                            >
+                              <Phone className="w-3 h-3" />
+                              <span>WhatsApp</span>
+                            </a>
+                          )}
                         </div>
                       </div>
-                      <Badge variant="teal" size="sm">ACTIVE</Badge>
-                    </div>
 
-                    <div className="pt-2 border-t border-brand-dark/20 flex items-center justify-between flex-wrap gap-2">
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <Link
-                          to={`/mentor/plans?studentId=${student.id}`}
-                          className="font-mono text-[11px] font-bold text-brand-teal hover:underline"
+                      <div className="pt-2 border-t border-brand-dark/20 flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <Link
+                            to={`/mentor/plans?studentId=${student.id}`}
+                            className="font-mono text-[11px] font-bold text-brand-teal hover:underline"
+                          >
+                            Plans
+                          </Link>
+                          <span className="text-brand-muted">•</span>
+                          <Link
+                            to={`/mentor/tasks?studentId=${student.id}`}
+                            className="font-mono text-[11px] font-bold text-brand-navy hover:underline"
+                          >
+                            Tasks
+                          </Link>
+                          <span className="text-brand-muted">•</span>
+                          <Link
+                            to={`/mentor/assignments?studentId=${student.id}`}
+                            className="font-mono text-[11px] font-bold text-brand-navy hover:underline"
+                          >
+                            Practice
+                          </Link>
+                        </div>
+
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedStudent(student)}
+                          className="text-xs font-bold"
                         >
-                          Plans
-                        </Link>
-                        <span className="text-brand-muted">•</span>
-                        <Link
-                          to={`/mentor/tasks?studentId=${student.id}`}
-                          className="font-mono text-[11px] font-bold text-brand-navy hover:underline"
-                        >
-                          Tasks
-                        </Link>
-                        <span className="text-brand-muted">•</span>
-                        <Link
-                          to={`/mentor/assignments?studentId=${student.id}`}
-                          className="font-mono text-[11px] font-bold text-brand-navy hover:underline"
-                        >
-                          Practice
-                        </Link>
+                          Student Details
+                        </Button>
                       </div>
-
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSelectedStudent(student)}
-                        className="text-xs"
-                      >
-                        Student Details
-                      </Button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ) : (

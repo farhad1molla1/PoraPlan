@@ -1,9 +1,10 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import type { Profile } from '../types/database';
 import { getMockAssignedStudents, getMockAssignedMentors } from './mockAuthStore';
+import { getEffectiveStudentsForMentor, getEffectiveMentor } from './mentorAssignments';
 
 /**
- * Fetch students assigned to a specific mentor.
+ * Fetch students assigned to a specific mentor using effective mentor resolution.
  */
 export async function getAssignedStudents(mentorId: string): Promise<{
   students: Profile[];
@@ -15,10 +16,17 @@ export async function getAssignedStudents(mentorId: string): Promise<{
   }
 
   try {
+    const { students: effectiveList, error: effError } = await getEffectiveStudentsForMentor(mentorId);
+    if (!effError && effectiveList.length > 0) {
+      return { students: effectiveList.map((item) => item.student), error: null };
+    }
+
+    // Fallback to legacy mentor_students table
     const { data: pairings, error: pairError } = await supabase
       .from('mentor_students')
       .select('student_id')
-      .eq('mentor_id', mentorId);
+      .eq('mentor_id', mentorId)
+      .eq('status', 'active');
 
     if (pairError) {
       return { students: [], error: pairError };
@@ -46,7 +54,7 @@ export async function getAssignedStudents(mentorId: string): Promise<{
 }
 
 /**
- * Fetch mentors assigned to a specific student.
+ * Fetch mentor(s) assigned to a specific student using effective mentor resolution.
  */
 export async function getAssignedMentors(studentId: string): Promise<{
   mentors: Profile[];
@@ -58,10 +66,17 @@ export async function getAssignedMentors(studentId: string): Promise<{
   }
 
   try {
+    const { resolution, error: resError } = await getEffectiveMentor(studentId);
+    if (!resError && resolution.mentor) {
+      return { mentors: [resolution.mentor], error: null };
+    }
+
+    // Fallback to legacy mentor_students table
     const { data: pairings, error: pairError } = await supabase
       .from('mentor_students')
       .select('mentor_id')
-      .eq('student_id', studentId);
+      .eq('student_id', studentId)
+      .eq('status', 'active');
 
     if (pairError) {
       return { mentors: [], error: pairError };

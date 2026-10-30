@@ -299,6 +299,110 @@ export type MentorStudent = {
   created_at?: string;
 };
 
+export type CohortMentor = {
+  id: string;
+  cohort_id: string;
+  mentor_id: string;
+  program_id: string;
+  assigned_by?: string | null;
+  assigned_at: string;
+  ended_at?: string | null;
+  is_active: boolean;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type CohortMentorInsert = {
+  id?: string;
+  cohort_id: string;
+  mentor_id: string;
+  program_id: string;
+  assigned_by?: string | null;
+  assigned_at?: string;
+  ended_at?: string | null;
+  is_active?: boolean;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type CohortMentorUpdate = Partial<CohortMentorInsert>;
+
+export type StudentMentorAssignment = {
+  id: string;
+  student_id: string;
+  mentor_id: string;
+  program_id: string;
+  cohort_id?: string | null;
+  assignment_type: 'individual';
+  assigned_by?: string | null;
+  assigned_at: string;
+  ended_at?: string | null;
+  is_active: boolean;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type StudentMentorAssignmentInsert = {
+  id?: string;
+  student_id: string;
+  mentor_id: string;
+  program_id: string;
+  cohort_id?: string | null;
+  assignment_type?: 'individual';
+  assigned_by?: string | null;
+  assigned_at?: string;
+  ended_at?: string | null;
+  is_active?: boolean;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type StudentMentorAssignmentUpdate = Partial<StudentMentorAssignmentInsert>;
+
+export type AssignmentLevel = 'individual' | 'cohort' | 'none';
+
+export type EffectiveMentorResolution = {
+  student_id: string;
+  mentor: Profile | null;
+  assignment_type: AssignmentLevel;
+  assignment_id?: string | null;
+  cohort_id?: string | null;
+  program_id?: string | null;
+  cohort?: Cohort | null;
+  program?: Program | null;
+  assigned_at?: string | null;
+  notes?: string | null;
+};
+
+export type CohortMentorWithMeta = CohortMentor & {
+  mentor?: Profile | null;
+  cohort?: Cohort | null;
+  program?: Program | null;
+  assigned_by_profile?: Profile | null;
+  enrolled_students_count?: number;
+};
+
+export type StudentMentorAssignmentWithMeta = StudentMentorAssignment & {
+  student?: Profile | null;
+  mentor?: Profile | null;
+  cohort?: Cohort | null;
+  program?: Program | null;
+  assigned_by_profile?: Profile | null;
+};
+
+export type MentorWorkloadSummary = {
+  mentor: Profile;
+  activeCohortsCount: number;
+  individualOverridesCount: number;
+  totalEffectiveMenteesCount: number;
+  cohorts: { id: string; name: string; code: string; programName: string; studentCount: number }[];
+  isEligible: boolean;
+};
+
 export type SubjectStatus = 'active' | 'archived';
 
 export type Subject = {
@@ -1429,11 +1533,118 @@ export type Database = {
           }
         ];
       };
+      cohort_mentors: {
+        Row: CohortMentor;
+        Insert: CohortMentorInsert;
+        Update: CohortMentorUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'cohort_mentors_cohort_id_fkey';
+            columns: ['cohort_id'];
+            isOneToOne: false;
+            referencedRelation: 'cohorts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'cohort_mentors_mentor_id_fkey';
+            columns: ['mentor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'cohort_mentors_program_id_fkey';
+            columns: ['program_id'];
+            isOneToOne: false;
+            referencedRelation: 'programs';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      student_mentor_assignments: {
+        Row: StudentMentorAssignment;
+        Insert: StudentMentorAssignmentInsert;
+        Update: StudentMentorAssignmentUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'student_mentor_assignments_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'student_mentor_assignments_mentor_id_fkey';
+            columns: ['mentor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'student_mentor_assignments_program_id_fkey';
+            columns: ['program_id'];
+            isOneToOne: false;
+            referencedRelation: 'programs';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
+      admin_assign_cohort_mentor: {
+        Args: {
+          p_cohort_id: string;
+          p_mentor_id: string;
+          p_notes?: string | null;
+        };
+        Returns: Json;
+      };
+      admin_end_cohort_mentor: {
+        Args: {
+          p_cohort_id: string;
+          p_notes?: string | null;
+        };
+        Returns: Json;
+      };
+      admin_assign_individual_mentor: {
+        Args: {
+          p_student_id: string;
+          p_mentor_id: string;
+          p_program_id: string;
+          p_cohort_id?: string | null;
+          p_notes?: string | null;
+        };
+        Returns: Json;
+      };
+      admin_end_individual_mentor: {
+        Args: {
+          p_assignment_id: string;
+          p_notes?: string | null;
+        };
+        Returns: Json;
+      };
+      get_effective_mentor_for_student: {
+        Args: {
+          p_student_id: string;
+          p_program_id?: string | null;
+        };
+        Returns: {
+          mentor_id: string;
+          assignment_type: string;
+          assignment_id: string;
+          cohort_id: string;
+          program_id: string;
+          assigned_at: string;
+          mentor_name: string;
+          mentor_email: string;
+          mentor_poraplan_id: string;
+          mentor_whatsapp: string;
+          mentor_background: string;
+        }[];
+      };
       admin_review_application: {
         Args: {
           p_application_id: string;

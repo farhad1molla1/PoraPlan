@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
-import { ShieldCheck, LogOut, CheckCircle, Database, UserPlus, AlertCircle, CheckCircle2, Loader2, GraduationCap, ArrowRight, ClipboardList, UserCheck } from 'lucide-react';
+import { ShieldCheck, LogOut, CheckCircle, Database, UserPlus, AlertCircle, CheckCircle2, Loader2, GraduationCap, ArrowRight, ClipboardList, UserCheck, Users } from 'lucide-react';
 import { adminRegisterMember } from '../../lib/profiles';
 import type { UserRole } from '../../types/database';
 
@@ -214,6 +214,36 @@ export const AdminDashboardPage: React.FC = () => {
                 Manage Enrollments
               </Button>
             </div>
+          </div>
+        </div>
+
+        {/* Milestone 4: Mentor Assignment & Matching Desk Banner */}
+        <div className="border-2 border-brand-dark bg-brand-paper p-6 shadow-brutal space-y-4">
+          <div className="border-b-2 border-brand-dark pb-3 flex items-center justify-between">
+            <div className="space-y-0.5">
+              <h2 className="font-heading font-extrabold text-lg text-brand-navy flex items-center gap-2">
+                <Users className="w-5 h-5 text-brand-teal stroke-[2.5]" />
+                Mentor Assignment &amp; Matching System
+              </h2>
+              <p className="text-xs text-brand-dark/80 font-sans">
+                Allocate cohort default mentors, manage individual student overrides, and monitor mentor workload distribution.
+              </p>
+            </div>
+            <Badge variant="teal" size="sm">MILESTONE 4</Badge>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-1">
+            <p className="text-xs font-mono text-brand-muted max-w-xl">
+              Strict precedence resolution: Individual Override takes precedence over Cohort Default. Full history preserved.
+            </p>
+            <Button
+              to="/admin/mentor-assignments"
+              variant="primary"
+              size="sm"
+              rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+            >
+              Open Mentor Allocations
+            </Button>
           </div>
         </div>
 

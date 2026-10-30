@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getAssignedMentors } from '../../lib/mentorship';
+import { getEffectiveMentor } from '../../lib/mentorAssignments';
 import { getStudentTasks, setTaskStatus, type TaskWithMeta } from '../../lib/tasks';
 import { getStudentStudyPlans, type StudyPlanWithMeta } from '../../lib/studyPlans';
 import { getStudentAssignments, type AssignmentWithMeta } from '../../lib/assignments';
 import { getStudentDoubts, type DoubtWithMeta } from '../../lib/doubts';
 import { getStudentEvaluations, type EvaluationWithMeta } from '../../lib/evaluations';
-import type { Profile, TaskStatus } from '../../types/database';
+import type { Profile, TaskStatus, EffectiveMentorResolution } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import {
@@ -31,6 +32,7 @@ import {
   Megaphone,
   Circle,
   Loader2,
+  Phone,
 } from 'lucide-react';
 
 export const StudentDashboardPage: React.FC = () => {
@@ -38,6 +40,7 @@ export const StudentDashboardPage: React.FC = () => {
   const studentId = user?.id || '';
 
   const [mentors, setMentors] = useState<Profile[]>([]);
+  const [effectiveResolution, setEffectiveResolution] = useState<EffectiveMentorResolution | null>(null);
   const [tasks, setTasks] = useState<TaskWithMeta[]>([]);
   const [plans, setPlans] = useState<StudyPlanWithMeta[]>([]);
   const [assignments, setAssignments] = useState<AssignmentWithMeta[]>([]);
@@ -56,6 +59,7 @@ export const StudentDashboardPage: React.FC = () => {
     if (!studentId) return;
     let isMounted = true;
     Promise.all([
+      getEffectiveMentor(studentId),
       getAssignedMentors(studentId),
       getStudentTasks(studentId),
       getStudentStudyPlans(studentId),
@@ -63,8 +67,9 @@ export const StudentDashboardPage: React.FC = () => {
       getStudentDoubts(studentId),
       getStudentEvaluations(studentId),
     ])
-      .then(([mentorsRes, tasksRes, plansRes, assignmentsRes, doubtsRes, evalsRes]) => {
+      .then(([effRes, mentorsRes, tasksRes, plansRes, assignmentsRes, doubtsRes, evalsRes]) => {
         if (!isMounted) return;
+        setEffectiveResolution(effRes.resolution || null);
         setMentors(mentorsRes.mentors || []);
         setTasks(tasksRes.tasks || []);
         setPlans(plansRes.plans || []);
@@ -119,7 +124,8 @@ export const StudentDashboardPage: React.FC = () => {
   });
 
   const studentName = profile?.full_name || user?.user_metadata?.full_name || 'Student';
-  const assignedMentor = mentors.length > 0 ? mentors[0] : null;
+  const assignedMentor = effectiveResolution?.mentor || (mentors.length > 0 ? mentors[0] : null);
+  const assignmentType = effectiveResolution?.assignment_type || (assignedMentor ? 'cohort' : 'none');
 
   // Active plan & daily tasks
   const activePlan = plans.find((p) => p.status === 'active') || plans[0] || null;
@@ -177,26 +183,76 @@ export const StudentDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Mentor Status Strip */}
-          <div className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-gold text-brand-dark shadow-brutal-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5 font-mono text-xs font-extrabold tracking-wide uppercase">
-                  <Users className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.5]" />
-                  <span>YOUR MENTOR</span>
+          {/* Dedicated My Mentor Section */}
+          <div className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper text-brand-dark shadow-brutal-xs">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+              <div className="space-y-2 flex-1">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 font-mono text-xs font-extrabold tracking-wide uppercase text-brand-navy">
+                    <Users className="w-4 h-4 text-brand-teal shrink-0 stroke-[2.5]" />
+                    <span>YOUR MENTOR</span>
+                  </div>
+                  {assignmentType === 'individual' ? (
+                    <Badge variant="teal" size="sm" className="font-bold">
+                      INDIVIDUAL MENTOR
+                    </Badge>
+                  ) : assignmentType === 'cohort' ? (
+                    <Badge variant="gold" size="sm" className="font-bold">
+                      COHORT MENTOR
+                    </Badge>
+                  ) : null}
                 </div>
-                <p className="text-xs font-sans font-medium text-brand-dark/90 leading-relaxed">
-                  {assignedMentor ? (
-                    <>
-                      <span className="font-bold">{assignedMentor.full_name}</span> is organizing your study schedule. Need quick help? Reach out on WhatsApp or submit a doubt below.
-                    </>
-                  ) : (
-                    'Your mentor pairing is being set up. You can view your study materials or contact support.'
-                  )}
-                </p>
+
+                {assignedMentor ? (
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base sm:text-lg font-black text-brand-navy">
+                        {assignedMentor.full_name}
+                      </h3>
+                      {assignedMentor.poraplan_id && (
+                        <span className="font-mono text-xs px-1.5 py-0.5 bg-brand-paper-tint border border-brand-dark/40 font-bold text-brand-navy">
+                          {assignedMentor.poraplan_id}
+                        </span>
+                      )}
+                    </div>
+
+                    {(assignedMentor.academic_background || assignedMentor.expertise) && (
+                      <p className="text-xs text-brand-dark/80 font-sans leading-relaxed">
+                        {assignedMentor.academic_background || assignedMentor.expertise}
+                      </p>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-brand-muted pt-1">
+                      {effectiveResolution?.program && (
+                        <span>Program: {effectiveResolution.program.name}</span>
+                      )}
+                      {effectiveResolution?.cohort && (
+                        <>
+                          <span>•</span>
+                          <span>Cohort: {effectiveResolution.cohort.name} ({effectiveResolution.cohort.code})</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs font-sans text-brand-dark/80 leading-relaxed pt-1">
+                    No mentor has been assigned yet. PoraPlan will update this section when your mentorship allocation is ready.
+                  </p>
+                )}
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 shrink-0 self-start">
+                {assignedMentor?.whatsapp_number && (
+                  <a
+                    href={`https://wa.me/${assignedMentor.whatsapp_number.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-emerald-600 text-white text-xs font-mono font-bold shadow-brutal-xs hover:bg-emerald-700 transition-colors"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>WhatsApp</span>
+                  </a>
+                )}
                 <Link
                   to="/student/doubts"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-navy text-brand-bg text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-dark transition-colors"
@@ -206,7 +262,7 @@ export const StudentDashboardPage: React.FC = () => {
                 </Link>
                 <Link
                   to="/student/plans"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-brand-dark text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-paper-tint transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-gold text-brand-dark text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-gold-light transition-colors"
                 >
                   <span>Study Plans</span>
                   <ArrowRight className="w-3.5 h-3.5" />

@@ -49,6 +49,10 @@ import type {
   ProgramApplicationInsert,
   ProgramEnrollment,
   EnrollmentStatus,
+  CohortMentor,
+  StudentMentorAssignment,
+  EffectiveMentorResolution,
+  MentorWorkloadSummary,
 } from '../types/database';
 import { sha256 } from './crypto';
 
@@ -436,24 +440,16 @@ export function adminRegisterMockMember(
 }
 
 /**
- * Mock mentorship pairings: Dr. Rafiqul Islam (PPM001) is paired with Fahim Rahman (PP001).
+ * Mock mentorship pairings: resolved dynamically using effective mentor resolution engine.
  */
 export function getMockAssignedStudents(mentorId: string): Profile[] {
-  const mentor = mockStore.find((acc) => acc.id === mentorId);
-  if (mentor?.poraplanId === 'PPM001') {
-    const student = getMockProfile('mock-student-pp001');
-    return student ? [student] : [];
-  }
-  return [];
+  const effectiveMentees = getMockEffectiveStudentsForMentor(mentorId);
+  return effectiveMentees.map((item) => item.student);
 }
 
 export function getMockAssignedMentors(studentId: string): Profile[] {
-  const student = mockStore.find((acc) => acc.id === studentId);
-  if (student?.poraplanId === 'PP001') {
-    const mentor = getMockProfile('mock-mentor-ppm001');
-    return mentor ? [mentor] : [];
-  }
-  return [];
+  const resolution = getMockEffectiveMentorForStudent(studentId);
+  return resolution.mentor ? [resolution.mentor] : [];
 }
 
 /**
@@ -4575,4 +4571,506 @@ export function updateMockEnrollmentStatus(
   };
 
   return { enrollment: mockEnrollments[index], error: null };
+}
+
+// ==============================================================================
+// Milestone 4: Mentor Assignment & Matching Mock Store
+// ==============================================================================
+
+const mockCohortMentors: CohortMentor[] = [
+  {
+    id: 'cm-seed-01',
+    cohort_id: 'cohort-uu-cse-b67',
+    mentor_id: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    assigned_by: 'mock-admin-ppa001',
+    assigned_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+    ended_at: null,
+    is_active: true,
+    notes: 'Allocated as lead cohort mentor for Batch 67 CSE mentorship.',
+    created_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+    updated_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+  },
+];
+
+const mockStudentMentorAssignments: StudentMentorAssignment[] = [];
+
+export function getMockCohortMentors(filters?: {
+  cohortId?: string;
+  programId?: string;
+  mentorId?: string;
+  isActive?: boolean;
+}): CohortMentor[] {
+  let list = [...mockCohortMentors];
+
+  if (filters?.cohortId && filters.cohortId !== 'all') {
+    list = list.filter((cm) => cm.cohort_id === filters.cohortId);
+  }
+  if (filters?.programId && filters.programId !== 'all') {
+    list = list.filter((cm) => cm.program_id === filters.programId);
+  }
+  if (filters?.mentorId && filters.mentorId !== 'all') {
+    list = list.filter((cm) => cm.mentor_id === filters.mentorId);
+  }
+  if (filters?.isActive !== undefined) {
+    list = list.filter((cm) => cm.is_active === filters.isActive);
+  }
+
+  return list.sort((a, b) => new Date(b.assigned_at).getTime() - new Date(a.assigned_at).getTime());
+}
+
+export function getMockStudentMentorAssignments(filters?: {
+  studentId?: string;
+  programId?: string;
+  mentorId?: string;
+  isActive?: boolean;
+}): StudentMentorAssignment[] {
+  let list = [...mockStudentMentorAssignments];
+
+  if (filters?.studentId && filters.studentId !== 'all') {
+    list = list.filter((sma) => sma.student_id === filters.studentId);
+  }
+  if (filters?.programId && filters.programId !== 'all') {
+    list = list.filter((sma) => sma.program_id === filters.programId);
+  }
+  if (filters?.mentorId && filters.mentorId !== 'all') {
+    list = list.filter((sma) => sma.mentor_id === filters.mentorId);
+  }
+  if (filters?.isActive !== undefined) {
+    list = list.filter((sma) => sma.is_active === filters.isActive);
+  }
+
+  return list.sort((a, b) => new Date(b.assigned_at).getTime() - new Date(a.assigned_at).getTime());
+}
+
+export function getMockCohortMentorById(id: string): CohortMentor | null {
+  return mockCohortMentors.find((cm) => cm.id === id) || null;
+}
+
+export function getMockStudentMentorAssignmentById(id: string): StudentMentorAssignment | null {
+  return mockStudentMentorAssignments.find((sma) => sma.id === id) || null;
+}
+
+/**
+ * Resolves the effective mentor for a given student according to precedence:
+ * Individual Override ?? Cohort Default ?? None
+ */
+export function getMockEffectiveMentorForStudent(
+  studentId: string,
+  programId?: string
+): EffectiveMentorResolution {
+  // 1. Check for active individual override
+  const override = mockStudentMentorAssignments.find(
+    (sma) => sma.student_id === studentId && sma.is_active && (!programId || sma.program_id === programId)
+  );
+
+  if (override) {
+    const mentor = getMockProfile(override.mentor_id);
+    const cohort = override.cohort_id
+      ? getMockCohorts().find((c) => c.id === override.cohort_id) || null
+      : null;
+    const program = getMockProgramById(override.program_id);
+
+    return {
+      student_id: studentId,
+      mentor,
+      assignment_type: 'individual',
+      assignment_id: override.id,
+      cohort,
+      program,
+      assigned_at: override.assigned_at,
+      notes: override.notes,
+    };
+  }
+
+  // 2. Check student's active enrollment to locate cohort default mentor
+  const enrollments = getMockEnrollments({ studentId, status: 'active' });
+  const enrollment = programId
+    ? enrollments.find((e) => e.program_id === programId)
+    : enrollments[0];
+
+  if (enrollment && enrollment.cohort_id) {
+    const cohortMentor = mockCohortMentors.find(
+      (cm) => cm.cohort_id === enrollment.cohort_id && cm.is_active
+    );
+
+    if (cohortMentor) {
+      const mentor = getMockProfile(cohortMentor.mentor_id);
+      const cohort = getMockCohorts().find((c) => c.id === cohortMentor.cohort_id) || null;
+      const program = getMockProgramById(cohortMentor.program_id);
+
+      return {
+        student_id: studentId,
+        mentor,
+        assignment_type: 'cohort',
+        assignment_id: cohortMentor.id,
+        cohort,
+        program,
+        assigned_at: cohortMentor.assigned_at,
+        notes: cohortMentor.notes,
+      };
+    }
+  }
+
+  // 3. No effective mentor found
+  return {
+    student_id: studentId,
+    mentor: null,
+    assignment_type: 'none',
+    assignment_id: null,
+    cohort: null,
+    program: null,
+    assigned_at: null,
+    notes: null,
+  };
+}
+
+/**
+ * Returns all active students who effectively have this mentor assigned.
+ * Respects individual overrides so mentors don't see overridden students.
+ */
+export function getMockEffectiveStudentsForMentor(mentorId: string): {
+  student: Profile;
+  cohort: Cohort | null;
+  program: Program | null;
+  assignmentType: 'individual' | 'cohort';
+  assignedAt: string;
+}[] {
+  const result: {
+    student: Profile;
+    cohort: Cohort | null;
+    program: Program | null;
+    assignmentType: 'individual' | 'cohort';
+    assignedAt: string;
+  }[] = [];
+  const processedStudentIds = new Set<string>();
+
+  // 1. Students with active individual overrides pointing to this mentor
+  const activeOverrides = mockStudentMentorAssignments.filter(
+    (sma) => sma.mentor_id === mentorId && sma.is_active
+  );
+
+  for (const override of activeOverrides) {
+    const student = getMockProfile(override.student_id);
+    if (student) {
+      const cohort = override.cohort_id
+        ? getMockCohorts().find((c) => c.id === override.cohort_id) || null
+        : null;
+      const program = getMockProgramById(override.program_id);
+      result.push({
+        student,
+        cohort,
+        program,
+        assignmentType: 'individual',
+        assignedAt: override.assigned_at,
+      });
+      processedStudentIds.add(student.id);
+    }
+  }
+
+  // 2. Students enrolled in cohorts where this mentor is the active cohort mentor
+  const activeCohortAssignments = mockCohortMentors.filter(
+    (cm) => cm.mentor_id === mentorId && cm.is_active
+  );
+
+  for (const cm of activeCohortAssignments) {
+    const enrollments = getMockEnrollments({ cohortId: cm.cohort_id, status: 'active' });
+    const cohort = getMockCohorts().find((c) => c.id === cm.cohort_id) || null;
+    const program = getMockProgramById(cm.program_id);
+
+    for (const enr of enrollments) {
+      if (processedStudentIds.has(enr.student_id)) continue;
+
+      // Check if student has an individual override to someone else
+      const hasOtherOverride = mockStudentMentorAssignments.some(
+        (sma) => sma.student_id === enr.student_id && sma.is_active && sma.mentor_id !== mentorId
+      );
+      if (hasOtherOverride) continue;
+
+      const student = getMockProfile(enr.student_id);
+      if (student) {
+        result.push({
+          student,
+          cohort,
+          program,
+          assignmentType: 'cohort',
+          assignedAt: cm.assigned_at,
+        });
+        processedStudentIds.add(student.id);
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Filter mentors who have an approved application for the target program
+ * and active mentor account status.
+ */
+export function getMockEligibleMentorsForProgram(programId: string): Profile[] {
+  // Find approved mentor applications for program
+  const approvedMentorApps = mockApplications.filter(
+    (app) =>
+      app.program_id === programId &&
+      app.application_type === 'mentor' &&
+      app.status === 'approved'
+  );
+
+  const eligibleMentorIds = new Set(approvedMentorApps.map((a) => a.applicant_id));
+
+  return mockStore
+    .filter(
+      (acc) =>
+        acc.role === 'mentor' &&
+        acc.status !== 'suspended' &&
+        eligibleMentorIds.has(acc.id)
+    )
+    .map((acc) => getMockProfile(acc.id)!)
+    .filter(Boolean);
+}
+
+/**
+ * Admin action: Assign or replace cohort mentor.
+ */
+export function adminAssignMockCohortMentor(
+  cohortId: string,
+  mentorId: string,
+  notes?: string
+): { success: boolean; message: string; assignmentId?: string } {
+  const cohort = getMockCohorts().find((c) => c.id === cohortId);
+  if (!cohort) {
+    return { success: false, message: 'Cohort not found.' };
+  }
+  if (cohort.status === 'completed' || cohort.status === 'archived') {
+    return { success: false, message: 'Cannot assign a mentor to an archived or completed cohort.' };
+  }
+
+  const mentor = mockStore.find((m) => m.id === mentorId);
+  if (!mentor || mentor.role !== 'mentor') {
+    return { success: false, message: 'Selected user is not an active mentor.' };
+  }
+  if (mentor.status === 'suspended') {
+    return { success: false, message: 'Cannot assign a suspended mentor.' };
+  }
+
+  // Validate approved mentor application for target program
+  const hasApprovedApp = mockApplications.some(
+    (a) =>
+      a.applicant_id === mentorId &&
+      a.program_id === cohort.program_id &&
+      a.application_type === 'mentor' &&
+      a.status === 'approved'
+  );
+  if (!hasApprovedApp) {
+    return {
+      success: false,
+      message: 'Mentor does not have an approved application for this program.',
+    };
+  }
+
+  // Deactivate existing active assignment for this cohort
+  const existingActive = mockCohortMentors.find(
+    (cm) => cm.cohort_id === cohortId && cm.is_active
+  );
+  if (existingActive) {
+    existingActive.is_active = false;
+    existingActive.ended_at = new Date().toISOString();
+    existingActive.updated_at = new Date().toISOString();
+    existingActive.notes = existingActive.notes
+      ? `${existingActive.notes}\n[Replaced by admin]`
+      : '[Replaced by admin]';
+  }
+
+  const newAssignment: CohortMentor = {
+    id: `cm-${Date.now()}`,
+    cohort_id: cohortId,
+    mentor_id: mentorId,
+    program_id: cohort.program_id,
+    assigned_by: 'mock-admin-ppa001',
+    assigned_at: new Date().toISOString(),
+    ended_at: null,
+    is_active: true,
+    notes: notes || null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  mockCohortMentors.push(newAssignment);
+  return {
+    success: true,
+    message: 'Cohort mentor assigned successfully.',
+    assignmentId: newAssignment.id,
+  };
+}
+
+/**
+ * Admin action: End cohort mentor assignment.
+ */
+export function adminEndMockCohortMentor(
+  cohortId: string,
+  notes?: string
+): { success: boolean; message: string } {
+  const active = mockCohortMentors.find((cm) => cm.cohort_id === cohortId && cm.is_active);
+  if (!active) {
+    return { success: false, message: 'No active mentor found for this cohort.' };
+  }
+
+  active.is_active = false;
+  active.ended_at = new Date().toISOString();
+  active.updated_at = new Date().toISOString();
+  if (notes) {
+    active.notes = active.notes ? `${active.notes}\n${notes}` : notes;
+  }
+
+  return { success: true, message: 'Cohort mentor assignment ended.' };
+}
+
+/**
+ * Admin action: Assign or replace individual student mentor override.
+ */
+export function adminAssignMockIndividualMentor(
+  studentId: string,
+  mentorId: string,
+  programId: string,
+  cohortId?: string,
+  notes?: string
+): { success: boolean; message: string; assignmentId?: string } {
+  if (studentId === mentorId) {
+    return { success: false, message: 'Student and Mentor cannot be the same user.' };
+  }
+
+  // Validate student is actively enrolled
+  const activeEnrollment = mockEnrollments.find(
+    (e) => e.student_id === studentId && e.program_id === programId && e.status === 'active'
+  );
+  if (!activeEnrollment) {
+    return { success: false, message: 'Student is not actively enrolled in this program.' };
+  }
+
+  const mentor = mockStore.find((m) => m.id === mentorId);
+  if (!mentor || mentor.role !== 'mentor') {
+    return { success: false, message: 'Selected user is not an active mentor.' };
+  }
+  if (mentor.status === 'suspended') {
+    return { success: false, message: 'Cannot assign a suspended mentor.' };
+  }
+
+  // Validate approved application
+  const hasApprovedApp = mockApplications.some(
+    (a) =>
+      a.applicant_id === mentorId &&
+      a.program_id === programId &&
+      a.application_type === 'mentor' &&
+      a.status === 'approved'
+  );
+  if (!hasApprovedApp) {
+    return {
+      success: false,
+      message: 'Mentor does not have an approved application for this program.',
+    };
+  }
+
+  // Deactivate any existing active individual override for this student in this program
+  const existingOverride = mockStudentMentorAssignments.find(
+    (sma) => sma.student_id === studentId && sma.program_id === programId && sma.is_active
+  );
+  if (existingOverride) {
+    existingOverride.is_active = false;
+    existingOverride.ended_at = new Date().toISOString();
+    existingOverride.updated_at = new Date().toISOString();
+    existingOverride.notes = existingOverride.notes
+      ? `${existingOverride.notes}\n[Replaced by admin]`
+      : '[Replaced by admin]';
+  }
+
+  const newAssignment: StudentMentorAssignment = {
+    id: `sma-${Date.now()}`,
+    student_id: studentId,
+    mentor_id: mentorId,
+    program_id: programId,
+    cohort_id: cohortId || activeEnrollment.cohort_id || null,
+    assignment_type: 'individual',
+    assigned_by: 'mock-admin-ppa001',
+    assigned_at: new Date().toISOString(),
+    ended_at: null,
+    is_active: true,
+    notes: notes || null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  mockStudentMentorAssignments.push(newAssignment);
+  return {
+    success: true,
+    message: 'Individual mentor override assigned successfully.',
+    assignmentId: newAssignment.id,
+  };
+}
+
+/**
+ * Admin action: End individual student override, restoring cohort default.
+ */
+export function adminEndMockIndividualMentor(
+  assignmentId: string,
+  notes?: string
+): { success: boolean; message: string } {
+  const active = mockStudentMentorAssignments.find((sma) => sma.id === assignmentId && sma.is_active);
+  if (!active) {
+    return { success: false, message: 'Active individual assignment not found.' };
+  }
+
+  active.is_active = false;
+  active.ended_at = new Date().toISOString();
+  active.updated_at = new Date().toISOString();
+  if (notes) {
+    active.notes = active.notes ? `${active.notes}\n${notes}` : notes;
+  }
+
+  return {
+    success: true,
+    message: 'Individual override ended. Student reverted to cohort default mentor.',
+  };
+}
+
+/**
+ * Workload distribution summary for all mentor accounts.
+ */
+export function getMockMentorWorkload(): MentorWorkloadSummary[] {
+  const mentors = mockStore.filter((acc) => acc.role === 'mentor');
+
+  return mentors.map((acc) => {
+    const mentorProfile = getMockProfile(acc.id)!;
+    const activeCohorts = mockCohortMentors.filter((cm) => cm.mentor_id === acc.id && cm.is_active);
+    const individualOverrides = mockStudentMentorAssignments.filter(
+      (sma) => sma.mentor_id === acc.id && sma.is_active
+    );
+    const effectiveMentees = getMockEffectiveStudentsForMentor(acc.id);
+
+    const cohortsDetail = activeCohorts.map((cm) => {
+      const cohort = getMockCohorts().find((c) => c.id === cm.cohort_id);
+      const prog = getMockProgramById(cm.program_id);
+      const studentCount = getMockEnrollments({ cohortId: cm.cohort_id, status: 'active' }).length;
+      return {
+        id: cm.cohort_id,
+        name: cohort?.name || 'Cohort',
+        code: cohort?.code || 'N/A',
+        programName: prog?.name || 'Program',
+        studentCount,
+      };
+    });
+
+    const isEligible = mockApplications.some(
+      (a) => a.applicant_id === acc.id && a.application_type === 'mentor' && a.status === 'approved'
+    );
+
+    return {
+      mentor: mentorProfile,
+      activeCohortsCount: activeCohorts.length,
+      individualOverridesCount: individualOverrides.length,
+      totalEffectiveMenteesCount: effectiveMentees.length,
+      cohorts: cohortsDetail,
+      isEligible,
+    };
+  });
 }
