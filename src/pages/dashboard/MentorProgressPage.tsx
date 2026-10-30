@@ -135,14 +135,14 @@ export const MentorProgressPage: React.FC = () => {
               MENTORSHIP CONSOLE
             </span>
             <Badge variant="gold" size="sm">
-              SCHOLARS PROGRESS
+              STUDENTS PROGRESS
             </Badge>
           </div>
           <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy tracking-tight">
-            Assigned Scholars Progress Overview
+            Student Progress Overview
           </h1>
           <p className="font-sans text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl">
-            Monitor academic activity, task completion, practice submissions, and milestone evaluations for students paired with your mentor account.
+            Monitor study activity, task completion, practice submissions, and evaluations for students paired with your mentor account.
           </p>
         </div>
 
@@ -175,7 +175,7 @@ export const MentorProgressPage: React.FC = () => {
         <div className="p-4 border-2 border-red-600 bg-red-50 text-red-900 shadow-brutal flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h4 className="font-heading font-bold text-sm">Failed to Load Scholar Progress</h4>
+            <h4 className="font-heading font-bold text-sm">Failed to Load Student Progress</h4>
             <p className="font-mono text-xs mt-1 text-red-800">{errorMessage}</p>
           </div>
         </div>
@@ -188,7 +188,7 @@ export const MentorProgressPage: React.FC = () => {
         <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <span className="font-mono text-[10px] sm:text-xs uppercase font-extrabold text-brand-muted">
-              ASSIGNED SCHOLARS
+              ASSIGNED STUDENTS
             </span>
             <Users className="w-4 h-4 text-brand-navy stroke-[2.5]" />
           </div>
@@ -196,7 +196,7 @@ export const MentorProgressPage: React.FC = () => {
             {totalAssignedScholars}
           </div>
           <span className="text-[10px] font-mono text-brand-muted mt-1">
-            Authorized mentees
+            Active students
           </span>
         </div>
 
@@ -211,7 +211,7 @@ export const MentorProgressPage: React.FC = () => {
             {scholarsWithActiveTasks}
           </div>
           <span className="text-[10px] font-mono text-brand-teal font-bold mt-1">
-            Scholars with study tasks
+            Students with study tasks
           </span>
         </div>
 
@@ -264,7 +264,7 @@ export const MentorProgressPage: React.FC = () => {
             />
           </div>
           <span className="font-mono text-xs text-brand-muted">
-            Showing {filteredScholars.length} of {scholars.length} assigned scholars
+            Showing {filteredScholars.length} of {scholars.length} assigned students
           </span>
         </div>
 
@@ -272,7 +272,7 @@ export const MentorProgressPage: React.FC = () => {
           <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center flex flex-col items-center justify-center">
             <Loader2 className="w-8 h-8 animate-spin text-brand-teal mb-3" />
             <p className="font-heading font-extrabold text-base text-brand-navy">
-              LOADING SCHOLAR ROSTER
+              LOADING STUDENTS...
             </p>
             <span className="font-mono text-xs text-brand-muted mt-1">
               Fetching assigned student metrics...
@@ -288,13 +288,13 @@ export const MentorProgressPage: React.FC = () => {
               No Students Currently Assigned
             </h3>
             <p className="font-sans text-xs sm:text-sm text-brand-muted mt-2 max-w-lg mx-auto">
-              You currently have 0 assigned scholars in the database. When platform administrators pair students with your mentor account, their progress tracking and academic metrics will appear here automatically.
+              You currently have 0 assigned students in the database. When students are paired with your mentor account, their progress tracking and study metrics will appear here automatically.
             </p>
           </div>
         ) : filteredScholars.length === 0 ? (
           <div className="p-8 border-2 border-brand-dark bg-brand-paper text-center shadow-brutal-xs">
             <p className="font-heading font-bold text-sm text-brand-navy">
-              No scholars matching "{searchQuery}"
+              No students matching "{searchQuery}"
             </p>
             <button
               onClick={() => setSearchQuery('')}
@@ -424,7 +424,7 @@ export const MentorProgressPage: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Badge variant="teal" size="sm">
-                    SCHOLAR PROGRESS DOSSIER
+                    STUDENT PROGRESS DETAILS
                   </Badge>
                   <span className="font-mono text-xs font-bold text-brand-teal">
                     {selectedScholar.poraplanId}
@@ -450,7 +450,7 @@ export const MentorProgressPage: React.FC = () => {
                 <div className="py-12 text-center flex flex-col items-center justify-center">
                   <Loader2 className="w-8 h-8 animate-spin text-brand-teal mb-3" />
                   <p className="font-heading font-bold text-sm text-brand-navy">
-                    LOADING SCHOLAR DOSSIER
+                    LOADING STUDENT DETAILS...
                   </p>
                 </div>
               ) : detailError ? (

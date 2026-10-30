@@ -108,14 +108,11 @@ export const StudentProgressPage: React.FC = () => {
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="font-mono text-xs uppercase font-bold text-brand-muted bg-brand-bg px-2 py-0.5 border border-brand-dark">
-              ACADEMIC METRICS
+              STUDY METRICS
             </span>
-            <Badge variant="teal" size="sm">
-              TRUTHFUL LOG
-            </Badge>
             {profile?.poraplan_id && (
               <span className="font-mono text-xs font-bold text-brand-teal px-2 py-0.5 border border-brand-dark bg-brand-paper shadow-brutal-xs">
-                SCHOLAR ID: {profile.poraplan_id}
+                STUDENT ID: {profile.poraplan_id}
               </span>
             )}
             {assignedMentor && (
@@ -125,10 +122,10 @@ export const StudentProgressPage: React.FC = () => {
             )}
           </div>
           <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy tracking-tight">
-            Academic Progress Tracking
+            Progress Tracking
           </h1>
           <p className="font-sans text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl">
-            Verified, database-backed summary of your study workflow: tasks, practice submissions, and milestone evaluations.
+            Summary of your study progress: completed tasks, practice submissions, and mentor evaluations.
           </p>
         </div>
 
@@ -213,7 +210,7 @@ export const StudentProgressPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                 <span className="font-mono text-xs uppercase font-extrabold text-brand-navy flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-brand-teal" />
-                  PoraPlan Core Academic Progression
+                  Study Cycle Overview
                 </span>
                 <span className="font-mono text-[11px] text-brand-muted">
                   Plan → Study → Practice → Submit → Review → Feedback → Progress

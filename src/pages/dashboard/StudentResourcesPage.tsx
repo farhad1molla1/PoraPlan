@@ -137,22 +137,19 @@ export const StudentResourcesPage: React.FC = () => {
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="font-mono text-xs uppercase font-bold text-brand-muted bg-brand-bg px-2 py-0.5 border border-brand-dark">
-              STUDY REFERENCE
+              STUDY MATERIALS
             </span>
-            <Badge variant="teal" size="sm">
-              ACADEMIC LIBRARY
-            </Badge>
             {profile?.poraplan_id && (
               <span className="font-mono text-xs font-bold text-brand-teal px-2 py-0.5 border border-brand-dark bg-brand-paper shadow-brutal-xs">
-                SCHOLAR: {profile.poraplan_id}
+                STUDENT ID: {profile.poraplan_id}
               </span>
             )}
           </div>
           <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy tracking-tight">
-            Learning Resources & Formula Library
+            Study Resources
           </h1>
           <p className="font-sans text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl">
-            Mentor-curated reference sheets, formula cheatsheets, lecture links, and textbook excerpts organized by study area.
+            Organized study materials, reference notes, and lecture resources curated by your mentor.
           </p>
         </div>
 

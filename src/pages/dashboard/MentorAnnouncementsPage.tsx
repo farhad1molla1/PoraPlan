@@ -162,7 +162,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
       return;
     }
     if (createScope === 'individual' && !createStudentId) {
-      setCreateError('Please select a target scholar for this announcement.');
+      setCreateError('Please select a target student for this announcement.');
       return;
     }
 
@@ -400,7 +400,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-purple-700 bg-purple-50 text-purple-900 font-mono text-[10px] font-bold uppercase">
             <Sparkles className="w-2.5 h-2.5" />
-            Individual: {ann.student_name || ann.student_poraplan_id || 'Scholar'}
+            Individual: {ann.student_name || ann.student_poraplan_id || 'Student'}
           </span>
         );
       default:
@@ -418,11 +418,11 @@ export const MentorAnnouncementsPage: React.FC = () => {
               <Megaphone className="w-5 h-5 stroke-[2.5]" />
             </div>
             <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
-              Announcements Desk
+              Announcements
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-brand-muted font-sans">
-            Broadcast targeted directives, consultation schedules, and track scholar acknowledgments.
+            Post announcements, schedule updates, and guidance for your assigned students.
           </p>
         </div>
 
@@ -548,7 +548,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search notices by title, content, or targeted scholar..."
+              placeholder="Search notices by title, content, or targeted student..."
               className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
             />
             {searchQuery && (
@@ -639,7 +639,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
             Loading Faculty Announcements...
           </p>
           <span className="font-mono text-[11px] text-brand-muted block">
-            Querying authorized announcement records and scholar acknowledgment logs
+            Querying authorized announcement records and student acknowledgment logs
           </span>
         </div>
       ) : filteredAnnouncements.length === 0 ? (
@@ -650,7 +650,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
           <h2 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy">
             {totalCount === 0
               ? 'No Announcements Published Yet'
-              : 'No Directives Match Filter Criteria'}
+              : 'No Announcements Match Filter Criteria'}
           </h2>
           <p className="font-sans text-xs sm:text-sm text-brand-muted max-w-md mx-auto leading-relaxed">
             {totalCount === 0
@@ -725,7 +725,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
                       type="button"
                       onClick={() => setViewingAcksAnnouncement(announcement)}
                       className="inline-flex items-center gap-1 font-mono text-[11px] font-bold px-2.5 py-0.5 border border-brand-dark bg-brand-paper hover:bg-brand-paper-tint shadow-xs transition-colors"
-                      title="View scholars who confirmed receipt"
+                      title="View students who confirmed receipt"
                     >
                       <Users className="w-3 h-3 text-brand-navy" />
                       <span>{announcement.acknowledgments_count || 0} Confirmations</span>
@@ -868,7 +868,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
                       Mentor Cohort
                     </div>
                     <p className="text-[11px] text-brand-muted leading-tight">
-                      Dispatched to all scholars currently assigned to your mentoring roster.
+                      Dispatched to all students currently assigned to your mentoring roster.
                     </p>
                   </button>
 
@@ -883,10 +883,10 @@ export const MentorAnnouncementsPage: React.FC = () => {
                   >
                     <div className="flex items-center gap-1.5 font-heading font-bold text-xs text-brand-navy mb-0.5">
                       <Sparkles className="w-3.5 h-3.5 text-purple-700" />
-                      Individual Scholar
+                      Individual Student
                     </div>
                     <p className="text-[11px] text-brand-muted leading-tight">
-                      Confidential notice targeted exclusively to one assigned scholar.
+                      Notice targeted exclusively to one assigned student.
                     </p>
                   </button>
                 </div>
@@ -926,11 +926,11 @@ export const MentorAnnouncementsPage: React.FC = () => {
               {createScope === 'individual' && (
                 <div className="p-3 border-2 border-brand-dark bg-purple-50 space-y-1.5 animate-in fade-in duration-150">
                   <label className="font-mono text-xs font-bold uppercase text-purple-900 block">
-                    Select Target Scholar <span className="text-red-600">*</span>
+                    Select Target Student <span className="text-red-600">*</span>
                   </label>
                   {students.length === 0 ? (
                     <div className="text-xs text-amber-900 font-sans p-2 border border-amber-600 bg-amber-50">
-                      No scholars currently assigned to your mentoring roster. Pair with scholars first to dispatch individual notices.
+                      No students currently assigned to your mentoring roster. Pair with students first to dispatch individual notices.
                     </div>
                   ) : (
                     <select
@@ -939,7 +939,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
                       className="w-full px-3 py-2 text-xs sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none"
                       required
                     >
-                      <option value="">-- Choose Assigned Scholar --</option>
+                      <option value="">-- Choose Assigned Student --</option>
                       {students.map((student) => (
                         <option key={student.id} value={student.id}>
                           {student.full_name} ({student.poraplan_id || student.email})
@@ -953,7 +953,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
               {/* Priority */}
               <div>
                 <label className="font-mono text-xs font-bold uppercase text-brand-navy block mb-1">
-                  Priority Directive Level
+                  Priority Level
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {(['normal', 'important', 'urgent'] as AnnouncementPriority[]).map((p) => (
@@ -980,12 +980,12 @@ export const MentorAnnouncementsPage: React.FC = () => {
               {/* Notice Body */}
               <div>
                 <label className="font-mono text-xs font-bold uppercase text-brand-navy block mb-1">
-                  Announcement Notice Body <span className="text-red-600">*</span>
+                  Announcement Message <span className="text-red-600">*</span>
                 </label>
                 <textarea
                   value={createContent}
                   onChange={(e) => setCreateContent(e.target.value)}
-                  placeholder="Provide precise academic directives, guidelines, assignment dates, or preparation instructions..."
+                  placeholder="Write your announcement or study guidance here..."
                   rows={5}
                   className="w-full px-3 py-2 text-xs sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   required
@@ -1149,7 +1149,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
                 <Users className="w-5 h-5 text-brand-navy stroke-[2.5]" />
                 <div>
                   <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
-                    Scholar Confirmations
+                    Student Confirmations
                   </h3>
                   <span className="font-mono text-[10px] text-brand-muted block truncate max-w-xs">
                     {viewingAcksAnnouncement.title}
@@ -1169,7 +1169,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
               <div className="flex items-center justify-between font-mono text-xs border-b border-brand-dark/15 pb-2">
                 <span className="text-brand-muted uppercase font-bold">Total Confirmed</span>
                 <span className="font-bold text-brand-navy">
-                  {viewingAcksAnnouncement.acknowledgments_count || 0} Scholars
+                  {viewingAcksAnnouncement.acknowledgments_count || 0} Students
                 </span>
               </div>
 
@@ -1181,7 +1181,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
                     No Confirmations Recorded Yet
                   </p>
                   <span className="font-mono text-[11px] text-brand-muted block">
-                    Scholars will appear here once they acknowledge the notice from their desk.
+                    Students will appear here once they acknowledge the notice.
                   </span>
                 </div>
               ) : (
@@ -1254,7 +1254,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
 
             <p className="text-xs sm:text-sm text-brand-dark leading-relaxed font-sans">
               Are you sure you want to permanently delete{' '}
-              <strong className="text-brand-navy">"{deletingAnnouncement.title}"</strong>? All scholar
+              <strong className="text-brand-navy">"{deletingAnnouncement.title}"</strong>? All student
               acknowledgment records associated with this announcement will also be removed.
             </p>
 

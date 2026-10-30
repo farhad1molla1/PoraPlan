@@ -124,9 +124,29 @@ Accounts are pre-registered by authorized Mentors or Administrators with an init
 | `/login` | Public (Unauthenticated) | PoraPlan ID + Password login, Google login for linked members, and forgot password |
 | `/signup` | Public (Unauthenticated) | Information notice on mentor-assigned PoraPlan IDs and support contact |
 | `/reset-password` | Public | Secure password update interface for recovery sessions |
-| `/student/dashboard` | Protected (`student`, `admin`) | Student workspace: greeting, focus, tasks, progress placeholders, quick links |
-| `/mentor/dashboard` | Protected (`mentor`, `admin`) | Mentor workspace: student count, review queue, evaluations, student roster |
-| `/admin/dashboard` | Protected (`admin`) | System admin control sector placeholder |
+| `/student/dashboard` | Protected (`student`, `admin`) | Student workspace: today's tasks, active study plans, quick metrics, doubt inquiries |
+| `/student/tasks` | Protected (`student`, `admin`) | Today's prioritized study tasks organized by mentor |
+| `/student/plans` | Protected (`student`, `admin`) | Study roadmaps broken down from university syllabus |
+| `/student/assignments` | Protected (`student`, `admin`) | Problem sets and practice submissions |
+| `/student/evaluations` | Protected (`student`, `admin`) | Mentor review sessions and evaluation feedback |
+| `/student/progress` | Protected (`student`, `admin`) | Study metrics, completion tracking, and cycle overview |
+| `/student/resources` | Protected (`student`, `admin`) | Curated study materials and reference links |
+| `/student/doubts` | Protected (`student`, `admin`) | Conceptual questions and mentor responses |
+| `/student/announcements` | Protected (`student`, `admin`) | Notices and schedule updates from mentor |
+| `/student/notifications` | Protected (`student`, `admin`) | Real-time alerts for tasks, plans, feedback, and replies |
+| `/student/subjects` | Protected (`student`, `admin`) | University courses and enrolled subjects |
+| `/mentor/dashboard` | Protected (`mentor`, `admin`) | Mentor console: assigned students, attention queue, quick action cards |
+| `/mentor/tasks` | Protected (`mentor`, `admin`) | Assign and monitor daily study tasks for students |
+| `/mentor/plans` | Protected (`mentor`, `admin`) | Draft and manage syllabus study roadmaps |
+| `/mentor/assignments` | Protected (`mentor`, `admin`) | Create and assign practice sets and homework |
+| `/mentor/reviews` | Protected (`mentor`, `admin`) | Inspect and grade student submissions with qualitative feedback |
+| `/mentor/evaluations` | Protected (`mentor`, `admin`) | Schedule review sessions and record evaluations |
+| `/mentor/progress` | Protected (`mentor`, `admin`) | Overview of student performance and completion rates |
+| `/mentor/resources` | Protected (`mentor`, `admin`) | Curate study materials for students |
+| `/mentor/doubts` | Protected (`mentor`, `admin`) | Answer and clarify student doubt inquiries |
+| `/mentor/announcements` | Protected (`mentor`, `admin`) | Dispatch notices to cohort or individual students |
+| `/mentor/subjects` | Protected (`mentor`, `admin`) | Configure syllabus subjects for assigned students |
+| `/admin/dashboard` | Protected (`admin`) | System admin control sector |
 | `/dashboard` | Protected | Dynamic resolver redirecting to role workspace |
 
 ---

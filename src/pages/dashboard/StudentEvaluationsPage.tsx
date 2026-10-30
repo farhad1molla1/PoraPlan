@@ -119,15 +119,14 @@ export const StudentEvaluationsPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs uppercase text-brand-teal font-bold tracking-wider">
-              STEP 6 &amp; 7: EVALUATION &amp; PROGRESS
+              Check-ins &amp; Feedback
             </span>
-            <Badge variant="teal" size="sm">ACADEMIC CHECKPOINTS</Badge>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy tracking-tight mt-1">
-            Milestone Evaluations &amp; Calibration
+            Evaluations
           </h1>
           <p className="text-xs sm:text-sm text-brand-muted mt-0.5">
-            Structured oral walkthroughs and milestone reviews scheduled with your mentor to verify concept retention.
+            Regular review sessions and progress evaluations with your mentor via Google Meet, Zoom, or detailed feedback.
           </p>
         </div>
 
@@ -159,15 +158,15 @@ export const StudentEvaluationsPage: React.FC = () => {
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5 font-mono text-xs font-extrabold tracking-wide uppercase">
               <Sparkles className="w-4 h-4 text-brand-navy shrink-0" />
-              <span>HOW MILESTONE EVALUATIONS OPERATE IN PORAPLAN</span>
+              <span>HOW EVALUATIONS WORK IN PORAPLAN</span>
             </div>
             <p className="text-xs font-sans font-medium text-brand-dark/90 leading-relaxed">
               {assignedMentor ? (
                 <>
-                  Your assigned mentor, <span className="font-bold underline">{assignedMentor.full_name}</span>, conducts scheduled milestone assessments after you complete study plans and practice sets. These sessions check derivations, resolve subtle misconceptions, and calibrate your upcoming weekly syllabus pace.
+                  Your assigned mentor, <span className="font-bold underline">{assignedMentor.full_name}</span>, conducts periodic reviews and evaluation sessions (via Google Meet, Zoom, or written feedback). These check-ins test understanding, clear stubborn doubts, and adjust your study plan realistically.
                 </>
               ) : (
-                'You are currently studying independently. When a platform mentor is paired with your account, they will schedule milestone reviews and pacing calibrations here.'
+                'You are currently studying independently. When a mentor is assigned to your account, they will schedule evaluations and progress check-ins here.'
               )}
             </p>
           </div>

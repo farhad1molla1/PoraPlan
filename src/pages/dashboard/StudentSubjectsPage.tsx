@@ -104,22 +104,22 @@ export const StudentSubjectsPage: React.FC = () => {
                 </Link>
                 <span className="text-brand-bg/50 font-mono text-xs">/</span>
                 <span className="font-mono text-xs uppercase text-brand-teal font-bold tracking-wider">
-                  STUDY AREAS
+                  SUBJECTS
                 </span>
               </div>
 
               <h1 id="subjects-heading" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
-                My Study Areas &amp; Subjects
+                Subjects
               </h1>
 
               <p className="text-xs sm:text-sm text-brand-bg/85 font-sans max-w-2xl leading-relaxed">
-                Core academic courses organized for your mentorship study plan. Each study area anchors your daily tasks, practice exercises, and syllabus milestones.
+                Your university courses and subjects organized by your mentor. Each subject anchors your study plans, tasks, and practice exercises.
               </p>
             </div>
 
             <div className="shrink-0">
               <Badge variant="teal" size="sm" className="font-mono">
-                {subjects.length} {subjects.length === 1 ? 'SUBJECT' : 'SUBJECTS'} ENROLLED
+                {subjects.length} {subjects.length === 1 ? 'SUBJECT' : 'SUBJECTS'}
               </Badge>
             </div>
           </div>
@@ -129,7 +129,7 @@ export const StudentSubjectsPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Compass className="w-4 h-4 text-brand-teal shrink-0 stroke-[2.2]" />
               <span>
-                <span className="font-bold text-brand-navy">Study Workflow Position:</span> Step 1: Plan &amp; Step 2: Study
+                <span className="font-bold text-brand-navy">Mentorship Structure:</span> Subjects are mapped from your university syllabus by your mentor.
               </span>
             </div>
             {assignedMentor && (

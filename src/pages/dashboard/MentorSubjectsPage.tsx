@@ -260,16 +260,16 @@ export const MentorSubjectsPage: React.FC = () => {
                 </Link>
                 <span className="text-brand-bg/50 font-mono text-xs">/</span>
                 <span className="font-mono text-xs uppercase text-brand-gold font-bold tracking-wider">
-                  STUDY AREAS MANAGEMENT
+                  SUBJECTS
                 </span>
               </div>
 
               <h1 id="mentor-subjects-heading" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
-                Curriculum Study Areas
+                Subjects
               </h1>
 
               <p className="text-xs sm:text-sm text-brand-bg/85 font-sans max-w-2xl leading-relaxed">
-                Configure syllabus study areas for your assigned students. Study areas serve as the foundation for weekly study plans, daily tasks, and practice problem sets.
+                Configure syllabus subjects for your assigned students based on their university coursework.
               </p>
             </div>
 
@@ -282,7 +282,7 @@ export const MentorSubjectsPage: React.FC = () => {
                 leftIcon={<Plus className="w-4 h-4 stroke-[2.5]" />}
                 className="bg-brand-gold text-brand-dark hover:bg-brand-gold-light border-2 border-brand-dark"
               >
-                Add Study Area
+                Add Subject
               </Button>
             </div>
           </div>

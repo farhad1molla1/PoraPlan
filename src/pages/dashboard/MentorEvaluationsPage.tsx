@@ -330,15 +330,14 @@ export const MentorEvaluationsPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs uppercase text-brand-gold font-bold tracking-wider">
-              STEP 6 &amp; 7: EVALUATION &amp; PROGRESS
+              Check-ins &amp; Reviews
             </span>
-            <Badge variant="gold" size="sm">MILESTONE ASSESSMENTS</Badge>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy tracking-tight mt-1">
-            Student Milestone Evaluations
+            Evaluations
           </h1>
           <p className="text-xs sm:text-sm text-brand-muted mt-0.5">
-            Conduct oral concept walkthroughs, written problem sets, and calibrate syllabus pacing for assigned scholars.
+            Schedule and record review sessions (Google Meet/Zoom or written) to evaluate understanding and adjust study plans.
           </p>
         </div>
 
@@ -515,10 +514,10 @@ export const MentorEvaluationsPage: React.FC = () => {
               onChange={(e) => setSelectedStudentId(e.target.value)}
               className="p-1.5 border-2 border-brand-dark bg-brand-paper text-xs font-mono font-bold text-brand-navy shadow-brutal-xs focus:outline-none"
             >
-              <option value="all">All Assigned Scholars ({students.length})</option>
+              <option value="all">All Assigned Students ({students.length})</option>
               {students.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.full_name} ({s.poraplan_id || 'Scholar'})
+                  {s.full_name} ({s.poraplan_id || 'Student'})
                 </option>
               ))}
             </select>
@@ -563,7 +562,7 @@ export const MentorEvaluationsPage: React.FC = () => {
             LOADING EVALUATIONS DATABASE
           </p>
           <span className="font-mono text-xs text-brand-muted block">
-            Querying milestone reviews for assigned scholars...
+            Querying evaluations for assigned students...
           </span>
         </div>
       ) : filteredEvaluations.length > 0 ? (
@@ -614,7 +613,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-brand-muted">
                       <span className="font-bold text-brand-teal flex items-center gap-1">
                         <Users className="w-3.5 h-3.5" />
-                        Scholar: {item.student_name} ({item.student_poraplan_id || 'PP001'})
+                        Student: {item.student_name} ({item.student_poraplan_id || 'PP001'})
                       </span>
                       <span>•</span>
                       <span className="flex items-center gap-1 text-brand-dark font-medium">
@@ -749,11 +748,11 @@ export const MentorEvaluationsPage: React.FC = () => {
           </div>
           <div className="max-w-md mx-auto space-y-1">
             <h3 className="font-heading font-extrabold text-base text-brand-navy">
-              No Milestone Evaluations Found
+              No Evaluations Found
             </h3>
             <p className="text-xs text-brand-muted leading-relaxed">
               {evaluations.length === 0
-                ? 'You have not scheduled any milestone evaluations for your assigned scholars yet. Evaluations allow you to conduct oral problem walkthroughs and calibrate weekly syllabus pacing.'
+                ? 'You have not scheduled any evaluations for your assigned students yet. Evaluations allow you to conduct short review sessions (via Google Meet/Zoom or written) and calibrate study plans.'
                 : 'No evaluations match your current filter and search criteria.'}
             </p>
           </div>
@@ -781,7 +780,7 @@ export const MentorEvaluationsPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-brand-gold" />
                 <h2 className="font-heading font-extrabold text-base text-brand-paper">
-                  Schedule Milestone Evaluation
+                  Schedule Evaluation
                 </h2>
               </div>
               <button
@@ -804,7 +803,7 @@ export const MentorEvaluationsPage: React.FC = () => {
               {/* Student Selector */}
               <div>
                 <label className="block text-xs font-mono font-bold text-brand-navy uppercase mb-1">
-                  Target Assigned Scholar *
+                  Target Assigned Student *
                 </label>
                 <select
                   value={targetStudentId}
@@ -956,7 +955,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Specific topics, chapters, and question types the scholar will be evaluated on..."
+                  placeholder="Specific topics, chapters, and question types the student will be evaluated on..."
                   value={evalDescription}
                   onChange={(e) => setEvalDescription(e.target.value)}
                   className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none resize-none"
@@ -1023,7 +1022,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                   <Badge variant="teal" size="sm">{activeEval.format.toUpperCase()}</Badge>
                 </div>
                 <div className="text-brand-muted flex items-center justify-between text-[11px]">
-                  <span>Scholar: {activeEval.student_name}</span>
+                  <span>Student: {activeEval.student_name}</span>
                   <span>Max Points: {activeEval.total_points || 100}</span>
                 </div>
               </div>
@@ -1049,12 +1048,12 @@ export const MentorEvaluationsPage: React.FC = () => {
               {/* Qualitative Concept Notes */}
               <div>
                 <label className="block text-xs font-mono font-bold text-brand-navy uppercase mb-1">
-                  Concept Retention Notes &amp; Misconception Analysis *
+                  Feedback &amp; Performance Notes *
                 </label>
                 <textarea
                   rows={4}
                   required
-                  placeholder="Detail the scholar's performance on derivations, accuracy of mathematical steps, and conceptual understanding..."
+                  placeholder="Detail the student's performance, strengths, areas needing improvement, and next steps..."
                   value={gradingFeedback}
                   onChange={(e) => setGradingFeedback(e.target.value)}
                   className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none resize-none"
@@ -1124,7 +1123,7 @@ export const MentorEvaluationsPage: React.FC = () => {
               <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs uppercase font-bold text-brand-muted">
-                    SCHOLAR PROFILE
+                    STUDENT PROFILE
                   </span>
                   <Badge variant="teal" size="sm">{activeEval.status.toUpperCase()}</Badge>
                 </div>

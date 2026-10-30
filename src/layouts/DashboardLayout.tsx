@@ -5,10 +5,8 @@ import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import {
   LayoutDashboard,
-  Target,
   ListTodo,
   FileText,
-  Users,
   FileCheck,
   Calendar,
   LogOut,
@@ -95,40 +93,55 @@ export const DashboardLayout: React.FC = () => {
   // Desktop sidebar navigation links
   const studentNavItems = [
     { label: 'Overview', shortLabel: 'Home', to: '/student/dashboard', icon: LayoutDashboard },
-    { label: 'Study Areas', shortLabel: 'Subjects', to: '/student/subjects', icon: BookOpen },
     { label: 'Study Plans', shortLabel: 'Plans', to: '/student/plans', icon: Compass },
     { label: "Today's Tasks", shortLabel: 'Tasks', to: '/student/tasks', icon: ListTodo },
     { label: 'Assignments', shortLabel: 'Practice', to: '/student/assignments', icon: FileText },
-    { label: "Today's Focus", shortLabel: 'Focus', to: '/student/dashboard#focus', icon: Target },
-    { label: 'Upcoming Evaluation', shortLabel: 'Eval', to: '/student/evaluations', icon: Calendar },
-    { label: 'Academic Progress', shortLabel: 'Progress', to: '/student/progress', icon: TrendingUp },
-    { label: 'Study Resources', shortLabel: 'Library', to: '/student/resources', icon: BookMarked },
-    { label: 'Doubts & Inquiries', shortLabel: 'Doubts', to: '/student/doubts', icon: HelpCircle },
+    { label: 'Evaluations', shortLabel: 'Eval', to: '/student/evaluations', icon: Calendar },
+    { label: 'Progress', shortLabel: 'Progress', to: '/student/progress', icon: TrendingUp },
+    { label: 'Study Resources', shortLabel: 'Resources', to: '/student/resources', icon: BookMarked },
+    { label: 'Doubts', shortLabel: 'Doubts', to: '/student/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/student/announcements', icon: Megaphone },
     { label: 'Notifications', shortLabel: 'Alerts', to: '/student/notifications', icon: Bell, badgeCount: unreadNotifCount },
-    { label: 'Mentorship', shortLabel: 'Mentor', to: '/student/dashboard#mentorship', icon: Users },
+    { label: 'Subjects', shortLabel: 'Subjects', to: '/student/subjects', icon: BookOpen },
   ];
 
   const mentorNavItems = [
     { label: 'Overview', shortLabel: 'Home', to: '/mentor/dashboard', icon: LayoutDashboard },
-    { label: 'Study Areas', shortLabel: 'Subjects', to: '/mentor/subjects', icon: BookOpen },
     { label: 'Study Plans', shortLabel: 'Plans', to: '/mentor/plans', icon: Compass },
-    { label: 'Tasks Queue', shortLabel: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
+    { label: 'Tasks', shortLabel: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
     { label: 'Assignments', shortLabel: 'Practice', to: '/mentor/assignments', icon: FileText },
-    { label: 'Student Roster', shortLabel: 'Roster', to: '/mentor/dashboard#roster', icon: Users },
-    { label: 'Review Queue', shortLabel: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
+    { label: 'Review Submissions', shortLabel: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
     { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/evaluations', icon: Calendar },
-    { label: 'Scholar Progress', shortLabel: 'Progress', to: '/mentor/progress', icon: TrendingUp },
-    { label: 'Resource Library', shortLabel: 'Library', to: '/mentor/resources', icon: BookMarked },
-    { label: 'Doubts Desk', shortLabel: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
-    { label: 'Announcements Desk', shortLabel: 'Notices', to: '/mentor/announcements', icon: Megaphone },
+    { label: 'Student Progress', shortLabel: 'Progress', to: '/mentor/progress', icon: TrendingUp },
+    { label: 'Resources', shortLabel: 'Resources', to: '/mentor/resources', icon: BookMarked },
+    { label: 'Doubts', shortLabel: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
+    { label: 'Announcements', shortLabel: 'Notices', to: '/mentor/announcements', icon: Megaphone },
+    { label: 'Subjects', shortLabel: 'Subjects', to: '/mentor/subjects', icon: BookOpen },
   ];
 
   const adminNavItems = [
     { label: 'Admin Console', shortLabel: 'Admin', to: '/admin/dashboard', icon: ShieldCheck },
   ];
 
+  // Mobile navigation: top essential daily actions
+  const mobileStudentNavItems = [
+    { label: 'Home', to: '/student/dashboard', icon: LayoutDashboard },
+    { label: 'Tasks', to: '/student/tasks', icon: ListTodo },
+    { label: 'Plans', to: '/student/plans', icon: Compass },
+    { label: 'Doubts', to: '/student/doubts', icon: HelpCircle },
+    { label: 'Alerts', to: '/student/notifications', icon: Bell, badgeCount: unreadNotifCount },
+  ];
+
+  const mobileMentorNavItems = [
+    { label: 'Home', to: '/mentor/dashboard', icon: LayoutDashboard },
+    { label: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
+    { label: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
+    { label: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
+    { label: 'Evals', to: '/mentor/evaluations', icon: Calendar },
+  ];
+
   const navItems = isStudent ? studentNavItems : isMentor ? mentorNavItems : adminNavItems;
+  const mobileNavItems = isStudent ? mobileStudentNavItems : isMentor ? mobileMentorNavItems : adminNavItems;
 
   return (
     <div className="min-h-screen bg-brand-bg text-brand-dark flex flex-col font-sans">
@@ -328,7 +341,7 @@ export const DashboardLayout: React.FC = () => {
         className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-paper border-t-2 border-brand-dark h-14 flex items-stretch justify-around shadow-brutal-xs"
         aria-label="Mobile Bottom Navigation"
       >
-        {navItems.map((item) => {
+        {mobileNavItems.map((item) => {
           const Icon = item.icon;
           const isExact = location.pathname === item.to || (location.pathname + location.hash) === item.to;
           const isSubpath = item.to.includes('/subjects') && location.pathname.startsWith(item.to);
@@ -352,7 +365,7 @@ export const DashboardLayout: React.FC = () => {
                 )}
               </div>
               <span className="text-[10px] font-mono mt-0.5 leading-none truncate max-w-[70px]">
-                {item.shortLabel || item.label}
+                {item.label}
               </span>
             </Link>
           );

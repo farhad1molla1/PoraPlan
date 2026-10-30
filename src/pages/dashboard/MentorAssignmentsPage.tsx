@@ -351,17 +351,14 @@ export const MentorAssignmentsPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="font-mono text-xs font-bold text-brand-gold uppercase tracking-wider">
-              Mentorship Practice Roster
+              Mentorship Practice
             </span>
-            <Badge variant="gold" size="sm">
-              PHASE 3: PRACTICE
-            </Badge>
           </div>
           <h1 className="font-heading font-black text-2xl md:text-3xl text-brand-navy">
-            Assignments &amp; Practice Queue
+            Assignments
           </h1>
           <p className="text-sm text-brand-muted mt-1 max-w-2xl">
-            Distribute rigorous homework sets, problem solving exercises, and chapter tests to your assigned scholars. Review their submitted derivations and solutions.
+            Create and assign practice problem sets, questions, and revision exercises for your assigned students.
           </p>
         </div>
 
@@ -388,10 +385,10 @@ export const MentorAssignmentsPage: React.FC = () => {
           </div>
           <div>
             <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-brand-muted">
-              Select Assigned Scholar
+              Select Assigned Student
             </div>
             <div className="font-heading font-bold text-base text-brand-navy">
-              {selectedStudent ? `${selectedStudent.full_name} (${selectedStudent.poraplan_id})` : 'No Scholar Selected'}
+              {selectedStudent ? `${selectedStudent.full_name} (${selectedStudent.poraplan_id})` : 'No Student Selected'}
             </div>
           </div>
         </div>
@@ -399,11 +396,11 @@ export const MentorAssignmentsPage: React.FC = () => {
         {loadingStudents ? (
           <div className="flex items-center gap-2 text-xs font-mono text-brand-muted">
             <Loader2 className="w-4 h-4 animate-spin text-brand-teal" />
-            Loading assigned roster...
+            Loading assigned students...
           </div>
         ) : students.length === 0 ? (
           <div className="text-xs font-mono text-brand-muted bg-brand-paper px-3 py-1.5 border border-brand-dark">
-            0 Assigned Scholars
+            0 Assigned Students
           </div>
         ) : (
           <div className="flex items-center gap-2">
@@ -500,7 +497,7 @@ export const MentorAssignmentsPage: React.FC = () => {
             <Users className="w-8 h-8 text-brand-muted" />
           </div>
           <h3 className="font-heading font-black text-xl text-brand-navy mb-2">
-            No Assigned Scholars Found
+            No Assigned Students Found
           </h3>
           <p className="text-sm text-brand-muted max-w-md mx-auto mb-6">
             You do not currently have any students assigned to your mentorship roster. Administrative pairing is required before distributing assignments.
@@ -513,7 +510,7 @@ export const MentorAssignmentsPage: React.FC = () => {
           </div>
           <h3 className="font-heading font-black text-xl text-brand-navy mb-2">
             {filterState === 'all'
-              ? 'No Assignments for This Scholar'
+              ? 'No Assignments for This Student'
               : `No Assignments in "${filterState.toUpperCase()}" Status`}
           </h3>
           <p className="text-sm text-brand-muted max-w-md mx-auto mb-6">
@@ -696,7 +693,7 @@ export const MentorAssignmentsPage: React.FC = () => {
               {/* Target Scholar */}
               <div>
                 <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
-                  Assigned Scholar
+                  Assigned Student
                 </label>
                 <div className="bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark">
                   {selectedStudent ? `${selectedStudent.full_name} (${selectedStudent.poraplan_id})` : 'None'}

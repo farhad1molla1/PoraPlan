@@ -275,10 +275,10 @@ export const StudentNotificationsPage: React.FC = () => {
             )}
           </div>
           <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">
-            Notifications Center
+            Notifications
           </h1>
           <p className="text-xs sm:text-sm text-brand-dark/70 font-sans mt-0.5">
-            Real-time notifications triggered exclusively by your mentors and academic directives.
+            Updates and alerts from your mentor on tasks, plans, reviews, and announcements.
           </p>
         </div>
 
@@ -414,7 +414,7 @@ export const StudentNotificationsPage: React.FC = () => {
           </h2>
           <p className="text-xs sm:text-sm text-brand-muted max-w-md mx-auto">
             {statusFilter === 'unread'
-              ? 'You have caught up with all mentor tasks, assignment reviews, and academic directives.'
+              ? 'You have caught up with all mentor tasks, assignment reviews, and announcements.'
               : 'When your mentors publish study plans, assign tasks, review assignments, or reply to doubts, notifications will appear here.'}
           </p>
           {statusFilter !== 'all' && (

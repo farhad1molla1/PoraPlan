@@ -157,17 +157,17 @@ export const MentorReviewQueuePage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="font-mono text-xs font-bold text-brand-gold uppercase tracking-wider">
-              Scholar Submissions Review Queue
+              Student Submissions
             </span>
             <Badge variant="gold" size="sm">
-              EVALUATION &amp; FEEDBACK
+              FEEDBACK
             </Badge>
           </div>
           <h1 className="font-heading font-black text-2xl md:text-3xl text-brand-navy">
-            Submission Review Queue
+            Review Queue
           </h1>
           <p className="text-sm text-brand-muted mt-1 max-w-2xl">
-            Inspect handwritten work, proof derivations, and practice assignments submitted by your assigned scholars. Provide qualitative feedback and record scores.
+            Review practice tasks, written work, and problem sets submitted by your assigned students. Provide feedback and guidance.
           </p>
         </div>
 
@@ -292,7 +292,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search scholar or assignment..."
+            placeholder="Search student or assignment..."
             className="w-full bg-white border-2 border-brand-dark px-3 py-1.5 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
           />
         </div>
@@ -316,7 +316,7 @@ export const MentorReviewQueuePage: React.FC = () => {
           </h3>
           <p className="text-sm text-brand-muted max-w-md mx-auto mb-6">
             {filterState === 'all'
-              ? 'No student submissions have been turned in yet across your assigned scholar roster.'
+              ? 'No student submissions have been turned in yet across your assigned students.'
               : `There are currently no submissions matching "${filterState.replace('_', ' ').toUpperCase()}".`}
           </p>
           <Link to="/mentor/assignments">
@@ -480,7 +480,7 @@ export const MentorReviewQueuePage: React.FC = () => {
               {/* Submission Meta */}
               <div className="bg-brand-paper p-3 border-2 border-brand-dark flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
                 <div>
-                  <span className="text-brand-muted">Scholar:</span>{' '}
+                  <span className="text-brand-muted">Student:</span>{' '}
                   <strong>{reviewTarget.student_name}</strong> ({reviewTarget.student_poraplan_id})
                 </div>
                 <div>

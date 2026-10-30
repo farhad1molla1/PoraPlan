@@ -129,17 +129,14 @@ export const StudentTasksPage: React.FC = () => {
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[10px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-2 py-0.5 shadow-brutal-xs">
-                  STEP 2: STUDY • ACTIVITY QUEUE
-                </span>
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-teal-light bg-brand-teal/20 border border-brand-teal/40 px-2 py-0.5">
-                  Verified Scholar Access
+                  DAILY TARGETS
                 </span>
               </div>
               <h1 id="tasks-heading" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
-                Daily Study Tasks
+                Today's Tasks
               </h1>
               <p className="text-xs sm:text-sm text-brand-bg/80 font-sans max-w-2xl leading-relaxed">
-                Prioritized 50-minute study blocks, chapter reading allocations, and conceptual problem sets calibrated by your mentor.
+                Prioritized daily study tasks and practice sessions organized by your mentor.
               </p>
             </div>
 
@@ -167,7 +164,7 @@ export const StudentTasksPage: React.FC = () => {
                 </strong>
               </div>
               <div className="text-[11px] text-brand-paper/70">
-                Scholar ID: <span className="text-brand-teal-light font-bold">{profile?.poraplan_id || 'PP001'}</span>
+                Student ID: <span className="text-brand-teal-light font-bold">{profile?.poraplan_id || 'PP001'}</span>
               </div>
             </div>
           )}

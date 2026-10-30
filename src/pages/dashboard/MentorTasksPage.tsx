@@ -313,17 +313,14 @@ export const MentorTasksPage: React.FC = () => {
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[10px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-2 py-0.5 shadow-brutal-xs">
-                  STEP 2: STUDY • TASK ALLOCATION
-                </span>
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-teal-light bg-brand-teal/20 border border-brand-teal/40 px-2 py-0.5">
-                  Verified Mentor Access
+                  Daily Targets
                 </span>
               </div>
               <h1 id="mentor-tasks-title" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
-                Task Allocation &amp; Study Blocks
+                Study Tasks
               </h1>
               <p className="text-xs sm:text-sm text-brand-bg/80 font-sans max-w-2xl leading-relaxed">
-                Assign and monitor daily study sessions, reading chapters, and problem set checkpoints for your scholars.
+                Assign and monitor daily study sessions, reading chapters, and problem set checkpoints for your assigned students.
               </p>
             </div>
 
@@ -334,7 +331,7 @@ export const MentorTasksPage: React.FC = () => {
               disabled={loadingStudents || students.length === 0}
               leftIcon={<Plus className="w-4 h-4 stroke-[2.5]" />}
             >
-              Allocate Task
+              Assign Task
             </Button>
           </div>
         </section>
@@ -358,11 +355,11 @@ export const MentorTasksPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-brand-teal stroke-[2.2]" />
               <h2 id="roster-tasks-heading" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
-                Select Assigned Scholar
+                Select Assigned Student
               </h2>
             </div>
             <span className="font-mono text-xs text-brand-muted">
-              {students.length} {students.length === 1 ? 'scholar enrolled' : 'scholars enrolled'}
+              {students.length} {students.length === 1 ? 'student assigned' : 'students assigned'}
             </span>
           </div>
 
@@ -408,14 +405,14 @@ export const MentorTasksPage: React.FC = () => {
 
         {/* Selected Student's Tasks Queue */}
         {selectedStudentId && activeStudent && (
-          <section aria-label="Scholar tasks queue" className="space-y-4">
+          <section aria-label="Student tasks list" className="space-y-4">
             <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2">
               <div>
                 <h2 className="font-heading font-extrabold text-base text-brand-navy">
-                  Activity Tasks for {activeStudent.full_name}
+                  Tasks for {activeStudent.full_name}
                 </h2>
                 <span className="font-mono text-xs text-brand-muted">
-                  Scholar PoraPlan ID: {activeStudent.poraplan_id || 'PP001'}
+                  Student ID: {activeStudent.poraplan_id || 'PP001'}
                 </span>
               </div>
 
@@ -427,7 +424,7 @@ export const MentorTasksPage: React.FC = () => {
             {loadingTasks ? (
               <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center space-y-2">
                 <Loader2 className="w-8 h-8 animate-spin text-brand-teal mx-auto" />
-                <span className="font-mono text-xs text-brand-muted block">Loading scholar activity queue...</span>
+                <span className="font-mono text-xs text-brand-muted block">Loading student tasks...</span>
               </div>
             ) : tasks.length === 0 ? (
               <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-8 text-center space-y-4">
@@ -791,7 +788,7 @@ export const MentorTasksPage: React.FC = () => {
                   Confirm Task Removal
                 </h3>
                 <p className="text-xs text-brand-dark/80 font-sans">
-                  Are you sure you want to remove <strong className="font-bold text-brand-dark">{deleteTargetTask.title}</strong> from this scholar&apos;s queue?
+                  Are you sure you want to remove <strong className="font-bold text-brand-dark">{deleteTargetTask.title}</strong> from this student&apos;s tasks?
                 </p>
               </div>
 

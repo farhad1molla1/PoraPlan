@@ -367,17 +367,14 @@ export const MentorPlansPage: React.FC = () => {
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[10px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-2 py-0.5 shadow-brutal-xs">
-                  STEP 1: PLAN • CURRICULUM MANAGEMENT
-                </span>
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-teal-light bg-brand-teal/20 border border-brand-teal/40 px-2 py-0.5">
-                  Verified Mentor Access
+                  Study Roadmaps
                 </span>
               </div>
               <h1 id="mentor-plans-title" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
-                Study Plans &amp; Syllabus Roadmaps
+                Study Plans
               </h1>
               <p className="text-xs sm:text-sm text-brand-bg/80 font-sans max-w-2xl leading-relaxed">
-                Design weekly targets, chapter milestones, and study instructions for your assigned scholars. Keep learning paced, structured, and auditable.
+                Organize clear study roadmaps, topics, and targets for your assigned students based on their university syllabus.
               </p>
             </div>
 
@@ -412,11 +409,11 @@ export const MentorPlansPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-brand-teal stroke-[2.2]" />
               <h2 id="roster-selector-heading" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
-                Select Assigned Scholar
+                Select Assigned Student
               </h2>
             </div>
             <span className="font-mono text-xs text-brand-muted">
-              {students.length} {students.length === 1 ? 'scholar assigned' : 'scholars assigned'}
+              {students.length} {students.length === 1 ? 'student assigned' : 'students assigned'}
             </span>
           </div>
 
@@ -432,7 +429,7 @@ export const MentorPlansPage: React.FC = () => {
                 No students currently assigned to your mentorship roster.
               </p>
               <p className="text-xs text-brand-muted max-w-sm mx-auto">
-                Once an administrator pairs scholars with your mentor profile, their academic roadmaps will be manageable here.
+                Once a student is paired with your mentor profile, their study plans will be manageable here.
               </p>
             </div>
           ) : (
@@ -465,14 +462,14 @@ export const MentorPlansPage: React.FC = () => {
 
         {/* Selected Student's Study Plans */}
         {selectedStudentId && activeStudent && (
-          <section aria-label="Scholar study plans" className="space-y-4">
+          <section aria-label="Student study plans" className="space-y-4">
             <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2">
               <div>
                 <h2 className="font-heading font-extrabold text-base text-brand-navy">
-                  Curriculum Plans for {activeStudent.full_name}
+                  Study Plans for {activeStudent.full_name}
                 </h2>
                 <span className="font-mono text-xs text-brand-muted">
-                  Scholar PoraPlan ID: {activeStudent.poraplan_id || 'PP001'}
+                  Student ID: {activeStudent.poraplan_id || 'PP001'}
                 </span>
               </div>
 
@@ -484,7 +481,7 @@ export const MentorPlansPage: React.FC = () => {
             {loadingPlans ? (
               <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center space-y-2">
                 <Loader2 className="w-8 h-8 animate-spin text-brand-teal mx-auto" />
-                <span className="font-mono text-xs text-brand-muted block">Loading scholar roadmaps...</span>
+                <span className="font-mono text-xs text-brand-muted block">Loading study plans...</span>
               </div>
             ) : plans.length === 0 ? (
               <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-8 text-center space-y-4">

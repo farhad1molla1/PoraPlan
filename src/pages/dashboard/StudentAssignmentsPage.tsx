@@ -203,15 +203,12 @@ export const StudentAssignmentsPage: React.FC = () => {
             <span className="font-mono text-xs font-bold text-brand-teal uppercase tracking-wider">
               Practice &amp; Submissions
             </span>
-            <Badge variant="teal" size="sm">
-              PHASE 3: PRACTICE
-            </Badge>
           </div>
           <h1 className="font-heading font-black text-2xl md:text-3xl text-brand-navy">
-            Assignments &amp; Practice Sets
+            Assignments
           </h1>
           <p className="text-sm text-brand-muted mt-1 max-w-2xl">
-            Complete and submit assignments assigned by your mentor. Submit your work as written derivation text, external cloud document link, or file attachment.
+            Practice tasks and problem sets assigned by your mentor to test your understanding.
           </p>
         </div>
 

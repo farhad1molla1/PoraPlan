@@ -104,17 +104,14 @@ export const StudentPlansPage: React.FC = () => {
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[10px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-2 py-0.5 shadow-brutal-xs">
-                  STEP 1: PLAN • CURRICULUM ROADMAPS
-                </span>
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-teal-light bg-brand-teal/20 border border-brand-teal/40 px-2 py-0.5">
-                  Verified Scholar Access
+                  STUDY ROADMAPS
                 </span>
               </div>
               <h1 id="study-plans-heading" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
-                My Study Plans
+                Study Plans
               </h1>
               <p className="text-xs sm:text-sm text-brand-bg/80 font-sans max-w-2xl leading-relaxed">
-                Structured academic roadmaps calibrated by your mentor. Each plan breaks down subjects into sequential milestones, target dates, and guided study instructions.
+                Clear study roadmaps organized by your mentor to guide what topics to study and in what order.
               </p>
             </div>
 

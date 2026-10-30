@@ -263,14 +263,14 @@ export const StudentDoubtsPage: React.FC = () => {
               Dashboard
             </Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-brand-navy font-bold">Doubts Resolution Desk</span>
+            <span className="text-brand-navy font-bold">Doubts</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-brand-navy flex items-center gap-2.5">
             <HelpCircle className="w-7 h-7 text-brand-teal" />
-            Academic Doubts &amp; Inquiries
+            Doubts
           </h1>
           <p className="text-xs sm:text-sm text-brand-muted mt-1">
-            Ask specific conceptual questions, homework problems, and study inquiries directly to your assigned mentor.
+            Ask questions, clarify concepts, and discuss study difficulties directly with your assigned mentor.
           </p>
         </div>
 

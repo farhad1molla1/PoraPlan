@@ -248,7 +248,7 @@ export const MentorResourcesPage: React.FC = () => {
   };
 
   const handleDelete = async (res: ResourceWithMeta) => {
-    if (!window.confirm(`Are you sure you want to remove "${res.title}" from scholar library?`)) {
+    if (!window.confirm(`Are you sure you want to remove "${res.title}" from student resources?`)) {
       return;
     }
 
@@ -296,10 +296,10 @@ export const MentorResourcesPage: React.FC = () => {
             </Badge>
           </div>
           <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy tracking-tight">
-            Academic Resources & Formula Sheets
+            Study Resources
           </h1>
           <p className="font-sans text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl">
-            Curate chapter formula sheets, textbook reference notes, and study links directly into your assigned scholars' study areas.
+            Curate study materials, reference notes, and lecture links for your assigned students.
           </p>
         </div>
 
@@ -351,22 +351,22 @@ export const MentorResourcesPage: React.FC = () => {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
             <input
               type="text"
-              placeholder="Search resource title, scholar, subject..."
+              placeholder="Search resource title, student, subject..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
             />
           </div>
 
-          {/* Scholar Filter */}
+          {/* Student Filter */}
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-bold text-brand-muted shrink-0">Scholar:</span>
+            <span className="font-mono text-xs font-bold text-brand-muted shrink-0">Student:</span>
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
               className="px-2.5 py-1.5 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
             >
-              <option value="all">All Assigned Scholars ({students.length})</option>
+              <option value="all">All Assigned Students ({students.length})</option>
               {students.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.full_name} ({s.poraplan_id || 'PP000'})
@@ -419,7 +419,7 @@ export const MentorResourcesPage: React.FC = () => {
             No Resources Curated Yet
           </h3>
           <p className="font-sans text-xs sm:text-sm text-brand-muted mt-2 max-w-lg mx-auto">
-            You haven’t added any learning materials or formula sheets yet. Click "Add New Resource" to attach external lecture notes, formula cheatsheets, or web materials for your assigned scholars.
+            You haven’t added any study materials or notes yet. Click "Add New Resource" to attach lecture notes, formula cheatsheets, or reference links for your assigned students.
           </p>
           <div className="mt-5">
             <Button
@@ -460,7 +460,7 @@ export const MentorResourcesPage: React.FC = () => {
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="font-mono text-[10px] font-bold text-brand-teal bg-brand-bg px-1.5 py-0.5 border border-brand-dark">
-                      {res.student_poraplan_id || 'SCHOLAR'}
+                      {res.student_poraplan_id || 'STUDENT'}
                     </span>
                     <Badge
                       variant={
@@ -483,7 +483,7 @@ export const MentorResourcesPage: React.FC = () => {
                 </div>
 
                 <div className="text-xs font-mono text-brand-muted mb-1">
-                  Scholar: <span className="font-bold text-brand-dark">{res.student_name}</span>
+                  Student: <span className="font-bold text-brand-dark">{res.student_name}</span>
                 </div>
 
                 <h3 className="font-heading font-extrabold text-base text-brand-navy leading-snug">
@@ -599,7 +599,7 @@ export const MentorResourcesPage: React.FC = () => {
               {/* Target Student */}
               <div>
                 <label className="block font-mono text-xs uppercase font-bold text-brand-navy mb-1">
-                  Target Scholar <span className="text-red-600">*</span>
+                  Target Student <span className="text-red-600">*</span>
                 </label>
                 <select
                   value={targetStudentId}
@@ -774,7 +774,7 @@ export const MentorResourcesPage: React.FC = () => {
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Provide instructions or syllabus context for the scholar..."
+                  placeholder="Provide instructions or syllabus context for the student..."
                   value={resourceDescription}
                   onChange={(e) => setResourceDescription(e.target.value)}
                   className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
@@ -804,7 +804,7 @@ export const MentorResourcesPage: React.FC = () => {
                     )
                   }
                 >
-                  {submittingCreate ? 'Saving...' : 'Publish to Scholar Library'}
+                  {submittingCreate ? 'Saving...' : 'Publish Resource'}
                 </Button>
               </div>
             </form>
@@ -905,7 +905,7 @@ export const MentorResourcesPage: React.FC = () => {
                   onChange={(e) => setEditStatus(e.target.value as ResourceStatus)}
                   className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 >
-                  <option value="active">Active (Visible to Scholar)</option>
+                  <option value="active">Active (Visible to Student)</option>
                   <option value="archived">Archived (Hidden)</option>
                 </select>
               </div>
@@ -946,7 +946,7 @@ export const MentorResourcesPage: React.FC = () => {
                     {activeResource.resource_type.toUpperCase()}
                   </Badge>
                   <span className="font-mono text-xs font-bold text-brand-teal">
-                    Scholar: {activeResource.student_name} ({activeResource.student_poraplan_id})
+                    Student: {activeResource.student_name} ({activeResource.student_poraplan_id})
                   </span>
                 </div>
                 <h3 className="font-heading font-extrabold text-xl text-brand-navy">

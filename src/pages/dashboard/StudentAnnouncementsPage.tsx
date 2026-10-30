@@ -255,11 +255,11 @@ export const StudentAnnouncementsPage: React.FC = () => {
               <Megaphone className="w-5 h-5 stroke-[2.5]" />
             </div>
             <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
-              Announcements &amp; Bulletins
+              Announcements
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-brand-muted font-sans">
-            Official academic directives, faculty consultation hours, and platform notifications.
+            Important notices, schedule updates, and guidance from your mentor.
           </p>
         </div>
 
