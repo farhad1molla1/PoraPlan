@@ -40,6 +40,9 @@ import { StudentAnnouncementsPage } from '../pages/dashboard/StudentAnnouncement
 import { MentorAnnouncementsPage } from '../pages/dashboard/MentorAnnouncementsPage';
 import { StudentNotificationsPage } from '../pages/dashboard/StudentNotificationsPage';
 import { ProfilePage } from '../pages/dashboard/ProfilePage';
+import { MyApplicationsPage } from '../pages/dashboard/MyApplicationsPage';
+import { AdminApplicationsPage } from '../pages/dashboard/AdminApplicationsPage';
+import { AdminEnrollmentsPage } from '../pages/dashboard/AdminEnrollmentsPage';
 import { useAuth } from '../hooks/useAuth';
 
 /**
@@ -164,6 +167,14 @@ export const AppRoutes: React.FC = () => {
           }
         />
         <Route
+          path="student/applications"
+          element={
+            <ProtectedRoute allowedRoles={['student', 'admin']}>
+              <MyApplicationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="student/notifications"
           element={
             <ProtectedRoute allowedRoles={['student', 'admin']}>
@@ -278,6 +289,14 @@ export const AppRoutes: React.FC = () => {
           }
         />
         <Route
+          path="mentor/applications"
+          element={
+            <ProtectedRoute allowedRoles={['mentor', 'admin']}>
+              <MyApplicationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="mentor/plans"
           element={
             <ProtectedRoute allowedRoles={['mentor', 'admin']}>
@@ -324,6 +343,22 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminProgramsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/applications"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminApplicationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/enrollments"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminEnrollmentsPage />
             </ProtectedRoute>
           }
         />

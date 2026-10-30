@@ -22,6 +22,8 @@ import {
   Megaphone,
   Bell,
   GraduationCap,
+  ClipboardList,
+  UserCheck,
 } from 'lucide-react';
 import { getUnreadNotificationCount } from '../lib/notifications';
 
@@ -103,6 +105,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Doubts', shortLabel: 'Doubts', to: '/student/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/student/announcements', icon: Megaphone },
     { label: 'Notifications', shortLabel: 'Alerts', to: '/student/notifications', icon: Bell, badgeCount: unreadNotifCount },
+    { label: 'My Applications', shortLabel: 'Apps', to: '/student/applications', icon: ClipboardList },
     { label: 'Subjects', shortLabel: 'Subjects', to: '/student/subjects', icon: BookOpen },
     { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
@@ -118,6 +121,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Resources', shortLabel: 'Resources', to: '/mentor/resources', icon: BookMarked },
     { label: 'Doubts', shortLabel: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/mentor/announcements', icon: Megaphone },
+    { label: 'My Applications', shortLabel: 'Apps', to: '/mentor/applications', icon: ClipboardList },
     { label: 'Subjects', shortLabel: 'Subjects', to: '/mentor/subjects', icon: BookOpen },
     { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
@@ -125,6 +129,8 @@ export const DashboardLayout: React.FC = () => {
   const adminNavItems = [
     { label: 'Admin Console', shortLabel: 'Admin', to: '/admin/dashboard', icon: ShieldCheck },
     { label: 'Programs & Cohorts', shortLabel: 'Programs', to: '/admin/programs', icon: GraduationCap },
+    { label: 'Applications Desk', shortLabel: 'Apps', to: '/admin/applications', icon: ClipboardList },
+    { label: 'Enrollments Desk', shortLabel: 'Enrollments', to: '/admin/enrollments', icon: UserCheck },
     { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
 

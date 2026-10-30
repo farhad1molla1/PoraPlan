@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
-import { ShieldCheck, LogOut, CheckCircle, Database, UserPlus, AlertCircle, CheckCircle2, Loader2, GraduationCap, ArrowRight } from 'lucide-react';
+import { ShieldCheck, LogOut, CheckCircle, Database, UserPlus, AlertCircle, CheckCircle2, Loader2, GraduationCap, ArrowRight, ClipboardList, UserCheck } from 'lucide-react';
 import { adminRegisterMember } from '../../lib/profiles';
 import type { UserRole } from '../../types/database';
 
@@ -152,6 +152,68 @@ export const AdminDashboardPage: React.FC = () => {
             >
               Open Program Manager
             </Button>
+          </div>
+        </div>
+
+        {/* Milestone 3: Applications & Enrollment Desk Banner */}
+        <div className="border-2 border-brand-dark bg-brand-paper p-6 shadow-brutal space-y-4">
+          <div className="border-b-2 border-brand-dark pb-3 flex items-center justify-between">
+            <div className="space-y-0.5">
+              <h2 className="font-heading font-extrabold text-lg text-brand-navy flex items-center gap-2">
+                <ClipboardList className="w-5 h-5 text-brand-teal stroke-[2.5]" />
+                Applications &amp; Enrollment Management System
+              </h2>
+              <p className="text-xs text-brand-dark/80 font-sans">
+                Review student and mentor program admission applications, enforce cohort capacity, and manage active student rosters.
+              </p>
+            </div>
+            <Badge variant="teal" size="sm">MILESTONE 3</Badge>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div className="p-4 border-2 border-brand-dark bg-brand-paper flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <ClipboardList className="w-4 h-4 text-brand-teal" />
+                  <span className="font-heading font-extrabold text-sm text-brand-navy">
+                    Applications Desk
+                  </span>
+                </div>
+                <p className="text-xs text-brand-dark/70 font-sans mb-3">
+                  Triage incoming student and mentor applications with atomic approval and cohort capacity validation.
+                </p>
+              </div>
+              <Button
+                to="/admin/applications"
+                variant="primary"
+                size="sm"
+                rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+              >
+                Review Applications
+              </Button>
+            </div>
+
+            <div className="p-4 border-2 border-brand-dark bg-brand-paper flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <UserCheck className="w-4 h-4 text-brand-teal" />
+                  <span className="font-heading font-extrabold text-sm text-brand-navy">
+                    Enrollments Desk
+                  </span>
+                </div>
+                <p className="text-xs text-brand-dark/70 font-sans mb-3">
+                  View and manage student cohort rosters, change enrollment status (Active, On Hold, Completed, Withdrawn).
+                </p>
+              </div>
+              <Button
+                to="/admin/enrollments"
+                variant="outline"
+                size="sm"
+                rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+              >
+                Manage Enrollments
+              </Button>
+            </div>
           </div>
         </div>
 

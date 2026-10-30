@@ -209,6 +209,89 @@ export type ProgramWithCurriculumAndCohorts = Program & {
   curriculum: CurriculumSectionWithTopics[];
 };
 
+export type ApplicationType = 'student' | 'mentor';
+export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected';
+export type EnrollmentStatus = 'active' | 'on_hold' | 'completed' | 'withdrawn';
+
+export type ProgramApplication = {
+  id: string;
+  applicant_id: string;
+  application_type: ApplicationType;
+  program_id: string;
+  cohort_id?: string | null;
+  status: ApplicationStatus;
+  application_message?: string | null;
+  experience?: string | null;
+  additional_information?: string | null;
+  admin_review_note?: string | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  submitted_at: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProgramApplicationInsert = {
+  id?: string;
+  applicant_id: string;
+  application_type: ApplicationType;
+  program_id: string;
+  cohort_id?: string | null;
+  status?: ApplicationStatus;
+  application_message?: string | null;
+  experience?: string | null;
+  additional_information?: string | null;
+  admin_review_note?: string | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  submitted_at?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProgramApplicationUpdate = Partial<ProgramApplicationInsert>;
+
+export type ProgramEnrollment = {
+  id: string;
+  student_id: string;
+  program_id: string;
+  cohort_id?: string | null;
+  application_id?: string | null;
+  status: EnrollmentStatus;
+  enrolled_at: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProgramEnrollmentInsert = {
+  id?: string;
+  student_id: string;
+  program_id: string;
+  cohort_id?: string | null;
+  application_id?: string | null;
+  status?: EnrollmentStatus;
+  enrolled_at?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ProgramEnrollmentUpdate = Partial<ProgramEnrollmentInsert>;
+
+export type ProgramApplicationWithMeta = ProgramApplication & {
+  applicant?: Profile | null;
+  program?: Program | null;
+  cohort?: Cohort | null;
+  reviewer?: Profile | null;
+  enrollment?: ProgramEnrollment | null;
+};
+
+export type ProgramEnrollmentWithMeta = ProgramEnrollment & {
+  student?: Profile | null;
+  program?: Program | null;
+  cohort?: Cohort | null;
+  application?: ProgramApplication | null;
+};
+
 export type MentorStudent = {
   mentor_id: string;
   student_id: string;
@@ -1276,11 +1359,89 @@ export type Database = {
           }
         ];
       };
+      program_applications: {
+        Row: ProgramApplication;
+        Insert: ProgramApplicationInsert;
+        Update: ProgramApplicationUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'program_applications_applicant_id_fkey';
+            columns: ['applicant_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'program_applications_program_id_fkey';
+            columns: ['program_id'];
+            isOneToOne: false;
+            referencedRelation: 'programs';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'program_applications_cohort_id_fkey';
+            columns: ['cohort_id'];
+            isOneToOne: false;
+            referencedRelation: 'cohorts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'program_applications_reviewed_by_fkey';
+            columns: ['reviewed_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      program_enrollments: {
+        Row: ProgramEnrollment;
+        Insert: ProgramEnrollmentInsert;
+        Update: ProgramEnrollmentUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'program_enrollments_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'program_enrollments_program_id_fkey';
+            columns: ['program_id'];
+            isOneToOne: false;
+            referencedRelation: 'programs';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'program_enrollments_cohort_id_fkey';
+            columns: ['cohort_id'];
+            isOneToOne: false;
+            referencedRelation: 'cohorts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'program_enrollments_application_id_fkey';
+            columns: ['application_id'];
+            isOneToOne: false;
+            referencedRelation: 'program_applications';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
+      admin_review_application: {
+        Args: {
+          p_application_id: string;
+          p_decision: string;
+          p_review_note?: string | null;
+        };
+        Returns: Json;
+      };
       resolve_poraplan_id_login: {
         Args: {
           p_poraplan_id: string;

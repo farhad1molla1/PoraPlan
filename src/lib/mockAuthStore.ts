@@ -45,6 +45,10 @@ import type {
   ProgramCurriculumTopicInsert,
   ProgramCurriculumTopicUpdate,
   CurriculumSectionWithTopics,
+  ProgramApplication,
+  ProgramApplicationInsert,
+  ProgramEnrollment,
+  EnrollmentStatus,
 } from '../types/database';
 import { sha256 } from './crypto';
 
@@ -4218,4 +4222,357 @@ export function reorderMockCurriculumTopics(
   });
 
   return { success: true, error: null };
+}
+
+// ==============================================================================
+// Milestone 3: Mock Program Applications & Enrollments Store
+// ==============================================================================
+
+const mockApplications: ProgramApplication[] = [
+  {
+    id: 'app-seed-01',
+    applicant_id: 'mock-student-pp001',
+    application_type: 'student',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
+    status: 'approved',
+    application_message: 'I want to build a disciplined daily study routine for my 4th-semester CSE core courses and prepare systematically for final exams.',
+    experience: 'Undergraduate student, completed 1st to 3rd semester coursework in Dhaka University CSE.',
+    additional_information: 'Ready to dedicate 3 hours each evening to assigned task milestones.',
+    admin_review_note: 'Verified student academic credentials. Cohort capacity available. Approved for Batch 67.',
+    reviewed_by: 'mock-admin-ppa001',
+    reviewed_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+    submitted_at: new Date(Date.now() - 28 * 86400000).toISOString(),
+    created_at: new Date(Date.now() - 28 * 86400000).toISOString(),
+    updated_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+  },
+  {
+    id: 'app-seed-02',
+    applicant_id: 'mock-student-pp002',
+    application_type: 'student',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
+    status: 'pending',
+    application_message: 'Looking for structured mentorship to navigate challenging circuit theory and advanced calculus topics.',
+    experience: '2nd Semester student at BUET EEE.',
+    additional_information: 'Can attend weekly evaluation checkpoints on Friday afternoons.',
+    admin_review_note: null,
+    reviewed_by: null,
+    reviewed_at: null,
+    submitted_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+    updated_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: 'app-seed-03',
+    applicant_id: 'mock-mentor-ppm001',
+    application_type: 'mentor',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
+    status: 'approved',
+    application_message: 'Experienced academic mentor offering guidance in Algorithms, Data Structures, and syllabus breakdown.',
+    experience: 'Ph.D. in Computer Science with 8+ years undergraduate teaching and academic planning experience.',
+    additional_information: 'Available for daily asynchronous doubt resolution and weekly task setting.',
+    admin_review_note: 'Verified senior academic credentials. Approved as eligible mentor for Academic Mentorship 0.1.',
+    reviewed_by: 'mock-admin-ppa001',
+    reviewed_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+    submitted_at: new Date(Date.now() - 29 * 86400000).toISOString(),
+    created_at: new Date(Date.now() - 29 * 86400000).toISOString(),
+    updated_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+  },
+];
+
+const mockEnrollments: ProgramEnrollment[] = [
+  {
+    id: 'enr-seed-01',
+    student_id: 'mock-student-pp001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
+    application_id: 'app-seed-01',
+    status: 'active',
+    enrolled_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+    created_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+    updated_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+  },
+];
+
+// --- Mock Applications Functions ---
+
+export function getMockApplications(filters?: {
+  applicantId?: string;
+  programId?: string;
+  cohortId?: string;
+  status?: string;
+  type?: string;
+}): ProgramApplication[] {
+  let list = [...mockApplications];
+
+  if (filters?.applicantId) {
+    list = list.filter((a) => a.applicant_id === filters.applicantId);
+  }
+  if (filters?.programId && filters.programId !== 'all') {
+    list = list.filter((a) => a.program_id === filters.programId);
+  }
+  if (filters?.cohortId && filters.cohortId !== 'all') {
+    list = list.filter((a) => a.cohort_id === filters.cohortId);
+  }
+  if (filters?.status && filters.status !== 'all') {
+    list = list.filter((a) => a.status === filters.status);
+  }
+  if (filters?.type && filters.type !== 'all') {
+    list = list.filter((a) => a.application_type === filters.type);
+  }
+
+  return list.sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime());
+}
+
+export function getMockApplicationById(id: string): ProgramApplication | null {
+  return mockApplications.find((a) => a.id === id) || null;
+}
+
+export function createMockApplication(
+  app: ProgramApplicationInsert
+): { application: ProgramApplication | null; error: Error | null } {
+  // Check duplicate active application
+  const existingActive = mockApplications.find(
+    (a) =>
+      a.applicant_id === app.applicant_id &&
+      a.program_id === app.program_id &&
+      (a.cohort_id || null) === (app.cohort_id || null) &&
+      ['pending', 'under_review', 'approved'].includes(a.status)
+  );
+
+  if (existingActive) {
+    return {
+      application: null,
+      error: new Error(`You already have an active application (${existingActive.status.replace('_', ' ')}) for this program.`),
+    };
+  }
+
+  const now = new Date().toISOString();
+  const newApp: ProgramApplication = {
+    id: app.id || `app-${Date.now()}`,
+    applicant_id: app.applicant_id,
+    application_type: app.application_type,
+    program_id: app.program_id,
+    cohort_id: app.cohort_id || null,
+    status: 'pending',
+    application_message: app.application_message?.trim() || null,
+    experience: app.experience?.trim() || null,
+    additional_information: app.additional_information?.trim() || null,
+    admin_review_note: null,
+    reviewed_by: null,
+    reviewed_at: null,
+    submitted_at: now,
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockApplications.push(newApp);
+
+  // Send in-app confirmation notification to applicant
+  createMockNotification({
+    recipientId: app.applicant_id,
+    actorId: null,
+    type: 'system',
+    title: 'Application Received',
+    message: `Your application to participate in the program has been submitted and is pending administrative review.`,
+    link: app.application_type === 'student' ? '/student/applications' : '/mentor/applications',
+  });
+
+  return { application: newApp, error: null };
+}
+
+export function adminReviewMockApplication(
+  adminId: string,
+  applicationId: string,
+  decision: 'under_review' | 'approved' | 'rejected',
+  reviewNote?: string
+): { success: boolean; message: string; enrollmentId?: string; error: Error | null } {
+  const index = mockApplications.findIndex((a) => a.id === applicationId);
+  if (index === -1) {
+    return { success: false, message: 'Application not found.', error: new Error('Application not found.') };
+  }
+
+  const app = mockApplications[index];
+
+  if (app.status === 'approved' && decision === 'approved') {
+    return { success: false, message: 'Application already approved.', error: new Error('This application has already been approved.') };
+  }
+
+  const now = new Date().toISOString();
+
+  if (decision === 'approved') {
+    let enrollmentId: string | undefined = undefined;
+
+    // Student approval creates an enrollment
+    if (app.application_type === 'student') {
+      // Check cohort capacity if cohort is assigned
+      if (app.cohort_id) {
+        const cohort = mockCohorts.find((c) => c.id === app.cohort_id);
+        if (cohort && cohort.capacity) {
+          const currentCount = mockEnrollments.filter(
+            (e) => e.cohort_id === app.cohort_id && e.status === 'active'
+          ).length;
+
+          if (currentCount >= cohort.capacity) {
+            return {
+              success: false,
+              message: `Cannot approve: Cohort capacity (${cohort.capacity} scholars) is full.`,
+              error: new Error(`Cohort capacity (${cohort.capacity} scholars) is full.`),
+            };
+          }
+        }
+      }
+
+      // Check duplicate active enrollment
+      const isAlreadyEnrolled = mockEnrollments.some(
+        (e) =>
+          e.student_id === app.applicant_id &&
+          e.program_id === app.program_id &&
+          (e.cohort_id || null) === (app.cohort_id || null) &&
+          ['active', 'on_hold'].includes(e.status)
+      );
+
+      if (isAlreadyEnrolled) {
+        return {
+          success: false,
+          message: 'Student is already enrolled.',
+          error: new Error('Student is already actively enrolled in this program/cohort.'),
+        };
+      }
+
+      // Create enrollment
+      enrollmentId = `enr-${Date.now()}`;
+      mockEnrollments.push({
+        id: enrollmentId,
+        student_id: app.applicant_id,
+        program_id: app.program_id,
+        cohort_id: app.cohort_id || null,
+        application_id: app.id,
+        status: 'active',
+        enrolled_at: now,
+        created_at: now,
+        updated_at: now,
+      });
+
+      // Send student notification
+      createMockNotification({
+        recipientId: app.applicant_id,
+        actorId: adminId,
+        type: 'system',
+        title: 'Application Approved — You Are Enrolled!',
+        message: 'Congratulations! Your program application has been approved by the administration and your active enrollment has been created.',
+        link: '/student/applications',
+      });
+    } else {
+      // Mentor approval notification
+      createMockNotification({
+        recipientId: app.applicant_id,
+        actorId: adminId,
+        type: 'system',
+        title: 'Mentor Application Approved',
+        message: 'Your mentor application has been approved! You are now eligible to mentor in this program. Cohort assignment will be coordinated by administration.',
+        link: '/mentor/applications',
+      });
+    }
+
+    mockApplications[index] = {
+      ...app,
+      status: 'approved',
+      reviewed_by: adminId,
+      reviewed_at: now,
+      admin_review_note: reviewNote !== undefined ? reviewNote : app.admin_review_note,
+      updated_at: now,
+    };
+
+    return {
+      success: true,
+      message: app.application_type === 'student'
+        ? 'Application approved and student enrollment created.'
+        : 'Mentor application approved.',
+      enrollmentId,
+      error: null,
+    };
+  }
+
+  if (decision === 'rejected') {
+    mockApplications[index] = {
+      ...app,
+      status: 'rejected',
+      reviewed_by: adminId,
+      reviewed_at: now,
+      admin_review_note: reviewNote !== undefined ? reviewNote : app.admin_review_note,
+      updated_at: now,
+    };
+
+    createMockNotification({
+      recipientId: app.applicant_id,
+      actorId: adminId,
+      type: 'system',
+      title: 'Application Update',
+      message: 'Your program application has been reviewed and was not accepted for this intake. Check back for upcoming cohorts.',
+      link: app.application_type === 'student' ? '/student/applications' : '/mentor/applications',
+    });
+
+    return { success: true, message: 'Application declined.', error: null };
+  }
+
+  // Under review
+  mockApplications[index] = {
+    ...app,
+    status: 'under_review',
+    admin_review_note: reviewNote !== undefined ? reviewNote : app.admin_review_note,
+    updated_at: now,
+  };
+
+  return { success: true, message: 'Application status set to Under Review.', error: null };
+}
+
+// --- Mock Enrollments Functions ---
+
+export function getMockEnrollments(filters?: {
+  studentId?: string;
+  programId?: string;
+  cohortId?: string;
+  status?: string;
+}): ProgramEnrollment[] {
+  let list = [...mockEnrollments];
+
+  if (filters?.studentId) {
+    list = list.filter((e) => e.student_id === filters.studentId);
+  }
+  if (filters?.programId && filters.programId !== 'all') {
+    list = list.filter((e) => e.program_id === filters.programId);
+  }
+  if (filters?.cohortId && filters.cohortId !== 'all') {
+    list = list.filter((e) => e.cohort_id === filters.cohortId);
+  }
+  if (filters?.status && filters.status !== 'all') {
+    list = list.filter((e) => e.status === filters.status);
+  }
+
+  return list.sort((a, b) => new Date(b.enrolled_at).getTime() - new Date(a.enrolled_at).getTime());
+}
+
+export function getMockEnrollmentById(id: string): ProgramEnrollment | null {
+  return mockEnrollments.find((e) => e.id === id) || null;
+}
+
+export function updateMockEnrollmentStatus(
+  id: string,
+  status: EnrollmentStatus
+): { enrollment: ProgramEnrollment | null; error: Error | null } {
+  const index = mockEnrollments.findIndex((e) => e.id === id);
+  if (index === -1) {
+    return { enrollment: null, error: new Error('Enrollment not found.') };
+  }
+
+  mockEnrollments[index] = {
+    ...mockEnrollments[index],
+    status,
+    updated_at: new Date().toISOString(),
+  };
+
+  return { enrollment: mockEnrollments[index], error: null };
 }
