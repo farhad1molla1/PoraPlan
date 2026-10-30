@@ -28,7 +28,7 @@ export type StudyPlanWithMeta = StudyPlan & {
  * - Students can only query their own student_id.
  * - Mentors can only query student_ids of students assigned to them.
  */
-export async function getStudentStudyPlans(studentId: string): Promise<{
+export async function getStudentStudyPlans(studentId: string, programId?: string): Promise<{
   plans: StudyPlanWithMeta[];
   error: Error | null;
 }> {
@@ -37,16 +37,24 @@ export async function getStudentStudyPlans(studentId: string): Promise<{
   }
 
   if (!isSupabaseConfigured()) {
-    const list = getMockStudentStudyPlans(studentId);
+    let list = getMockStudentStudyPlans(studentId);
+    if (programId && programId !== 'all') {
+      list = list.filter((p) => !p.program_id || p.program_id === programId);
+    }
     return { plans: list as StudyPlanWithMeta[], error: null };
   }
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('study_plans')
       .select('*, subjects(*), study_plan_items(id)')
-      .eq('student_id', studentId)
-      .order('created_at', { ascending: false });
+      .eq('student_id', studentId);
+
+    if (programId && programId !== 'all') {
+      query = query.eq('program_id', programId);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
       return { plans: [], error };
@@ -147,6 +155,8 @@ export async function createStudyPlan(params: {
   studentId: string;
   createdBy?: string;
   subjectId?: string;
+  programId?: string;
+  cohortId?: string;
   title: string;
   description?: string;
   items?: {
@@ -173,6 +183,8 @@ export async function createStudyPlan(params: {
       studentId: params.studentId,
       createdBy: params.createdBy,
       subjectId: params.subjectId,
+      programId: params.programId,
+      cohortId: params.cohortId,
       title: cleanTitle,
       description: params.description,
       items: params.items,
@@ -183,6 +195,8 @@ export async function createStudyPlan(params: {
     const planPayload: StudyPlanInsert = {
       student_id: params.studentId,
       created_by: params.createdBy || null,
+      program_id: params.programId || null,
+      cohort_id: params.cohortId || null,
       subject_id: params.subjectId || null,
       title: cleanTitle,
       description: params.description?.trim() || null,

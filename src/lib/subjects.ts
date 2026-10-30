@@ -14,7 +14,7 @@ import {
  * - Students can only query their own student_id.
  * - Mentors can only query student_ids of students assigned to them.
  */
-export async function getStudentSubjects(studentId: string): Promise<{
+export async function getStudentSubjects(studentId: string, programId?: string): Promise<{
   subjects: Subject[];
   error: Error | null;
 }> {
@@ -23,16 +23,21 @@ export async function getStudentSubjects(studentId: string): Promise<{
   }
 
   if (!isSupabaseConfigured()) {
-    const list = getMockStudentSubjects(studentId);
+    const list = getMockStudentSubjects(studentId, programId);
     return { subjects: list, error: null };
   }
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('subjects')
       .select('*')
-      .eq('student_id', studentId)
-      .order('name', { ascending: true });
+      .eq('student_id', studentId);
+
+    if (programId && programId !== 'all') {
+      query = query.eq('program_id', programId);
+    }
+
+    const { data, error } = await query.order('name', { ascending: true });
 
     if (error) {
       return { subjects: [], error };
@@ -89,6 +94,8 @@ export async function createSubject(params: {
   code?: string;
   description?: string;
   createdBy?: string;
+  programId?: string;
+  cohortId?: string;
 }): Promise<{
   subject: Subject | null;
   error: Error | null;
@@ -109,6 +116,8 @@ export async function createSubject(params: {
       code: params.code,
       description: params.description,
       createdBy: params.createdBy,
+      programId: params.programId,
+      cohortId: params.cohortId,
     });
   }
 
@@ -116,6 +125,8 @@ export async function createSubject(params: {
     const insertPayload: SubjectInsert = {
       student_id: params.studentId,
       created_by: params.createdBy || null,
+      program_id: params.programId || null,
+      cohort_id: params.cohortId || null,
       name: cleanName,
       code: params.code?.trim().toUpperCase() || null,
       description: params.description?.trim() || null,

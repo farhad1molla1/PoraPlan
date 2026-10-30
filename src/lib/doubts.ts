@@ -23,6 +23,7 @@ import {
   deleteMockDoubt,
 } from './mockAuthStore';
 import { getAssignedStudents } from './mentorship';
+import { getEffectiveMentor } from './mentorAssignments';
 import { createNotification } from './notifications';
 
 export interface DoubtResponseWithAuthor extends DoubtResponse {
@@ -48,7 +49,7 @@ export interface DoubtWithMeta extends Doubt {
 /**
  * Fetch all doubts submitted by a student.
  */
-export async function getStudentDoubts(studentId: string): Promise<{
+export async function getStudentDoubts(studentId: string, programId?: string): Promise<{
   doubts: DoubtWithMeta[];
   error: Error | null;
 }> {
@@ -57,16 +58,24 @@ export async function getStudentDoubts(studentId: string): Promise<{
   }
 
   if (!isSupabaseConfigured()) {
-    const list = getMockStudentDoubts(studentId);
+    let list = getMockStudentDoubts(studentId);
+    if (programId && programId !== 'all') {
+      list = list.filter((d) => !d.program_id || d.program_id === programId);
+    }
     return { doubts: list as DoubtWithMeta[], error: null };
   }
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('doubts')
       .select('*, subjects(id, name, code), study_plans(id, title), tasks(id, title), assignments(id, title), profiles!mentor_id(full_name), doubt_responses(*, profiles!author_id(full_name, poraplan_id, role))')
-      .eq('student_id', studentId)
-      .order('created_at', { ascending: false });
+      .eq('student_id', studentId);
+
+    if (programId && programId !== 'all') {
+      query = query.eq('program_id', programId);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
       return { doubts: [], error };
@@ -297,6 +306,8 @@ export async function createDoubt(params: {
   taskId?: string;
   assignmentId?: string;
   priority?: DoubtPriority;
+  programId?: string;
+  cohortId?: string;
 }): Promise<{
   doubt: Doubt | null;
   error: Error | null;
@@ -319,16 +330,15 @@ export async function createDoubt(params: {
   }
 
   try {
-    // 1. Look up mentor assigned to student if available
+    // 1. Look up effective mentor assigned to student for this program (or overall)
     let mentorId: string | null = null;
-    const { data: mentorPair } = await supabase
-      .from('mentor_students')
-      .select('mentor_id')
-      .eq('student_id', params.studentId)
-      .maybeSingle();
-
-    if (mentorPair?.mentor_id) {
-      mentorId = mentorPair.mentor_id;
+    try {
+      const { resolution } = await getEffectiveMentor(params.studentId, params.programId);
+      if (resolution?.mentor?.id) {
+        mentorId = resolution.mentor.id;
+      }
+    } catch {
+      mentorId = null;
     }
 
     // 2. Validate subject ownership if supplied
@@ -349,6 +359,8 @@ export async function createDoubt(params: {
       .insert({
         student_id: params.studentId,
         mentor_id: mentorId,
+        program_id: params.programId || null,
+        cohort_id: params.cohortId || null,
         subject_id: params.subjectId || null,
         plan_id: params.planId || null,
         task_id: params.taskId || null,

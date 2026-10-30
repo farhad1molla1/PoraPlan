@@ -39,7 +39,7 @@ export type EvaluationWithMeta = Evaluation & {
  * - Students can only view evaluations where student_id = auth.uid()
  * - Mentors can view evaluations for assigned students
  */
-export async function getStudentEvaluations(studentId: string): Promise<{
+export async function getStudentEvaluations(studentId: string, programId?: string): Promise<{
   evaluations: EvaluationWithMeta[];
   error: Error | null;
 }> {
@@ -48,16 +48,24 @@ export async function getStudentEvaluations(studentId: string): Promise<{
   }
 
   if (!isSupabaseConfigured()) {
-    const list = getMockStudentEvaluations(studentId);
+    let list = getMockStudentEvaluations(studentId);
+    if (programId && programId !== 'all') {
+      list = list.filter((e) => !e.program_id || e.program_id === programId);
+    }
     return { evaluations: list as EvaluationWithMeta[], error: null };
   }
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('evaluations')
       .select('*, subjects(id, name, code), study_plans(id, title), assignments(id, title), profiles!mentor_id(full_name)')
-      .eq('student_id', studentId)
-      .order('scheduled_date', { ascending: false });
+      .eq('student_id', studentId);
+
+    if (programId && programId !== 'all') {
+      query = query.eq('program_id', programId);
+    }
+
+    const { data, error } = await query.order('scheduled_date', { ascending: false });
 
     if (error) {
       return { evaluations: [], error };
@@ -238,6 +246,8 @@ export async function createEvaluation(params: {
   subjectId?: string;
   planId?: string;
   assignmentId?: string;
+  programId?: string;
+  cohortId?: string;
 }): Promise<{ evaluation: Evaluation | null; error: Error | null }> {
   const cleanTitle = params.title.trim();
   if (!cleanTitle) {
@@ -258,6 +268,8 @@ export async function createEvaluation(params: {
     const payload: EvaluationInsert = {
       student_id: params.studentId,
       mentor_id: params.mentorId,
+      program_id: params.programId || null,
+      cohort_id: params.cohortId || null,
       subject_id: params.subjectId || null,
       plan_id: params.planId || null,
       assignment_id: params.assignmentId || null,

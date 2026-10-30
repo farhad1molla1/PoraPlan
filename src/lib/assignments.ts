@@ -46,7 +46,7 @@ export type AssignmentWithMeta = Assignment & {
  * - Students can only query their own student_id.
  * - Mentors can only query student_ids of students assigned to them.
  */
-export async function getStudentAssignments(studentId: string): Promise<{
+export async function getStudentAssignments(studentId: string, programId?: string): Promise<{
   assignments: AssignmentWithMeta[];
   error: Error | null;
 }> {
@@ -55,15 +55,24 @@ export async function getStudentAssignments(studentId: string): Promise<{
   }
 
   if (!isSupabaseConfigured()) {
-    const list = getMockStudentAssignments(studentId);
+    let list = getMockStudentAssignments(studentId);
+    if (programId && programId !== 'all') {
+      list = list.filter((a) => !a.program_id || a.program_id === programId);
+    }
     return { assignments: list as AssignmentWithMeta[], error: null };
   }
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('assignments')
       .select('*, subjects(*), study_plans(*), submissions(*)')
-      .eq('student_id', studentId)
+      .eq('student_id', studentId);
+
+    if (programId && programId !== 'all') {
+      query = query.eq('program_id', programId);
+    }
+
+    const { data, error } = await query
       .order('due_date', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false });
 
@@ -181,6 +190,8 @@ export async function createAssignment(params: {
   mentorId?: string;
   subjectId?: string;
   planId?: string;
+  programId?: string;
+  cohortId?: string;
   title: string;
   instructions?: string;
   dueDate?: string;
@@ -203,6 +214,8 @@ export async function createAssignment(params: {
     const insertPayload: AssignmentInsert = {
       student_id: params.studentId,
       mentor_id: params.mentorId || null,
+      program_id: params.programId || null,
+      cohort_id: params.cohortId || null,
       subject_id: params.subjectId || null,
       plan_id: params.planId || null,
       title: cleanTitle,

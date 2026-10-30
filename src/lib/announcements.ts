@@ -49,7 +49,7 @@ export interface AnnouncementWithMeta extends Announcement {
 /**
  * Fetch all announcements targeted to a student (platform-wide, mentor cohort, or individual).
  */
-export async function getStudentAnnouncements(studentId: string): Promise<{
+export async function getStudentAnnouncements(studentId: string, programId?: string): Promise<{
   announcements: AnnouncementWithMeta[];
   error: Error | null;
 }> {
@@ -58,15 +58,23 @@ export async function getStudentAnnouncements(studentId: string): Promise<{
   }
 
   if (!isSupabaseConfigured()) {
-    const list = getMockStudentAnnouncements(studentId);
+    let list = getMockStudentAnnouncements(studentId);
+    if (programId && programId !== 'all') {
+      list = list.filter((a) => !a.program_id || a.program_id === programId);
+    }
     return { announcements: list as AnnouncementWithMeta[], error: null };
   }
 
   try {
-    const { data, error } = await (supabase.from('announcements') as any)
+    let query = (supabase.from('announcements') as any)
       .select('*, profiles!author_id(full_name, poraplan_id, role), subjects(name, code), announcement_acknowledgments(id, student_id, acknowledged_at)')
-      .eq('status', 'published')
-      .order('published_at', { ascending: false });
+      .eq('status', 'published');
+
+    if (programId && programId !== 'all') {
+      query = query.or(`program_id.is.null,program_id.eq.${programId}`);
+    }
+
+    const { data, error } = await query.order('published_at', { ascending: false });
 
     if (error) {
       return { announcements: [], error };
@@ -267,6 +275,8 @@ export async function createAnnouncement(input: {
   title: string;
   content: string;
   targetScope?: AnnouncementScope;
+  programId?: string | null;
+  cohortId?: string | null;
   studentId?: string | null;
   subjectId?: string | null;
   priority?: AnnouncementPriority;
@@ -303,6 +313,8 @@ export async function createAnnouncement(input: {
       title: input.title,
       content: input.content,
       targetScope: input.targetScope,
+      programId: input.programId,
+      cohortId: input.cohortId,
       studentId: input.studentId,
       subjectId: input.subjectId,
       priority: input.priority,
@@ -316,6 +328,8 @@ export async function createAnnouncement(input: {
       title: input.title.trim(),
       content: input.content.trim(),
       target_scope: input.targetScope || 'assigned_students',
+      program_id: input.programId || null,
+      cohort_id: input.cohortId || null,
       student_id: input.targetScope === 'individual' ? input.studentId : null,
       subject_id: input.subjectId || null,
       priority: input.priority || 'normal',

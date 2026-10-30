@@ -30,7 +30,7 @@ export type TaskWithMeta = Task & {
  * - Students can only query their own student_id.
  * - Mentors can only query student_ids of students assigned to them.
  */
-export async function getStudentTasks(studentId: string): Promise<{
+export async function getStudentTasks(studentId: string, programId?: string): Promise<{
   tasks: TaskWithMeta[];
   error: Error | null;
 }> {
@@ -39,15 +39,24 @@ export async function getStudentTasks(studentId: string): Promise<{
   }
 
   if (!isSupabaseConfigured()) {
-    const list = getMockStudentTasks(studentId);
+    let list = getMockStudentTasks(studentId);
+    if (programId && programId !== 'all') {
+      list = list.filter((t) => !t.program_id || t.program_id === programId);
+    }
     return { tasks: list as TaskWithMeta[], error: null };
   }
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('tasks')
       .select('*, subjects(*), study_plans(*)')
-      .eq('student_id', studentId)
+      .eq('student_id', studentId);
+
+    if (programId && programId !== 'all') {
+      query = query.eq('program_id', programId);
+    }
+
+    const { data, error } = await query
       .order('due_date', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false });
 
@@ -153,6 +162,8 @@ export async function createTask(params: {
   createdBy?: string;
   subjectId?: string;
   planId?: string;
+  programId?: string;
+  cohortId?: string;
   title: string;
   description?: string;
   priority?: TaskPriority;
@@ -176,6 +187,8 @@ export async function createTask(params: {
       createdBy: params.createdBy,
       subjectId: params.subjectId,
       planId: params.planId,
+      programId: params.programId,
+      cohortId: params.cohortId,
       title: cleanTitle,
       description: params.description,
       priority: params.priority,
@@ -188,6 +201,8 @@ export async function createTask(params: {
     const payload: TaskInsert = {
       student_id: params.studentId,
       created_by: params.createdBy || null,
+      program_id: params.programId || null,
+      cohort_id: params.cohortId || null,
       subject_id: params.subjectId || null,
       plan_id: params.planId || null,
       title: cleanTitle,

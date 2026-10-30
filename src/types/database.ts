@@ -295,6 +295,7 @@ export type ProgramEnrollmentWithMeta = ProgramEnrollment & {
 export type MentorStudent = {
   mentor_id: string;
   student_id: string;
+  program_id?: string | null;
   status?: string;
   created_at?: string;
 };
@@ -409,6 +410,8 @@ export type Subject = {
   id: string;
   student_id: string;
   created_by?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   name: string;
   code?: string | null;
   description?: string | null;
@@ -421,6 +424,8 @@ export type SubjectInsert = {
   id?: string;
   student_id: string;
   created_by?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   name: string;
   code?: string | null;
   description?: string | null;
@@ -433,6 +438,8 @@ export type SubjectUpdate = {
   id?: string;
   student_id?: string;
   created_by?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   name?: string;
   code?: string | null;
   description?: string | null;
@@ -448,6 +455,8 @@ export type StudyPlan = {
   id: string;
   student_id: string;
   created_by?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   title: string;
   description?: string | null;
@@ -460,6 +469,8 @@ export type StudyPlanInsert = {
   id?: string;
   student_id: string;
   created_by?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   title: string;
   description?: string | null;
@@ -472,6 +483,8 @@ export type StudyPlanUpdate = {
   id?: string;
   student_id?: string;
   created_by?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   title?: string;
   description?: string | null;
@@ -526,6 +539,8 @@ export type Task = {
   id: string;
   student_id: string;
   created_by?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   title: string;
@@ -543,6 +558,8 @@ export type TaskInsert = {
   id?: string;
   student_id: string;
   created_by?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   title: string;
@@ -560,6 +577,8 @@ export type TaskUpdate = {
   id?: string;
   student_id?: string;
   created_by?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   title?: string;
@@ -581,6 +600,8 @@ export type Assignment = {
   id: string;
   student_id: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   title: string;
@@ -596,6 +617,8 @@ export type AssignmentInsert = {
   id?: string;
   student_id: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   title: string;
@@ -611,6 +634,8 @@ export type AssignmentUpdate = {
   id?: string;
   student_id?: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   title?: string;
@@ -683,6 +708,8 @@ export type Evaluation = {
   id: string;
   student_id: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   assignment_id?: string | null;
@@ -706,6 +733,8 @@ export type EvaluationInsert = {
   id?: string;
   student_id: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   assignment_id?: string | null;
@@ -729,6 +758,8 @@ export type EvaluationUpdate = {
   id?: string;
   student_id?: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   assignment_id?: string | null;
@@ -755,6 +786,8 @@ export type Resource = {
   id: string;
   student_id: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   title: string;
@@ -773,6 +806,8 @@ export type ResourceInsert = {
   id?: string;
   student_id: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   title: string;
@@ -791,6 +826,8 @@ export type ResourceUpdate = {
   id?: string;
   student_id?: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   title?: string;
@@ -812,6 +849,8 @@ export type Doubt = {
   id: string;
   student_id: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   task_id?: string | null;
@@ -829,6 +868,8 @@ export type DoubtInsert = {
   id?: string;
   student_id: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   task_id?: string | null;
@@ -846,6 +887,8 @@ export type DoubtUpdate = {
   id?: string;
   student_id?: string;
   mentor_id?: string | null;
+  program_id?: string | null;
+  cohort_id?: string | null;
   subject_id?: string | null;
   plan_id?: string | null;
   task_id?: string | null;
@@ -885,6 +928,8 @@ export type Announcement = {
   title: string;
   content: string;
   target_scope: AnnouncementScope;
+  program_id?: string | null;
+  cohort_id?: string | null;
   student_id?: string | null;
   subject_id?: string | null;
   priority: AnnouncementPriority;
@@ -900,6 +945,8 @@ export type AnnouncementInsert = {
   title: string;
   content: string;
   target_scope?: AnnouncementScope;
+  program_id?: string | null;
+  cohort_id?: string | null;
   student_id?: string | null;
   subject_id?: string | null;
   priority?: AnnouncementPriority;
@@ -915,6 +962,8 @@ export type AnnouncementUpdate = {
   title?: string;
   content?: string;
   target_scope?: AnnouncementScope;
+  program_id?: string | null;
+  cohort_id?: string | null;
   student_id?: string | null;
   subject_id?: string | null;
   priority?: AnnouncementPriority;
@@ -1005,11 +1054,15 @@ export type Database = {
         Insert: {
           mentor_id: string;
           student_id: string;
+          program_id?: string | null;
+          status?: string;
           created_at?: string;
         };
         Update: {
           mentor_id?: string;
           student_id?: string;
+          program_id?: string | null;
+          status?: string;
           created_at?: string;
         };
         Relationships: [
@@ -1594,6 +1647,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      is_authorized_mentor_for_student: {
+        Args: {
+          p_mentor_id?: string;
+          p_student_id: string;
+          p_program_id?: string | null;
+        };
+        Returns: boolean;
+      };
       admin_assign_cohort_mentor: {
         Args: {
           p_cohort_id: string;

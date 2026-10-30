@@ -56,7 +56,7 @@ export async function getAssignedStudents(mentorId: string): Promise<{
 /**
  * Fetch mentor(s) assigned to a specific student using effective mentor resolution.
  */
-export async function getAssignedMentors(studentId: string): Promise<{
+export async function getAssignedMentors(studentId: string, programId?: string): Promise<{
   mentors: Profile[];
   error: Error | null;
 }> {
@@ -66,7 +66,7 @@ export async function getAssignedMentors(studentId: string): Promise<{
   }
 
   try {
-    const { resolution, error: resError } = await getEffectiveMentor(studentId);
+    const { resolution, error: resError } = await getEffectiveMentor(studentId, programId);
     if (!resError && resolution.mentor) {
       return { mentors: [resolution.mentor], error: null };
     }

@@ -460,6 +460,8 @@ let mockSubjects: Subject[] = [
     id: 'mock-sub-phy-101',
     student_id: 'mock-student-pp001',
     created_by: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     name: 'Physics',
     code: 'PHY-101',
     description: 'Classical mechanics, Newtonian dynamics, and thermodynamics.',
@@ -471,6 +473,8 @@ let mockSubjects: Subject[] = [
     id: 'mock-sub-math-102',
     student_id: 'mock-student-pp001',
     created_by: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     name: 'Higher Mathematics',
     code: 'MATH-102',
     description: 'Calculus, coordinate geometry, and vector algebra.',
@@ -480,10 +484,12 @@ let mockSubjects: Subject[] = [
   },
 ];
 
-export function getMockStudentSubjects(studentId: string): Subject[] {
-  return mockSubjects
-    .filter((s) => s.student_id === studentId)
-    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+export function getMockStudentSubjects(studentId: string, programId?: string): Subject[] {
+  let list = mockSubjects.filter((s) => s.student_id === studentId);
+  if (programId && programId !== 'all') {
+    list = list.filter((s) => !s.program_id || s.program_id === programId);
+  }
+  return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 }
 
 export function getMockSubjectById(subjectId: string): Subject | null {
@@ -496,6 +502,8 @@ export function createMockSubject(params: {
   code?: string;
   description?: string;
   createdBy?: string;
+  programId?: string;
+  cohortId?: string;
 }): { subject: Subject | null; error: Error | null } {
   const cleanName = params.name.trim();
   if (!cleanName) {
@@ -514,6 +522,8 @@ export function createMockSubject(params: {
     id: `mock-sub-${Date.now()}`,
     student_id: params.studentId,
     created_by: params.createdBy || null,
+    program_id: params.programId || null,
+    cohort_id: params.cohortId || null,
     name: cleanName,
     code: params.code?.trim().toUpperCase() || null,
     description: params.description?.trim() || null,
@@ -583,6 +593,8 @@ let mockStudyPlans: StudyPlan[] = [
     id: 'mock-plan-phy-001',
     student_id: 'mock-student-pp001',
     created_by: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-phy-101',
     title: 'Newtonian Mechanics & Dynamics Milestone',
     description: 'Core foundation of classical mechanics covering Newton\'s laws of motion, friction, and work-energy theorem.',
@@ -667,6 +679,8 @@ export function createMockStudyPlan(params: {
   studentId: string;
   createdBy?: string;
   subjectId?: string;
+  programId?: string;
+  cohortId?: string;
   title: string;
   description?: string;
   items?: {
@@ -703,6 +717,8 @@ export function createMockStudyPlan(params: {
     id: planId,
     student_id: params.studentId,
     created_by: params.createdBy || null,
+    program_id: params.programId || null,
+    cohort_id: params.cohortId || null,
     subject_id: params.subjectId || null,
     title: cleanTitle,
     description: params.description?.trim() || null,
@@ -854,6 +870,8 @@ let mockTasks: Task[] = [
     id: 'mock-task-001',
     student_id: 'mock-student-pp001',
     created_by: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-phy-101',
     plan_id: 'mock-plan-phy-001',
     title: 'Review Giancoli Ch. 4 Newton\'s Laws & Draw FBDs',
@@ -869,6 +887,8 @@ let mockTasks: Task[] = [
     id: 'mock-task-002',
     student_id: 'mock-student-pp001',
     created_by: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-phy-101',
     plan_id: 'mock-plan-phy-001',
     title: 'Practice 5 Pulley & Kinetic Friction Multi-Body Problems',
@@ -884,6 +904,8 @@ let mockTasks: Task[] = [
     id: 'mock-task-003',
     student_id: 'mock-student-pp001',
     created_by: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-phy-101',
     plan_id: 'mock-plan-phy-001',
     title: 'Read Vectors & 1D Kinematics Overview',
@@ -923,6 +945,8 @@ export function createMockTask(params: {
   createdBy?: string;
   subjectId?: string;
   planId?: string;
+  programId?: string;
+  cohortId?: string;
   title: string;
   description?: string;
   priority?: TaskPriority;
@@ -960,6 +984,8 @@ export function createMockTask(params: {
     id: taskId,
     student_id: params.studentId,
     created_by: params.createdBy || null,
+    program_id: params.programId || null,
+    cohort_id: params.cohortId || null,
     subject_id: params.subjectId || null,
     plan_id: params.planId || null,
     title: cleanTitle,
@@ -1074,6 +1100,8 @@ export const mockAssignments: Assignment[] = [
     id: 'mock-assign-001',
     student_id: 'mock-student-pp001',
     mentor_id: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-phy-101',
     plan_id: 'mock-plan-phy-001',
     title: 'Newtonian Mechanics Problem Set: Inclined Planes & Pulley Friction',
@@ -1088,6 +1116,8 @@ export const mockAssignments: Assignment[] = [
     id: 'mock-assign-002',
     student_id: 'mock-student-pp001',
     mentor_id: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-math-102',
     plan_id: null,
     title: 'Calculus Optimization & Critical Point Analysis',
@@ -1170,6 +1200,8 @@ export function createMockAssignment(params: {
   mentorId?: string;
   subjectId?: string;
   planId?: string;
+  programId?: string;
+  cohortId?: string;
   title: string;
   instructions?: string;
   dueDate?: string;
@@ -1209,6 +1241,8 @@ export function createMockAssignment(params: {
     id: assignmentId,
     student_id: normalizedStudentId,
     mentor_id: params.mentorId || null,
+    program_id: params.programId || null,
+    cohort_id: params.cohortId || null,
     subject_id: params.subjectId || null,
     plan_id: params.planId || null,
     title: cleanTitle,
@@ -1434,8 +1468,8 @@ export function reviewMockSubmission(params: {
 
   // Verify mentor assignment to student
   const normalizedMentorId = params.mentorId === 'PPM001' ? 'mock-mentor-ppm001' : params.mentorId;
-  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
-  const isAssigned = assignedStudents.some((s) => s.id === current.student_id || s.poraplan_id === 'PP001');
+  const assignment = mockAssignments.find((a) => a.id === current.assignment_id);
+  const isAssigned = isMockAuthorizedMentorForStudent(normalizedMentorId, current.student_id, assignment?.program_id);
 
   if (!isAssigned && params.mentorId !== 'admin' && params.mentorId !== 'mock-admin-ppa001') {
     return { submission: null, error: new Error('You are not authorized to review submissions for this student.') };
@@ -1451,7 +1485,6 @@ export function reviewMockSubmission(params: {
 
   mockSubmissions[index] = { ...current };
 
-  const assignment = mockAssignments.find((a) => a.id === current.assignment_id);
   const assignmentTitle = assignment?.title || 'Assignment';
 
   createMockNotification({
@@ -1469,12 +1502,12 @@ export function reviewMockSubmission(params: {
 
 export function getMockMentorSubmissions(mentorId: string): EnrichedMockSubmission[] {
   const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
-  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
-  const studentIds = new Set(assignedStudents.map((s) => s.id));
-  studentIds.add('mock-student-pp001');
 
   return mockSubmissions
-    .filter((s) => studentIds.has(s.student_id))
+    .filter((s) => {
+      const assignment = mockAssignments.find((a) => a.id === s.assignment_id);
+      return isMockAuthorizedMentorForStudent(normalizedMentorId, s.student_id, assignment?.program_id);
+    })
     .sort((a, b) => new Date(b.submitted_at || 0).getTime() - new Date(a.submitted_at || 0).getTime())
     .map((sub) => {
       const assignment = mockAssignments.find((a) => a.id === sub.assignment_id);
@@ -1513,6 +1546,8 @@ export const mockEvaluations: Evaluation[] = [
     id: 'mock-eval-001',
     student_id: 'mock-student-pp001',
     mentor_id: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-phy-101',
     plan_id: 'mock-plan-phy-001',
     assignment_id: 'mock-assign-001',
@@ -1535,6 +1570,8 @@ export const mockEvaluations: Evaluation[] = [
     id: 'mock-eval-002',
     student_id: 'mock-student-pp001',
     mentor_id: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-math-102',
     title: 'Calculus Milestone Review: Derivatives from First Principles',
     description: 'Demonstrate limit definition of derivative and chain rule application on trigonometric composites.',
@@ -1581,12 +1618,9 @@ export function getMockStudentEvaluations(studentId: string): EnrichedMockEvalua
 
 export function getMockMentorEvaluations(mentorId: string): EnrichedMockEvaluation[] {
   const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
-  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
-  const studentIds = new Set(assignedStudents.map((s) => s.id));
-  studentIds.add('mock-student-pp001');
 
   return mockEvaluations
-    .filter((e) => studentIds.has(e.student_id) || e.mentor_id === normalizedMentorId)
+    .filter((e) => isMockAuthorizedMentorForStudent(normalizedMentorId, e.student_id, e.program_id))
     .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime())
     .map(enrichMockEvaluation);
 }
@@ -1615,6 +1649,8 @@ export function createMockEvaluation(params: {
   subjectId?: string;
   planId?: string;
   assignmentId?: string;
+  programId?: string;
+  cohortId?: string;
 }): { evaluation: Evaluation | null; error: Error | null } {
   const cleanTitle = params.title.trim();
   if (!cleanTitle) {
@@ -1627,10 +1663,9 @@ export function createMockEvaluation(params: {
     return { evaluation: null, error: new Error('Student ID is required.') };
   }
 
-  // Authorization check: mentor must be assigned to student
+  // Authorization check: mentor must be authorized for student
   const normalizedMentorId = params.mentorId === 'PPM001' ? 'mock-mentor-ppm001' : params.mentorId;
-  const assigned = getMockAssignedStudents(normalizedMentorId);
-  const isAssigned = assigned.some((s) => s.id === params.studentId || s.poraplan_id === 'PP001');
+  const isAssigned = isMockAuthorizedMentorForStudent(normalizedMentorId, params.studentId, params.programId);
   if (!isAssigned && params.mentorId !== 'admin' && params.mentorId !== 'mock-admin-ppa001') {
     return { evaluation: null, error: new Error('You are not authorized to schedule evaluations for this student.') };
   }
@@ -1648,6 +1683,8 @@ export function createMockEvaluation(params: {
     id: `mock-eval-${Date.now()}`,
     student_id: params.studentId,
     mentor_id: normalizedMentorId,
+    program_id: params.programId || null,
+    cohort_id: params.cohortId || null,
     subject_id: params.subjectId || null,
     plan_id: params.planId || null,
     assignment_id: params.assignmentId || null,
@@ -2308,6 +2345,8 @@ export const mockResources: Resource[] = [
     id: 'mock-res-001',
     student_id: 'mock-student-pp001',
     mentor_id: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-phy-101',
     plan_id: 'mock-plan-phy-001',
     title: 'Halliday & Resnick Mechanics Formula Sheet & Vector Summary',
@@ -2325,6 +2364,8 @@ export const mockResources: Resource[] = [
     id: 'mock-res-002',
     student_id: 'mock-student-pp001',
     mentor_id: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-math-102',
     plan_id: null,
     title: 'Differential Calculus: Critical Point Analysis & Derivative Rules',
@@ -2361,14 +2402,9 @@ export function getMockStudentResources(studentId: string): EnrichedMockResource
 
 export function getMockMentorResources(mentorId: string): EnrichedMockResource[] {
   const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
-  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
-  const studentIds = new Set(assignedStudents.map((s) => s.id));
-  if (normalizedMentorId === 'mock-mentor-ppm001' || assignedStudents.some((s) => s.poraplan_id === 'PP001' || s.id === 'mock-student-pp001')) {
-    studentIds.add('mock-student-pp001');
-  }
 
   return mockResources
-    .filter((r) => studentIds.has(r.student_id) || r.mentor_id === normalizedMentorId)
+    .filter((r) => isMockAuthorizedMentorForStudent(normalizedMentorId, r.student_id, r.program_id))
     .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
     .map((res) => {
       const student = mockStore.find((s) => s.id === res.student_id);
@@ -2417,6 +2453,8 @@ export function createMockResource(params: {
   fileSize?: number;
   content?: string;
   status?: ResourceStatus;
+  programId?: string;
+  cohortId?: string;
 }): { resource: Resource | null; error: Error | null } {
   const cleanTitle = params.title?.trim();
   if (!cleanTitle) {
@@ -2428,11 +2466,10 @@ export function createMockResource(params: {
 
   const normalizedStudentId = params.studentId === 'PP001' ? 'mock-student-pp001' : params.studentId;
 
-  // Validate mentor assignment
+  // Validate mentor authorization
   if (params.mentorId && params.mentorId !== 'admin' && params.mentorId !== 'mock-admin-ppa001') {
     const normalizedMentorId = params.mentorId === 'PPM001' ? 'mock-mentor-ppm001' : params.mentorId;
-    const assignedStudents = getMockAssignedStudents(normalizedMentorId);
-    const isAssigned = assignedStudents.some((s) => s.id === normalizedStudentId || s.poraplan_id === 'PP001');
+    const isAssigned = isMockAuthorizedMentorForStudent(normalizedMentorId, normalizedStudentId, params.programId);
     if (!isAssigned) {
       return { resource: null, error: new Error('You are not authorized to create resources for this student.') };
     }
@@ -2461,6 +2498,8 @@ export function createMockResource(params: {
     id: resourceId,
     student_id: normalizedStudentId,
     mentor_id: params.mentorId || null,
+    program_id: params.programId || null,
+    cohort_id: params.cohortId || null,
     subject_id: params.subjectId || null,
     plan_id: params.planId || null,
     title: cleanTitle,
@@ -2610,6 +2649,8 @@ export const mockDoubts: Doubt[] = [
     id: 'mock-doubt-001',
     student_id: 'mock-student-pp001',
     mentor_id: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-phy-101',
     plan_id: 'mock-plan-phy-001',
     task_id: 'mock-task-002',
@@ -2626,6 +2667,8 @@ export const mockDoubts: Doubt[] = [
     id: 'mock-doubt-002',
     student_id: 'mock-student-pp001',
     mentor_id: 'mock-mentor-ppm001',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     subject_id: 'mock-sub-math-102',
     plan_id: null,
     task_id: null,
@@ -2699,18 +2742,9 @@ export function getMockStudentDoubts(studentId: string): EnrichedMockDoubt[] {
 
 export function getMockMentorDoubts(mentorId: string): EnrichedMockDoubt[] {
   const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
-  const assignedStudents = getMockAssignedStudents(normalizedMentorId);
-  const studentIds = new Set(assignedStudents.map((s) => s.id));
-  if (normalizedMentorId === 'mock-mentor-ppm001' || assignedStudents.some((s) => s.poraplan_id === 'PP001' || s.id === 'mock-student-pp001')) {
-    studentIds.add('mock-student-pp001');
-  }
-
-  if (studentIds.size === 0 && mentorId !== 'admin' && mentorId !== 'mock-admin-ppa001') {
-    return [];
-  }
 
   return mockDoubts
-    .filter((d) => studentIds.has(d.student_id) || (mentorId === 'admin' || mentorId === 'mock-admin-ppa001'))
+    .filter((d) => isMockAuthorizedMentorForStudent(normalizedMentorId, d.student_id, d.program_id))
     .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
     .map(enrichMockDoubt);
 }
@@ -2730,6 +2764,8 @@ export function createMockDoubt(params: {
   taskId?: string;
   assignmentId?: string;
   priority?: DoubtPriority;
+  programId?: string;
+  cohortId?: string;
 }): { doubt: Doubt | null; error: Error | null } {
   const cleanTitle = params.title?.trim();
   if (!cleanTitle) {
@@ -2753,9 +2789,9 @@ export function createMockDoubt(params: {
     }
   }
 
-  // Find assigned mentor if any
-  const mentors = getMockAssignedMentors(normalizedStudentId);
-  const mentorId = mentors.length > 0 ? mentors[0].id : null;
+  // Find effective assigned mentor for student (and program if supplied)
+  const effectiveMentor = getMockEffectiveMentorForStudent(normalizedStudentId, params.programId);
+  const mentorId = effectiveMentor.mentor ? effectiveMentor.mentor.id : null;
 
   const doubtId = `mock-doubt-${Date.now()}`;
   const now = new Date().toISOString();
@@ -2764,6 +2800,8 @@ export function createMockDoubt(params: {
     id: doubtId,
     student_id: normalizedStudentId,
     mentor_id: mentorId,
+    program_id: params.programId || null,
+    cohort_id: params.cohortId || null,
     subject_id: params.subjectId || null,
     plan_id: params.planId || null,
     task_id: params.taskId || null,
@@ -2969,6 +3007,8 @@ export const mockAnnouncements: Announcement[] = [
     title: 'Physics Lab & Advanced Problem Set 3 Consultation Hours',
     content: 'Office hours for rotational dynamics, moment of inertia calculations, and Atwood machine problem sets will be held this Thursday at 16:00 UTC. Submit any preliminary inquiries via the Doubts Desk in advance.',
     target_scope: 'assigned_students',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     student_id: null,
     subject_id: 'mock-sub-phy-101',
     priority: 'important',
@@ -2983,6 +3023,8 @@ export const mockAnnouncements: Announcement[] = [
     title: 'Personalized Focus: Angular Momentum & Precession Problem Set',
     content: 'Fahim, please pay special attention to problem 4.2 in the new assignment regarding gyroscope precession angular velocity. Acknowledge this notice once you have reviewed the reference notes.',
     target_scope: 'individual',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
     student_id: 'mock-student-pp001',
     subject_id: 'mock-sub-phy-101',
     priority: 'normal',
@@ -3019,10 +3061,9 @@ export function getMockStudentAnnouncements(studentId: string): EnrichedMockAnno
         return a.student_id === normalizedId || (student && a.student_id === student.poraplanId);
       }
 
-      // Assigned students target: student must be in author's assigned roster
+      // Assigned students target: student must be in author's assigned roster or mentor authorized
       if (a.target_scope === 'assigned_students') {
-        const assigned = getMockAssignedStudents(a.author_id);
-        return assigned.some((s) => s.id === normalizedId || (student && s.poraplan_id === student.poraplanId));
+        return isMockAuthorizedMentorForStudent(a.author_id, normalizedId, (a as any).program_id || undefined);
       }
 
       return false;
@@ -3168,6 +3209,8 @@ export function createMockAnnouncement(data: {
   title: string;
   content: string;
   targetScope?: AnnouncementScope;
+  programId?: string | null;
+  cohortId?: string | null;
   studentId?: string | null;
   subjectId?: string | null;
   priority?: AnnouncementPriority;
@@ -3212,10 +3255,7 @@ export function createMockAnnouncement(data: {
     }
     normalizedStudentId = normalizeId(data.studentId);
     if (author.role === 'mentor') {
-      const assigned = getMockAssignedStudents(normalizedAuthorId);
-      const isAssigned = assigned.some(
-        (s) => s.id === normalizedStudentId || s.poraplan_id === data.studentId
-      );
+      const isAssigned = isMockAuthorizedMentorForStudent(normalizedAuthorId, normalizedStudentId, data.programId || undefined);
       if (!isAssigned) {
         return {
           announcement: null,
@@ -3240,6 +3280,8 @@ export function createMockAnnouncement(data: {
     title: cleanTitle,
     content: cleanContent,
     target_scope: scope,
+    program_id: data.programId || null,
+    cohort_id: data.cohortId || null,
     student_id: normalizedStudentId,
     subject_id: data.subjectId || null,
     priority,
@@ -4802,6 +4844,78 @@ export function getMockEffectiveStudentsForMentor(mentorId: string): {
   }
 
   return result;
+}
+
+/**
+ * Evaluates whether a mentor is currently authorized to access/modify a student's records
+ * for a specific program.
+ * Mirrors database public.is_authorized_mentor_for_student.
+ * Security Rules:
+ * - Admin has platform-wide oversight.
+ * - Suspended mentors are denied.
+ * - Missing/null programId FAILS CLOSED for mentors to prevent cross-program data leakage.
+ * - Precedence: Individual Override > Cohort Default > None.
+ */
+export function isMockAuthorizedMentorForStudent(
+  mentorId: string,
+  studentId: string,
+  programId?: string | null
+): boolean {
+  const normalizedMentorId = mentorId === 'PPM001' ? 'mock-mentor-ppm001' : mentorId;
+  const normalizedStudentId = studentId === 'PP001' ? 'mock-student-pp001' : studentId;
+
+  // 1. Identify admin caller (platform-wide oversight)
+  const callerAcc = mockStore.find((u) => u.id === normalizedMentorId);
+  if (callerAcc?.role === 'admin' || normalizedMentorId === 'mock-admin-ppa001' || mentorId === 'admin') {
+    return true;
+  }
+
+  // 2. Validate mentor role and account status (suspended or non-mentors are denied)
+  if (!callerAcc || callerAcc.role !== 'mentor' || callerAcc.status === 'suspended') {
+    return false;
+  }
+
+  // 3. Fail Closed on missing / null programId for mentors!
+  // Unscoped / ambiguous records are restricted from mentor access.
+  if (!programId) {
+    return false;
+  }
+
+  // 4. Resolve the student's active enrollment in the requested program
+  const activeEnrollments = getMockEnrollments({
+    studentId: normalizedStudentId,
+    status: 'active',
+  }).filter((e) => e.program_id === programId);
+
+  if (activeEnrollments.length === 0) {
+    return false;
+  }
+
+  // 5. Check active individual override first (Precedence: Override > Default)
+  const activeOverride = mockStudentMentorAssignments.find(
+    (sma) => sma.student_id === normalizedStudentId && sma.program_id === programId && sma.is_active
+  );
+
+  if (activeOverride) {
+    // Only the assigned override mentor has operational access; cohort default or former mentors are denied!
+    return activeOverride.mentor_id === normalizedMentorId;
+  }
+
+  // 6. Check active cohort-level assignment
+  for (const enr of activeEnrollments) {
+    if (enr.cohort_id) {
+      const isCohortMentor = mockCohortMentors.some(
+        (cm) =>
+          cm.cohort_id === enr.cohort_id &&
+          cm.mentor_id === normalizedMentorId &&
+          cm.program_id === programId &&
+          cm.is_active
+      );
+      if (isCohortMentor) return true;
+    }
+  }
+
+  return false;
 }
 
 /**

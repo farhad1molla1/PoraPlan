@@ -34,7 +34,7 @@ export type ResourceWithMeta = Resource & {
  * - Students can only view resources where student_id = auth.uid()
  * - Mentors can view resources for their assigned students
  */
-export async function getStudentResources(studentId: string): Promise<{
+export async function getStudentResources(studentId: string, programId?: string): Promise<{
   resources: ResourceWithMeta[];
   error: Error | null;
 }> {
@@ -43,16 +43,24 @@ export async function getStudentResources(studentId: string): Promise<{
   }
 
   if (!isSupabaseConfigured()) {
-    const list = getMockStudentResources(studentId);
+    let list = getMockStudentResources(studentId);
+    if (programId && programId !== 'all') {
+      list = list.filter((r) => !r.program_id || r.program_id === programId);
+    }
     return { resources: list as ResourceWithMeta[], error: null };
   }
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('resources')
       .select('*, subjects(id, name, code), study_plans(id, title), profiles!mentor_id(full_name)')
-      .eq('student_id', studentId)
-      .order('created_at', { ascending: false });
+      .eq('student_id', studentId);
+
+    if (programId && programId !== 'all') {
+      query = query.eq('program_id', programId);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
       return { resources: [], error };
@@ -206,6 +214,8 @@ export async function createResource(params: {
   mentorId?: string;
   subjectId?: string;
   planId?: string;
+  programId?: string;
+  cohortId?: string;
   title: string;
   description?: string;
   resourceType: ResourceType;
@@ -241,6 +251,8 @@ export async function createResource(params: {
     const newRecord: ResourceInsert = {
       student_id: params.studentId,
       mentor_id: params.mentorId || null,
+      program_id: params.programId || null,
+      cohort_id: params.cohortId || null,
       subject_id: params.subjectId || null,
       plan_id: params.planId || null,
       title: cleanTitle,
