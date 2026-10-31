@@ -118,7 +118,17 @@ BEGIN
 END;
 $$;
 
--- 3. PROVISION STANDARD TEST ACCOUNTS (Student PP001, Mentor PPM001, Admin PPA001)
+-- 3. ENSURE DEPENDENCIES & PROVISION STANDARD TEST ACCOUNTS (Student PP001, Mentor PPM001, Admin PPA001)
+-- Ensure mentor_students has status column if table exists (backward compatibility for clean sequential migrations)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'mentor_students') THEN
+    ALTER TABLE public.mentor_students
+    ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active'
+    CHECK (status IN ('active', 'inactive', 'suspended'));
+  END IF;
+END $$;
+
 DO $$
 DECLARE
   v_student_id UUID;

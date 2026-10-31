@@ -442,9 +442,10 @@ export function adminRegisterMockMember(
 /**
  * Mock mentorship pairings: resolved dynamically using effective mentor resolution engine.
  */
-export function getMockAssignedStudents(mentorId: string): Profile[] {
+export function getMockAssignedStudents(mentorId: string, programId?: string): Profile[] {
   const effectiveMentees = getMockEffectiveStudentsForMentor(mentorId);
-  return effectiveMentees.map((item) => item.student);
+  const filtered = programId ? effectiveMentees.filter((item) => item.program?.id === programId) : effectiveMentees;
+  return filtered.map((item) => item.student);
 }
 
 export function getMockAssignedMentors(studentId: string, programId?: string): Profile[] {
@@ -3178,8 +3179,15 @@ export function getMockAnnouncementById(
     }
     const isPlatform = a.target_scope === 'platform';
     const isIndividual = a.target_scope === 'individual' && (a.student_id === normalizedViewerId || a.student_id === viewer.poraplanId);
-    const assigned = getMockAssignedStudents(a.author_id);
-    const isAssigned = a.target_scope === 'assigned_students' && assigned.some((s) => s.id === normalizedViewerId || s.poraplan_id === viewer.poraplanId);
+    let isAssigned = false;
+    if (a.target_scope === 'assigned_students') {
+      if (a.cohort_id) {
+        const studentEnrollments = getMockEnrollments({ studentId: normalizedViewerId, cohortId: a.cohort_id, status: 'active' });
+        isAssigned = studentEnrollments.length > 0;
+      } else {
+        isAssigned = isMockAuthorizedMentorForStudent(a.author_id, normalizedViewerId, (a as any).program_id || undefined);
+      }
+    }
 
     if (!isPlatform && !isIndividual && !isAssigned) {
       return { announcement: null, error: new Error('You are not authorized to view this announcement.') };
@@ -3325,11 +3333,20 @@ export function createMockAnnouncement(data: {
     if (scope === 'individual' && normalizedStudentId) {
       recipients = [normalizedStudentId];
     } else if (scope === 'assigned_students') {
-      const assigned = getMockAssignedStudents(normalizedAuthorId);
-      recipients = assigned.map((s) => s.id);
+      if (data.cohortId) {
+        const enrollments = getMockEnrollments({ cohortId: data.cohortId, status: 'active' });
+        recipients = enrollments.map((e) => e.student_id);
+      } else if (data.programId) {
+        const assigned = getMockAssignedStudents(normalizedAuthorId, data.programId);
+        recipients = assigned.map((s) => s.id);
+      } else {
+        const assigned = getMockAssignedStudents(normalizedAuthorId);
+        recipients = assigned.map((s) => s.id);
+      }
     } else if (scope === 'platform') {
       recipients = mockStore.filter((u) => u.role === 'student').map((u) => u.id);
     }
+    recipients = Array.from(new Set(recipients));
 
     recipients.forEach((recId) => {
       createMockNotification({
@@ -3444,8 +3461,16 @@ export function acknowledgeMockAnnouncement(
   } else if (announcement.target_scope === 'individual') {
     authorized = announcement.student_id === normalizedStudentId || announcement.student_id === student.poraplanId;
   } else if (announcement.target_scope === 'assigned_students') {
-    const assigned = getMockAssignedStudents(announcement.author_id);
-    authorized = assigned.some((s) => s.id === normalizedStudentId || s.poraplan_id === student.poraplanId);
+    if (announcement.cohort_id) {
+      const studentEnrollments = getMockEnrollments({ studentId: normalizedStudentId, cohortId: announcement.cohort_id, status: 'active' });
+      authorized = studentEnrollments.length > 0;
+    } else {
+      authorized = isMockAuthorizedMentorForStudent(
+        announcement.author_id,
+        normalizedStudentId,
+        (announcement as any).program_id || undefined
+      );
+    }
   }
 
   if (!authorized) {
@@ -4668,7 +4693,7 @@ export function updateMockEnrollmentStatus(
 // Milestone 4: Mentor Assignment & Matching Mock Store
 // ==============================================================================
 
-const mockCohortMentors: CohortMentor[] = [
+export const mockCohortMentors: CohortMentor[] = [
   {
     id: 'cm-seed-01',
     cohort_id: 'cohort-uu-cse-b67',
@@ -4684,7 +4709,7 @@ const mockCohortMentors: CohortMentor[] = [
   },
 ];
 
-const mockStudentMentorAssignments: StudentMentorAssignment[] = [];
+export const mockStudentMentorAssignments: StudentMentorAssignment[] = [];
 
 export function getMockCohortMentors(filters?: {
   cohortId?: string;
@@ -4879,7 +4904,7 @@ export function getMockEffectiveStudentsForMentor(mentorId: string): {
     assignmentType: 'individual' | 'cohort';
     assignedAt: string;
   }[] = [];
-  const processedStudentIds = new Set<string>();
+  const processedStudentProgramKeys = new Set<string>();
 
   // 1. Students with active individual overrides pointing to this mentor
   const activeOverrides = mockStudentMentorAssignments.filter(
@@ -4900,7 +4925,7 @@ export function getMockEffectiveStudentsForMentor(mentorId: string): {
         assignmentType: 'individual',
         assignedAt: override.assigned_at,
       });
-      processedStudentIds.add(student.id);
+      processedStudentProgramKeys.add(`${student.id}:${override.program_id}`);
     }
   }
 
@@ -4915,11 +4940,16 @@ export function getMockEffectiveStudentsForMentor(mentorId: string): {
     const program = getMockProgramById(cm.program_id);
 
     for (const enr of enrollments) {
-      if (processedStudentIds.has(enr.student_id)) continue;
+      const studentProgramKey = `${enr.student_id}:${cm.program_id}`;
+      if (processedStudentProgramKeys.has(studentProgramKey)) continue;
 
-      // Check if student has an individual override to someone else
+      // Check if student has an individual override to someone else in this specific program
       const hasOtherOverride = mockStudentMentorAssignments.some(
-        (sma) => sma.student_id === enr.student_id && sma.is_active && sma.mentor_id !== mentorId
+        (sma) =>
+          sma.student_id === enr.student_id &&
+          sma.program_id === cm.program_id &&
+          sma.is_active &&
+          sma.mentor_id !== mentorId
       );
       if (hasOtherOverride) continue;
 
@@ -4932,7 +4962,7 @@ export function getMockEffectiveStudentsForMentor(mentorId: string): {
           assignmentType: 'cohort',
           assignedAt: cm.assigned_at,
         });
-        processedStudentIds.add(student.id);
+        processedStudentProgramKeys.add(studentProgramKey);
       }
     }
   }

@@ -388,7 +388,7 @@ export async function getEffectiveStudentsForMentor(mentorId: string): Promise<{
       .eq('is_active', true);
 
     const result: any[] = [];
-    const processedStudentIds = new Set<string>();
+    const processedStudentProgramKeys = new Set<string>();
 
     for (const ov of overrides || []) {
       if (ov.student) {
@@ -399,7 +399,7 @@ export async function getEffectiveStudentsForMentor(mentorId: string): Promise<{
           assignmentType: 'individual',
           assignedAt: ov.assigned_at,
         });
-        processedStudentIds.add(ov.student.id);
+        processedStudentProgramKeys.add(`${ov.student.id}:${ov.program_id}`);
       }
     }
 
@@ -416,11 +416,13 @@ export async function getEffectiveStudentsForMentor(mentorId: string): Promise<{
         .eq('status', 'active');
 
       for (const enr of enrollments || []) {
-        if (!processedStudentIds.has(enr.student_id)) {
-          // Verify student does not have an active override to someone else
+        const studentProgramKey = `${enr.student_id}:${ca.program_id}`;
+        if (!processedStudentProgramKeys.has(studentProgramKey)) {
+          // Verify student does not have an active override to someone else in this specific program
           const { data: otherOverride } = await (supabase.from('student_mentor_assignments') as any)
             .select('id')
             .eq('student_id', enr.student_id)
+            .eq('program_id', ca.program_id)
             .eq('is_active', true)
             .neq('mentor_id', mentorId)
             .maybeSingle();
@@ -433,7 +435,7 @@ export async function getEffectiveStudentsForMentor(mentorId: string): Promise<{
               assignmentType: 'cohort',
               assignedAt: ca.assigned_at,
             });
-            processedStudentIds.add(enr.student_id);
+            processedStudentProgramKeys.add(studentProgramKey);
           }
         }
       }

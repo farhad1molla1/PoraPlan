@@ -353,11 +353,26 @@ export async function createAnnouncement(input: {
           if (payload.target_scope === 'individual' && payload.student_id) {
             recipients = [payload.student_id];
           } else if (payload.target_scope === 'assigned_students') {
-            const { data: assignments } = await supabase
-              .from('mentor_students')
-              .select('student_id')
-              .eq('mentor_id', input.authorId);
-            recipients = (assignments || []).map((r: any) => r.student_id);
+            if (payload.cohort_id) {
+              const { data: enrollments } = await (supabase.from('program_enrollments') as any)
+                .select('student_id')
+                .eq('cohort_id', payload.cohort_id)
+                .eq('status', 'active');
+              recipients = (enrollments || []).map((e: any) => e.student_id);
+            } else if (payload.program_id) {
+              const { data: assignments } = await (supabase.from('mentor_students') as any)
+                .select('student_id')
+                .eq('mentor_id', input.authorId)
+                .eq('program_id', payload.program_id)
+                .eq('status', 'active');
+              recipients = (assignments || []).map((r: any) => r.student_id);
+            } else {
+              const { data: assignments } = await (supabase.from('mentor_students') as any)
+                .select('student_id')
+                .eq('mentor_id', input.authorId)
+                .eq('status', 'active');
+              recipients = (assignments || []).map((r: any) => r.student_id);
+            }
           } else if (payload.target_scope === 'platform') {
             const { data: students } = await supabase
               .from('profiles')
@@ -365,6 +380,7 @@ export async function createAnnouncement(input: {
               .eq('role', 'student');
             recipients = (students || []).map((s: any) => s.id);
           }
+          recipients = Array.from(new Set(recipients));
 
           for (const recipientId of recipients) {
             await createNotification({
