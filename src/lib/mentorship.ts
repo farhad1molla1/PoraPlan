@@ -61,23 +61,55 @@ export async function getAssignedMentors(studentId: string, programId?: string):
   error: Error | null;
 }> {
   if (!isSupabaseConfigured()) {
-    const mockMentors = getMockAssignedMentors(studentId);
+    const mockMentors = getMockAssignedMentors(studentId, programId);
     return { mentors: mockMentors, error: null };
   }
 
   try {
-    const { resolution, error: resError } = await getEffectiveMentor(studentId, programId);
-    if (!resError && resolution.mentor) {
-      return { mentors: [resolution.mentor], error: null };
+    if (programId) {
+      const { resolution, error: resError } = await getEffectiveMentor(studentId, programId);
+      if (!resError && resolution.mentor) {
+        return { mentors: [resolution.mentor], error: null };
+      }
+    } else {
+      // When programId is omitted, query student's active enrollments to get mentors across all programs
+      const { data: enrollments } = await supabase
+        .from('program_enrollments')
+        .select('program_id')
+        .eq('student_id', studentId)
+        .eq('status', 'active');
+
+      if (enrollments && enrollments.length > 0) {
+        const mentorMap = new Map<string, Profile>();
+        for (const enr of enrollments) {
+          const { resolution } = await getEffectiveMentor(studentId, enr.program_id);
+          if (resolution.mentor) {
+            mentorMap.set(resolution.mentor.id, resolution.mentor);
+          }
+        }
+        if (mentorMap.size > 0) {
+          return { mentors: Array.from(mentorMap.values()), error: null };
+        }
+      } else {
+        const { resolution, error: resError } = await getEffectiveMentor(studentId);
+        if (!resError && resolution.mentor) {
+          return { mentors: [resolution.mentor], error: null };
+        }
+      }
     }
 
     // Fallback to legacy mentor_students table
-    const { data: pairings, error: pairError } = await supabase
+    let query = supabase
       .from('mentor_students')
       .select('mentor_id')
       .eq('student_id', studentId)
       .eq('status', 'active');
 
+    if (programId) {
+      query = query.eq('program_id', programId);
+    }
+
+    const { data: pairings, error: pairError } = await query;
     if (pairError) {
       return { mentors: [], error: pairError };
     }

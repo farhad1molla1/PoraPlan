@@ -447,9 +447,24 @@ export function getMockAssignedStudents(mentorId: string): Profile[] {
   return effectiveMentees.map((item) => item.student);
 }
 
-export function getMockAssignedMentors(studentId: string): Profile[] {
-  const resolution = getMockEffectiveMentorForStudent(studentId);
-  return resolution.mentor ? [resolution.mentor] : [];
+export function getMockAssignedMentors(studentId: string, programId?: string): Profile[] {
+  if (programId) {
+    const resolution = getMockEffectiveMentorForStudent(studentId, programId);
+    return resolution.mentor ? [resolution.mentor] : [];
+  }
+  const activeEnrollments = getMockEnrollments({ studentId, status: 'active' });
+  if (activeEnrollments.length === 0) {
+    const resolution = getMockEffectiveMentorForStudent(studentId);
+    return resolution.mentor ? [resolution.mentor] : [];
+  }
+  const mentorsMap = new Map<string, Profile>();
+  for (const enr of activeEnrollments) {
+    const res = getMockEffectiveMentorForStudent(studentId, enr.program_id);
+    if (res.mentor) {
+      mentorsMap.set(res.mentor.id, res.mentor);
+    }
+  }
+  return Array.from(mentorsMap.values());
 }
 
 /**
@@ -1390,6 +1405,12 @@ export function submitMockAssignment(params: {
   if (existingIndex !== -1) {
     // Update existing submission (prevent duplicates)
     const current = mockSubmissions[existingIndex];
+    if (current.status === 'reviewed') {
+      return { submission: null, error: new Error('Cannot modify or resubmit an already reviewed submission.') };
+    }
+    if (current.status === 'under_review') {
+      return { submission: null, error: new Error('Submission is currently under mentor review and cannot be modified.') };
+    }
     current.submission_type = params.submissionType;
     current.content = cleanContent;
     current.link_url = params.linkUrl?.trim() || (params.submissionType === 'link' ? cleanContent : null);
@@ -1429,6 +1450,9 @@ export function updateMockSubmissionStatus(
     return { submission: null, error: new Error('Submission not found.') };
   }
   const current = mockSubmissions[index];
+  if (current.status === 'reviewed' && status === 'submitted') {
+    return { submission: null, error: new Error('Cannot downgrade a reviewed submission back to submitted.') };
+  }
   current.status = status;
   current.updated_at = new Date().toISOString();
   mockSubmissions[index] = { ...current };
@@ -3344,8 +3368,11 @@ export function updateMockAnnouncement(
     return { announcement: null, error: new Error('You are not authorized to update this announcement.') };
   }
 
-  // Security checks (Milestone 5.2): Mentors cannot elevate to platform scope or retarget unauthorized students
+  // Security checks (Milestone 5.2.1): Mentors cannot elevate to platform scope, reassign author, or retarget unauthorized students/programs
   if (!isAdmin) {
+    if ((updates as any).author_id && (updates as any).author_id !== current.author_id) {
+      return { announcement: null, error: new Error('Cannot reassign announcement author.') };
+    }
     if (updates.target_scope === 'platform') {
       return { announcement: null, error: new Error('Mentors cannot change announcement scope to platform-wide.') };
     }
@@ -3353,6 +3380,15 @@ export function updateMockAnnouncement(
       const targetStudent = updates.student_id || current.student_id;
       if (!targetStudent || !isMockAuthorizedMentorForStudent(normalizedUserId, targetStudent, (current as any).program_id)) {
         return { announcement: null, error: new Error('Cannot direct announcement to unauthorized student.') };
+      }
+    }
+    const targetProgramId = (updates as any).program_id || (current as any).program_id;
+    if (targetProgramId) {
+      const hasProgramRole = mockCohortMentors.some((cm) => cm.mentor_id === normalizedUserId && cm.program_id === targetProgramId && cm.is_active)
+        || mockStudentMentorAssignments.some((sma) => sma.mentor_id === normalizedUserId && sma.program_id === targetProgramId && sma.is_active)
+        || mockApplications.some((app) => app.applicant_id === normalizedUserId && app.application_type === 'mentor' && app.program_id === targetProgramId && app.status === 'approved');
+      if (!hasProgramRole) {
+        return { announcement: null, error: new Error('Cannot publish announcement for a program you do not mentor.') };
       }
     }
   }

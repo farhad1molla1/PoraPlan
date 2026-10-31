@@ -41,7 +41,7 @@ function recordTest(id: number, name: string, category: 'SQL/Static' | 'Mock-Dat
 
 // Read migration file for SQL static verification
 const migrationPath = path.resolve('supabase/migrations/20261030000007_final_security_and_integrity_corrections.sql');
-const migrationSql = fs.readFileSync(migrationPath, 'utf8');
+const migrationSql = fs.readFileSync(migrationPath, 'utf8').replace(/\r\n/g, '\n');
 
 console.log('================================================================');
 console.log('PoraPlan Milestone 5.2 Security & Data Integrity Verification');
