@@ -601,6 +601,14 @@ export type TaskUpdate = {
   updated_at?: string;
 };
 
+export type StudentTaskFilters = {
+  programId?: string;
+  startDate?: string;
+  endDate?: string;
+  subjectId?: string;
+  status?: TaskStatus;
+};
+
 export type AssignmentStatus = 'draft' | 'published' | 'closed' | 'archived';
 export type SubmissionType = 'text' | 'link' | 'file';
 export type SubmissionStatus = 'submitted' | 'under_review' | 'reviewed' | 'needs_revision';

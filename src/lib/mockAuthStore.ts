@@ -9,6 +9,7 @@ import type {
   StudyPlanItemStatus,
   Task,
   TaskPriority,
+  TaskStatus,
   Assignment,
   AssignmentStatus,
   Submission,
@@ -936,10 +937,86 @@ let mockTasks: Task[] = [
   },
 ];
 
-export function getMockStudentTasks(studentId: string): (Task & { subject_name?: string; plan_title?: string })[] {
+export function getMockStudentTasks(
+  studentId: string,
+  filters?: {
+    programId?: string;
+    startDate?: string;
+    endDate?: string;
+    subjectId?: string;
+    status?: TaskStatus;
+  }
+): (Task & { subject_name?: string; plan_title?: string })[] {
+  const normalizedId = studentId === 'PP001' ? 'mock-student-pp001' : studentId;
+
   return mockTasks
-    .filter((t) => t.student_id === studentId)
-    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+    .filter((t) => {
+      // 1. Student ownership
+      if (t.student_id !== normalizedId && t.student_id !== studentId) {
+        return false;
+      }
+
+      // 2. Program ID filter
+      if (filters?.programId && filters.programId !== 'all') {
+        if (t.program_id && t.program_id !== filters.programId) {
+          return false;
+        }
+      }
+
+      // 3. Subject ID filter
+      if (filters?.subjectId && filters.subjectId !== 'all') {
+        if (t.subject_id !== filters.subjectId) {
+          return false;
+        }
+      }
+
+      // 4. Status filter
+      if (filters?.status && (filters.status as string) !== 'all') {
+        if (t.status !== filters.status) {
+          return false;
+        }
+      }
+
+      // 5. Date filtering on due_date (inclusive, for scheduled-date browsing)
+      if (filters?.startDate) {
+        const cleanStart = filters.startDate.includes('T')
+          ? filters.startDate.split('T')[0]
+          : filters.startDate.trim();
+        if (!t.due_date) return false;
+        const taskDue = t.due_date.includes('T') ? t.due_date.split('T')[0] : t.due_date.trim();
+        if (taskDue < cleanStart) return false;
+      }
+
+      if (filters?.endDate) {
+        const cleanEnd = filters.endDate.includes('T')
+          ? filters.endDate.split('T')[0]
+          : filters.endDate.trim();
+        if (!t.due_date) return false;
+        const taskDue = t.due_date.includes('T') ? t.due_date.split('T')[0] : t.due_date.trim();
+        if (taskDue > cleanEnd) return false;
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      // Supabase PostgREST parity: order('due_date', { ascending: true, nullsFirst: false }).order('created_at', { ascending: false })
+      if (a.due_date && b.due_date) {
+        const dateA = a.due_date.includes('T') ? a.due_date.split('T')[0] : a.due_date.trim();
+        const dateB = b.due_date.includes('T') ? b.due_date.split('T')[0] : b.due_date.trim();
+        if (dateA !== dateB) {
+          return dateA < dateB ? -1 : 1;
+        }
+      } else if (a.due_date && !b.due_date) {
+        return -1; // nulls last
+      } else if (!a.due_date && b.due_date) {
+        return 1; // nulls last
+      }
+
+      // Secondary order: created_at DESC
+      const timeA = new Date(a.created_at || 0).getTime();
+      const timeB = new Date(b.created_at || 0).getTime();
+      return timeB - timeA;
+    })
     .map((task) => {
       const subject = task.subject_id ? mockSubjects.find((s) => s.id === task.subject_id) : null;
       const plan = task.plan_id ? mockStudyPlans.find((p) => p.id === task.plan_id) : null;

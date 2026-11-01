@@ -5,9 +5,12 @@ import type {
   TaskUpdate,
   TaskPriority,
   TaskStatus,
+  StudentTaskFilters,
   Subject,
   StudyPlan,
 } from '../types/database';
+
+export type { StudentTaskFilters };
 import {
   getMockStudentTasks,
   getMockTaskById,
@@ -25,12 +28,21 @@ export type TaskWithMeta = Task & {
 };
 
 /**
- * Fetch all tasks for a given student ID.
+ * Fetch all tasks for a given student ID with optional filters:
+ * - startDate / endDate: filters by scheduled task due_date (inclusive)
+ * - subjectId: filters by associated subject
+ * - status: filters by current status ('pending', 'in_progress', 'completed')
+ * - programId: filters by program
+ *
  * Handled via RLS on Supabase:
  * - Students can only query their own student_id.
  * - Mentors can only query student_ids of students assigned to them.
  */
-export async function getStudentTasks(studentId: string, programId?: string): Promise<{
+export async function getStudentTasks(
+  studentId: string,
+  programIdOrFilters?: string | StudentTaskFilters,
+  optionalFilters?: StudentTaskFilters
+): Promise<{
   tasks: TaskWithMeta[];
   error: Error | null;
 }> {
@@ -38,11 +50,13 @@ export async function getStudentTasks(studentId: string, programId?: string): Pr
     return { tasks: [], error: new Error('Student ID is required.') };
   }
 
+  const filters: StudentTaskFilters =
+    typeof programIdOrFilters === 'string'
+      ? { programId: programIdOrFilters, ...(optionalFilters || {}) }
+      : programIdOrFilters || {};
+
   if (!isSupabaseConfigured()) {
-    let list = getMockStudentTasks(studentId);
-    if (programId && programId !== 'all') {
-      list = list.filter((t) => !t.program_id || t.program_id === programId);
-    }
+    const list = getMockStudentTasks(studentId, filters);
     return { tasks: list as TaskWithMeta[], error: null };
   }
 
@@ -52,8 +66,31 @@ export async function getStudentTasks(studentId: string, programId?: string): Pr
       .select('*, subjects(*), study_plans(*)')
       .eq('student_id', studentId);
 
-    if (programId && programId !== 'all') {
-      query = query.eq('program_id', programId);
+    if (filters.programId && filters.programId !== 'all') {
+      query = query.eq('program_id', filters.programId);
+    }
+
+    if (filters.subjectId && filters.subjectId !== 'all') {
+      query = query.eq('subject_id', filters.subjectId);
+    }
+
+    if (filters.status && (filters.status as string) !== 'all') {
+      query = query.eq('status', filters.status);
+    }
+
+    // Scheduled task date filtering based on due_date (inclusive)
+    if (filters.startDate) {
+      const cleanStart = filters.startDate.includes('T')
+        ? filters.startDate.split('T')[0]
+        : filters.startDate.trim();
+      query = query.gte('due_date', cleanStart);
+    }
+
+    if (filters.endDate) {
+      const cleanEnd = filters.endDate.includes('T')
+        ? filters.endDate.split('T')[0]
+        : filters.endDate.trim();
+      query = query.lte('due_date', cleanEnd);
     }
 
     const { data, error } = await query
