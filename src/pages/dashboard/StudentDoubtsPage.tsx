@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -11,6 +11,11 @@ import {
 import { getStudentSubjects } from '../../lib/subjects';
 import { getStudentStudyPlans } from '../../lib/studyPlans';
 import { getStudentTasks } from '../../lib/tasks';
+import {
+  validateAcademicFile,
+  getAcademicFileSignedUrl,
+} from '../../lib/storage';
+import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
 import type { Subject, StudyPlan, Task, DoubtStatus, DoubtPriority } from '../../types/database';
 import { Button } from '../../components/common/Button';
 import {
@@ -28,6 +33,11 @@ import {
   Loader2,
   Calendar,
   Check,
+  Paperclip,
+  FileText,
+  Image as ImageIcon,
+  Download,
+  Eye,
 } from 'lucide-react';
 
 export const StudentDoubtsPage: React.FC = () => {
@@ -55,15 +65,40 @@ export const StudentDoubtsPage: React.FC = () => {
   const [selectedSubjectId, setSelectedSubjectId] = useState('');
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [selectedTaskId, setSelectedTaskId] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFileError, setSelectedFileError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [submittingCreate, setSubmittingCreate] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
   // Detail / Thread Modal
   const [activeDoubt, setActiveDoubt] = useState<DoubtWithMeta | null>(null);
   const [replyMessage, setReplyMessage] = useState('');
+  const [replyFile, setReplyFile] = useState<File | null>(null);
+  const [replyFileError, setReplyFileError] = useState<string | null>(null);
+  const replyFileInputRef = useRef<HTMLInputElement>(null);
   const [submittingReply, setSubmittingReply] = useState(false);
   const [replyError, setReplyError] = useState<string | null>(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
+
+  // Attachment Viewer Modal
+  const [viewerModal, setViewerModal] = useState<{
+    isOpen: boolean;
+    fileName: string;
+    filePath: string | null;
+    fileUrl: string | null;
+    fileSize?: number | null;
+    loading: boolean;
+    error: string | null;
+  }>({
+    isOpen: false,
+    fileName: '',
+    filePath: null,
+    fileUrl: null,
+    fileSize: null,
+    loading: false,
+    error: null,
+  });
 
   useEffect(() => {
     if (!studentId) return;
@@ -125,6 +160,171 @@ export const StudentDoubtsPage: React.FC = () => {
     setRefreshing(false);
   };
 
+  // Attachment Helpers
+  const formatFileSize = (bytes?: number | null): string => {
+    if (!bytes || bytes <= 0) return '';
+    if (bytes < 1024 * 1024) {
+      return `${Math.round(bytes / 1024)} KB`;
+    }
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateAcademicFile(file);
+    if (!validation.valid) {
+      setSelectedFileError(validation.error || 'Invalid file format or size.');
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    setSelectedFile(file);
+    setSelectedFileError(null);
+  };
+
+  const handleRemoveSelectedFile = () => {
+    setSelectedFile(null);
+    setSelectedFileError(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleReplyFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateAcademicFile(file);
+    if (!validation.valid) {
+      setReplyFileError(validation.error || 'Invalid file format or size.');
+      setReplyFile(null);
+      if (replyFileInputRef.current) replyFileInputRef.current.value = '';
+      return;
+    }
+
+    setReplyFile(file);
+    setReplyFileError(null);
+  };
+
+  const handleRemoveReplyFile = () => {
+    setReplyFile(null);
+    setReplyFileError(null);
+    if (replyFileInputRef.current) replyFileInputRef.current.value = '';
+  };
+
+  const handleOpenAttachmentViewer = async (attachment: { name: string; path: string; size?: number | null }) => {
+    setViewerModal({
+      isOpen: true,
+      fileName: attachment.name,
+      filePath: attachment.path,
+      fileUrl: null,
+      fileSize: attachment.size,
+      loading: true,
+      error: null,
+    });
+
+    try {
+      const { signedUrl, error } = await getAcademicFileSignedUrl(attachment.path);
+      if (error || !signedUrl) {
+        setViewerModal((prev) => ({
+          ...prev,
+          loading: false,
+          error: error?.message || 'Unable to generate secure preview link.',
+        }));
+        return;
+      }
+
+      setViewerModal((prev) => ({
+        ...prev,
+        fileUrl: signedUrl,
+        loading: false,
+        error: null,
+      }));
+    } catch (err: unknown) {
+      setViewerModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: err instanceof Error ? err.message : 'Failed to load attachment.',
+      }));
+    }
+  };
+
+  const handleDownloadAttachment = async (attachment: { name: string; path: string }) => {
+    try {
+      const { signedUrl, error } = await getAcademicFileSignedUrl(attachment.path);
+      if (error || !signedUrl) {
+        alert(error?.message || 'Failed to download file.');
+        return;
+      }
+
+      const link = document.createElement('a');
+      link.href = signedUrl;
+      link.download = attachment.name;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch {
+      alert('Failed to initiate attachment download.');
+    }
+  };
+
+  const renderAttachmentCard = (attachment: { name: string; path: string; size?: number | null }) => {
+    const ext = attachment.name.split('.').pop()?.toLowerCase() || '';
+    const isImage = ['png', 'jpg', 'jpeg', 'webp'].includes(ext);
+    const isPdf = ext === 'pdf';
+    const canPreview = isImage || isPdf;
+
+    return (
+      <div className="mt-2.5 p-2.5 border-2 border-brand-dark bg-brand-light/60 flex items-center justify-between gap-3 shadow-brutal-xs">
+        <div className="flex items-center gap-2 min-w-0">
+          {isImage ? (
+            <ImageIcon className="w-4 h-4 text-brand-teal shrink-0" />
+          ) : (
+            <FileText className="w-4 h-4 text-brand-navy shrink-0" />
+          )}
+          <div className="min-w-0">
+            <p className="font-heading font-bold text-xs text-brand-navy truncate" title={attachment.name}>
+              {attachment.name}
+            </p>
+            {attachment.size && attachment.size > 0 && (
+              <span className="font-mono text-[10px] text-brand-muted">
+                {formatFileSize(attachment.size)}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {canPreview && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => handleOpenAttachmentViewer(attachment)}
+              className="px-2 py-1 text-[11px] flex items-center gap-1"
+            >
+              <Eye className="w-3 h-3" />
+              <span>Preview</span>
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleDownloadAttachment(attachment)}
+            className="px-2 py-1 text-[11px] flex items-center gap-1"
+          >
+            <Download className="w-3 h-3" />
+            <span>Download</span>
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   const handleCreateDoubt = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentId) return;
@@ -152,6 +352,7 @@ export const StudentDoubtsPage: React.FC = () => {
       subjectId: selectedSubjectId || undefined,
       planId: selectedPlanId || undefined,
       taskId: selectedTaskId || undefined,
+      attachmentFile: selectedFile,
     });
 
     setSubmittingCreate(false);
@@ -171,6 +372,9 @@ export const StudentDoubtsPage: React.FC = () => {
       setSelectedSubjectId('');
       setSelectedPlanId('');
       setSelectedTaskId('');
+      setSelectedFile(null);
+      setSelectedFileError(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -179,8 +383,8 @@ export const StudentDoubtsPage: React.FC = () => {
     if (!activeDoubt || !studentId) return;
 
     const cleanMsg = replyMessage.trim();
-    if (!cleanMsg) {
-      setReplyError('Reply message cannot be empty.');
+    if (!cleanMsg && !replyFile) {
+      setReplyError('Reply message or attachment is required.');
       return;
     }
 
@@ -190,7 +394,8 @@ export const StudentDoubtsPage: React.FC = () => {
     const { response: newResp, error } = await addDoubtResponse({
       doubtId: activeDoubt.id,
       authorId: studentId,
-      message: cleanMsg,
+      message: cleanMsg || 'Attachment shared.',
+      attachmentFile: replyFile,
     });
 
     setSubmittingReply(false);
@@ -202,6 +407,9 @@ export const StudentDoubtsPage: React.FC = () => {
 
     if (newResp) {
       setReplyMessage('');
+      setReplyFile(null);
+      setReplyFileError(null);
+      if (replyFileInputRef.current) replyFileInputRef.current.value = '';
       await handleRefresh();
     }
   };
@@ -518,6 +726,12 @@ export const StudentDoubtsPage: React.FC = () => {
                       <MessageSquare className="w-3.5 h-3.5" />
                       {doubt.responses_count || 0} {(doubt.responses_count === 1) ? 'reply' : 'replies'}
                     </span>
+                    {doubt.attachment_path && (
+                      <span className="text-brand-navy font-bold flex items-center gap-1 bg-white border border-brand-dark/20 px-1.5 py-0.5">
+                        <Paperclip className="w-3 h-3 text-brand-teal" />
+                        Attachment
+                      </span>
+                    )}
                     {doubt.latest_response && (
                       <span className="text-brand-teal font-bold hidden sm:inline">
                         • Latest reply by {doubt.latest_response.author_name}
@@ -677,6 +891,60 @@ export const StudentDoubtsPage: React.FC = () => {
                 />
               </div>
 
+              {/* Attachment Picker */}
+              <div>
+                <label className="block font-mono text-[11px] font-bold uppercase text-brand-navy mb-1">
+                  Attachment (Optional)
+                </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+
+                {selectedFileError && (
+                  <p className="font-mono text-[11px] text-red-600 mb-2 font-bold">
+                    {selectedFileError}
+                  </p>
+                )}
+
+                {selectedFile ? (
+                  <div className="p-2.5 border-2 border-brand-dark bg-white flex items-center justify-between gap-2 shadow-brutal-xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="w-4 h-4 text-brand-teal shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-heading font-bold text-xs text-brand-navy truncate">
+                          {selectedFile.name}
+                        </p>
+                        <span className="font-mono text-[10px] text-brand-muted">
+                          {formatFileSize(selectedFile.size)}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveSelectedFile}
+                      className="px-2 py-0.5 border border-red-500 bg-red-50 hover:bg-red-100 text-red-700 text-[11px] font-mono font-bold"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full border-2 border-dashed border-brand-dark/60 bg-white hover:bg-brand-paper p-3 text-center transition-colors shadow-brutal-xs flex items-center justify-center gap-2"
+                  >
+                    <Paperclip className="w-4 h-4 text-brand-teal" />
+                    <span className="font-heading font-bold text-xs text-brand-navy">
+                      Attach Reference File (PDF, DOCX, PNG, JPG, WebP — Max 10MB)
+                    </span>
+                  </button>
+                )}
+              </div>
+
               <div className="pt-2 flex justify-end gap-2 border-t border-brand-dark/20">
                 <Button
                   type="button"
@@ -763,6 +1031,15 @@ export const StudentDoubtsPage: React.FC = () => {
                   {activeDoubt.question}
                 </p>
 
+                {/* Question attachment if present */}
+                {activeDoubt.attachment_path && (
+                  renderAttachmentCard({
+                    name: activeDoubt.attachment_name || 'attachment',
+                    path: activeDoubt.attachment_path,
+                    size: activeDoubt.attachment_size,
+                  })
+                )}
+
                 {/* Context associations */}
                 {(activeDoubt.plan_title || activeDoubt.task_title || activeDoubt.assignment_title) && (
                   <div className="mt-3 pt-2 border-t border-brand-dark/10 flex flex-wrap gap-2 text-[10px] font-mono text-brand-muted">
@@ -811,6 +1088,15 @@ export const StudentDoubtsPage: React.FC = () => {
                         <p className="font-sans text-xs text-brand-navy whitespace-pre-wrap leading-relaxed">
                           {resp.message}
                         </p>
+
+                        {/* Response attachment if present */}
+                        {resp.attachment_path && (
+                          renderAttachmentCard({
+                            name: resp.attachment_name || 'attachment',
+                            path: resp.attachment_path,
+                            size: resp.attachment_size,
+                          })
+                        )}
                       </div>
                     );
                   })
@@ -826,29 +1112,67 @@ export const StudentDoubtsPage: React.FC = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSendReply} className="flex gap-2">
+              <form onSubmit={handleSendReply} className="space-y-2">
                 <input
-                  type="text"
-                  placeholder="Type a follow-up inquiry or clarification..."
-                  value={replyMessage}
-                  onChange={(e) => setReplyMessage(e.target.value)}
-                  className="flex-1 p-2 border-2 border-brand-dark bg-white font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  ref={replyFileInputRef}
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+                  onChange={handleReplyFileSelect}
+                  className="hidden"
                 />
-                <Button
-                  type="submit"
-                  variant="primary"
-                  disabled={submittingReply}
-                  className="flex items-center gap-1 shadow-brutal px-3"
-                >
-                  {submittingReply ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Reply</span>
-                    </>
-                  )}
-                </Button>
+
+                {replyFile && (
+                  <div className="p-2 border border-brand-dark bg-white flex items-center justify-between text-xs font-mono">
+                    <span className="truncate max-w-[300px]">
+                      Attached: <strong>{replyFile.name}</strong> ({formatFileSize(replyFile.size)})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleRemoveReplyFile}
+                      className="text-red-700 hover:underline font-bold"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+
+                {replyFileError && (
+                  <p className="text-[11px] font-mono text-red-600 font-bold">{replyFileError}</p>
+                )}
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Type a follow-up inquiry or clarification..."
+                    value={replyMessage}
+                    onChange={(e) => setReplyMessage(e.target.value)}
+                    className="flex-1 p-2 border-2 border-brand-dark bg-white font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => replyFileInputRef.current?.click()}
+                    title="Attach file to reply"
+                    className="px-2.5"
+                  >
+                    <Paperclip className="w-3.5 h-3.5 text-brand-teal" />
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={submittingReply}
+                    className="flex items-center gap-1 shadow-brutal px-3"
+                  >
+                    {submittingReply ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Reply</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
               </form>
 
               <div className="flex items-center justify-between pt-1">
@@ -892,6 +1216,23 @@ export const StudentDoubtsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Attachment Viewer Modal */}
+      <AttachmentViewerModal
+        isOpen={viewerModal.isOpen}
+        onClose={() => setViewerModal((prev) => ({ ...prev, isOpen: false }))}
+        fileName={viewerModal.fileName}
+        fileUrl={viewerModal.fileUrl}
+        fileSize={viewerModal.fileSize}
+        loading={viewerModal.loading}
+        error={viewerModal.error}
+        onDownload={() =>
+          handleDownloadAttachment({
+            name: viewerModal.fileName,
+            path: viewerModal.filePath || '',
+          })
+        }
+      />
     </div>
   );
 };

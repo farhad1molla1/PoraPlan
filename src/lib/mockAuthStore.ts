@@ -2809,6 +2809,9 @@ export function createMockDoubt(params: {
   priority?: DoubtPriority;
   programId?: string;
   cohortId?: string;
+  attachmentPath?: string | null;
+  attachmentName?: string | null;
+  attachmentSize?: number | null;
 }): { doubt: Doubt | null; error: Error | null } {
   const cleanTitle = params.title?.trim();
   if (!cleanTitle) {
@@ -2853,6 +2856,9 @@ export function createMockDoubt(params: {
     question: cleanQuestion,
     priority: params.priority || 'normal',
     status: 'open',
+    attachment_path: params.attachmentPath || null,
+    attachment_name: params.attachmentName || null,
+    attachment_size: params.attachmentSize || null,
     resolved_at: null,
     created_at: now,
     updated_at: now,
@@ -2866,6 +2872,9 @@ export function addMockDoubtResponse(params: {
   doubtId: string;
   authorId: string;
   message: string;
+  attachmentPath?: string | null;
+  attachmentName?: string | null;
+  attachmentSize?: number | null;
 }): { response: DoubtResponse | null; error: Error | null } {
   const cleanMessage = params.message?.trim();
   if (!cleanMessage) {
@@ -2899,6 +2908,9 @@ export function addMockDoubtResponse(params: {
     doubt_id: doubt.id,
     author_id: normalizedAuthorId,
     message: cleanMessage,
+    attachment_path: params.attachmentPath || null,
+    attachment_name: params.attachmentName || null,
+    attachment_size: params.attachmentSize || null,
     created_at: now,
   };
 

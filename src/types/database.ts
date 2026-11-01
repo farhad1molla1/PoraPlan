@@ -871,6 +871,9 @@ export type Doubt = {
   question: string;
   priority: DoubtPriority;
   status: DoubtStatus;
+  attachment_path?: string | null;
+  attachment_name?: string | null;
+  attachment_size?: number | null;
   resolved_at?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -890,6 +893,9 @@ export type DoubtInsert = {
   question: string;
   priority?: DoubtPriority;
   status?: DoubtStatus;
+  attachment_path?: string | null;
+  attachment_name?: string | null;
+  attachment_size?: number | null;
   resolved_at?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -909,6 +915,9 @@ export type DoubtUpdate = {
   question?: string;
   priority?: DoubtPriority;
   status?: DoubtStatus;
+  attachment_path?: string | null;
+  attachment_name?: string | null;
+  attachment_size?: number | null;
   resolved_at?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -919,6 +928,9 @@ export type DoubtResponse = {
   doubt_id: string;
   author_id: string;
   message: string;
+  attachment_path?: string | null;
+  attachment_name?: string | null;
+  attachment_size?: number | null;
   created_at?: string;
 };
 
@@ -927,6 +939,9 @@ export type DoubtResponseInsert = {
   doubt_id: string;
   author_id: string;
   message: string;
+  attachment_path?: string | null;
+  attachment_name?: string | null;
+  attachment_size?: number | null;
   created_at?: string;
 };
 

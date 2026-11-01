@@ -25,6 +25,11 @@ import {
 import { getAssignedStudents } from './mentorship';
 import { getEffectiveMentor } from './mentorAssignments';
 import { createNotification } from './notifications';
+import {
+  uploadAcademicFile,
+  deleteAcademicFile,
+  validateAcademicFile,
+} from './storage';
 
 export interface DoubtResponseWithAuthor extends DoubtResponse {
   author_name?: string;
@@ -91,6 +96,9 @@ export async function getStudentDoubts(studentId: string, programId?: string): P
           author_id: r.author_id,
           message: r.message,
           created_at: r.created_at,
+          attachment_path: r.attachment_path || undefined,
+          attachment_name: r.attachment_name || undefined,
+          attachment_size: r.attachment_size || undefined,
           author_name: r.profiles?.full_name || 'User',
           author_role: r.profiles?.role,
           author_poraplan_id: r.profiles?.poraplan_id,
@@ -108,6 +116,9 @@ export async function getStudentDoubts(studentId: string, programId?: string): P
         question: row.question,
         priority: row.priority,
         status: row.status,
+        attachment_path: row.attachment_path || undefined,
+        attachment_name: row.attachment_name || undefined,
+        attachment_size: row.attachment_size || undefined,
         resolved_at: row.resolved_at,
         created_at: row.created_at,
         updated_at: row.updated_at,
@@ -178,6 +189,9 @@ export async function getMentorDoubts(mentorId: string): Promise<{
           author_id: r.author_id,
           message: r.message,
           created_at: r.created_at,
+          attachment_path: r.attachment_path || undefined,
+          attachment_name: r.attachment_name || undefined,
+          attachment_size: r.attachment_size || undefined,
           author_name: r.profiles?.full_name || 'User',
           author_role: r.profiles?.role,
           author_poraplan_id: r.profiles?.poraplan_id,
@@ -195,6 +209,9 @@ export async function getMentorDoubts(mentorId: string): Promise<{
         question: row.question,
         priority: row.priority,
         status: row.status,
+        attachment_path: row.attachment_path || undefined,
+        attachment_name: row.attachment_name || undefined,
+        attachment_size: row.attachment_size || undefined,
         resolved_at: row.resolved_at,
         created_at: row.created_at,
         updated_at: row.updated_at,
@@ -254,6 +271,9 @@ export async function getDoubtById(doubtId: string): Promise<{
         author_id: r.author_id,
         message: r.message,
         created_at: r.created_at,
+        attachment_path: r.attachment_path || undefined,
+        attachment_name: r.attachment_name || undefined,
+        attachment_size: r.attachment_size || undefined,
         author_name: r.profiles?.full_name || 'User',
         author_role: r.profiles?.role,
         author_poraplan_id: r.profiles?.poraplan_id,
@@ -271,6 +291,9 @@ export async function getDoubtById(doubtId: string): Promise<{
       question: row.question,
       priority: row.priority,
       status: row.status,
+      attachment_path: row.attachment_path || undefined,
+      attachment_name: row.attachment_name || undefined,
+      attachment_size: row.attachment_size || undefined,
       resolved_at: row.resolved_at,
       created_at: row.created_at,
       updated_at: row.updated_at,
@@ -308,6 +331,7 @@ export async function createDoubt(params: {
   priority?: DoubtPriority;
   programId?: string;
   cohortId?: string;
+  attachmentFile?: File | null;
 }): Promise<{
   doubt: Doubt | null;
   error: Error | null;
@@ -324,8 +348,36 @@ export async function createDoubt(params: {
     return { doubt: null, error: new Error('Student ID is required.') };
   }
 
+  // Pre-validate attachment if provided
+  if (params.attachmentFile) {
+    const validation = validateAcademicFile(params.attachmentFile);
+    if (!validation.valid) {
+      return { doubt: null, error: new Error(validation.error || 'Invalid attachment file.') };
+    }
+  }
+
   if (!isSupabaseConfigured()) {
-    const res = createMockDoubt(params);
+    let attachmentPath: string | null = null;
+    if (params.attachmentFile) {
+      const dummyId = `mock-doubt-${Date.now()}`;
+      const uploadRes = await uploadAcademicFile({
+        category: 'doubts',
+        entityId: dummyId,
+        messageId: 'inquiry',
+        file: params.attachmentFile,
+      });
+      if (uploadRes.error || !uploadRes.path) {
+        return { doubt: null, error: uploadRes.error || new Error('Failed to upload mock attachment.') };
+      }
+      attachmentPath = uploadRes.path;
+    }
+
+    const res = createMockDoubt({
+      ...params,
+      attachmentPath,
+      attachmentName: params.attachmentFile ? params.attachmentFile.name : undefined,
+      attachmentSize: params.attachmentFile ? params.attachmentFile.size : undefined,
+    });
     return res;
   }
 
@@ -354,7 +406,8 @@ export async function createDoubt(params: {
       }
     }
 
-    const { data, error } = await supabase
+    // 3. Insert parent doubt row first so storage RLS policy has a parent record to authorize against
+    const { data: insertedDoubt, error: insertError } = await supabase
       .from('doubts')
       .insert({
         student_id: params.studentId,
@@ -373,11 +426,71 @@ export async function createDoubt(params: {
       .select()
       .single();
 
-    if (error) {
-      return { doubt: null, error };
+    if (insertError || !insertedDoubt) {
+      return { doubt: null, error: insertError || new Error('Failed to create doubt inquiry.') };
     }
 
-    return { doubt: data, error: null };
+    // 4. If no attachment, return immediately
+    if (!params.attachmentFile) {
+      return { doubt: insertedDoubt, error: null };
+    }
+
+    // 5. Upload attachment
+    const { path: uploadedPath, error: uploadError } = await uploadAcademicFile({
+      category: 'doubts',
+      entityId: insertedDoubt.id,
+      messageId: 'inquiry',
+      file: params.attachmentFile,
+    });
+
+    if (uploadError || !uploadedPath) {
+      // Compensation: remove the created parent row so an attachment failure doesn't create a false message
+      try {
+        await supabase.from('doubts').delete().eq('id', insertedDoubt.id);
+      } catch {
+        // Retain diagnostic
+      }
+      return {
+        doubt: null,
+        error: new Error(`Failed to upload inquiry attachment: ${uploadError?.message || 'Upload error'}. Inquiry submission cancelled.`),
+      };
+    }
+
+    // 6. Update doubt with attachment metadata
+    const { data: updatedDoubt, error: metaError } = await supabase
+      .from('doubts')
+      .update({
+        attachment_path: uploadedPath,
+        attachment_name: params.attachmentFile.name,
+        attachment_size: params.attachmentFile.size,
+      })
+      .eq('id', insertedDoubt.id)
+      .select()
+      .single();
+
+    if (metaError || !updatedDoubt) {
+      // Compensation: clean up uploaded storage object and delete doubt
+      let cleanupSucceeded = false;
+      try {
+        const { success } = await deleteAcademicFile(uploadedPath);
+        cleanupSucceeded = success;
+      } catch {
+        cleanupSucceeded = false;
+      }
+      try {
+        await supabase.from('doubts').delete().eq('id', insertedDoubt.id);
+      } catch {
+        // Retain diagnostic
+      }
+
+      const diagnostic = cleanupSucceeded
+        ? `Failed to persist attachment metadata: ${metaError?.message || 'Database error'}. Successfully cleaned up uploaded file.`
+        : `Failed to persist attachment metadata: ${metaError?.message || 'Database error'}. WARNING: Failed to remove uploaded object at ${uploadedPath}.`;
+
+      return { doubt: null, error: new Error(diagnostic) };
+    }
+
+    return { doubt: updatedDoubt, error: null };
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { doubt: null, error };
@@ -391,6 +504,7 @@ export async function addDoubtResponse(params: {
   doubtId: string;
   authorId: string;
   message: string;
+  attachmentFile?: File | null;
 }): Promise<{
   response: DoubtResponse | null;
   error: Error | null;
@@ -406,23 +520,91 @@ export async function addDoubtResponse(params: {
     return { response: null, error: new Error('Author ID is required.') };
   }
 
+  // Pre-validate attachment if provided
+  if (params.attachmentFile) {
+    const validation = validateAcademicFile(params.attachmentFile);
+    if (!validation.valid) {
+      return { response: null, error: new Error(validation.error || 'Invalid attachment file.') };
+    }
+  }
+
   if (!isSupabaseConfigured()) {
-    return addMockDoubtResponse(params);
+    let attachmentPath: string | null = null;
+    if (params.attachmentFile) {
+      const responseId = `mock-resp-${Date.now()}`;
+      const uploadRes = await uploadAcademicFile({
+        category: 'doubts',
+        entityId: params.doubtId,
+        messageId: responseId,
+        file: params.attachmentFile,
+      });
+      if (uploadRes.error || !uploadRes.path) {
+        return { response: null, error: uploadRes.error || new Error('Failed to upload mock response attachment.') };
+      }
+      attachmentPath = uploadRes.path;
+    }
+
+    return addMockDoubtResponse({
+      ...params,
+      message: cleanMessage,
+      attachmentPath,
+      attachmentName: params.attachmentFile ? params.attachmentFile.name : undefined,
+      attachmentSize: params.attachmentFile ? params.attachmentFile.size : undefined,
+    });
   }
 
   try {
+    let uploadedPath: string | null = null;
+    const responseId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `resp-${Date.now()}`;
+
+    if (params.attachmentFile) {
+      const uploadRes = await uploadAcademicFile({
+        category: 'doubts',
+        entityId: params.doubtId,
+        messageId: responseId,
+        file: params.attachmentFile,
+      });
+
+      if (uploadRes.error || !uploadRes.path) {
+        return {
+          response: null,
+          error: new Error(`Failed to upload response attachment: ${uploadRes.error?.message || 'Upload error'}. Response not sent.`),
+        };
+      }
+      uploadedPath = uploadRes.path;
+    }
+
     const { data, error } = await supabase
       .from('doubt_responses')
       .insert({
+        id: responseId,
         doubt_id: params.doubtId,
         author_id: params.authorId,
         message: cleanMessage,
+        attachment_path: uploadedPath,
+        attachment_name: params.attachmentFile ? params.attachmentFile.name : null,
+        attachment_size: params.attachmentFile ? params.attachmentFile.size : null,
       })
       .select()
       .single();
 
-    if (error) {
-      return { response: null, error };
+    if (error || !data) {
+      if (uploadedPath) {
+        let cleanupSucceeded = false;
+        try {
+          const { success } = await deleteAcademicFile(uploadedPath);
+          cleanupSucceeded = success;
+        } catch {
+          cleanupSucceeded = false;
+        }
+        const diagnostic = cleanupSucceeded
+          ? `Failed to post response: ${error?.message || 'Database error'}. Successfully cleaned up uploaded file.`
+          : `Failed to post response: ${error?.message || 'Database error'}. WARNING: Failed to remove uploaded object at ${uploadedPath}.`;
+        return { response: null, error: new Error(diagnostic) };
+      }
+      return { response: null, error: error || new Error('Failed to post response.') };
     }
 
     // Notify student if respondent is mentor or admin
@@ -510,10 +692,46 @@ export async function deleteDoubt(
   }
 
   if (!isSupabaseConfigured()) {
+    const doubt = getMockDoubtById(doubtId);
+    if (doubt?.attachment_path) {
+      await deleteAcademicFile(doubt.attachment_path).catch(() => {});
+    }
+    if (doubt?.responses) {
+      for (const r of doubt.responses) {
+        if (r.attachment_path) {
+          await deleteAcademicFile(r.attachment_path).catch(() => {});
+        }
+      }
+    }
     return deleteMockDoubt(doubtId, userId);
   }
 
   try {
+    // 1. Fetch any attachments for the parent doubt and its responses to clean them up
+    const { data: doubt } = await supabase
+      .from('doubts')
+      .select('attachment_path')
+      .eq('id', doubtId)
+      .maybeSingle();
+
+    if (doubt?.attachment_path) {
+      await deleteAcademicFile(doubt.attachment_path).catch(() => {});
+    }
+
+    const { data: responses } = await supabase
+      .from('doubt_responses')
+      .select('attachment_path')
+      .eq('doubt_id', doubtId)
+      .not('attachment_path', 'is', null);
+
+    if (responses && responses.length > 0) {
+      for (const r of responses) {
+        if (r.attachment_path) {
+          await deleteAcademicFile(r.attachment_path).catch(() => {});
+        }
+      }
+    }
+
     const { error } = await supabase
       .from('doubts')
       .delete()

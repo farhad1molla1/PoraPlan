@@ -143,9 +143,10 @@ export function validateAcademicFile(file: File): { valid: boolean; error: strin
 }
 
 export interface UploadAcademicFileParams {
-  category: 'submissions' | 'tasks';
-  entityId: string; // assignment_id or task_id
+  category: 'submissions' | 'tasks' | 'doubts';
+  entityId: string; // assignment_id, task_id, or doubt_id
   studentId?: string; // required for submissions
+  messageId?: string; // optional for doubts (e.g. response_id or 'inquiry')
   file: File;
 }
 
@@ -155,6 +156,7 @@ export interface UploadAcademicFileParams {
  * Path schema:
  * - Submissions: submissions/<assignment_id>/<student_id>/<timestamp>_<sanitized_name>
  * - Tasks: tasks/<task_id>/<timestamp>_<sanitized_name>
+ * - Doubts: doubts/<doubt_id>/<message_id>/<timestamp>_<sanitized_name>
  *
  * Task Upload Lifecycle Requirements (for UI integration):
  * 1. Create the task database row first (or pre-generate task UUID and insert row).
@@ -166,7 +168,7 @@ export interface UploadAcademicFileParams {
 export async function uploadAcademicFile(
   params: UploadAcademicFileParams
 ): Promise<{ path: string | null; error: Error | null }> {
-  const { category, entityId, studentId, file } = params;
+  const { category, entityId, studentId, messageId, file } = params;
 
   // 1. Validation
   const validation = validateAcademicFile(file);
@@ -175,7 +177,7 @@ export async function uploadAcademicFile(
   }
 
   if (!entityId || typeof entityId !== 'string' || !entityId.trim()) {
-    return { path: null, error: new Error('A valid entity ID (assignment or task) is required.') };
+    return { path: null, error: new Error('A valid entity ID (assignment, task, or doubt) is required.') };
   }
 
   if (category === 'submissions' && (!studentId || typeof studentId !== 'string' || !studentId.trim())) {
@@ -190,6 +192,9 @@ export async function uploadAcademicFile(
   let filePath: string;
   if (category === 'submissions') {
     filePath = `submissions/${entityId.trim()}/${studentId!.trim()}/${uniqueName}`;
+  } else if (category === 'doubts') {
+    const subId = messageId && messageId.trim() ? messageId.trim() : 'inquiry';
+    filePath = `doubts/${entityId.trim()}/${subId}/${uniqueName}`;
   } else {
     filePath = `tasks/${entityId.trim()}/${uniqueName}`;
   }
