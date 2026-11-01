@@ -77,6 +77,9 @@ export async function getStudentTasks(studentId: string, programId?: string): Pr
       due_date: row.due_date,
       estimated_minutes: row.estimated_minutes,
       completed_at: row.completed_at,
+      attachment_path: row.attachment_path || null,
+      attachment_name: row.attachment_name || null,
+      attachment_size: row.attachment_size || null,
       created_at: row.created_at,
       updated_at: row.updated_at,
       subject: row.subjects || null,
@@ -137,6 +140,9 @@ export async function getTaskById(taskId: string): Promise<{
       due_date: data.due_date,
       estimated_minutes: data.estimated_minutes,
       completed_at: data.completed_at,
+      attachment_path: data.attachment_path || null,
+      attachment_name: data.attachment_name || null,
+      attachment_size: data.attachment_size || null,
       created_at: data.created_at,
       updated_at: data.updated_at,
     };
@@ -169,6 +175,9 @@ export async function createTask(params: {
   priority?: TaskPriority;
   dueDate?: string;
   estimatedMinutes?: number;
+  attachmentPath?: string;
+  attachmentName?: string;
+  attachmentSize?: number;
 }): Promise<{
   task: Task | null;
   error: Error | null;
@@ -194,6 +203,9 @@ export async function createTask(params: {
       priority: params.priority,
       dueDate: params.dueDate,
       estimatedMinutes: params.estimatedMinutes,
+      attachmentPath: params.attachmentPath,
+      attachmentName: params.attachmentName,
+      attachmentSize: params.attachmentSize,
     });
   }
 
@@ -212,6 +224,9 @@ export async function createTask(params: {
       due_date: params.dueDate || null,
       estimated_minutes: params.estimatedMinutes && params.estimatedMinutes > 0 ? params.estimatedMinutes : null,
       completed_at: null,
+      attachment_path: params.attachmentPath || null,
+      attachment_name: params.attachmentName || null,
+      attachment_size: params.attachmentSize || null,
     };
 
     const { data, error } = await supabase
@@ -248,7 +263,7 @@ export async function createTask(params: {
  */
 export async function updateTask(
   taskId: string,
-  updates: Partial<Pick<Task, 'title' | 'description' | 'subject_id' | 'plan_id' | 'priority' | 'status' | 'due_date' | 'estimated_minutes' | 'completed_at'>>
+  updates: Partial<Pick<Task, 'title' | 'description' | 'subject_id' | 'plan_id' | 'priority' | 'status' | 'due_date' | 'estimated_minutes' | 'completed_at' | 'attachment_path' | 'attachment_name' | 'attachment_size'>>
 ): Promise<{
   task: Task | null;
   error: Error | null;
@@ -298,6 +313,15 @@ export async function updateTask(
     }
     if (updates.completed_at !== undefined) {
       payload.completed_at = updates.completed_at;
+    }
+    if (updates.attachment_path !== undefined) {
+      payload.attachment_path = updates.attachment_path;
+    }
+    if (updates.attachment_name !== undefined) {
+      payload.attachment_name = updates.attachment_name;
+    }
+    if (updates.attachment_size !== undefined) {
+      payload.attachment_size = updates.attachment_size;
     }
 
     const { data, error } = await supabase

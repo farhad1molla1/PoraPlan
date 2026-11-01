@@ -550,6 +550,9 @@ export type Task = {
   due_date?: string | null;
   estimated_minutes?: number | null;
   completed_at?: string | null;
+  attachment_path?: string | null;
+  attachment_name?: string | null;
+  attachment_size?: number | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -569,6 +572,9 @@ export type TaskInsert = {
   due_date?: string | null;
   estimated_minutes?: number | null;
   completed_at?: string | null;
+  attachment_path?: string | null;
+  attachment_name?: string | null;
+  attachment_size?: number | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -588,6 +594,9 @@ export type TaskUpdate = {
   due_date?: string | null;
   estimated_minutes?: number | null;
   completed_at?: string | null;
+  attachment_path?: string | null;
+  attachment_name?: string | null;
+  attachment_size?: number | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -656,6 +665,7 @@ export type Submission = {
   link_url?: string | null;
   file_name?: string | null;
   file_size?: number | null;
+  file_path?: string | null;
   status: SubmissionStatus;
   feedback?: string | null;
   score?: number | null;
@@ -674,6 +684,7 @@ export type SubmissionInsert = {
   link_url?: string | null;
   file_name?: string | null;
   file_size?: number | null;
+  file_path?: string | null;
   status?: SubmissionStatus;
   feedback?: string | null;
   score?: number | null;
@@ -692,6 +703,7 @@ export type SubmissionUpdate = {
   link_url?: string | null;
   file_name?: string | null;
   file_size?: number | null;
+  file_path?: string | null;
   status?: SubmissionStatus;
   feedback?: string | null;
   score?: number | null;

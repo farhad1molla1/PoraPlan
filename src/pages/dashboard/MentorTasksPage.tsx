@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { getAssignedStudents } from '../../lib/mentorship';
 import { getStudentSubjects } from '../../lib/subjects';
@@ -10,6 +10,13 @@ import {
   deleteTask,
   type TaskWithMeta,
 } from '../../lib/tasks';
+import {
+  uploadAcademicFile,
+  deleteAcademicFile,
+  validateAcademicFile,
+  getAcademicFileSignedUrl,
+} from '../../lib/storage';
+import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
 import type { Profile, Subject, TaskPriority, TaskStatus, StudyPlan } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
@@ -29,6 +36,10 @@ import {
   CheckCircle,
   Circle,
   CheckCircle2,
+  Paperclip,
+  Upload,
+  Download,
+  Eye,
 } from 'lucide-react';
 
 export const MentorTasksPage: React.FC = () => {
@@ -59,6 +70,36 @@ export const MentorTasksPage: React.FC = () => {
   const [formStatus, setFormStatus] = useState<TaskStatus>('pending');
   const [formEstimatedMinutes, setFormEstimatedMinutes] = useState('60');
   const [formDueDate, setFormDueDate] = useState('');
+
+  // Attachment State
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFileError, setSelectedFileError] = useState<string | null>(null);
+  const [existingAttachment, setExistingAttachment] = useState<{
+    name: string;
+    size?: number | null;
+    path: string;
+  } | null>(null);
+  const [removeExistingAttachment, setRemoveExistingAttachment] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Attachment Viewer Modal State
+  const [viewerModal, setViewerModal] = useState<{
+    isOpen: boolean;
+    fileName: string;
+    filePath: string | null;
+    fileUrl: string | null;
+    fileSize?: number | null;
+    loading: boolean;
+    error: string | null;
+  }>({
+    isOpen: false,
+    fileName: '',
+    filePath: null,
+    fileUrl: null,
+    fileSize: null,
+    loading: false,
+    error: null,
+  });
 
   // Delete Confirmation State
   const [deleteTargetTask, setDeleteTargetTask] = useState<TaskWithMeta | null>(null);
@@ -176,6 +217,109 @@ export const MentorTasksPage: React.FC = () => {
 
   const activeStudent = students.find((s) => s.id === selectedStudentId);
 
+  // Attachment Helpers
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateAcademicFile(file);
+    if (!validation.valid) {
+      setSelectedFileError(validation.error || 'Invalid file format or size.');
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    setSelectedFile(file);
+    setSelectedFileError(null);
+    setRemoveExistingAttachment(false);
+  };
+
+  const handleRemoveSelectedFile = () => {
+    setSelectedFile(null);
+    setSelectedFileError(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleRemoveExistingAttachment = () => {
+    setRemoveExistingAttachment(true);
+    setSelectedFile(null);
+    setSelectedFileError(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handlePreviewAttachment = async (attachment: {
+    name?: string | null;
+    size?: number | null;
+    path?: string | null;
+  }) => {
+    const name = attachment.name || 'attachment';
+    if (!attachment.path) {
+      setViewerModal({
+        isOpen: true,
+        fileName: name,
+        filePath: null,
+        fileUrl: null,
+        fileSize: attachment.size || null,
+        loading: false,
+        error: 'Storage path was not recorded for this attachment.',
+      });
+      return;
+    }
+
+    setViewerModal({
+      isOpen: true,
+      fileName: name,
+      filePath: attachment.path,
+      fileUrl: null,
+      fileSize: attachment.size || null,
+      loading: true,
+      error: null,
+    });
+
+    const { signedUrl, error: urlErr } = await getAcademicFileSignedUrl(attachment.path);
+    if (urlErr || !signedUrl) {
+      setViewerModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: urlErr?.message || 'Unable to generate secure preview link for this attachment.',
+      }));
+    } else {
+      setViewerModal((prev) => ({
+        ...prev,
+        fileUrl: signedUrl,
+        loading: false,
+        error: null,
+      }));
+    }
+  };
+
+  const handleDownloadAttachment = async (attachment: {
+    name?: string | null;
+    path?: string | null;
+  }) => {
+    const name = attachment.name || 'download';
+    if (!attachment.path) {
+      alert('Attachment path is not available for download.');
+      return;
+    }
+
+    const { signedUrl, error: urlErr } = await getAcademicFileSignedUrl(attachment.path);
+    if (urlErr || !signedUrl) {
+      alert(urlErr?.message || 'Failed to generate secure download link.');
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = signedUrl;
+    link.download = name;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Open Create Modal
   const openCreateModal = () => {
     setEditingTaskId(null);
@@ -188,6 +332,11 @@ export const MentorTasksPage: React.FC = () => {
     setFormEstimatedMinutes('60');
     setFormDueDate('');
     setFormError(null);
+    setSelectedFile(null);
+    setSelectedFileError(null);
+    setExistingAttachment(null);
+    setRemoveExistingAttachment(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
     setIsModalOpen(true);
   };
 
@@ -203,6 +352,19 @@ export const MentorTasksPage: React.FC = () => {
     setFormEstimatedMinutes(task.estimated_minutes ? String(task.estimated_minutes) : '');
     setFormDueDate(task.due_date || '');
     setFormError(null);
+    setSelectedFile(null);
+    setSelectedFileError(null);
+    if (task.attachment_path) {
+      setExistingAttachment({
+        name: task.attachment_name || 'Attachment',
+        size: task.attachment_size,
+        path: task.attachment_path,
+      });
+    } else {
+      setExistingAttachment(null);
+    }
+    setRemoveExistingAttachment(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
     setIsModalOpen(true);
   };
 
@@ -238,7 +400,8 @@ export const MentorTasksPage: React.FC = () => {
 
     try {
       if (editingTaskId) {
-        const { error } = await updateTask(editingTaskId, {
+        // 1. Update task general attributes
+        const { task: updatedTask, error } = await updateTask(editingTaskId, {
           title: formTitle.trim(),
           description: formDescription.trim() || undefined,
           subject_id: formSubjectId || null,
@@ -249,13 +412,62 @@ export const MentorTasksPage: React.FC = () => {
           estimated_minutes: estMins,
         });
 
-        if (error) {
-          setFormError(error.message);
+        if (error || !updatedTask) {
+          setFormError(error?.message || 'Failed to update task.');
           setIsSubmitting(false);
           return;
         }
+
+        // 2. Handle attachment replacement / upload if new file selected
+        if (selectedFile) {
+          const { path: uploadedPath, error: uploadErr } = await uploadAcademicFile({
+            category: 'tasks',
+            entityId: editingTaskId,
+            file: selectedFile,
+          });
+
+          if (uploadErr || !uploadedPath) {
+            setFormError(`Task details updated, but attachment upload failed: ${uploadErr?.message || 'Upload error'}`);
+            setIsSubmitting(false);
+            refreshStudentTasks(selectedStudentId);
+            return;
+          }
+
+          // Update task row with new attachment metadata
+          const { error: metaErr } = await updateTask(editingTaskId, {
+            attachment_path: uploadedPath,
+            attachment_name: selectedFile.name,
+            attachment_size: selectedFile.size,
+          });
+
+          if (metaErr) {
+            // Rollback newly uploaded file on metadata failure
+            await deleteAcademicFile(uploadedPath);
+            setFormError(`Attachment metadata could not be saved: ${metaErr.message}`);
+            setIsSubmitting(false);
+            refreshStudentTasks(selectedStudentId);
+            return;
+          }
+
+          // Delete old attachment if one existed and path is different
+          if (existingAttachment?.path && existingAttachment.path !== uploadedPath) {
+            await deleteAcademicFile(existingAttachment.path);
+          }
+        } else if (removeExistingAttachment && existingAttachment?.path) {
+          // Mentor chose to remove the existing attachment
+          const { error: remErr } = await updateTask(editingTaskId, {
+            attachment_path: null,
+            attachment_name: null,
+            attachment_size: null,
+          });
+
+          if (!remErr) {
+            await deleteAcademicFile(existingAttachment.path);
+          }
+        }
       } else {
-        const { error } = await createTask({
+        // 1. Create task row first
+        const { task: createdTask, error } = await createTask({
           studentId: selectedStudentId,
           createdBy: user?.id,
           subjectId: formSubjectId || undefined,
@@ -267,10 +479,42 @@ export const MentorTasksPage: React.FC = () => {
           estimatedMinutes: estMins,
         });
 
-        if (error) {
-          setFormError(error.message);
+        if (error || !createdTask) {
+          setFormError(error?.message || 'Failed to create task.');
           setIsSubmitting(false);
           return;
+        }
+
+        // 2. If an attachment was chosen, upload using confirmed task id
+        if (selectedFile) {
+          const { path: uploadedPath, error: uploadErr } = await uploadAcademicFile({
+            category: 'tasks',
+            entityId: createdTask.id,
+            file: selectedFile,
+          });
+
+          if (uploadErr || !uploadedPath) {
+            setFormError(`Task was created, but attachment upload failed: ${uploadErr?.message || 'Upload error'}`);
+            setIsSubmitting(false);
+            refreshStudentTasks(selectedStudentId);
+            return;
+          }
+
+          // 3. Update task row with attachment metadata
+          const { error: metaErr } = await updateTask(createdTask.id, {
+            attachment_path: uploadedPath,
+            attachment_name: selectedFile.name,
+            attachment_size: selectedFile.size,
+          });
+
+          if (metaErr) {
+            // Rollback newly uploaded file
+            await deleteAcademicFile(uploadedPath);
+            setFormError(`Task was created, but attachment metadata failed to save: ${metaErr.message}`);
+            setIsSubmitting(false);
+            refreshStudentTasks(selectedStudentId);
+            return;
+          }
         }
       }
 
@@ -283,21 +527,72 @@ export const MentorTasksPage: React.FC = () => {
     }
   };
 
-  // Handle Task Deletion
+  // Handle Task Deletion with Failure Compensation
   const handleDeleteTask = async () => {
     if (!deleteTargetTask) return;
     setIsDeleting(true);
 
+    const taskToDelete = deleteTargetTask;
+    const originalAttachmentPath = taskToDelete.attachment_path;
+    let storageDeleted = false;
+
     try {
-      const { error } = await deleteTask(deleteTargetTask.id);
-      if (error) {
-        setErrorMessage(error.message);
-      } else {
+      // 1 & 2. Delete Storage object first if task has an attachment
+      if (originalAttachmentPath) {
+        const { success: fileDeleted, error: storageErr } = await deleteAcademicFile(originalAttachmentPath);
+        if (storageErr || !fileDeleted) {
+          // 3. If Storage deletion fails, halt and report error without touching the database task
+          setErrorMessage(
+            `Unable to delete task attachment from storage: ${storageErr?.message || 'Storage deletion failed'}. The task was not removed.`
+          );
+          setDeleteTargetTask(null);
+          return;
+        }
+        storageDeleted = true;
+      }
+
+      // 4. Attempt to delete the task database row
+      const { error: dbDeleteErr } = await deleteTask(taskToDelete.id);
+
+      // 5. If database deletion succeeds, finish normally
+      if (!dbDeleteErr) {
         setDeleteTargetTask(null);
         refreshStudentTasks(selectedStudentId);
+        return;
       }
+
+      // 6. Database deletion failed
+      if (storageDeleted && originalAttachmentPath) {
+        // Attempt compensating metadata clearance
+        const { error: compErr } = await updateTask(taskToDelete.id, {
+          attachment_path: null,
+          attachment_name: null,
+          attachment_size: null,
+        });
+
+        if (!compErr) {
+          // Compensating metadata clearance succeeded
+          setErrorMessage(
+            `Task deletion failed (${dbDeleteErr.message}), but its storage attachment was removed. Attachment metadata was cleared from task "${taskToDelete.title}" (ID: ${taskToDelete.id}) to maintain data integrity.`
+          );
+          refreshStudentTasks(selectedStudentId);
+        } else {
+          // 7. Compensating metadata update also failed
+          setErrorMessage(
+            `CRITICAL: Task deletion failed (${dbDeleteErr.message}) and its attachment file was removed, but clearing task attachment metadata also failed (${compErr.message}). Manual recovery required for task "${taskToDelete.title}" (ID: ${taskToDelete.id}). Attachment path was: ${originalAttachmentPath}.`
+          );
+          refreshStudentTasks(selectedStudentId);
+        }
+      } else {
+        // Task had no attachment
+        setErrorMessage(`Failed to delete task: ${dbDeleteErr.message}`);
+      }
+
+      setDeleteTargetTask(null);
     } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : 'Failed to delete task.');
+      const msg = err instanceof Error ? err.message : 'Unexpected error during task deletion.';
+      setErrorMessage(msg);
+      setDeleteTargetTask(null);
     } finally {
       setIsDeleting(false);
     }
@@ -529,6 +824,54 @@ export const MentorTasksPage: React.FC = () => {
                             )}
                           </div>
 
+                          {/* Mentor Task Attachment Pill */}
+                          {task.attachment_path && (
+                            <div className="mt-2 p-2.5 bg-brand-bg border-2 border-brand-dark flex flex-wrap items-center justify-between gap-2 text-xs">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Paperclip className="w-3.5 h-3.5 text-brand-teal shrink-0" />
+                                <span className="font-mono font-bold text-brand-navy truncate max-w-[200px] sm:max-w-xs">
+                                  {task.attachment_name || 'Attached Reference'}
+                                </span>
+                                {task.attachment_size && (
+                                  <span className="font-mono text-[11px] text-brand-muted shrink-0">
+                                    ({task.attachment_size < 1024 * 1024
+                                      ? `${Math.round(task.attachment_size / 1024)} KB`
+                                      : `${(task.attachment_size / (1024 * 1024)).toFixed(2)} MB`})
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handlePreviewAttachment({
+                                      name: task.attachment_name,
+                                      size: task.attachment_size,
+                                      path: task.attachment_path,
+                                    })
+                                  }
+                                  className="px-2 py-1 bg-white border border-brand-dark font-heading text-[11px] font-bold text-brand-navy hover:bg-brand-paper shadow-brutal-xs flex items-center gap-1"
+                                >
+                                  <Eye className="w-3 h-3 text-brand-teal" />
+                                  Preview
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleDownloadAttachment({
+                                      name: task.attachment_name,
+                                      path: task.attachment_path,
+                                    })
+                                  }
+                                  className="px-2 py-1 bg-brand-navy border border-brand-dark font-heading text-[11px] font-bold text-white hover:bg-brand-navy/90 shadow-brutal-xs flex items-center gap-1"
+                                >
+                                  <Download className="w-3 h-3 text-brand-gold" />
+                                  Download
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Timestamps */}
                           <div className="flex items-center gap-4 text-xs font-mono text-brand-muted pt-1">
                             {task.estimated_minutes && (
@@ -754,6 +1097,108 @@ export const MentorTasksPage: React.FC = () => {
                   />
                 </div>
 
+                {/* Reference Attachment Field */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-heading font-bold text-brand-navy uppercase tracking-wider">
+                    Task Reference Attachment (Optional)
+                  </label>
+
+                  {/* Hidden file input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
+
+                  {/* Existing attachment display */}
+                  {existingAttachment && !removeExistingAttachment && !selectedFile && (
+                    <div className="p-3 bg-brand-bg border-2 border-brand-dark flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Paperclip className="w-4 h-4 text-brand-teal shrink-0" />
+                        <div className="min-w-0">
+                          <p className="font-mono text-xs font-bold text-brand-navy truncate">
+                            {existingAttachment.name}
+                          </p>
+                          {existingAttachment.size && (
+                            <span className="font-mono text-[10px] text-brand-muted">
+                              {existingAttachment.size < 1024 * 1024
+                                ? `${Math.round(existingAttachment.size / 1024)} KB`
+                                : `${(existingAttachment.size / (1024 * 1024)).toFixed(2)} MB`}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-2 py-1 bg-white border border-brand-dark text-xs font-heading font-bold text-brand-navy hover:bg-brand-paper shadow-brutal-xs"
+                        >
+                          Replace File
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleRemoveExistingAttachment}
+                          className="px-2 py-1 bg-red-50 border border-red-500 text-xs font-heading font-bold text-red-700 hover:bg-red-100 shadow-brutal-xs"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Newly selected file display */}
+                  {selectedFile && (
+                    <div className="p-3 bg-teal-50 border-2 border-brand-teal flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Paperclip className="w-4 h-4 text-brand-teal shrink-0" />
+                        <div className="min-w-0">
+                          <p className="font-mono text-xs font-bold text-brand-navy truncate">
+                            {selectedFile.name}
+                          </p>
+                          <span className="font-mono text-[10px] text-brand-muted">
+                            {selectedFile.size < 1024 * 1024
+                              ? `${Math.round(selectedFile.size / 1024)} KB`
+                              : `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB`}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveSelectedFile}
+                        className="px-2 py-1 bg-white border border-brand-dark text-xs font-heading font-bold text-red-600 hover:bg-red-50 shadow-brutal-xs shrink-0"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Upload button when no file is chosen or existing was removed */}
+                  {(!existingAttachment || removeExistingAttachment) && !selectedFile && (
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full border-2 border-dashed border-brand-dark bg-white hover:bg-brand-paper-tint p-4 text-center transition-colors shadow-brutal-xs flex flex-col items-center justify-center gap-1.5"
+                      >
+                        <Upload className="w-5 h-5 text-brand-teal" />
+                        <span className="font-heading font-bold text-xs text-brand-navy">
+                          Upload Task Reference Attachment
+                        </span>
+                        <span className="font-mono text-[10px] text-brand-muted">
+                          PDF, Word (.docx), or Images (PNG, JPG, WebP) — Max 10MB
+                        </span>
+                      </button>
+                    </div>
+                  )}
+
+                  {selectedFileError && (
+                    <p className="text-xs text-red-600 font-sans mt-1">{selectedFileError}</p>
+                  )}
+                </div>
+
                 {/* Footer Buttons */}
                 <div className="pt-3 border-t-2 border-brand-dark flex items-center justify-end gap-2">
                   <Button
@@ -819,6 +1264,23 @@ export const MentorTasksPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Attachment Viewer Modal */}
+        <AttachmentViewerModal
+          isOpen={viewerModal.isOpen}
+          onClose={() => setViewerModal((prev) => ({ ...prev, isOpen: false }))}
+          fileName={viewerModal.fileName}
+          fileUrl={viewerModal.fileUrl}
+          fileSize={viewerModal.fileSize}
+          loading={viewerModal.loading}
+          error={viewerModal.error}
+          onDownload={() =>
+            handleDownloadAttachment({
+              name: viewerModal.fileName,
+              path: viewerModal.filePath,
+            })
+          }
+        />
 
       </div>
     </div>

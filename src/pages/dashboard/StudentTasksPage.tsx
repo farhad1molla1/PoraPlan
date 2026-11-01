@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getStudentTasks, setTaskStatus, type TaskWithMeta } from '../../lib/tasks';
 import { getAssignedMentors } from '../../lib/mentorship';
+import { getAcademicFileSignedUrl } from '../../lib/storage';
+import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
 import type { Profile, TaskStatus } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
@@ -21,6 +23,9 @@ import {
   ArrowRight,
   Circle,
   CheckCircle,
+  Paperclip,
+  Download,
+  Eye,
 } from 'lucide-react';
 
 export const StudentTasksPage: React.FC = () => {
@@ -32,7 +37,98 @@ export const StudentTasksPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
   const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
 
+  // Attachment Viewer Modal State
+  const [viewerModal, setViewerModal] = useState<{
+    isOpen: boolean;
+    fileName: string;
+    filePath: string | null;
+    fileUrl: string | null;
+    fileSize?: number | null;
+    loading: boolean;
+    error: string | null;
+  }>({
+    isOpen: false,
+    fileName: '',
+    filePath: null,
+    fileUrl: null,
+    fileSize: null,
+    loading: false,
+    error: null,
+  });
+
   const studentId = user?.id || '';
+
+  const handlePreviewAttachment = async (attachment: {
+    name?: string | null;
+    size?: number | null;
+    path?: string | null;
+  }) => {
+    const name = attachment.name || 'attachment';
+    if (!attachment.path) {
+      setViewerModal({
+        isOpen: true,
+        fileName: name,
+        filePath: null,
+        fileUrl: null,
+        fileSize: attachment.size || null,
+        loading: false,
+        error: 'Storage path is not recorded for this task attachment.',
+      });
+      return;
+    }
+
+    setViewerModal({
+      isOpen: true,
+      fileName: name,
+      filePath: attachment.path,
+      fileUrl: null,
+      fileSize: attachment.size || null,
+      loading: true,
+      error: null,
+    });
+
+    const { signedUrl, error: urlErr } = await getAcademicFileSignedUrl(attachment.path);
+    if (urlErr || !signedUrl) {
+      setViewerModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: urlErr?.message || 'Unable to generate secure preview link for this attachment.',
+      }));
+    } else {
+      setViewerModal((prev) => ({
+        ...prev,
+        fileUrl: signedUrl,
+        loading: false,
+        error: null,
+      }));
+    }
+  };
+
+  const handleDownloadAttachment = async (attachment: {
+    name?: string | null;
+    path?: string | null;
+  }) => {
+    const name = attachment.name || 'download';
+    if (!attachment.path) {
+      alert('Attachment path is not available for download.');
+      return;
+    }
+
+    const { signedUrl, error: urlErr } = await getAcademicFileSignedUrl(attachment.path);
+    if (urlErr || !signedUrl) {
+      alert(urlErr?.message || 'Failed to generate secure download link.');
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = signedUrl;
+    link.download = name;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const loadData = () => {
     if (!studentId) return;
@@ -382,6 +478,54 @@ export const StudentTasksPage: React.FC = () => {
                         )}
                       </div>
 
+                      {/* Mentor Reference Attachment */}
+                      {task.attachment_path && (
+                        <div className="mt-2 p-2.5 bg-brand-bg border-2 border-brand-dark flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Paperclip className="w-3.5 h-3.5 text-brand-teal shrink-0" />
+                            <span className="font-mono font-bold text-brand-navy truncate max-w-[200px] sm:max-w-xs">
+                              {task.attachment_name || 'Mentor Attached File'}
+                            </span>
+                            {task.attachment_size && (
+                              <span className="font-mono text-[11px] text-brand-muted shrink-0">
+                                ({task.attachment_size < 1024 * 1024
+                                  ? `${Math.round(task.attachment_size / 1024)} KB`
+                                  : `${(task.attachment_size / (1024 * 1024)).toFixed(2)} MB`})
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handlePreviewAttachment({
+                                  name: task.attachment_name,
+                                  size: task.attachment_size,
+                                  path: task.attachment_path,
+                                })
+                              }
+                              className="px-2 py-1 bg-white border border-brand-dark font-heading text-[11px] font-bold text-brand-navy hover:bg-brand-paper shadow-brutal-xs flex items-center gap-1"
+                            >
+                              <Eye className="w-3 h-3 text-brand-teal" />
+                              Preview
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDownloadAttachment({
+                                  name: task.attachment_name,
+                                  path: task.attachment_path,
+                                })
+                              }
+                              className="px-2 py-1 bg-brand-navy border border-brand-dark font-heading text-[11px] font-bold text-white hover:bg-brand-navy/90 shadow-brutal-xs flex items-center gap-1"
+                            >
+                              <Download className="w-3 h-3 text-brand-gold" />
+                              Download
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Timestamps & Estimates */}
                       <div className="flex items-center gap-4 text-xs font-mono text-brand-muted pt-1">
                         {task.estimated_minutes && (
@@ -433,6 +577,23 @@ export const StudentTasksPage: React.FC = () => {
             </Button>
           </Link>
         </section>
+
+        {/* Attachment Viewer Modal */}
+        <AttachmentViewerModal
+          isOpen={viewerModal.isOpen}
+          onClose={() => setViewerModal((prev) => ({ ...prev, isOpen: false }))}
+          fileName={viewerModal.fileName}
+          fileUrl={viewerModal.fileUrl}
+          fileSize={viewerModal.fileSize}
+          loading={viewerModal.loading}
+          error={viewerModal.error}
+          onDownload={() =>
+            handleDownloadAttachment({
+              name: viewerModal.fileName,
+              path: viewerModal.filePath,
+            })
+          }
+        />
 
       </div>
     </div>

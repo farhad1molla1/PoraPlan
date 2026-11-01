@@ -968,6 +968,9 @@ export function createMockTask(params: {
   priority?: TaskPriority;
   dueDate?: string;
   estimatedMinutes?: number;
+  attachmentPath?: string;
+  attachmentName?: string;
+  attachmentSize?: number;
 }): { task: Task | null; error: Error | null } {
   const cleanTitle = params.title.trim();
   if (!cleanTitle) {
@@ -1011,6 +1014,9 @@ export function createMockTask(params: {
     due_date: params.dueDate || null,
     estimated_minutes: params.estimatedMinutes && params.estimatedMinutes > 0 ? params.estimatedMinutes : null,
     completed_at: null,
+    attachment_path: params.attachmentPath || null,
+    attachment_name: params.attachmentName || null,
+    attachment_size: params.attachmentSize || null,
     created_at: now,
     updated_at: now,
   };
@@ -1034,7 +1040,7 @@ export function createMockTask(params: {
 
 export function updateMockTask(
   taskId: string,
-  updates: Partial<Pick<Task, 'title' | 'description' | 'subject_id' | 'plan_id' | 'priority' | 'status' | 'due_date' | 'estimated_minutes' | 'completed_at'>>
+  updates: Partial<Pick<Task, 'title' | 'description' | 'subject_id' | 'plan_id' | 'priority' | 'status' | 'due_date' | 'estimated_minutes' | 'completed_at' | 'attachment_path' | 'attachment_name' | 'attachment_size'>>
 ): { task: Task | null; error: Error | null } {
   const index = mockTasks.findIndex((t) => t.id === taskId);
   if (index === -1) {
@@ -1090,6 +1096,15 @@ export function updateMockTask(
   }
   if (updates.completed_at !== undefined) {
     current.completed_at = updates.completed_at;
+  }
+  if (updates.attachment_path !== undefined) {
+    current.attachment_path = updates.attachment_path;
+  }
+  if (updates.attachment_name !== undefined) {
+    current.attachment_name = updates.attachment_name;
+  }
+  if (updates.attachment_size !== undefined) {
+    current.attachment_size = updates.attachment_size;
   }
 
   current.updated_at = new Date().toISOString();
@@ -1366,6 +1381,7 @@ export function submitMockAssignment(params: {
   linkUrl?: string;
   fileName?: string;
   fileSize?: number;
+  filePath?: string;
 }): { submission: Submission | null; error: Error | null } {
   const cleanContent = params.content.trim();
   if (!cleanContent) {
@@ -1417,6 +1433,7 @@ export function submitMockAssignment(params: {
     current.link_url = params.linkUrl?.trim() || (params.submissionType === 'link' ? cleanContent : null);
     current.file_name = params.fileName || current.file_name;
     current.file_size = params.fileSize || current.file_size;
+    current.file_path = params.filePath !== undefined ? (params.filePath || null) : current.file_path;
     current.status = 'submitted';
     current.submitted_at = now;
     current.updated_at = now;
@@ -1433,6 +1450,7 @@ export function submitMockAssignment(params: {
     link_url: params.linkUrl?.trim() || (params.submissionType === 'link' ? cleanContent : null),
     file_name: params.fileName || null,
     file_size: params.fileSize || null,
+    file_path: params.filePath || null,
     status: 'submitted',
     submitted_at: now,
     updated_at: now,

@@ -9,6 +9,8 @@ import {
 import type { SubmissionStatus } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
+import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
+import { getAcademicFileSignedUrl } from '../../lib/storage';
 import {
   FileCheck,
   Calendar,
@@ -21,6 +23,7 @@ import {
   CheckCircle2,
   Paperclip,
   Eye,
+  Download,
   X,
   MessageSquare,
   ArrowRight,
@@ -44,7 +47,99 @@ export const MentorReviewQueuePage: React.FC = () => {
   const [reviewModalError, setReviewModalError] = useState<string | null>(null);
   const [reviewModalSuccess, setReviewModalSuccess] = useState<string | null>(null);
 
+  // Attachment Viewer Modal State
+  const [viewerModal, setViewerModal] = useState<{
+    isOpen: boolean;
+    fileName: string;
+    filePath: string | null;
+    fileUrl: string | null;
+    fileSize?: number | null;
+    loading: boolean;
+    error: string | null;
+  }>({
+    isOpen: false,
+    fileName: '',
+    filePath: null,
+    fileUrl: null,
+    fileSize: null,
+    loading: false,
+    error: null,
+  });
+
   const mentorId = user?.id || '';
+
+  const handlePreviewAttachment = async (sub: {
+    file_name?: string | null;
+    file_size?: number | null;
+    file_path?: string | null;
+  }) => {
+    const name = sub.file_name || 'attachment';
+    if (!sub.file_path) {
+      setViewerModal({
+        isOpen: true,
+        fileName: name,
+        filePath: null,
+        fileUrl: null,
+        fileSize: sub.file_size || null,
+        loading: false,
+        error:
+          'Storage path was not recorded for this attachment. This may be an older submission created before private academic storage was configured.',
+      });
+      return;
+    }
+
+    setViewerModal({
+      isOpen: true,
+      fileName: name,
+      filePath: sub.file_path,
+      fileUrl: null,
+      fileSize: sub.file_size || null,
+      loading: true,
+      error: null,
+    });
+
+    const { signedUrl, error: urlErr } = await getAcademicFileSignedUrl(sub.file_path);
+    if (urlErr || !signedUrl) {
+      setViewerModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: urlErr?.message || 'Unable to generate secure preview link for this attachment.',
+      }));
+    } else {
+      setViewerModal((prev) => ({
+        ...prev,
+        fileUrl: signedUrl,
+        loading: false,
+        error: null,
+      }));
+    }
+  };
+
+  const handleDownloadAttachment = async (sub: {
+    file_name?: string | null;
+    file_path?: string | null;
+  }) => {
+    const name = sub.file_name || 'download';
+    if (!sub.file_path) {
+      alert('Attachment path is not available for download.');
+      return;
+    }
+
+    const { signedUrl, error: urlErr } = await getAcademicFileSignedUrl(sub.file_path);
+    if (urlErr || !signedUrl) {
+      alert(urlErr?.message || 'Failed to generate secure download link.');
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = signedUrl;
+    link.download = name;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const loadSubmissions = () => {
     if (!mentorId) {
@@ -390,17 +485,53 @@ export const MentorReviewQueuePage: React.FC = () => {
                           </a>
                         </div>
                       ) : sub.submission_type === 'file' ? (
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 font-mono text-brand-navy">
-                            <Paperclip className="w-4 h-4 text-brand-teal" />
-                            <strong>{sub.file_name || 'Attached File'}</strong>
-                            {sub.file_size && (
-                              <span className="text-brand-muted">
-                                ({Math.round(sub.file_size / 1024)} KB)
-                              </span>
-                            )}
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-white border border-brand-dark">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                              <div className="min-w-0">
+                                <span className="font-mono text-xs font-bold text-brand-navy truncate block">
+                                  {sub.file_name || 'Attached File'}
+                                </span>
+                                {sub.file_size && (
+                                  <span className="font-mono text-[11px] text-brand-muted">
+                                    {sub.file_size < 1024 * 1024
+                                      ? `${Math.round(sub.file_size / 1024)} KB`
+                                      : `${(sub.file_size / (1024 * 1024)).toFixed(2)} MB`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePreviewAttachment(sub)}
+                                className="flex items-center gap-1"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                Preview
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => handleDownloadAttachment(sub)}
+                                className="flex items-center gap-1"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                Download
+                              </Button>
+                            </div>
                           </div>
-                          {sub.content && <p className="text-xs text-brand-muted">{sub.content}</p>}
+
+                          {sub.content && (
+                            <p className="text-xs text-brand-muted font-sans whitespace-pre-wrap">
+                              {sub.content}
+                            </p>
+                          )}
                         </div>
                       ) : (
                         <p className="whitespace-pre-wrap">{sub.content}</p>
@@ -527,18 +658,46 @@ export const MentorReviewQueuePage: React.FC = () => {
                     )}
                   </div>
                 ) : reviewTarget.submission_type === 'file' ? (
-                  <div className="p-4 bg-white border-2 border-brand-dark space-y-2">
-                    <div className="flex items-center gap-2 font-mono text-xs text-brand-navy">
-                      <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
-                      <strong>{reviewTarget.file_name || 'Attached File'}</strong>
-                      {reviewTarget.file_size && (
-                        <span className="text-brand-muted">
-                          ({Math.round(reviewTarget.file_size / 1024)} KB)
-                        </span>
-                      )}
+                  <div className="p-4 bg-white border-2 border-brand-dark space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 font-mono text-xs text-brand-navy min-w-0">
+                        <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                        <strong className="truncate">{reviewTarget.file_name || 'Attached File'}</strong>
+                        {reviewTarget.file_size && (
+                          <span className="text-brand-muted flex-shrink-0">
+                            ({reviewTarget.file_size < 1024 * 1024
+                              ? `${Math.round(reviewTarget.file_size / 1024)} KB`
+                              : `${(reviewTarget.file_size / (1024 * 1024)).toFixed(2)} MB`})
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePreviewAttachment(reviewTarget)}
+                          className="flex items-center gap-1 text-xs"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          Preview
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleDownloadAttachment(reviewTarget)}
+                          className="flex items-center gap-1 text-xs"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Download
+                        </Button>
+                      </div>
                     </div>
+
                     {reviewTarget.content && (
-                      <p className="text-xs text-brand-dark font-sans whitespace-pre-wrap">
+                      <p className="text-xs text-brand-dark font-sans whitespace-pre-wrap border-t border-brand-dark/10 pt-2">
                         {reviewTarget.content}
                       </p>
                     )}
@@ -654,6 +813,23 @@ export const MentorReviewQueuePage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Attachment Preview Modal */}
+      <AttachmentViewerModal
+        isOpen={viewerModal.isOpen}
+        onClose={() => setViewerModal((prev) => ({ ...prev, isOpen: false }))}
+        fileName={viewerModal.fileName}
+        fileUrl={viewerModal.fileUrl}
+        fileSize={viewerModal.fileSize}
+        loading={viewerModal.loading}
+        error={viewerModal.error}
+        onDownload={() =>
+          handleDownloadAttachment({
+            file_name: viewerModal.fileName,
+            file_path: viewerModal.filePath,
+          })
+        }
+      />
     </div>
   );
 };

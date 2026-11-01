@@ -339,6 +339,7 @@ export async function submitAssignment(params: {
   linkUrl?: string;
   fileName?: string;
   fileSize?: number;
+  filePath?: string;
 }): Promise<{ submission: Submission | null; error: Error | null }> {
   const cleanContent = params.content.trim();
   if (!cleanContent) {
@@ -372,6 +373,7 @@ export async function submitAssignment(params: {
       link_url: params.linkUrl?.trim() || (params.submissionType === 'link' ? cleanContent : null),
       file_name: params.fileName || null,
       file_size: params.fileSize || null,
+      file_path: params.filePath || null,
       status: 'submitted' as SubmissionStatus,
       submitted_at: now,
       updated_at: now,
@@ -527,6 +529,7 @@ export async function getMentorReviewQueue(mentorId: string): Promise<{
       link_url: row.link_url,
       file_name: row.file_name,
       file_size: row.file_size,
+      file_path: row.file_path || null,
       status: row.status,
       feedback: row.feedback,
       score: row.score,

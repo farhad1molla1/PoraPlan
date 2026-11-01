@@ -33,6 +33,7 @@ import {
   Circle,
   Loader2,
   Phone,
+  Paperclip,
 } from 'lucide-react';
 
 export const StudentDashboardPage: React.FC = () => {
@@ -387,6 +388,15 @@ export const StudentDashboardPage: React.FC = () => {
                             <span className="text-[10px] font-mono px-1.5 py-0.2 bg-brand-gold-light border border-brand-dark flex items-center gap-1">
                               <Clock className="w-3 h-3" />
                               {task.estimated_minutes} min
+                            </span>
+                          )}
+                          {task.attachment_path && (
+                            <span
+                              className="text-[10px] font-mono px-1.5 py-0.2 bg-brand-teal-light border border-brand-dark flex items-center gap-1 text-brand-navy"
+                              title={task.attachment_name || 'Attachment attached'}
+                            >
+                              <Paperclip className="w-3 h-3 text-brand-teal" />
+                              File
                             </span>
                           )}
                           {task.priority === 'high' && (

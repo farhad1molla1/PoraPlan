@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -6,10 +6,17 @@ import {
   submitAssignment,
   type AssignmentWithMeta,
 } from '../../lib/assignments';
+import {
+  validateAcademicFile,
+  uploadAcademicFile,
+  getAcademicFileSignedUrl,
+  deleteAcademicFile,
+} from '../../lib/storage';
 import { getAssignedMentors } from '../../lib/mentorship';
 import type { Profile, SubmissionType } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
+import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
 import {
   FileText,
   Calendar,
@@ -28,6 +35,10 @@ import {
   Paperclip,
   Edit3,
   FileCheck,
+  Eye,
+  Download,
+  Trash2,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 export const StudentAssignmentsPage: React.FC = () => {
@@ -45,11 +56,57 @@ export const StudentAssignmentsPage: React.FC = () => {
   const [linkUrl, setLinkUrl] = useState('');
   const [fileName, setFileName] = useState('');
   const [fileSize, setFileSize] = useState<number | undefined>(undefined);
+  const [existingFilePath, setExistingFilePath] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFileObjectUrl, setSelectedFileObjectUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Attachment preview viewer modal state
+  const [viewerModal, setViewerModal] = useState<{
+    isOpen: boolean;
+    fileName: string;
+    fileUrl: string | null;
+    fileSize?: number | null;
+    loading: boolean;
+    error: string | null;
+  }>({
+    isOpen: false,
+    fileName: '',
+    fileUrl: null,
+    fileSize: null,
+    loading: false,
+    error: null,
+  });
+
   const studentId = user?.id || '';
+
+  // Clean up Object URL for selected file when changed or unmounted
+  useEffect(() => {
+    if (selectedFile && typeof window !== 'undefined' && typeof window.URL?.createObjectURL === 'function') {
+      let url: string | null = null;
+      try {
+        url = URL.createObjectURL(selectedFile);
+        setSelectedFileObjectUrl(url);
+      } catch {
+        // Fallback for headless environments
+      }
+      return () => {
+        if (url) {
+          try {
+            URL.revokeObjectURL(url);
+          } catch {
+            // Ignore revocation errors
+          }
+        }
+      };
+    } else {
+      setSelectedFileObjectUrl(null);
+    }
+  }, [selectedFile]);
 
   const loadData = () => {
     if (!studentId) return;
@@ -82,9 +139,22 @@ export const StudentAssignmentsPage: React.FC = () => {
   }, [studentId]);
 
   const handleOpenSubmission = (assignment: AssignmentWithMeta) => {
+    // If submission is already under review or reviewed, prevent editing
+    const isLocked =
+      assignment.submission &&
+      (assignment.submission.status === 'under_review' || assignment.submission.status === 'reviewed');
+
+    if (isLocked) {
+      return;
+    }
+
     setActiveAssignmentId(assignment.id);
     setFormError(null);
     setFormSuccess(null);
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
 
     if (assignment.submission) {
       setSubmissionType(assignment.submission.submission_type);
@@ -92,35 +162,163 @@ export const StudentAssignmentsPage: React.FC = () => {
       setLinkUrl(assignment.submission.link_url || '');
       setFileName(assignment.submission.file_name || '');
       setFileSize(assignment.submission.file_size || undefined);
+      setExistingFilePath(assignment.submission.file_path || null);
     } else {
       setSubmissionType('text');
       setTextContent('');
       setLinkUrl('');
       setFileName('');
       setFileSize(undefined);
+      setExistingFilePath(null);
     }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        setFormError('File size exceeds the 10MB limit.');
-        return;
+    if (!file) return;
+
+    // Validate using the unified storage validator (checks size <= 10MB, MIME, extensions)
+    const validation = validateAcademicFile(file);
+    if (!validation.valid) {
+      setFormError(validation.error || 'Invalid file selected.');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
-      setFileName(file.name);
-      setFileSize(file.size);
-      if (!textContent.trim()) {
-        setTextContent(`Attached file: ${file.name} (${Math.round(file.size / 1024)} KB)`);
-      }
-      setFormError(null);
+      return;
     }
+
+    setSelectedFile(file);
+    setFileName(file.name);
+    setFileSize(file.size);
+    setFormError(null);
+
+    // Provide default notes if text content is empty
+    if (!textContent.trim()) {
+      const formattedSize = file.size < 1024 * 1024
+        ? `${Math.round(file.size / 1024)} KB`
+        : `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+      setTextContent(`Attached file: ${file.name} (${formattedSize})`);
+    }
+  };
+
+  const handleRemoveSelectedFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    const currentAssignment = assignments.find((a) => a.id === activeAssignmentId);
+    if (currentAssignment?.submission?.file_name && currentAssignment.submission.submission_type === 'file') {
+      // Revert to previously saved file metadata
+      setFileName(currentAssignment.submission.file_name);
+      setFileSize(currentAssignment.submission.file_size || undefined);
+      setExistingFilePath(currentAssignment.submission.file_path || null);
+    } else {
+      setFileName('');
+      setFileSize(undefined);
+      setExistingFilePath(null);
+    }
+  };
+
+  const handlePreviewSelectedFile = () => {
+    if (!selectedFile) return;
+    setViewerModal({
+      isOpen: true,
+      fileName: selectedFile.name,
+      fileUrl: selectedFileObjectUrl,
+      fileSize: selectedFile.size,
+      loading: false,
+      error: null,
+    });
+  };
+
+  const handlePreviewExistingAttachment = async (sub: {
+    file_name?: string | null;
+    file_size?: number | null;
+    file_path?: string | null;
+  }) => {
+    const name = sub.file_name || 'attachment';
+    if (!sub.file_path) {
+      setViewerModal({
+        isOpen: true,
+        fileName: name,
+        fileUrl: null,
+        fileSize: sub.file_size || null,
+        loading: false,
+        error:
+          'Storage path was not recorded for this attachment. This may be an older submission created before private academic storage was configured.',
+      });
+      return;
+    }
+
+    setViewerModal({
+      isOpen: true,
+      fileName: name,
+      fileUrl: null,
+      fileSize: sub.file_size || null,
+      loading: true,
+      error: null,
+    });
+
+    const { signedUrl, error: urlErr } = await getAcademicFileSignedUrl(sub.file_path);
+    if (urlErr || !signedUrl) {
+      setViewerModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: urlErr?.message || 'Unable to generate secure preview link for this attachment.',
+      }));
+    } else {
+      setViewerModal((prev) => ({
+        ...prev,
+        fileUrl: signedUrl,
+        loading: false,
+        error: null,
+      }));
+    }
+  };
+
+  const handleDownloadAttachment = async (sub: {
+    file_name?: string | null;
+    file_path?: string | null;
+  }) => {
+    const name = sub.file_name || 'download';
+    if (!sub.file_path) {
+      alert('Attachment path is not available for download.');
+      return;
+    }
+
+    const { signedUrl, error: urlErr } = await getAcademicFileSignedUrl(sub.file_path);
+    if (urlErr || !signedUrl) {
+      alert(urlErr?.message || 'Failed to generate secure download link.');
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = signedUrl;
+    link.download = name;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleSubmitWork = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeAssignmentId) return;
+
+    const currentAssignment = assignments.find((a) => a.id === activeAssignmentId);
+    if (!currentAssignment) return;
+
+    // Guard: Under review or reviewed submissions cannot be modified
+    if (
+      currentAssignment.submission &&
+      (currentAssignment.submission.status === 'under_review' ||
+        currentAssignment.submission.status === 'reviewed')
+    ) {
+      setFormError('This submission is currently under mentor review or has already been graded. Modifications are locked.');
+      return;
+    }
 
     let finalContent = textContent.trim();
     if (submissionType === 'link') {
@@ -137,12 +335,12 @@ export const StudentAssignmentsPage: React.FC = () => {
         finalContent = cleanUrl;
       }
     } else if (submissionType === 'file') {
-      if (!fileName && !finalContent) {
-        setFormError('Please attach a document or provide file delivery instructions.');
+      if (!selectedFile && !existingFilePath && !fileName) {
+        setFormError('Please attach a document (PDF, PNG, JPG, WebP, or DOCX).');
         return;
       }
       if (!finalContent) {
-        finalContent = `Attached document: ${fileName}`;
+        finalContent = selectedFile ? `Attached file: ${selectedFile.name}` : `Attached document: ${fileName}`;
       }
     } else {
       if (!finalContent) {
@@ -155,29 +353,72 @@ export const StudentAssignmentsPage: React.FC = () => {
     setFormError(null);
     setFormSuccess(null);
 
+    let resolvedFilePath: string | undefined = existingFilePath || undefined;
+    let resolvedFileName: string | undefined = fileName || undefined;
+    let resolvedFileSize: number | undefined = fileSize || undefined;
+    let newUploadPath: string | null = null;
+
+    // STEP 1 & 2: If student selected a new binary file, upload it first
+    if (submissionType === 'file' && selectedFile) {
+      const { path: uploadedPath, error: uploadErr } = await uploadAcademicFile({
+        category: 'submissions',
+        entityId: activeAssignmentId,
+        studentId,
+        file: selectedFile,
+      });
+
+      if (uploadErr || !uploadedPath) {
+        setFormError(uploadErr?.message || 'Failed to upload attachment file. Please try again.');
+        setSubmitting(false);
+        return;
+      }
+
+      newUploadPath = uploadedPath;
+      resolvedFilePath = uploadedPath;
+      resolvedFileName = selectedFile.name;
+      resolvedFileSize = selectedFile.size;
+    }
+
+    // STEP 3: Upsert submission record with metadata and file path
     const { submission, error: submitErr } = await submitAssignment({
       assignmentId: activeAssignmentId,
       studentId,
       submissionType,
       content: finalContent,
       linkUrl: submissionType === 'link' ? linkUrl.trim() : undefined,
-      fileName: fileName || undefined,
-      fileSize: fileSize || undefined,
+      fileName: submissionType === 'file' ? resolvedFileName : undefined,
+      fileSize: submissionType === 'file' ? resolvedFileSize : undefined,
+      filePath: submissionType === 'file' ? resolvedFilePath : undefined,
     });
 
-    setSubmitting(false);
-
     if (submitErr) {
-      setFormError(submitErr.message);
-    } else {
-      setFormSuccess('Your assignment work has been submitted successfully!');
-      // Update local assignment submission state
-      setAssignments((prev) =>
-        prev.map((a) =>
-          a.id === activeAssignmentId ? { ...a, submission } : a
-        )
-      );
+      // STEP 4: If database record creation fails, attempt rollback/cleanup of newly uploaded file!
+      if (newUploadPath) {
+        await deleteAcademicFile(newUploadPath).catch(() => {});
+      }
+      setSubmitting(false);
+      setFormError(`Failed to save submission: ${submitErr.message}`);
+      return;
     }
+
+    // STEP 5: Successful submission.
+    // If a previous file was replaced, clean up old file if safe and different
+    if (
+      newUploadPath &&
+      currentAssignment.submission?.file_path &&
+      currentAssignment.submission.file_path !== newUploadPath
+    ) {
+      deleteAcademicFile(currentAssignment.submission.file_path).catch(() => {});
+    }
+
+    setSubmitting(false);
+    setSelectedFile(null);
+    setFormSuccess('Your assignment work and attachment have been submitted successfully!');
+
+    // Update local assignment submission state
+    setAssignments((prev) =>
+      prev.map((a) => (a.id === activeAssignmentId ? { ...a, submission } : a))
+    );
   };
 
   // Filter assignments
@@ -185,7 +426,8 @@ export const StudentAssignmentsPage: React.FC = () => {
     if (statusFilter === 'all') return true;
     if (statusFilter === 'pending') return !a.submission;
     if (statusFilter === 'submitted') return a.submission && a.submission.status === 'submitted';
-    if (statusFilter === 'reviewed') return a.submission && (a.submission.status === 'reviewed' || a.submission.status === 'under_review');
+    if (statusFilter === 'reviewed')
+      return a.submission && (a.submission.status === 'reviewed' || a.submission.status === 'under_review');
     return true;
   });
 
@@ -374,6 +616,11 @@ export const StudentAssignmentsPage: React.FC = () => {
             const hasSubmission = !!assignment.submission;
             const isSelected = activeAssignmentId === assignment.id;
             const isClosed = assignment.status === 'closed' || assignment.status === 'archived';
+            const submissionStatus = assignment.submission?.status;
+            const isLocked =
+              isClosed ||
+              (hasSubmission &&
+                (submissionStatus === 'under_review' || submissionStatus === 'reviewed'));
 
             return (
               <div
@@ -452,7 +699,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                           <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                           <div>
                             <strong className="block font-bold">Revision Requested by Mentor</strong>
-                            <span>Please review the correction notes below and update your derivation or solution.</span>
+                            <span>Please review the mentor corrections below and update your derivation or solution attachment.</span>
                           </div>
                         </div>
                       )}
@@ -485,18 +732,50 @@ export const StudentAssignmentsPage: React.FC = () => {
                             </a>
                           </div>
                         ) : assignment.submission?.submission_type === 'file' ? (
-                          <div className="text-xs font-mono text-brand-navy">
-                            <div className="flex items-center gap-1.5">
-                              <Paperclip className="w-4 h-4 text-brand-teal" />
-                              <strong>{assignment.submission.file_name || 'Attached Document'}</strong>
-                              {assignment.submission.file_size && (
-                                <span className="text-brand-muted">
-                                  ({Math.round(assignment.submission.file_size / 1024)} KB)
-                                </span>
-                              )}
+                          <div className="space-y-3 mt-1">
+                            <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-white border-2 border-brand-dark">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                                <div className="min-w-0">
+                                  <span className="font-mono text-xs font-bold text-brand-navy truncate block">
+                                    {assignment.submission.file_name || 'Attached Document'}
+                                  </span>
+                                  {assignment.submission.file_size && (
+                                    <span className="font-mono text-[11px] text-brand-muted">
+                                      {assignment.submission.file_size < 1024 * 1024
+                                        ? `${Math.round(assignment.submission.file_size / 1024)} KB`
+                                        : `${(assignment.submission.file_size / (1024 * 1024)).toFixed(2)} MB`}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handlePreviewExistingAttachment(assignment.submission!)}
+                                  className="flex items-center gap-1.5"
+                                >
+                                  <Eye className="w-3.5 h-3.5 text-brand-navy" />
+                                  Preview
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => handleDownloadAttachment(assignment.submission!)}
+                                  className="flex items-center gap-1.5"
+                                >
+                                  <Download className="w-3.5 h-3.5" />
+                                  Download
+                                </Button>
+                              </div>
                             </div>
+
                             {assignment.submission.content && (
-                              <p className="text-xs text-brand-muted mt-1 font-sans">
+                              <p className="text-xs text-brand-dark font-sans whitespace-pre-wrap">
                                 {assignment.submission.content}
                               </p>
                             )}
@@ -548,31 +827,51 @@ export const StudentAssignmentsPage: React.FC = () => {
                       Created: {assignment.created_at ? new Date(assignment.created_at).toLocaleDateString() : 'N/A'}
                     </div>
 
-                    {!isClosed && (
-                      <Button
-                        variant={hasSubmission ? 'outline' : 'primary'}
-                        size="sm"
-                        onClick={() => handleOpenSubmission(assignment)}
-                        className="flex items-center gap-1.5"
-                      >
-                        {hasSubmission ? (
-                          <>
-                            <Edit3 className="w-3.5 h-3.5" />
-                            Edit / Resubmit Work
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-3.5 h-3.5" />
-                            Submit Assignment
-                          </>
-                        )}
-                      </Button>
-                    )}
+                    <div>
+                      {isLocked ? (
+                        <span className="font-mono text-xs font-bold text-brand-muted flex items-center gap-1.5">
+                          {isClosed ? (
+                            'Assignment Closed'
+                          ) : submissionStatus === 'under_review' ? (
+                            <span className="text-brand-gold flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5" />
+                              Under Mentor Review (Locked)
+                            </span>
+                          ) : (
+                            <span className="text-brand-navy flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-brand-teal" />
+                              Evaluated &amp; Graded
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <Button
+                          variant={hasSubmission ? 'outline' : 'primary'}
+                          size="sm"
+                          onClick={() => handleOpenSubmission(assignment)}
+                          className="flex items-center gap-1.5"
+                        >
+                          {hasSubmission ? (
+                            <>
+                              <Edit3 className="w-3.5 h-3.5" />
+                              {submissionStatus === 'needs_revision'
+                                ? 'Resubmit Revisions'
+                                : 'Edit / Update Submission'}
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-3.5 h-3.5" />
+                              Submit Assignment
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 {/* Inline Submission Form Accordion */}
-                {isSelected && !isClosed && (
+                {isSelected && !isLocked && (
                   <div className="border-t-3 border-brand-dark bg-brand-bg p-5 sm:p-6">
                     <div className="max-w-2xl mx-auto">
                       <div className="flex items-center justify-between mb-4">
@@ -638,14 +937,14 @@ export const StudentAssignmentsPage: React.FC = () => {
                       </div>
 
                       {formError && (
-                        <div className="bg-red-50 border-2 border-red-500 p-3 text-red-700 text-xs mb-3 flex items-center gap-2">
+                        <div className="bg-red-50 border-2 border-red-500 p-3 text-red-700 text-xs mb-3 flex items-center gap-2 shadow-brutal-xs">
                           <AlertCircle className="w-4 h-4 flex-shrink-0" />
                           <span>{formError}</span>
                         </div>
                       )}
 
                       {formSuccess && (
-                        <div className="bg-teal-50 border-2 border-brand-teal p-3 text-brand-dark text-xs mb-3 flex items-center gap-2">
+                        <div className="bg-teal-50 border-2 border-brand-teal p-3 text-brand-dark text-xs mb-3 flex items-center gap-2 shadow-brutal-xs">
                           <CheckCircle2 className="w-4 h-4 text-brand-teal flex-shrink-0" />
                           <span>{formSuccess}</span>
                         </div>
@@ -705,23 +1004,163 @@ export const StudentAssignmentsPage: React.FC = () => {
                         )}
 
                         {submissionType === 'file' && (
-                          <div className="space-y-3">
-                            <div>
-                              <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
-                                Select File (PDF, PNG, JPG, ZIP — Max 10MB)
+                          <div className="space-y-4">
+                            {/* File Upload Box */}
+                            <div className="bg-white border-2 border-brand-dark p-4 space-y-3 shadow-brutal-xs">
+                              <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
+                                Attach Solution Document (PDF, PNG, JPG, WebP, DOCX — Max 10MB) *
                               </label>
+
+                              {/* Case 1: A new file is currently selected */}
+                              {selectedFile ? (
+                                <div className="space-y-3">
+                                  <div className="p-3 bg-teal-50 border-2 border-brand-teal flex flex-wrap items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                                      <div className="min-w-0">
+                                        <span className="font-mono text-xs font-bold text-brand-navy truncate block">
+                                          {selectedFile.name}
+                                        </span>
+                                        <span className="font-mono text-[11px] text-brand-muted">
+                                          {selectedFile.size < 1024 * 1024
+                                            ? `${Math.round(selectedFile.size / 1024)} KB`
+                                            : `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB`}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                                      {/* Preview button for supported images & PDFs */}
+                                      {['png', 'jpg', 'jpeg', 'webp', 'pdf'].includes(
+                                        selectedFile.name.split('.').pop()?.toLowerCase() || ''
+                                      ) && (
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={handlePreviewSelectedFile}
+                                          className="flex items-center gap-1"
+                                        >
+                                          <Eye className="w-3.5 h-3.5" />
+                                          Preview
+                                        </Button>
+                                      )}
+
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={handleRemoveSelectedFile}
+                                        className="text-red-600 hover:text-red-700 flex items-center gap-1"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                        Remove
+                                      </Button>
+                                    </div>
+                                  </div>
+
+                                  {/* Small Image Thumbnail Preview */}
+                                  {selectedFileObjectUrl &&
+                                    ['png', 'jpg', 'jpeg', 'webp'].includes(
+                                      selectedFile.name.split('.').pop()?.toLowerCase() || ''
+                                    ) && (
+                                      <div className="p-2 bg-brand-bg border border-brand-dark flex items-center gap-3">
+                                        <img
+                                          src={selectedFileObjectUrl}
+                                          alt="Preview thumbnail"
+                                          className="w-16 h-16 object-cover border border-brand-dark shadow-brutal-xs flex-shrink-0"
+                                        />
+                                        <div className="text-xs font-mono text-brand-muted">
+                                          <span className="font-bold text-brand-navy block flex items-center gap-1">
+                                            <ImageIcon className="w-3.5 h-3.5 text-brand-teal" />
+                                            Image preview ready
+                                          </span>
+                                          Click "Preview" above to inspect in full size before submitting.
+                                        </div>
+                                      </div>
+                                    )}
+                                </div>
+                              ) : existingFilePath || fileName ? (
+                                /* Case 2: Editing existing submission without choosing new file yet */
+                                <div className="space-y-2">
+                                  <div className="p-3 bg-brand-paper border-2 border-brand-dark flex flex-wrap items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <Paperclip className="w-4 h-4 text-brand-navy flex-shrink-0" />
+                                      <div className="min-w-0">
+                                        <span className="font-mono text-xs font-bold text-brand-navy truncate block">
+                                          Currently Attached: {fileName}
+                                        </span>
+                                        {fileSize && (
+                                          <span className="font-mono text-[11px] text-brand-muted">
+                                            {fileSize < 1024 * 1024
+                                              ? `${Math.round(fileSize / 1024)} KB`
+                                              : `${(fileSize / (1024 * 1024)).toFixed(2)} MB`}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                                      {existingFilePath && (
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() =>
+                                            handlePreviewExistingAttachment({
+                                              file_name: fileName,
+                                              file_size: fileSize,
+                                              file_path: existingFilePath,
+                                            })
+                                          }
+                                          className="flex items-center gap-1"
+                                        >
+                                          <Eye className="w-3.5 h-3.5" />
+                                          Preview
+                                        </Button>
+                                      )}
+                                      <Button
+                                        type="button"
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={() => fileInputRef.current?.click()}
+                                      >
+                                        Replace File
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <p className="text-[11px] font-mono text-brand-muted">
+                                    Your previously submitted file is retained unless you choose a new file to replace it.
+                                  </p>
+                                </div>
+                              ) : (
+                                /* Case 3: Initial file selection */
+                                <div className="space-y-2">
+                                  <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    onChange={handleFileSelect}
+                                    accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+                                    className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono focus:outline-none"
+                                    required={!existingFilePath && !fileName}
+                                  />
+                                  <p className="text-[11px] font-mono text-brand-muted">
+                                    Supported formats: PDF documents, PNG/JPG/WebP scan images, and DOCX files up to 10MB.
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Hidden file input for Replace action */}
                               <input
+                                ref={fileInputRef}
                                 type="file"
                                 onChange={handleFileSelect}
-                                accept=".pdf,.png,.jpg,.jpeg,.zip,.docx"
-                                className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono focus:outline-none"
+                                accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+                                className="hidden"
                               />
-                              {fileName && (
-                                <p className="text-xs font-mono text-brand-teal font-bold mt-1">
-                                  Selected: {fileName} ({fileSize ? Math.round(fileSize / 1024) : 0} KB)
-                                </p>
-                              )}
                             </div>
+
+                            {/* Solution Notes */}
                             <div>
                               <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
                                 Accompanying Solution Notes *
@@ -743,7 +1182,10 @@ export const StudentAssignmentsPage: React.FC = () => {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => setActiveAssignmentId(null)}
+                            onClick={() => {
+                              setActiveAssignmentId(null);
+                              setSelectedFile(null);
+                            }}
                           >
                             Cancel
                           </Button>
@@ -757,7 +1199,9 @@ export const StudentAssignmentsPage: React.FC = () => {
                             {submitting ? (
                               <>
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                Saving Submission...
+                                {submissionType === 'file' && selectedFile
+                                  ? 'Uploading File & Saving...'
+                                  : 'Saving Submission...'}
                               </>
                             ) : (
                               <>
@@ -791,6 +1235,17 @@ export const StudentAssignmentsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Attachment Preview Viewer Modal */}
+      <AttachmentViewerModal
+        isOpen={viewerModal.isOpen}
+        onClose={() => setViewerModal((prev) => ({ ...prev, isOpen: false }))}
+        fileName={viewerModal.fileName}
+        fileUrl={viewerModal.fileUrl}
+        fileSize={viewerModal.fileSize}
+        loading={viewerModal.loading}
+        error={viewerModal.error}
+      />
     </div>
   );
 };
