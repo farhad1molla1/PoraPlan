@@ -41,7 +41,6 @@ export type PublicProfile = {
   department?: string | null;
   batch?: string | null;
   current_semester?: string | null;
-  academic_background?: string | null;
   expertise?: string | null;
   mentoring_subjects?: string | null;
   bio?: string | null;

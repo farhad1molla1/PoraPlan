@@ -385,6 +385,9 @@ export function getMockPublicProfile(userId: string): PublicProfile | null {
   );
   if (!account) return null;
 
+  // Security Hardening: Only active accounts are discoverable via public profile
+  if (account.status !== 'active') return null;
+
   return {
     id: account.id,
     poraplan_id: account.poraplanId || null,
@@ -395,7 +398,6 @@ export function getMockPublicProfile(userId: string): PublicProfile | null {
     department: account.department || null,
     batch: account.batch || null,
     current_semester: account.currentSemester || null,
-    academic_background: account.academicBackground || null,
     expertise: account.expertise || null,
     mentoring_subjects: account.mentoringSubjects || null,
     bio: account.bio || null,

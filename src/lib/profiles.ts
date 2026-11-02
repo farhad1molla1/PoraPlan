@@ -462,16 +462,13 @@ export async function getAdminUsers(filters?: {
 }
 
 /**
- * Public profile columns to select when falling back to table query.
- * Strictly excludes private contact data: email, whatsapp_number, linked_email, contact_email.
- */
-const PUBLIC_PROFILE_COLUMNS =
-  'id, poraplan_id, full_name, role, avatar_url, university, department, batch, current_semester, academic_background, expertise, mentoring_subjects, bio, created_at';
-
-/**
  * Fetch a sanitized public profile by user ID.
  * Strictly respects role privacy gates by projecting only public fields.
- * Never exposes whatsapp_number, email, linked_email, contact_email or internal notes.
+ * Never exposes whatsapp_number, email, linked_email, contact_email, academic_background or internal notes.
+ * Enforces two-tier privacy-safe retrieval:
+ * Tier 1: get_public_profile SECURITY DEFINER RPC with active status check
+ * Tier 2: public_profiles VIEW with active status check
+ * Never falls back to raw profiles table query to prevent privacy bypass.
  */
 export async function getPublicProfile(userId: string): Promise<{
   profile: PublicProfile | null;
@@ -506,22 +503,9 @@ export async function getPublicProfile(userId: string): Promise<{
       return { profile: viewData as PublicProfile, error: null };
     }
 
-    // 3. Fallback: Direct strict projection query on profiles table
-    const { data: tableData, error: tableError } = await supabase
-      .from('profiles')
-      .select(PUBLIC_PROFILE_COLUMNS)
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (tableError) {
-      return { profile: null, error: tableError };
-    }
-
-    if (!tableData) {
-      return { profile: null, error: new Error('Profile not found') };
-    }
-
-    return { profile: tableData as unknown as PublicProfile, error: null };
+    // If both RPC and public_profiles view return nothing, profile does not exist or is inactive.
+    const finalError = rpcError || viewError || new Error('Public profile not found or unavailable');
+    return { profile: null, error: finalError };
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { profile: null, error };

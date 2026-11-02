@@ -1,16 +1,19 @@
 -- ==============================================================================
--- PoraPlan Milestone 10: Public Profiles Lens & Backend Privacy Gate
+-- PoraPlan Milestone 10.1: Public Profiles Security Hardening & Privacy Gate
 -- Schema Updates:
--- 1. Create public_profiles VIEW projecting only explicitly approved public fields.
--- 2. Create get_public_profile(UUID) SECURITY DEFINER RPC function with fixed search_path.
--- 3. Extend profiles SELECT policy for active assigned mentors in student_mentor_assignments
---    and cohort_mentors while keeping private fields sealed from arbitrary students and unassigned mentors.
--- 4. Grant access to authenticated and anon roles for public profile discovery.
+-- 1. Create public_profiles VIEW projecting only explicitly approved public fields,
+--    filtering strictly for active accounts and excluding sensitive academic_background notes.
+-- 2. Create get_public_profile(UUID) SECURITY DEFINER RPC function with fixed search_path,
+--    active status verification, and restricted execution to authenticated members.
+-- 3. Eliminate legacy unverified mentor policies and enforce strict active assignment checks
+--    on student_mentor_assignments and cohort_mentors.
+-- 4. Restrict discovery privileges strictly to authenticated platform members (revoking anon).
 -- ==============================================================================
 
 -- 1. SECURE PUBLIC PROFILES VIEW
--- Strips all private contact (whatsapp_number, email, linked_email, contact_email)
--- and internal administrative/account status columns.
+-- Strips all private contact (whatsapp_number, email, linked_email, contact_email),
+-- sensitive academic_background notes, and internal administrative/account status columns.
+-- Filters strictly to active accounts to avoid exposing suspended or not-activated members.
 CREATE OR REPLACE VIEW public.public_profiles AS
 SELECT
   id,
@@ -22,20 +25,22 @@ SELECT
   department,
   batch,
   current_semester,
-  academic_background,
   expertise,
   mentoring_subjects,
   bio,
   created_at
-FROM public.profiles;
+FROM public.profiles
+WHERE status = 'active';
 
 COMMENT ON VIEW public.public_profiles IS
-  'Public academic identity lens for PoraPlan scholars and faculty. Excludes private communication channels and account credentials.';
+  'Public academic identity lens for active PoraPlan scholars and faculty. Excludes private communication channels, credentials, and sensitive notes.';
 
-GRANT SELECT ON public.public_profiles TO authenticated, anon;
+REVOKE ALL ON public.public_profiles FROM PUBLIC, anon;
+GRANT SELECT ON public.public_profiles TO authenticated;
 
 -- 2. SECURE PUBLIC PROFILE RESOLVER RPC
 -- Parameterized lookup ensuring clean return of public identity attributes without internal table leakage.
+-- Excludes sensitive academic_background notes and enforces active account status check.
 CREATE OR REPLACE FUNCTION public.get_public_profile(p_user_id UUID)
 RETURNS TABLE (
   id UUID,
@@ -47,7 +52,6 @@ RETURNS TABLE (
   department TEXT,
   batch TEXT,
   current_semester TEXT,
-  academic_background TEXT,
   expertise TEXT,
   mentoring_subjects TEXT,
   bio TEXT,
@@ -69,27 +73,29 @@ BEGIN
     p.department,
     p.batch,
     p.current_semester,
-    p.academic_background,
     p.expertise,
     p.mentoring_subjects,
     p.bio,
     p.created_at
   FROM public.profiles p
   WHERE p.id = p_user_id
+    AND p.status = 'active'
   LIMIT 1;
 END;
 $$;
 
 COMMENT ON FUNCTION public.get_public_profile(UUID) IS
-  'Securely returns sanitized public profile fields for any registered member by UUID.';
+  'Securely returns sanitized public profile fields for active registered members by UUID.';
 
-REVOKE ALL ON FUNCTION public.get_public_profile(UUID) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.get_public_profile(UUID) TO authenticated, anon;
+REVOKE ALL ON FUNCTION public.get_public_profile(UUID) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.get_public_profile(UUID) TO authenticated;
 
 -- 3. ENFORCE MENTOR ASSIGNMENT PRIVACY BOUNDARY ON PROFILES TABLE
--- Authorizes active mentors to read their active mentees full profiles,
+-- Purge legacy unverified mentor policies and authorize active mentors to read their active mentees full profiles,
 -- while unassigned mentors and third-party students remain strictly blocked from private columns.
+DROP POLICY IF EXISTS "Mentors can view assigned students profiles" ON public.profiles;
 DROP POLICY IF EXISTS "Active mentors can view assigned students profiles" ON public.profiles;
+
 CREATE POLICY "Active mentors can view assigned students profiles"
   ON public.profiles
   FOR SELECT

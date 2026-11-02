@@ -181,7 +181,7 @@ export const PublicProfilePage: React.FC = () => {
                 Viewing Your Public Profile
               </p>
               <p className="text-xs text-brand-dark/80 mt-0.5">
-                This is how other students and mentors see your academic identity. Sensitive contact details (phone number, email address) are always kept private.
+                This is how other students and mentors see your academic identity. Sensitive contact details (phone, email) and personal academic background notes are strictly shielded.
               </p>
             </div>
           </div>
@@ -313,17 +313,6 @@ export const PublicProfilePage: React.FC = () => {
                   </span>
                 </div>
               </div>
-
-              {profile.academic_background && (
-                <div className="pt-2">
-                  <span className="block text-[11px] font-mono uppercase font-bold text-brand-muted mb-1">
-                    Academic Background & Objectives
-                  </span>
-                  <div className="border border-brand-dark/30 p-3 bg-white font-sans text-sm text-brand-dark leading-relaxed">
-                    {profile.academic_background}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -382,18 +371,6 @@ export const PublicProfilePage: React.FC = () => {
                   </p>
                 )}
               </div>
-
-              {/* Academic Background / Education */}
-              {profile.academic_background && (
-                <div className="pt-2">
-                  <span className="block text-[11px] font-mono uppercase font-bold text-brand-muted mb-1">
-                    Academic Background & Qualifications
-                  </span>
-                  <div className="border border-brand-dark/30 p-3 bg-white font-sans text-sm text-brand-dark leading-relaxed">
-                    {profile.academic_background}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -429,7 +406,7 @@ export const PublicProfilePage: React.FC = () => {
             </div>
 
             <p className="text-xs text-brand-dark/80 font-sans leading-relaxed">
-              PoraPlan enforces database-level privacy boundaries. In keeping with our academic focus, personal contact information is kept private.
+              PoraPlan enforces database-level privacy boundaries. In keeping with our academic focus, personal contact information and sensitive notes are strictly shielded.
             </p>
 
             <div className="border-2 border-brand-dark bg-brand-paper-tint p-3 space-y-2">
@@ -440,6 +417,7 @@ export const PublicProfilePage: React.FC = () => {
               <ul className="text-[11px] font-mono text-brand-muted space-y-1 list-disc list-inside">
                 <li>Personal Phone & WhatsApp</li>
                 <li>Email Addresses</li>
+                <li>Academic Background & Private Notes</li>
                 <li>Internal Mentor Notes</li>
                 <li>Private Enrollment Data</li>
               </ul>
