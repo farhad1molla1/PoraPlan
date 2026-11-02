@@ -102,7 +102,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Assignments', shortLabel: 'Practice', to: '/student/assignments', icon: FileText },
     { label: 'Evaluations', shortLabel: 'Eval', to: '/student/evaluations', icon: Calendar },
     { label: 'Progress', shortLabel: 'Progress', to: '/student/progress', icon: TrendingUp },
-    { label: 'Study Resources', shortLabel: 'Resources', to: '/student/resources', icon: BookMarked },
+    { label: 'Academic Library', shortLabel: 'Library', to: '/student/library', icon: BookMarked },
     { label: 'Doubts', shortLabel: 'Doubts', to: '/student/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/student/announcements', icon: Megaphone },
     { label: 'Notifications', shortLabel: 'Alerts', to: '/student/notifications', icon: Bell, badgeCount: unreadNotifCount },

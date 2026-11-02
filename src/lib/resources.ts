@@ -281,7 +281,7 @@ export async function createResource(params: {
       type: 'resource_published',
       title: 'New Resource Added',
       message: `Mentor added a new learning resource: "${cleanTitle}"`,
-      link: '/student/resources',
+      link: '/student/library',
       idempotencyKey: `resource:${data.id}`,
     }).catch(() => {});
 

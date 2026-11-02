@@ -2642,7 +2642,7 @@ export function createMockResource(params: {
     type: 'resource_published',
     title: 'New Resource Added',
     message: `Mentor added a new learning resource: "${cleanTitle}"`,
-    link: '/student/resources',
+    link: '/student/library',
     idempotencyKey: `resource:${resourceId}`,
   });
 

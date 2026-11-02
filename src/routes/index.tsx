@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { RootLayout } from '../layouts/RootLayout';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { LandingPage } from '../pages/LandingPage';
@@ -32,7 +32,7 @@ import { StudentEvaluationsPage } from '../pages/dashboard/StudentEvaluationsPag
 import { MentorEvaluationsPage } from '../pages/dashboard/MentorEvaluationsPage';
 import { StudentProgressPage } from '../pages/dashboard/StudentProgressPage';
 import { MentorProgressPage } from '../pages/dashboard/MentorProgressPage';
-import { StudentResourcesPage } from '../pages/dashboard/StudentResourcesPage';
+import { StudentLibraryPage } from '../pages/dashboard/StudentLibraryPage';
 import { MentorResourcesPage } from '../pages/dashboard/MentorResourcesPage';
 import { StudentDoubtsPage } from '../pages/dashboard/StudentDoubtsPage';
 import { MentorDoubtsPage } from '../pages/dashboard/MentorDoubtsPage';
@@ -75,6 +75,15 @@ const DashboardRedirect: React.FC = () => {
     return <Navigate to="/admin/dashboard" replace />;
   }
   return <Navigate to="/student/dashboard" replace />;
+};
+
+/**
+ * Backward compatibility redirect for /student/resources -> /student/library.
+ * Preserves query parameters across navigation (e.g. ?tab=resources).
+ */
+const StudentResourcesRedirect: React.FC = () => {
+  const location = useLocation();
+  return <Navigate to={{ pathname: '/student/library', search: location.search }} replace />;
 };
 
 export const AppRoutes: React.FC = () => {
@@ -144,10 +153,18 @@ export const AppRoutes: React.FC = () => {
           }
         />
         <Route
+          path="student/library"
+          element={
+            <ProtectedRoute allowedRoles={['student', 'admin']}>
+              <StudentLibraryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="student/resources"
           element={
             <ProtectedRoute allowedRoles={['student', 'admin']}>
-              <StudentResourcesPage />
+              <StudentResourcesRedirect />
             </ProtectedRoute>
           }
         />
