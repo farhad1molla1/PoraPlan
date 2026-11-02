@@ -34,6 +34,7 @@ import {
   Loader2,
   Phone,
   Paperclip,
+  User,
 } from 'lucide-react';
 
 export const StudentDashboardPage: React.FC = () => {
@@ -207,9 +208,12 @@ export const StudentDashboardPage: React.FC = () => {
                 {assignedMentor ? (
                   <div className="space-y-1.5 pt-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-base sm:text-lg font-black text-brand-navy">
+                      <Link
+                        to={`/profile/${assignedMentor.id}`}
+                        className="text-base sm:text-lg font-black text-brand-navy hover:text-brand-teal transition-colors underline decoration-brand-dark/30 hover:decoration-brand-teal"
+                      >
                         {assignedMentor.full_name}
-                      </h3>
+                      </Link>
                       {assignedMentor.poraplan_id && (
                         <span className="font-mono text-xs px-1.5 py-0.5 bg-brand-paper-tint border border-brand-dark/40 font-bold text-brand-navy">
                           {assignedMentor.poraplan_id}
@@ -243,6 +247,15 @@ export const StudentDashboardPage: React.FC = () => {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 shrink-0 self-start">
+                {assignedMentor && (
+                  <Link
+                    to={`/profile/${assignedMentor.id}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-brand-navy text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-paper-tint transition-colors"
+                  >
+                    <User className="w-3.5 h-3.5" />
+                    <span>Profile</span>
+                  </Link>
+                )}
                 {assignedMentor?.whatsapp_number && (
                   <a
                     href={`https://wa.me/${assignedMentor.whatsapp_number.replace(/\D/g, '')}`}

@@ -626,9 +626,18 @@ export const MentorDoubtsPage: React.FC = () => {
               <div className="flex items-start justify-between border-b-2 border-brand-dark pb-3 mb-4">
                 <div>
                   <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
-                    <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-white text-brand-navy">
-                      Student: {activeDoubt.student_name}{activeDoubt.student_poraplan_id ? ` (${activeDoubt.student_poraplan_id})` : ''}
-                    </span>
+                    {activeDoubt.student_id ? (
+                      <Link
+                        to={`/profile/${activeDoubt.student_id}`}
+                        className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-white text-brand-navy hover:text-brand-teal hover:border-brand-teal transition-colors"
+                      >
+                        Student: {activeDoubt.student_name}{activeDoubt.student_poraplan_id ? ` (${activeDoubt.student_poraplan_id})` : ''}
+                      </Link>
+                    ) : (
+                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-white text-brand-navy">
+                        Student: {activeDoubt.student_name}{activeDoubt.student_poraplan_id ? ` (${activeDoubt.student_poraplan_id})` : ''}
+                      </span>
+                    )}
 
                     {activeDoubt.subject_name && (
                       <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/30 bg-white text-brand-navy">
@@ -701,7 +710,16 @@ export const MentorDoubtsPage: React.FC = () => {
                       >
                         <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-brand-navy">{resp.author_name}</span>
+                            {resp.author_id ? (
+                              <Link
+                                to={`/profile/${resp.author_id}`}
+                                className="font-bold text-brand-navy hover:text-brand-teal transition-colors underline decoration-brand-dark/30 hover:decoration-brand-teal"
+                              >
+                                {resp.author_name}
+                              </Link>
+                            ) : (
+                              <span className="font-bold text-brand-navy">{resp.author_name}</span>
+                            )}
                             {isMentor ? (
                               <span className="px-1.5 py-0.2 font-mono text-[9px] uppercase font-bold bg-brand-teal text-white">
                                 Mentor (You)

@@ -1,5 +1,6 @@
 import type {
   Profile,
+  PublicProfile,
   UserRole,
   AccountStatus,
   ProfileUpdate,
@@ -370,6 +371,35 @@ export function getMockProfile(userId: string): Profile | null {
     bio: account.bio || null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+  };
+}
+
+/**
+ * Retrieve sanitized public profile for a user by ID or PoraPlan ID.
+ * Strictly omits private contact channels (email, phone/WhatsApp, linked_email) and status.
+ */
+export function getMockPublicProfile(userId: string): PublicProfile | null {
+  const clean = userId.trim();
+  const account = mockStore.find(
+    (acc) => acc.id === clean || (acc.poraplanId && acc.poraplanId.toUpperCase() === clean.toUpperCase())
+  );
+  if (!account) return null;
+
+  return {
+    id: account.id,
+    poraplan_id: account.poraplanId || null,
+    full_name: account.fullName,
+    role: account.role,
+    avatar_url: account.avatarUrl || null,
+    university: account.university || null,
+    department: account.department || null,
+    batch: account.batch || null,
+    current_semester: account.currentSemester || null,
+    academic_background: account.academicBackground || null,
+    expertise: account.expertise || null,
+    mentoring_subjects: account.mentoringSubjects || null,
+    bio: account.bio || null,
+    created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
   };
 }
 

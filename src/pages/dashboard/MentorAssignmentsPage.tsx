@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getAssignedStudents } from '../../lib/mentorship';
 import { getStudentSubjects } from '../../lib/subjects';
@@ -31,6 +32,7 @@ import {
   Paperclip,
   Eye,
   FileCheck,
+  User,
 } from 'lucide-react';
 
 export const MentorAssignmentsPage: React.FC = () => {
@@ -387,8 +389,29 @@ export const MentorAssignmentsPage: React.FC = () => {
             <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-brand-muted">
               Select Assigned Student
             </div>
-            <div className="font-heading font-bold text-base text-brand-navy">
-              {selectedStudent ? `${selectedStudent.full_name} (${selectedStudent.poraplan_id})` : 'No Student Selected'}
+            <div className="font-heading font-bold text-base text-brand-navy flex items-center gap-2">
+              {selectedStudent ? (
+                <>
+                  <Link
+                    to={`/profile/${selectedStudent.id}`}
+                    className="hover:text-brand-teal transition-colors underline decoration-brand-dark/30 hover:decoration-brand-teal"
+                  >
+                    {selectedStudent.full_name}
+                  </Link>
+                  <span className="font-mono text-xs font-normal text-brand-muted">
+                    ({selectedStudent.poraplan_id})
+                  </span>
+                  <Link
+                    to={`/profile/${selectedStudent.id}`}
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-brand-dark bg-brand-paper-tint text-[10px] font-mono font-bold text-brand-navy shadow-brutal-xs hover:bg-white"
+                  >
+                    <User className="w-3 h-3 text-brand-teal" />
+                    <span>Profile</span>
+                  </Link>
+                </>
+              ) : (
+                'No Student Selected'
+              )}
             </div>
           </div>
         </div>

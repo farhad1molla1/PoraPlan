@@ -1074,7 +1074,16 @@ export const StudentDoubtsPage: React.FC = () => {
                       >
                         <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-brand-navy">{resp.author_name}</span>
+                            {resp.author_id ? (
+                              <Link
+                                to={`/profile/${resp.author_id}`}
+                                className="font-bold text-brand-navy hover:text-brand-teal transition-colors underline decoration-brand-dark/30 hover:decoration-brand-teal"
+                              >
+                                {resp.author_name}
+                              </Link>
+                            ) : (
+                              <span className="font-bold text-brand-navy">{resp.author_name}</span>
+                            )}
                             {isMentor && (
                               <span className="px-1.5 py-0.2 font-mono text-[9px] uppercase font-bold bg-brand-teal text-white">
                                 Mentor

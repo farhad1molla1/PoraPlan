@@ -31,6 +31,23 @@ export type Profile = {
   updated_at?: string;
 };
 
+export type PublicProfile = {
+  id: string;
+  poraplan_id?: string | null;
+  full_name: string;
+  role: UserRole;
+  avatar_url?: string | null;
+  university?: string | null;
+  department?: string | null;
+  batch?: string | null;
+  current_semester?: string | null;
+  academic_background?: string | null;
+  expertise?: string | null;
+  mentoring_subjects?: string | null;
+  bio?: string | null;
+  created_at?: string;
+};
+
 export type ProfileInsert = {
   id: string;
   poraplan_id?: string | null;

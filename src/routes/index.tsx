@@ -40,6 +40,7 @@ import { StudentAnnouncementsPage } from '../pages/dashboard/StudentAnnouncement
 import { MentorAnnouncementsPage } from '../pages/dashboard/MentorAnnouncementsPage';
 import { StudentNotificationsPage } from '../pages/dashboard/StudentNotificationsPage';
 import { ProfilePage } from '../pages/dashboard/ProfilePage';
+import { PublicProfilePage } from '../pages/dashboard/PublicProfilePage';
 import { MyApplicationsPage } from '../pages/dashboard/MyApplicationsPage';
 import { AdminApplicationsPage } from '../pages/dashboard/AdminApplicationsPage';
 import { AdminEnrollmentsPage } from '../pages/dashboard/AdminEnrollmentsPage';
@@ -400,9 +401,13 @@ export const AppRoutes: React.FC = () => {
 
         {/* Dedicated Profile & Identity Sector (All Authenticated Members) */}
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="profile/:id" element={<PublicProfilePage />} />
         <Route path="student/profile" element={<ProfilePage />} />
+        <Route path="student/profile/:id" element={<PublicProfilePage />} />
         <Route path="mentor/profile" element={<ProfilePage />} />
+        <Route path="mentor/profile/:id" element={<PublicProfilePage />} />
         <Route path="admin/profile" element={<ProfilePage />} />
+        <Route path="admin/profile/:id" element={<PublicProfilePage />} />
       </Route>
 
       {/* Dynamic Role Resolver */}

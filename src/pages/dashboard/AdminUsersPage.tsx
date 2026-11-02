@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { getAdminUsers } from '../../lib/profiles';
 import { getEnrollments } from '../../lib/applications';
 import { getEffectiveMentor, getEffectiveStudentsForMentor } from '../../lib/mentorAssignments';
@@ -30,6 +31,7 @@ import {
   RefreshCw,
   Building,
   Award,
+  ExternalLink,
 } from 'lucide-react';
 
 export const AdminUsersPage: React.FC = () => {
@@ -509,12 +511,24 @@ export const AdminUsersPage: React.FC = () => {
                 </div>
               </div>
 
-              <button
-                onClick={() => setSelectedUser(null)}
-                className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-base transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <Link
+                  to={`/profile/${selectedUser.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border-default bg-surface-base hover:bg-surface-card text-xs font-medium text-text-primary transition-colors"
+                  title="Open Public Profile in new tab"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-text-muted" />
+                  <span>Public Profile</span>
+                </Link>
+                <button
+                  onClick={() => setSelectedUser(null)}
+                  className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-base transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Drawer Body */}

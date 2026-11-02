@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabase';
-import type { Profile, ProfileUpdate, UserRole, AccountStatus } from '../types/database';
+import type { Profile, ProfileUpdate, UserRole, AccountStatus, PublicProfile } from '../types/database';
 import {
   resolveMockPoraPlanId,
   checkMockGoogleLinked,
@@ -8,6 +8,7 @@ import {
   updateMockProfile,
   adminRegisterMockMember,
   getMockUsers,
+  getMockPublicProfile,
 } from './mockAuthStore';
 
 export interface PoraPlanIdResolution {
@@ -459,4 +460,72 @@ export async function getAdminUsers(filters?: {
     return { users: [], error };
   }
 }
+
+/**
+ * Public profile columns to select when falling back to table query.
+ * Strictly excludes private contact data: email, whatsapp_number, linked_email, contact_email.
+ */
+const PUBLIC_PROFILE_COLUMNS =
+  'id, poraplan_id, full_name, role, avatar_url, university, department, batch, current_semester, academic_background, expertise, mentoring_subjects, bio, created_at';
+
+/**
+ * Fetch a sanitized public profile by user ID.
+ * Strictly respects role privacy gates by projecting only public fields.
+ * Never exposes whatsapp_number, email, linked_email, contact_email or internal notes.
+ */
+export async function getPublicProfile(userId: string): Promise<{
+  profile: PublicProfile | null;
+  error: Error | null;
+}> {
+  if (!isSupabaseConfigured()) {
+    const mockPublic = getMockPublicProfile(userId);
+    if (mockPublic) {
+      return { profile: mockPublic, error: null };
+    }
+    return { profile: null, error: new Error('Public profile not found') };
+  }
+
+  try {
+    // 1. Preferred: Call the security-definer RPC
+    const { data: rpcData, error: rpcError } = await (supabase.rpc as any)('get_public_profile', {
+      p_user_id: userId,
+    });
+
+    if (!rpcError && rpcData && Array.isArray(rpcData) && rpcData.length > 0) {
+      return { profile: rpcData[0] as PublicProfile, error: null };
+    }
+
+    // 2. Fallback: Query the public_profiles view
+    const { data: viewData, error: viewError } = await (supabase as any)
+      .from('public_profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (!viewError && viewData) {
+      return { profile: viewData as PublicProfile, error: null };
+    }
+
+    // 3. Fallback: Direct strict projection query on profiles table
+    const { data: tableData, error: tableError } = await supabase
+      .from('profiles')
+      .select(PUBLIC_PROFILE_COLUMNS)
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (tableError) {
+      return { profile: null, error: tableError };
+    }
+
+    if (!tableData) {
+      return { profile: null, error: new Error('Profile not found') };
+    }
+
+    return { profile: tableData as unknown as PublicProfile, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { profile: null, error };
+  }
+}
+
 
