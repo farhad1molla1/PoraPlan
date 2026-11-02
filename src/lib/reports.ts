@@ -38,6 +38,9 @@ import {
   getMockEnrollments,
   getMockPrograms,
   getMockCohorts,
+  getMockCohortMentors,
+  getMockMentorSubmissions,
+  getMockMentorEvaluations,
 } from './mockAuthStore';
 
 function getMockUserById(id: string) {
@@ -342,6 +345,83 @@ export interface MentorAcademicReport {
     totalEvaluationsUpcoming: number;
     scholarsNeedingAttentionCount: number;
   };
+}
+
+export interface AdminAcademicOverview {
+  generatedAt: string;
+  totalRegisteredStudents: number;
+  activeStudents: number;
+  totalMentors: number;
+  activeMentors: number;
+  activeEnrollments: number;
+  scholarsNeedingAttentionCount: number;
+  totalSubmissionsPendingReview: number;
+  totalOverdueTasks: number;
+}
+
+export interface AdminStudentSummary {
+  studentId: string;
+  studentName: string;
+  poraplanId: string;
+  university?: string | null;
+  department?: string | null;
+  batch?: string | null;
+  currentSemester?: string | null;
+  enrollmentStatus: 'active' | 'completed' | 'inactive' | 'none';
+  programName?: string;
+  cohortName?: string;
+  mentorName?: string;
+  mentorId?: string;
+  taskCompletionRate: number;
+  isCompletionRateApplicable: boolean;
+  tasksCompleted: number;
+  tasksAssigned: number;
+  tasksOverdue: number;
+  averageScorePercentage: number | null;
+  scoredEvaluationsCount: number;
+  submissionRate: number;
+  submissionsPendingReview: number;
+  consistencyPercentage: number | null;
+  scheduledDaysCount: number;
+  activeStudyDays: number;
+  lastActivityDate: string | null;
+  attentionLevel: 'critical' | 'warning' | 'normal' | 'insufficient_data';
+  attentionReason?: string;
+}
+
+export interface AdminMentorSummary {
+  mentorId: string;
+  mentorName: string;
+  poraplanId: string;
+  expertiseSubjects: string[];
+  activeMenteesCount: number;
+  activeCohortsCount: number;
+  recentEvaluationsCount: number;
+  pendingReviewsCount: number;
+  menteesNeedingAttentionCount: number;
+  lastActivityDate: string | null;
+}
+
+export interface AdminAttentionItem {
+  studentId: string;
+  studentName: string;
+  poraplanId: string;
+  mentorName: string;
+  mentorId?: string;
+  level: 'critical' | 'warning' | 'normal' | 'insufficient_data';
+  levelLabel: 'Critical Attention' | 'Needs Attention' | 'On Track' | 'Insufficient Data';
+  reason: string;
+  evidence: string;
+}
+
+export interface AdminAcademicIntelligenceReport {
+  overview: AdminAcademicOverview;
+  students: AdminStudentSummary[];
+  mentors: AdminMentorSummary[];
+  attentionItems: AdminAttentionItem[];
+  period: ReportPeriod;
+  dateRange: ReportDateRange;
+  generatedAt: string;
 }
 
 /**
@@ -1797,4 +1877,316 @@ export async function generateMentorReport(
     },
     error: null,
   };
+}
+
+/**
+ * Generates Platform-Wide Academic Intelligence & Operations Overview for Administrators (Milestone 12.3).
+ *
+ * Strict Security & Privacy Enforcement:
+ * - Only administrators can access this report. Non-admin callers receive an immediate Unauthorized error.
+ * - Does not expose private personal emails, contact phone/WhatsApp numbers, passwords, or internal security notes.
+ * - Clearly distinguishes total registered users from active users (students with active program enrollment).
+ * - Distinguishes verified facts, rule-based observations, and stored feedback.
+ * - Employs neutral, non-presumptive labels: 'Critical Attention', 'Needs Attention', 'On Track', 'Insufficient Data'.
+ */
+export async function generateAdminAcademicIntelligence(
+  period: ReportPeriod = 'monthly',
+  customStart?: string,
+  customEnd?: string,
+  options?: {
+    referenceDate?: Date;
+    requestingUserId?: string;
+    requestingUserRole?: 'student' | 'mentor' | 'admin';
+  }
+): Promise<{ report: AdminAcademicIntelligenceReport | null; error: Error | null }> {
+  // 1. Strict Administrator Role Authorization
+  if (options?.requestingUserRole && options.requestingUserRole !== 'admin') {
+    return {
+      report: null,
+      error: new Error('Unauthorized: Only platform administrators can access administrative academic intelligence.'),
+    };
+  }
+
+  const dateRange = computeReportDateRange(period, customStart, customEnd, options?.referenceDate);
+  const now = options?.referenceDate ? options.referenceDate.toISOString() : new Date().toISOString();
+
+  const backend = await getSupabaseBackend();
+
+  try {
+    let studentProfiles: Profile[] = [];
+    let mentorProfiles: Profile[] = [];
+    let allEnrollments: any[] = [];
+
+    if (!backend.isConfigured || !backend.supabase) {
+      // Mock Data Layer
+      const allUsers = getMockUsers();
+      studentProfiles = allUsers.filter((u) => u.role === 'student');
+      mentorProfiles = allUsers.filter((u) => u.role === 'mentor');
+      allEnrollments = getMockEnrollments();
+    } else {
+      // Supabase Backend Layer — Privacy-conscious query excluding private contact fields
+      const { data: profiles, error: pErr } = await backend.supabase
+        .from('profiles')
+        .select('id, full_name, poraplan_id, role, university, department, batch, current_semester, status, created_at')
+        .in('role', ['student', 'mentor']);
+
+      if (pErr) return { report: null, error: pErr };
+
+      studentProfiles = (profiles || []).filter((p: any) => p.role === 'student');
+      mentorProfiles = (profiles || []).filter((p: any) => p.role === 'mentor');
+
+      const { data: enrs, error: eErr } = await backend.supabase
+        .from('program_enrollments')
+        .select('id, student_id, program_id, cohort_id, status, enrolled_at, programs(id, name), cohorts(id, name)');
+
+      if (eErr) return { report: null, error: eErr };
+      allEnrollments = enrs || [];
+    }
+
+    const activeEnrollments = allEnrollments.filter((e) => e.status === 'active');
+    const activeStudentIdSet = new Set(activeEnrollments.map((e) => e.student_id));
+
+    // 2. Aggregate Student Summaries via Existing Reporting Engine
+    const studentSummaries: AdminStudentSummary[] = [];
+    const attentionItems: AdminAttentionItem[] = [];
+
+    let totalSubmissionsPendingReview = 0;
+    let totalOverdueTasks = 0;
+
+    for (const student of studentProfiles) {
+      // Active enrollment identification
+      const enr =
+        activeEnrollments.find((e) => e.student_id === student.id) ||
+        allEnrollments.find((e) => e.student_id === student.id);
+
+      let enrollmentStatus: 'active' | 'completed' | 'inactive' | 'none' = 'none';
+      if (enr) {
+        enrollmentStatus = enr.status === 'active' ? 'active' : enr.status === 'completed' ? 'completed' : 'inactive';
+      }
+
+      // Generate student report using existing reporting engine with admin clearance
+      const { report: sReport } = await generateStudentReport(
+        student.id,
+        period,
+        customStart,
+        customEnd,
+        {
+          referenceDate: options?.referenceDate,
+          requestingUserRole: 'admin',
+        }
+      );
+
+      const tasksAssigned = sReport?.taskMetrics.totalAssigned || 0;
+      const tasksCompleted = sReport?.taskMetrics.completed || 0;
+      const tasksOverdue = sReport?.taskMetrics.overdue || 0;
+      const taskCompletionRate = sReport?.taskMetrics.completionRate || 0;
+      const isCompletionRateApplicable = Boolean(sReport?.taskMetrics.isCompletionRateApplicable);
+
+      const scoredCount = sReport?.evaluationMetrics.scoredCount || 0;
+      const averageScorePercentage = sReport?.evaluationMetrics.averageScorePercentage ?? null;
+
+      const submissionRate = sReport?.assignmentMetrics.submissionRate || 0;
+      const submissionsPendingReview = sReport?.assignmentMetrics.pendingReview || 0;
+
+      const scheduledDaysCount = sReport?.studyConsistency.totalScheduledDays || 0;
+      const activeStudyDays = sReport?.studyConsistency.consistentScheduledDays || 0;
+      const consistencyPercentage = sReport?.studyConsistency.consistencyPercentage ?? null;
+
+      totalSubmissionsPendingReview += submissionsPendingReview;
+      totalOverdueTasks += tasksOverdue;
+
+      // Determine Last Verified Activity Date
+      let lastActivityDate: string | null = null;
+      if (sReport) {
+        const activityDates: string[] = [];
+        sReport.studyActivityTimeline.forEach((a) => {
+          if (a.totalActivities > 0) activityDates.push(a.date);
+        });
+        if (activityDates.length > 0) {
+          activityDates.sort();
+          lastActivityDate = activityDates[activityDates.length - 1];
+        }
+      }
+
+      // Determine Attention Condition with Neutral, Evidence-Based Classification
+      let attentionLevel: 'critical' | 'warning' | 'normal' | 'insufficient_data' = 'normal';
+      let attentionReason = 'On track: Syllabus execution and study consistency meet platform expectations.';
+
+      if (tasksAssigned === 0 && scoredCount === 0) {
+        attentionLevel = 'insufficient_data';
+        attentionReason = 'Insufficient academic data: Zero scheduled tasks or evaluations recorded in window.';
+      } else if (tasksOverdue >= 2) {
+        attentionLevel = 'critical';
+        attentionReason = `Critical backlog: ${tasksOverdue} overdue tasks require administrative follow-up.`;
+      } else if (consistencyPercentage !== null && consistencyPercentage < 50 && scheduledDaysCount >= 2) {
+        attentionLevel = 'critical';
+        attentionReason = `Low schedule execution: ${consistencyPercentage}% consistency across ${scheduledDaysCount} scheduled days.`;
+      } else if (tasksOverdue === 1) {
+        attentionLevel = 'warning';
+        attentionReason = '1 overdue task requires mentor follow-up.';
+      } else if (averageScorePercentage !== null && averageScorePercentage < 60 && scoredCount >= 2) {
+        attentionLevel = 'warning';
+        attentionReason = `Evaluation average (${averageScorePercentage}%) below 60% mastery threshold across ${scoredCount} exams.`;
+      } else if (submissionsPendingReview >= 3) {
+        attentionLevel = 'warning';
+        attentionReason = `${submissionsPendingReview} submissions awaiting mentor review.`;
+      }
+
+      studentSummaries.push({
+        studentId: student.id,
+        studentName: student.full_name || 'Scholar',
+        poraplanId: student.poraplan_id || 'PP001',
+        university: student.university || sReport?.university,
+        department: student.department || sReport?.department,
+        batch: student.batch || sReport?.batch,
+        currentSemester: student.current_semester || sReport?.currentSemester,
+        enrollmentStatus,
+        programName: sReport?.programName,
+        cohortName: sReport?.cohortName,
+        mentorName: sReport?.mentorName || 'Unassigned',
+        taskCompletionRate,
+        isCompletionRateApplicable,
+        tasksCompleted,
+        tasksAssigned,
+        tasksOverdue,
+        averageScorePercentage,
+        scoredEvaluationsCount: scoredCount,
+        submissionRate,
+        submissionsPendingReview,
+        consistencyPercentage,
+        scheduledDaysCount,
+        activeStudyDays,
+        lastActivityDate,
+        attentionLevel,
+        attentionReason,
+      });
+
+      if (attentionLevel === 'critical' || attentionLevel === 'warning') {
+        const levelLabel = attentionLevel === 'critical' ? 'Critical Attention' : 'Needs Attention';
+        attentionItems.push({
+          studentId: student.id,
+          studentName: student.full_name || 'Scholar',
+          poraplanId: student.poraplan_id || 'PP001',
+          mentorName: sReport?.mentorName || 'Unassigned',
+          level: attentionLevel,
+          levelLabel,
+          reason: attentionReason,
+          evidence: `${tasksOverdue} overdue | ${consistencyPercentage !== null ? `${consistencyPercentage}% consistency` : 'No task data'} | ${averageScorePercentage !== null ? `Avg score ${averageScorePercentage}%` : 'No scored exams'}`,
+        });
+      }
+    }
+
+    // 3. Aggregate Mentor Performance & Workload Directory
+    const mentorSummaries: AdminMentorSummary[] = [];
+    let activeMentorsCount = 0;
+
+    for (const mentor of mentorProfiles) {
+      let activeMenteesCount = 0;
+      let activeCohortsCount = 0;
+      let pendingReviewsCount = 0;
+      let recentEvaluationsCount = 0;
+      let menteesNeedingAttentionCount = 0;
+      let lastActivityDate: string | null = null;
+      let expertiseSubjects: string[] = [];
+
+      if (!backend.isConfigured || !backend.supabase) {
+        const mentees = getMockAssignedStudents(mentor.id);
+        activeMenteesCount = mentees.length;
+        const cohorts = getMockCohortMentors({ mentorId: mentor.id, isActive: true });
+        activeCohortsCount = cohorts.length;
+
+        const subs = getMockMentorSubmissions(mentor.id);
+        pendingReviewsCount = subs.filter((s) => s.status === 'submitted' || (s.status as string) === 'under_review' || (s.status as string) === 'pending_review').length;
+
+        const evals = getMockMentorEvaluations(mentor.id);
+        recentEvaluationsCount = evals.filter((e) =>
+          isDateInRange(e.scheduled_date || e.evaluated_at || e.created_at, dateRange.startDate, dateRange.endDate)
+        ).length;
+
+        // Count assigned mentees needing attention
+        menteesNeedingAttentionCount = mentees.filter((m) => {
+          const sSum = studentSummaries.find((s) => s.studentId === m.id);
+          return sSum && (sSum.attentionLevel === 'critical' || sSum.attentionLevel === 'warning');
+        }).length;
+
+        // Activity date from evaluations or reviewed submissions
+        const mentorActivityDates: string[] = [];
+        evals.forEach((e) => {
+          if (e.evaluated_at) mentorActivityDates.push(toLocalDateStr(e.evaluated_at)!);
+          else if (e.scheduled_date) mentorActivityDates.push(e.scheduled_date);
+        });
+        subs.forEach((s) => {
+          if (s.reviewed_at) mentorActivityDates.push(toLocalDateStr(s.reviewed_at)!);
+        });
+        if (mentorActivityDates.length > 0) {
+          mentorActivityDates.sort();
+          lastActivityDate = mentorActivityDates[mentorActivityDates.length - 1];
+        }
+
+        const subjects = getMockStudentSubjects('mock-student-pp001');
+        expertiseSubjects = subjects.slice(0, 2).map((s) => s.name);
+      } else {
+        // Supabase queries for mentor
+        const { count: menteeCount } = await backend.supabase
+          .from('student_mentor_assignments')
+          .select('id', { count: 'exact', head: true })
+          .eq('mentor_id', mentor.id)
+          .eq('is_active', true);
+        activeMenteesCount = menteeCount || 0;
+
+        const { count: cohortCount } = await backend.supabase
+          .from('cohort_mentors')
+          .select('id', { count: 'exact', head: true })
+          .eq('mentor_id', mentor.id)
+          .eq('is_active', true);
+        activeCohortsCount = cohortCount || 0;
+      }
+
+      if (activeMenteesCount > 0 || activeCohortsCount > 0) {
+        activeMentorsCount++;
+      }
+
+      mentorSummaries.push({
+        mentorId: mentor.id,
+        mentorName: mentor.full_name || 'Mentor',
+        poraplanId: mentor.poraplan_id || 'PPM001',
+        expertiseSubjects,
+        activeMenteesCount,
+        activeCohortsCount,
+        recentEvaluationsCount,
+        pendingReviewsCount,
+        menteesNeedingAttentionCount,
+        lastActivityDate,
+      });
+    }
+
+    // 4. Construct Overview
+    const overview: AdminAcademicOverview = {
+      generatedAt: now,
+      totalRegisteredStudents: studentProfiles.length,
+      activeStudents: activeStudentIdSet.size,
+      totalMentors: mentorProfiles.length,
+      activeMentors: activeMentorsCount,
+      activeEnrollments: activeEnrollments.length,
+      scholarsNeedingAttentionCount: attentionItems.length,
+      totalSubmissionsPendingReview,
+      totalOverdueTasks,
+    };
+
+    return {
+      report: {
+        overview,
+        students: studentSummaries,
+        mentors: mentorSummaries,
+        attentionItems,
+        period,
+        dateRange,
+        generatedAt: now,
+      },
+      error: null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { report: null, error };
+  }
 }

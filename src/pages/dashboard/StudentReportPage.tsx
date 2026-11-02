@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
   generateStudentReport,
@@ -30,8 +30,11 @@ import {
 } from 'lucide-react';
 
 export const StudentReportPage: React.FC = () => {
-  const { user, profile } = useAuth();
-  const studentId = profile?.id || user?.id || '';
+  const { user, profile, role } = useAuth();
+  const [searchParams] = useSearchParams();
+  const paramStudentId = searchParams.get('studentId');
+  const isAdmin = role === 'admin';
+  const studentId = (isAdmin && paramStudentId) ? paramStudentId : (profile?.id || user?.id || '');
 
   const [period, setPeriod] = useState<ReportPeriod>('schedule');
   const [customStart, setCustomStart] = useState(() => {
@@ -56,8 +59,8 @@ export const StudentReportPage: React.FC = () => {
         period === 'custom' ? customStart : undefined,
         period === 'custom' ? customEnd : undefined,
         {
-          requestingUserId: studentId,
-          requestingUserRole: 'student',
+          requestingUserId: profile?.id || user?.id || '',
+          requestingUserRole: (isAdmin ? 'admin' : 'student') as 'admin' | 'student',
         }
       );
       if (err) {
@@ -70,7 +73,7 @@ export const StudentReportPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [studentId, period, customStart, customEnd]);
+  }, [studentId, period, customStart, customEnd, isAdmin, profile?.id, user?.id]);
 
   useEffect(() => {
     fetchReport();
@@ -129,8 +132,11 @@ export const StudentReportPage: React.FC = () => {
           .academic-heading, h1, h2, h3, h4, .academic-serif {
             font-family: 'Source Serif 4', 'Noto Serif Bengali', Georgia, serif !important;
           }
-          nav, aside, header, footer, .print\\:hidden {
+          nav, aside, header.sticky, main > footer, .print\\:hidden {
             display: none !important;
+          }
+          article header, article footer, .academic-doc header, .academic-doc footer {
+            display: flex !important;
           }
           .print\\:page-break {
             page-break-after: always !important;
@@ -155,14 +161,29 @@ export const StudentReportPage: React.FC = () => {
       <div className="print:hidden p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link
-              to="/student/library?tab=evaluations"
-              className="text-xs font-mono font-bold text-brand-muted hover:text-brand-dark flex items-center gap-1"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Academic Library</span>
-            </Link>
+            {isAdmin ? (
+              <Link
+                to="/admin/reports"
+                className="text-xs font-mono font-bold text-brand-navy hover:text-brand-teal flex items-center gap-1"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Return to Admin Reporting Center</span>
+              </Link>
+            ) : (
+              <Link
+                to="/student/library?tab=evaluations"
+                className="text-xs font-mono font-bold text-brand-muted hover:text-brand-dark flex items-center gap-1"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Academic Library</span>
+              </Link>
+            )}
           </div>
+          {isAdmin && (
+            <span className="font-mono text-[10px] uppercase font-bold text-brand-gold bg-brand-navy px-2 py-0.5 border border-brand-dark inline-block mb-1">
+              ADMINISTRATIVE AUDIT VIEW • {report?.studentName || studentId}
+            </span>
+          )}
           <h1 className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
             Academic Performance &amp; Improvement Report
           </h1>
@@ -655,9 +676,9 @@ export const StudentReportPage: React.FC = () => {
           {/* ===================================================================== */}
           {/* PAGE 2: INSIGHTS, CONSISTENCY GRAPH & ACTIONABLE ROADMAP              */}
           {/* ===================================================================== */}
-          <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-5 print:border-none print:shadow-none print:p-0 print:space-y-4">
+          <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-7 space-y-4 print:border-none print:shadow-none print:p-0 print:space-y-3">
             {/* Page 2 Running Header */}
-            <header className="border-b-2 border-brand-dark pb-3 flex items-center justify-between text-xs academic-sans">
+            <header className="border-b border-brand-dark/30 pb-2.5 flex items-center justify-between text-xs academic-sans">
               <div className="flex items-center gap-3">
                 <span className="font-bold text-brand-navy">{report.studentName}</span>
                 <span className="text-brand-teal font-bold">{report.poraplanId}</span>
@@ -665,18 +686,18 @@ export const StudentReportPage: React.FC = () => {
                   {report.programName || 'Academic Mentorship'}
                 </span>
               </div>
-              <div className="text-brand-muted font-semibold">
+              <div className="text-brand-muted font-semibold text-[11px]">
                 Academic Performance &amp; Improvement Report • Page 2 of 2
               </div>
             </header>
 
             {/* =================================================================== */}
-            {/* 1. DAILY CONSISTENCY GRAPH (MILESTONE 12.2.1 REQUIREMENT)          */}
+            {/* 1. DAILY CONSISTENCY GRAPH (MILESTONE 12.2.1 / 12.3 REQUIREMENT)   */}
             {/* =================================================================== */}
-            <section className="space-y-2 break-inside-avoid">
+            <section className="space-y-1.5 break-inside-avoid">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <h3 className="academic-heading font-bold text-sm sm:text-base text-brand-navy flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-brand-teal" />
+                <h3 className="academic-heading font-bold text-sm text-brand-navy flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-brand-teal" />
                   <span>Daily Schedule Execution Consistency</span>
                 </h3>
                 <span className="text-[10px] academic-sans text-brand-muted">
@@ -685,14 +706,14 @@ export const StudentReportPage: React.FC = () => {
               </div>
 
               {report.studyConsistency.totalScheduledDays === 0 ? (
-                <div className="p-4 border-2 border-brand-dark bg-brand-bg text-center text-xs academic-sans text-brand-muted italic">
+                <div className="p-3 border border-brand-dark/30 bg-brand-bg text-center text-xs academic-sans text-brand-muted italic">
                   No mentor-scheduled tasks were assigned during this reporting window. Consistency tracking is marked N/A.
                 </div>
               ) : (
-                <div className="p-3.5 border-2 border-brand-dark bg-white space-y-3">
+                <div className="p-3 border border-brand-dark/30 bg-white space-y-2.5">
                   {/* Metric Summary Ribbon */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-brand-dark/15 text-xs academic-sans">
-                    <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-brand-dark/15 text-xs academic-sans">
+                    <div className="flex items-center gap-4">
                       <div>
                         <span className="text-[9px] uppercase font-bold text-brand-muted block">SCHEDULED DAYS</span>
                         <span className="font-bold text-brand-navy text-sm">{report.studyConsistency.totalScheduledDays}</span>
@@ -720,8 +741,8 @@ export const StudentReportPage: React.FC = () => {
                   </div>
 
                   {/* Visual Bar Tracks (Grouped by Scheduled Day) */}
-                  <div className="overflow-x-auto pt-1 pb-1">
-                    <div className="flex items-end justify-between gap-2 min-w-full sm:min-w-0">
+                  <div className="overflow-x-auto pt-0.5 pb-0.5">
+                    <div className="flex items-end justify-between gap-1.5 min-w-full sm:min-w-0">
                       {report.studyConsistency.scheduledDays.map((day) => {
                         const onTimePct = day.assignedCount > 0 ? (day.completedOnTimeCount / day.assignedCount) * 100 : 0;
                         const latePct = day.assignedCount > 0 ? (day.completedLateCount / day.assignedCount) * 100 : 0;
@@ -730,15 +751,15 @@ export const StudentReportPage: React.FC = () => {
                         return (
                           <div
                             key={day.date}
-                            className="flex-1 min-w-[36px] max-w-[64px] flex flex-col items-center gap-1.5"
+                            className="flex-1 min-w-[32px] max-w-[56px] flex flex-col items-center gap-1"
                           >
                             {/* Values pill */}
-                            <span className="text-[9px] academic-sans font-bold text-brand-navy">
+                            <span className="text-[8.5px] academic-sans font-bold text-brand-navy">
                               {day.totalCompletedCount}/{day.assignedCount}
                             </span>
 
                             {/* Stacked Vertical Bar */}
-                            <div className="w-full h-16 border border-brand-dark/40 bg-brand-bg rounded-t overflow-hidden flex flex-col-reverse justify-start">
+                            <div className="w-full h-11 border border-brand-dark/30 bg-brand-bg rounded-t overflow-hidden flex flex-col-reverse justify-start">
                               {onTimePct > 0 && (
                                 <div
                                   style={{ height: `${onTimePct}%` }}
@@ -766,25 +787,25 @@ export const StudentReportPage: React.FC = () => {
                             <div className="flex items-center justify-center">
                               {day.isConsistent ? (
                                 <span
-                                  className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] text-white ${
+                                  className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] text-white ${
                                     day.isOnTime ? 'bg-emerald-600' : 'bg-amber-600'
                                   }`}
                                   title={day.isOnTime ? 'Active (Completed On-Time)' : 'Active (Completed Late)'}
                                 >
-                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                  <Check className="w-2 h-2 stroke-[3]" />
                                 </span>
                               ) : (
                                 <span
-                                  className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] text-white bg-red-600"
+                                  className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] text-white bg-red-600"
                                   title="Missed (No tasks completed)"
                                 >
-                                  <X className="w-2.5 h-2.5 stroke-[3]" />
+                                  <X className="w-2 h-2 stroke-[3]" />
                                 </span>
                               )}
                             </div>
 
                             {/* Date Label */}
-                            <span className="text-[9px] academic-sans font-semibold text-brand-dark text-center whitespace-nowrap">
+                            <span className="text-[8.5px] academic-sans font-semibold text-brand-dark text-center whitespace-nowrap">
                               {day.dayLabel}
                             </span>
                           </div>
@@ -794,48 +815,48 @@ export const StudentReportPage: React.FC = () => {
                   </div>
 
                   {/* Chart Legend & Academic Disclaimer */}
-                  <div className="pt-2 border-t border-brand-dark/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[10px] academic-sans">
+                  <div className="pt-1.5 border-t border-brand-dark/10 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[9.5px] academic-sans">
                     <div className="flex flex-wrap items-center gap-3">
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-sm bg-brand-teal inline-block" />
+                        <span className="w-2 h-2 rounded-xs bg-brand-teal inline-block" />
                         <span>Completed On-Time</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-sm bg-brand-gold inline-block" />
+                        <span className="w-2 h-2 rounded-xs bg-brand-gold inline-block" />
                         <span>Completed Late</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-sm bg-slate-200 border border-brand-dark/30 inline-block" />
+                        <span className="w-2 h-2 rounded-xs bg-slate-200 border border-brand-dark/30 inline-block" />
                         <span>Pending</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-full bg-red-600 inline-block" />
-                        <span>Zero Completed</span>
+                        <span className="w-2 h-2 rounded-full bg-red-600 inline-block" />
+                        <span>Missed Day</span>
                       </div>
                     </div>
-                    <span className="text-brand-muted italic text-[9px]">
-                      *Evaluates task schedule execution strictly; does not measure study hours or attendance.
+                    <span className="text-brand-muted italic text-[8.5px]">
+                      *Evaluates task schedule execution strictly; unscheduled days excluded from denominator.
                     </span>
                   </div>
                 </div>
               )}
             </section>
 
-            {/* Section 2: Task Backlog & Overdue Radar */}
-            <div className="space-y-2 break-inside-avoid">
-              <h3 className="academic-heading font-bold text-sm sm:text-base text-brand-navy flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-brand-gold" />
+            {/* Section 2: Task Backlog & Deadline Status */}
+            <div className="space-y-1.5 break-inside-avoid">
+              <h3 className="academic-heading font-bold text-sm text-brand-navy flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-brand-gold" />
                 <span>Task Backlog &amp; Deadline Status</span>
               </h3>
-              <div className="p-3.5 border-2 border-brand-dark bg-brand-bg grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs academic-sans">
+              <div className="p-3 border border-brand-dark/30 bg-brand-bg grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs academic-sans">
                 <div>
-                  <span className="text-brand-muted text-[10px] uppercase font-bold block">
+                  <span className="text-brand-muted text-[9.5px] uppercase font-bold block">
                     OVERDUE TASKS
                   </span>
-                  <span className={`text-xl font-bold ${report.taskMetrics.overdue > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
+                  <span className={`text-lg font-bold ${report.taskMetrics.overdue > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
                     {report.taskMetrics.overdue} task{report.taskMetrics.overdue === 1 ? '' : 's'}
                   </span>
-                  <p className="text-[10px] text-brand-muted mt-0.5">
+                  <p className="text-[9.5px] text-brand-muted mt-0.5">
                     {report.taskMetrics.overdue > 0
                       ? 'Action needed: prioritize in upcoming study session'
                       : 'Zero overdue tasks in reporting window'}
@@ -843,27 +864,27 @@ export const StudentReportPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <span className="text-brand-muted text-[10px] uppercase font-bold block">
+                  <span className="text-brand-muted text-[9.5px] uppercase font-bold block">
                     ON-TIME COMPLETION RATIO
                   </span>
-                  <span className="text-xl font-bold text-brand-navy">
+                  <span className="text-lg font-bold text-brand-navy">
                     {report.taskMetrics.completed > 0
                       ? `${Math.round((report.taskMetrics.onTimeCompleted / report.taskMetrics.completed) * 100)}%`
                       : 'N/A'}
                   </span>
-                  <p className="text-[10px] text-brand-muted mt-0.5">
+                  <p className="text-[9.5px] text-brand-muted mt-0.5">
                     {report.taskMetrics.onTimeCompleted} on-time, {report.taskMetrics.lateCompleted} completed late
                   </p>
                 </div>
 
                 <div>
-                  <span className="text-brand-muted text-[10px] uppercase font-bold block">
+                  <span className="text-brand-muted text-[9.5px] uppercase font-bold block">
                     PENDING IN-PROGRESS TASKS
                   </span>
-                  <span className="text-xl font-bold text-brand-navy">
+                  <span className="text-lg font-bold text-brand-navy">
                     {report.taskMetrics.pending + report.taskMetrics.inProgress}
                   </span>
-                  <p className="text-[10px] text-brand-muted mt-0.5">
+                  <p className="text-[9.5px] text-brand-muted mt-0.5">
                     Scheduled tasks awaiting execution
                   </p>
                 </div>
@@ -871,15 +892,15 @@ export const StudentReportPage: React.FC = () => {
             </div>
 
             {/* Section 3: Academic Strengths & Attention Areas */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 break-inside-avoid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 break-inside-avoid">
               {/* Strengths */}
-              <div className="p-3.5 border-2 border-brand-dark bg-emerald-50/40 space-y-2">
+              <div className="p-3 border border-brand-dark/30 bg-emerald-50/30 space-y-1.5">
                 <h4 className="academic-heading font-bold text-xs uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
                   <span>Verified Academic Strengths</span>
                 </h4>
                 {report.insights.observations.filter((o) => o.type === 'strength').length > 0 ? (
-                  <ul className="space-y-1.5 text-xs academic-sans text-emerald-950">
+                  <ul className="space-y-1 text-xs academic-sans text-emerald-950">
                     {report.insights.observations
                       .filter((o) => o.type === 'strength')
                       .map((obs, idx) => (
@@ -897,13 +918,13 @@ export const StudentReportPage: React.FC = () => {
               </div>
 
               {/* Areas Requiring Attention */}
-              <div className="p-3.5 border-2 border-brand-dark bg-red-50/40 space-y-2">
+              <div className="p-3 border border-brand-dark/30 bg-red-50/30 space-y-1.5">
                 <h4 className="academic-heading font-bold text-xs uppercase tracking-wider text-red-900 flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5 text-red-700" />
                   <span>Areas Requiring Focus &amp; Attention</span>
                 </h4>
                 {report.insights.observations.filter((o) => o.type === 'attention').length > 0 ? (
-                  <ul className="space-y-1.5 text-xs academic-sans text-red-950">
+                  <ul className="space-y-1 text-xs academic-sans text-red-950">
                     {report.insights.observations
                       .filter((o) => o.type === 'attention')
                       .map((obs, idx) => (
@@ -922,37 +943,37 @@ export const StudentReportPage: React.FC = () => {
             </div>
 
             {/* Section 4: Evaluation Feedback Highlights & Mentor Remarks */}
-            <div className="space-y-2 break-inside-avoid">
-              <h3 className="academic-heading font-bold text-sm sm:text-base text-brand-navy flex items-center gap-1.5">
-                <MessageSquareQuote className="w-4 h-4 text-brand-teal" />
+            <div className="space-y-1.5 break-inside-avoid">
+              <h3 className="academic-heading font-bold text-sm text-brand-navy flex items-center gap-1.5">
+                <MessageSquareQuote className="w-3.5 h-3.5 text-brand-teal" />
                 <span>Evaluation Remarks &amp; Mentor Guidance</span>
               </h3>
               {report.evaluationMetrics.recentFeedback.length === 0 ? (
-                <div className="p-3 border-2 border-brand-dark bg-brand-bg text-xs academic-sans text-brand-muted italic">
+                <div className="p-2.5 border border-brand-dark/30 bg-brand-bg text-xs academic-sans text-brand-muted italic">
                   No mentor evaluation notes recorded within this reporting window.
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {report.evaluationMetrics.recentFeedback.map((fb) => (
+                <div className="space-y-1.5">
+                  {report.evaluationMetrics.recentFeedback.slice(0, 3).map((fb) => (
                     <div
                       key={fb.id}
-                      className="p-3 border-2 border-brand-dark bg-brand-bg text-xs academic-sans space-y-1"
+                      className="p-2.5 border border-brand-dark/30 bg-brand-bg text-xs academic-sans space-y-1"
                     >
                       <div className="flex items-center justify-between font-bold text-brand-navy">
                         <span>
                           {fb.title} {fb.subjectName ? `(${fb.subjectName})` : ''}
                         </span>
-                        <span className="text-[10px] text-brand-muted">
+                        <span className="text-[9.5px] text-brand-muted">
                           {fb.date} {fb.scorePercentage !== null ? `• Score: ${fb.scorePercentage}%` : ''}
                         </span>
                       </div>
                       {fb.feedback && (
-                        <p className="text-brand-dark">
-                          <strong className="text-brand-navy">Feedback:</strong> "{fb.feedback}"
+                        <p className="text-brand-dark italic">
+                          <strong className="text-brand-navy not-italic">Feedback:</strong> "{fb.feedback}"
                         </p>
                       )}
                       {fb.recommendation && (
-                        <p className="text-brand-teal font-semibold">
+                        <p className="text-brand-teal font-medium">
                           <strong>Mentor Recommendation:</strong> {fb.recommendation}
                         </p>
                       )}
@@ -963,26 +984,26 @@ export const StudentReportPage: React.FC = () => {
             </div>
 
             {/* Section 5: Prioritized Action Plan (Top 3 Recommendations) */}
-            <div className="space-y-2 break-inside-avoid">
+            <div className="space-y-1.5 break-inside-avoid">
               <div className="flex items-center justify-between">
-                <h3 className="academic-heading font-bold text-sm sm:text-base text-brand-navy flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-brand-gold" />
+                <h3 className="academic-heading font-bold text-sm text-brand-navy flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-brand-gold" />
                   <span>Prioritized Action Plan for Next Cycle</span>
                 </h3>
-                <span className="text-[10px] academic-sans text-brand-muted">
+                <span className="text-[9.5px] academic-sans text-brand-muted">
                   Deterministic, Evidence-Based Next Steps
                 </span>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {report.recommendations.map((rec) => (
                   <div
                     key={rec.id}
-                    className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col sm:flex-row sm:items-start gap-3"
+                    className="p-2.5 border border-brand-dark/30 bg-brand-paper shadow-xs flex flex-col sm:flex-row sm:items-start gap-2.5"
                   >
                     <div className="shrink-0">
                       <span
-                        className={`px-2 py-0.5 border text-[10px] font-bold uppercase inline-block ${
+                        className={`px-1.5 py-0.5 border text-[9px] font-bold uppercase inline-block ${
                           rec.priority === 'P1'
                             ? 'bg-red-700 text-white border-red-900'
                             : rec.priority === 'P2'
@@ -993,15 +1014,15 @@ export const StudentReportPage: React.FC = () => {
                         {rec.priority} • {rec.priorityLabel}
                       </span>
                     </div>
-                    <div className="space-y-1 text-xs academic-sans flex-1">
-                      <div className="font-bold text-brand-navy text-sm">{rec.title}</div>
-                      <div className="text-[11px] text-brand-muted">
+                    <div className="space-y-0.5 text-xs academic-sans flex-1">
+                      <div className="font-bold text-brand-navy text-xs">{rec.title}</div>
+                      <div className="text-[10.5px] text-brand-muted">
                         <strong className="text-brand-dark">Evidence:</strong> {rec.evidence}
                       </div>
-                      <div className="text-brand-dark">
+                      <div className="text-[11px] text-brand-dark">
                         <strong className="text-brand-navy">Recommended Action:</strong> {rec.recommendedAction}
                       </div>
-                      <div className="text-[11px] text-brand-teal font-bold pt-0.5">
+                      <div className="text-[10.5px] text-brand-teal font-bold pt-0.5">
                         <span>Target Outcome:</span> {rec.measurableSuccessIndicator}
                       </div>
                     </div>
@@ -1011,31 +1032,31 @@ export const StudentReportPage: React.FC = () => {
             </div>
 
             {/* Page 2 Sign-off / Verification Block */}
-            <div className="pt-3 border-t-2 border-brand-dark grid grid-cols-2 gap-4 text-xs academic-sans break-inside-avoid">
-              <div className="space-y-1">
-                <span className="text-brand-muted text-[10px] uppercase font-bold block">
+            <div className="pt-2.5 border-t border-brand-dark/30 grid grid-cols-2 gap-4 text-xs academic-sans break-inside-avoid">
+              <div className="space-y-0.5">
+                <span className="text-brand-muted text-[9px] uppercase font-bold block">
                   SCHOLAR ACKNOWLEDGMENT
                 </span>
-                <div className="h-8 border-b border-brand-dark/40 flex items-end">
-                  <span className="text-brand-dark font-bold">{report.studentName}</span>
+                <div className="h-6 border-b border-brand-dark/30 flex items-end">
+                  <span className="text-brand-dark font-bold text-xs">{report.studentName}</span>
                 </div>
-                <span className="text-[9px] text-brand-muted">Digital Student Record</span>
+                <span className="text-[8.5px] text-brand-muted">Digital Student Record</span>
               </div>
-              <div className="space-y-1">
-                <span className="text-brand-muted text-[10px] uppercase font-bold block">
+              <div className="space-y-0.5">
+                <span className="text-brand-muted text-[9px] uppercase font-bold block">
                   MENTOR VERIFICATION &amp; SIGN-OFF
                 </span>
-                <div className="h-8 border-b border-brand-dark/40 flex items-end">
-                  <span className="text-brand-dark font-bold">
+                <div className="h-6 border-b border-brand-dark/30 flex items-end">
+                  <span className="text-brand-dark font-bold text-xs">
                     {report.mentorName ? `${report.mentorName} (Verified)` : 'PoraPlan Academic Team'}
                   </span>
                 </div>
-                <span className="text-[9px] text-brand-muted">Lead Academic Mentor Signature</span>
+                <span className="text-[8.5px] text-brand-muted">Lead Academic Mentor Signature</span>
               </div>
             </div>
 
             {/* Page 2 Footer */}
-            <footer className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-[10px] academic-sans text-brand-muted break-inside-avoid">
+            <footer className="pt-2 border-t border-brand-dark/20 flex items-center justify-between text-[9.5px] academic-sans text-brand-muted break-inside-avoid">
               <div>PoraPlan Academic Performance &amp; Improvement Report • Archive Copy</div>
               <div className="font-bold">Page 2 of 2</div>
             </footer>

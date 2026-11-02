@@ -138,6 +138,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Enrollments Desk', shortLabel: 'Enrollments', to: '/admin/enrollments', icon: UserCheck },
     { label: 'Mentor Allocations', shortLabel: 'Mentors', to: '/admin/mentor-assignments', icon: Users },
     { label: 'User Directory', shortLabel: 'Users', to: '/admin/users', icon: Users },
+    { label: 'Academic Reports', shortLabel: 'Reports', to: '/admin/reports', icon: BarChart3 },
     { label: 'System Alerts', shortLabel: 'Alerts', to: '/admin/notifications', icon: Bell, badgeCount: unreadNotifCount },
     { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
@@ -161,7 +162,7 @@ export const DashboardLayout: React.FC = () => {
 
   const mobileAdminNavItems = [
     { label: 'Admin', to: '/admin/dashboard', icon: ShieldCheck },
-    { label: 'Apps', to: '/admin/applications', icon: ClipboardList },
+    { label: 'Reports', to: '/admin/reports', icon: BarChart3 },
     { label: 'Enroll', to: '/admin/enrollments', icon: UserCheck },
     { label: 'Users', to: '/admin/users', icon: Users },
     { label: 'Alerts', to: '/admin/notifications', icon: Bell, badgeCount: unreadNotifCount },
@@ -173,7 +174,7 @@ export const DashboardLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-brand-bg text-brand-dark flex flex-col font-sans">
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-30 bg-brand-bg border-b-2 border-brand-dark px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shadow-sm">
+      <header className="sticky top-0 z-30 bg-brand-bg border-b-2 border-brand-dark px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shadow-sm print:hidden">
         {/* Brand identity & Role Indicator */}
         <div className="flex items-center gap-2.5 sm:gap-3">
           <Link
@@ -276,7 +277,7 @@ export const DashboardLayout: React.FC = () => {
       {/* Main Workspace Body with Responsive Shell */}
       <div className="flex-1 flex w-full">
         {/* Desktop Sidebar (md: 768px+) */}
-        <aside className="hidden md:flex flex-col w-60 lg:w-64 border-r-2 border-brand-dark bg-brand-paper shrink-0 justify-between">
+        <aside className="hidden md:flex flex-col w-60 lg:w-64 border-r-2 border-brand-dark bg-brand-paper shrink-0 justify-between print:hidden">
           <div className="p-4 space-y-4">
             <div className="border-b-2 border-brand-dark/20 pb-3">
               <span className="font-mono text-[10px] uppercase font-bold text-brand-muted tracking-wider block">
@@ -360,7 +361,7 @@ export const DashboardLayout: React.FC = () => {
           <Outlet />
 
           {/* Clean App Footer */}
-          <footer className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-2 text-center">
+          <footer className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-2 text-center print:hidden">
             <p className="font-mono text-[10px] text-brand-muted">
               PoraPlan Study System • You study. We organize how, what and when.
             </p>
@@ -370,7 +371,7 @@ export const DashboardLayout: React.FC = () => {
 
       {/* Mobile Bottom Navigation Bar (< 768px, optimized for 360px-430px) */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-paper border-t-2 border-brand-dark h-14 flex items-stretch justify-around shadow-brutal-xs"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-paper border-t-2 border-brand-dark h-14 flex items-stretch justify-around shadow-brutal-xs print:hidden"
         aria-label="Mobile Bottom Navigation"
       >
         {mobileNavItems.map((item) => {

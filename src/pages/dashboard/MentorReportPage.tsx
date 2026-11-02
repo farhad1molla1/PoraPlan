@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
   generateMentorReport,
@@ -19,6 +20,7 @@ import {
   Loader2,
   AlertCircle,
   ArrowRight,
+  ArrowLeft,
   CheckCircle2,
   AlertTriangle,
   Clock,
@@ -34,8 +36,11 @@ import {
 } from 'lucide-react';
 
 export const MentorReportPage: React.FC = () => {
-  const { user, profile } = useAuth();
-  const mentorId = profile?.id || user?.id || '';
+  const { user, profile, role } = useAuth();
+  const [searchParams] = useSearchParams();
+  const paramMentorId = searchParams.get('mentorId');
+  const isAdmin = role === 'admin';
+  const mentorId = (isAdmin && paramMentorId) ? paramMentorId : (profile?.id || user?.id || '');
 
   const [period, setPeriod] = useState<ReportPeriod>('schedule');
   const [customStart, setCustomStart] = useState(() => {
@@ -78,8 +83,8 @@ export const MentorReportPage: React.FC = () => {
         period === 'custom' ? customEnd : undefined,
         selectedStudentId === 'all' ? undefined : selectedStudentId,
         {
-          requestingUserId: mentorId,
-          requestingUserRole: 'mentor',
+          requestingUserId: profile?.id || user?.id || '',
+          requestingUserRole: (isAdmin ? 'admin' : 'mentor') as 'admin' | 'mentor',
         }
       );
 
@@ -99,8 +104,8 @@ export const MentorReportPage: React.FC = () => {
           period === 'custom' ? customStart : undefined,
           period === 'custom' ? customEnd : undefined,
           {
-            requestingUserId: mentorId,
-            requestingUserRole: 'mentor',
+            requestingUserId: profile?.id || user?.id || '',
+            requestingUserRole: (isAdmin ? 'admin' : 'mentor') as 'admin' | 'mentor',
           }
         );
 
@@ -117,7 +122,7 @@ export const MentorReportPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [mentorId, period, customStart, customEnd, selectedStudentId]);
+  }, [mentorId, period, customStart, customEnd, selectedStudentId, isAdmin, profile?.id, user?.id]);
 
   useEffect(() => {
     fetchReports();
@@ -173,8 +178,11 @@ export const MentorReportPage: React.FC = () => {
           .academic-heading, h1, h2, h3, h4, .academic-serif {
             font-family: 'Source Serif 4', 'Noto Serif Bengali', Georgia, serif !important;
           }
-          nav, aside, header, footer, .print\\:hidden {
+          nav, aside, header.sticky, main > footer, .print\\:hidden {
             display: none !important;
+          }
+          article header, article footer, .academic-doc header, .academic-doc footer {
+            display: flex !important;
           }
           .print\\:page-break {
             page-break-after: always !important;
@@ -199,8 +207,17 @@ export const MentorReportPage: React.FC = () => {
       <div className="print:hidden p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
+            {isAdmin && (
+              <Link
+                to="/admin/reports"
+                className="text-xs font-mono font-bold text-brand-navy hover:text-brand-teal flex items-center gap-1 mr-2"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Return to Admin Reporting Center</span>
+              </Link>
+            )}
             <span className="font-mono text-[10px] uppercase font-extrabold tracking-wider text-brand-gold bg-brand-bg px-2 py-0.5 border border-brand-dark">
-              MENTOR ROSTER OVERSIGHT
+              {isAdmin ? `ADMINISTRATIVE MENTOR AUDIT • ${mentorReport?.mentorName || mentorId}` : 'MENTOR ROSTER OVERSIGHT'}
             </span>
             <span className="font-mono text-[10px] text-brand-muted">
               {assignedStudents.length} Assigned Scholar{assignedStudents.length === 1 ? '' : 's'}
