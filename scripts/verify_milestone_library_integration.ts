@@ -23,7 +23,6 @@ import {
 } from '../src/lib/library';
 import {
   getMockStudentResources,
-  getMockMentorResources,
   createMockResource,
   deleteMockResource,
 } from '../src/lib/mockAuthStore';
