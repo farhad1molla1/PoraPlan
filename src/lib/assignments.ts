@@ -114,6 +114,38 @@ export async function getStudentAssignments(studentId: string, programId?: strin
 }
 
 /**
+ * Lightweight count of assignments assigned to a student.
+ */
+export async function getStudentAssignmentsCount(
+  studentId: string
+): Promise<{ count: number; error: Error | null }> {
+  if (!studentId) {
+    return { count: 0, error: new Error('Student ID is required.') };
+  }
+
+  if (!isSupabaseConfigured()) {
+    const list = getMockStudentAssignments(studentId);
+    return { count: list.length, error: null };
+  }
+
+  try {
+    const { count, error } = await supabase
+      .from('assignments')
+      .select('*', { count: 'exact', head: true })
+      .eq('student_id', studentId);
+
+    if (error) {
+      return { count: 0, error };
+    }
+
+    return { count: count ?? 0, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { count: 0, error };
+  }
+}
+
+/**
  * Fetch a single assignment by ID with its details and submission.
  */
 export async function getAssignmentById(assignmentId: string): Promise<{
@@ -242,7 +274,7 @@ export async function createAssignment(params: {
         type: 'assignment_created',
         title: 'New Assignment Published',
         message: `Mentor assigned "${cleanTitle}" (${insertPayload.total_points || 100} pts)`,
-        link: '/student/assignments',
+        link: '/student/library?tab=assignments',
         idempotencyKey: `assignment:${data.id}`,
       }).catch(() => {});
     }
@@ -482,7 +514,7 @@ export async function reviewSubmission(params: {
         type: 'submission_reviewed',
         title: 'Submission Reviewed',
         message: `Mentor reviewed your assignment submission${params.score !== undefined && params.score !== null ? ` — Score: ${params.score}` : ''}`,
-        link: '/student/assignments',
+        link: '/student/library?tab=assignments',
         idempotencyKey: `submission_review:${params.submissionId}`,
       }).catch(() => {});
     }

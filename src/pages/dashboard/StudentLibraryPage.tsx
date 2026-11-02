@@ -9,12 +9,14 @@ import { getStudentSubjects } from '../../lib/subjects';
 import {
   getStudentTasks,
   setTaskStatus,
+  getStudentTasksCount,
   type TaskWithMeta,
   type StudentTaskFilters,
 } from '../../lib/tasks';
 import {
   getStudentAssignments,
   submitAssignment,
+  getStudentAssignmentsCount,
   type AssignmentWithMeta,
 } from '../../lib/assignments';
 import {
@@ -26,7 +28,10 @@ import {
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
 import {
   parseLibraryTab,
+  formatLocalDate,
+  computeLibraryDateRange,
   type AcademicLibraryTab,
+  type LibraryDatePreset,
 } from '../../lib/library';
 import type {
   Subject,
@@ -64,7 +69,7 @@ import {
   FileUp,
 } from 'lucide-react';
 
-type DatePreset = 'all' | 'today' | 'this_week' | 'this_month' | 'specific_date' | 'custom_range';
+type DatePreset = LibraryDatePreset;
 
 export const StudentLibraryPage: React.FC = () => {
   const { user, profile } = useAuth();
@@ -73,6 +78,17 @@ export const StudentLibraryPage: React.FC = () => {
   // Tab State synchronized with URL query parameter (?tab=resources|tasks|assignments)
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab: AcademicLibraryTab = parseLibraryTab(searchParams.get('tab'));
+
+  // Tab Item Counts (PL-AUD-003: Accurate header counts with background prefetching)
+  const [tabCounts, setTabCounts] = useState<{
+    resources: number | null;
+    tasks: number | null;
+    assignments: number | null;
+  }>({
+    resources: null,
+    tasks: null,
+    assignments: null,
+  });
 
   const handleTabChange = (tab: AcademicLibraryTab) => {
     if (tab === activeTab) return;
@@ -119,7 +135,7 @@ export const StudentLibraryPage: React.FC = () => {
   const [taskStatusFilter, setTaskStatusFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed' | 'overdue'>('all');
   const [datePreset, setDatePreset] = useState<DatePreset>('all');
   const [selectedSpecificDate, setSelectedSpecificDate] = useState<string>(
-    () => new Date().toISOString().split('T')[0]
+    () => formatLocalDate(new Date())
   );
   const [customStartDate, setCustomStartDate] = useState<string>('');
   const [customEndDate, setCustomEndDate] = useState<string>('');
@@ -226,6 +242,7 @@ export const StudentLibraryPage: React.FC = () => {
           setResourcesError(res.error.message);
         } else {
           setResources(res.resources);
+          setTabCounts((prev) => ({ ...prev, resources: res.resources.length }));
         }
         setResourcesLoading(false);
       })
@@ -245,50 +262,11 @@ export const StudentLibraryPage: React.FC = () => {
   // LOAD TAB 2: TASKS & STUDY HISTORY DATA
   // ---------------------------------------------------------------------------
   const computeDateRange = useCallback((): { startDate?: string; endDate?: string } => {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-
-    switch (datePreset) {
-      case 'today':
-        return { startDate: todayStr, endDate: todayStr };
-
-      case 'this_week': {
-        const day = today.getDay(); // 0 is Sunday
-        const diffToMonday = (day + 6) % 7;
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - diffToMonday);
-        const sunday = new Date(monday);
-        sunday.setDate(monday.getDate() + 6);
-        return {
-          startDate: monday.toISOString().split('T')[0],
-          endDate: sunday.toISOString().split('T')[0],
-        };
-      }
-
-      case 'this_month': {
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        return {
-          startDate: firstDay.toISOString().split('T')[0],
-          endDate: lastDay.toISOString().split('T')[0],
-        };
-      }
-
-      case 'specific_date':
-        return selectedSpecificDate
-          ? { startDate: selectedSpecificDate, endDate: selectedSpecificDate }
-          : {};
-
-      case 'custom_range':
-        return {
-          startDate: customStartDate || undefined,
-          endDate: customEndDate || undefined,
-        };
-
-      case 'all':
-      default:
-        return {};
-    }
+    return computeLibraryDateRange(datePreset, {
+      selectedSpecificDate,
+      customStartDate,
+      customEndDate,
+    });
   }, [datePreset, selectedSpecificDate, customStartDate, customEndDate]);
 
   const loadTasks = useCallback(() => {
@@ -315,6 +293,9 @@ export const StudentLibraryPage: React.FC = () => {
           setTasksError(res.error.message);
         } else {
           setTasks(res.tasks);
+          if (datePreset === 'all' && taskSubjectFilter === 'all' && taskStatusFilter === 'all') {
+            setTabCounts((prev) => ({ ...prev, tasks: res.tasks.length }));
+          }
         }
         setTasksLoading(false);
       })
@@ -322,7 +303,7 @@ export const StudentLibraryPage: React.FC = () => {
         setTasksError(err instanceof Error ? err.message : 'Failed to load task history.');
         setTasksLoading(false);
       });
-  }, [studentId, computeDateRange, taskSubjectFilter, taskStatusFilter]);
+  }, [studentId, computeDateRange, taskSubjectFilter, taskStatusFilter, datePreset]);
 
   useEffect(() => {
     if (activeTab === 'tasks' && studentId) {
@@ -359,6 +340,7 @@ export const StudentLibraryPage: React.FC = () => {
           setAssignmentsError(res.error.message);
         } else {
           setAssignments(res.assignments);
+          setTabCounts((prev) => ({ ...prev, assignments: res.assignments.length }));
         }
         setAssignmentsLoading(false);
       })
@@ -373,6 +355,36 @@ export const StudentLibraryPage: React.FC = () => {
       loadAssignments();
     }
   }, [activeTab, studentId, loadAssignments]);
+
+  // Background prefetch for tab badge counts (PL-AUD-003)
+  useEffect(() => {
+    if (!studentId) return;
+    let isMounted = true;
+
+    if (tabCounts.tasks === null && activeTab !== 'tasks') {
+      getStudentTasksCount(studentId)
+        .then(({ count, error }) => {
+          if (isMounted && !error) {
+            setTabCounts((prev) => ({ ...prev, tasks: count }));
+          }
+        })
+        .catch(() => {});
+    }
+
+    if (tabCounts.assignments === null && activeTab !== 'assignments') {
+      getStudentAssignmentsCount(studentId)
+        .then(({ count, error }) => {
+          if (isMounted && !error) {
+            setTabCounts((prev) => ({ ...prev, assignments: count }));
+          }
+        })
+        .catch(() => {});
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [studentId, activeTab, tabCounts.tasks, tabCounts.assignments]);
 
   // ---------------------------------------------------------------------------
   // SUBMISSION FORM HANDLERS (TAB 3)
@@ -557,19 +569,32 @@ export const StudentLibraryPage: React.FC = () => {
 
     if (submitErr) {
       if (newUploadPath) {
-        await deleteAcademicFile(newUploadPath).catch(() => {});
+        await deleteAcademicFile(newUploadPath).catch((err) => {
+          console.error('Failed to clean up newly uploaded file after submission failure:', err);
+        });
       }
       setSubmitting(false);
       setFormError(`Failed to save submission: ${submitErr.message}`);
       return;
     }
 
-    if (
-      newUploadPath &&
-      currentAssignment.submission?.file_path &&
-      currentAssignment.submission.file_path !== newUploadPath
-    ) {
-      deleteAcademicFile(currentAssignment.submission.file_path).catch(() => {});
+    // Attachment lifecycle cleanup (PL-AUD-002):
+    // Only after successful database persistence, clean up previous file if it was replaced or superseded.
+    const previousFilePath = currentAssignment.submission?.file_path;
+    const isFileReplaced = Boolean(newUploadPath && previousFilePath && previousFilePath !== newUploadPath);
+    const isFileCleared = Boolean(submissionType !== 'file' && previousFilePath);
+
+    if (isFileReplaced || isFileCleared) {
+      if (previousFilePath) {
+        try {
+          const { error: delErr } = await deleteAcademicFile(previousFilePath);
+          if (delErr) {
+            console.error('Failed to clean up superseded submission attachment:', delErr);
+          }
+        } catch (cleanupErr) {
+          console.error('Error during superseded submission attachment cleanup:', cleanupErr);
+        }
+      }
     }
 
     setSubmitting(false);
@@ -661,7 +686,7 @@ export const StudentLibraryPage: React.FC = () => {
   // ---------------------------------------------------------------------------
   // Filtered Tasks for Display (Tab 2)
   const filteredTasks = useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = formatLocalDate(new Date());
     const q = taskSearch.trim().toLowerCase();
 
     return tasks.filter((task) => {
@@ -682,7 +707,7 @@ export const StudentLibraryPage: React.FC = () => {
   }, [tasks, taskStatusFilter, taskSearch]);
 
   const taskStats = useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = formatLocalDate(new Date());
     const total = tasks.length;
     const completed = tasks.filter((t) => t.status === 'completed').length;
     const inProgress = tasks.filter((t) => t.status === 'in_progress').length;
@@ -696,7 +721,7 @@ export const StudentLibraryPage: React.FC = () => {
 
   // Filtered Assignments for Display (Tab 3)
   const filteredAssignments = useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = formatLocalDate(new Date());
     const q = assignmentSearch.trim().toLowerCase();
 
     return assignments.filter((a) => {
@@ -902,7 +927,13 @@ export const StudentLibraryPage: React.FC = () => {
                 activeTab === 'resources' ? 'bg-white text-brand-dark' : 'bg-brand-paper text-brand-muted'
               }`}
             >
-              {resources.length}
+              {resourcesLoading && activeTab === 'resources' && tabCounts.resources === null
+                ? '...'
+                : tabCounts.resources !== null
+                ? tabCounts.resources
+                : resources.length > 0
+                ? resources.length
+                : '...'}
             </span>
           </button>
 
@@ -922,7 +953,13 @@ export const StudentLibraryPage: React.FC = () => {
                 activeTab === 'tasks' ? 'bg-white text-brand-dark' : 'bg-brand-paper text-brand-muted'
               }`}
             >
-              {tasks.length}
+              {tasksLoading && activeTab === 'tasks' && tabCounts.tasks === null
+                ? '...'
+                : tabCounts.tasks !== null
+                ? tabCounts.tasks
+                : tasks.length > 0
+                ? tasks.length
+                : '...'}
             </span>
           </button>
 
@@ -942,7 +979,13 @@ export const StudentLibraryPage: React.FC = () => {
                 activeTab === 'assignments' ? 'bg-brand-navy text-white' : 'bg-brand-paper text-brand-muted'
               }`}
             >
-              {assignments.length}
+              {assignmentsLoading && activeTab === 'assignments' && tabCounts.assignments === null
+                ? '...'
+                : tabCounts.assignments !== null
+                ? tabCounts.assignments
+                : assignments.length > 0
+                ? assignments.length
+                : '...'}
             </span>
           </button>
         </div>
@@ -1186,7 +1229,7 @@ export const StudentLibraryPage: React.FC = () => {
                 </span>
                 <span className="font-mono text-[11px] text-brand-muted">
                   {datePreset === 'all' && 'Showing All Scheduled & Unscheduled Tasks'}
-                  {datePreset === 'today' && `Today (${new Date().toISOString().split('T')[0]})`}
+                  {datePreset === 'today' && `Today (${formatLocalDate(new Date())})`}
                   {datePreset === 'this_week' && 'Current Calendar Week (Mon – Sun)'}
                   {datePreset === 'this_month' && 'Current Calendar Month'}
                   {datePreset === 'specific_date' && `Target Date: ${selectedSpecificDate}`}
@@ -1422,7 +1465,7 @@ export const StudentLibraryPage: React.FC = () => {
           ) : (
             <div className="space-y-3">
               {filteredTasks.map((task) => {
-                const todayStr = new Date().toISOString().split('T')[0];
+                const todayStr = formatLocalDate(new Date());
                 const isOverdue =
                   task.due_date && task.due_date < todayStr && task.status !== 'completed';
                 const isUpdating = updatingTaskId === task.id;
@@ -1857,7 +1900,7 @@ export const StudentLibraryPage: React.FC = () => {
                   isClosed ||
                   (hasSubmission &&
                     (submissionStatus === 'under_review' || submissionStatus === 'reviewed'));
-                const todayStr = new Date().toISOString().split('T')[0];
+                const todayStr = formatLocalDate(new Date());
                 const isPastDue =
                   assignment.due_date && assignment.due_date < todayStr && !hasSubmission;
 

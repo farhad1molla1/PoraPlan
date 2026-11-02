@@ -394,7 +394,9 @@ export const StudentAssignmentsPage: React.FC = () => {
     if (submitErr) {
       // STEP 4: If database record creation fails, attempt rollback/cleanup of newly uploaded file!
       if (newUploadPath) {
-        await deleteAcademicFile(newUploadPath).catch(() => {});
+        await deleteAcademicFile(newUploadPath).catch((err) => {
+          console.error('Failed to clean up newly uploaded file after submission failure:', err);
+        });
       }
       setSubmitting(false);
       setFormError(`Failed to save submission: ${submitErr.message}`);
@@ -402,13 +404,22 @@ export const StudentAssignmentsPage: React.FC = () => {
     }
 
     // STEP 5: Successful submission.
-    // If a previous file was replaced, clean up old file if safe and different
-    if (
-      newUploadPath &&
-      currentAssignment.submission?.file_path &&
-      currentAssignment.submission.file_path !== newUploadPath
-    ) {
-      deleteAcademicFile(currentAssignment.submission.file_path).catch(() => {});
+    // Clean up previous file if replaced by a new file, or cleared by switching to text/link.
+    const previousFilePath = currentAssignment.submission?.file_path;
+    const isFileReplaced = Boolean(newUploadPath && previousFilePath && previousFilePath !== newUploadPath);
+    const isFileCleared = Boolean(submissionType !== 'file' && previousFilePath);
+
+    if (isFileReplaced || isFileCleared) {
+      if (previousFilePath) {
+        try {
+          const { error: delErr } = await deleteAcademicFile(previousFilePath);
+          if (delErr) {
+            console.error('Failed to clean up superseded submission attachment:', delErr);
+          }
+        } catch (cleanupErr) {
+          console.error('Error during superseded submission attachment cleanup:', cleanupErr);
+        }
+      }
     }
 
     setSubmitting(false);

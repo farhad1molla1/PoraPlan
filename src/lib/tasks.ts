@@ -133,6 +133,38 @@ export async function getStudentTasks(
 }
 
 /**
+ * Lightweight count of tasks assigned to a student.
+ */
+export async function getStudentTasksCount(
+  studentId: string
+): Promise<{ count: number; error: Error | null }> {
+  if (!studentId) {
+    return { count: 0, error: new Error('Student ID is required.') };
+  }
+
+  if (!isSupabaseConfigured()) {
+    const list = getMockStudentTasks(studentId);
+    return { count: list.length, error: null };
+  }
+
+  try {
+    const { count, error } = await supabase
+      .from('tasks')
+      .select('*', { count: 'exact', head: true })
+      .eq('student_id', studentId);
+
+    if (error) {
+      return { count: 0, error };
+    }
+
+    return { count: count ?? 0, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { count: 0, error };
+  }
+}
+
+/**
  * Fetch a single task by ID.
  */
 export async function getTaskById(taskId: string): Promise<{
@@ -283,7 +315,7 @@ export async function createTask(params: {
         type: 'task_created',
         title: 'New Task Assigned',
         message: `Mentor assigned task "${cleanTitle}"`,
-        link: '/student/tasks',
+        link: '/student/library?tab=tasks',
         idempotencyKey: `task:${data.id}`,
       }).catch(() => {});
     }

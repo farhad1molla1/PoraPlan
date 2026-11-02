@@ -50,3 +50,79 @@ export function getLibraryTabUrl(
   params.set('tab', tab);
   return `${path}?${params.toString()}`;
 }
+
+/**
+ * Formats a Date object to a 'YYYY-MM-DD' calendar date string using
+ * local year, month, and day components, avoiding UTC-induced timezone shifts.
+ */
+export function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export type LibraryDatePreset =
+  | 'all'
+  | 'today'
+  | 'this_week'
+  | 'this_month'
+  | 'specific_date'
+  | 'custom_range';
+
+/**
+ * Computes scheduled date boundaries (YYYY-MM-DD) for Library task browsing presets.
+ * Accepts an optional reference `today` Date for deterministic timezone testing.
+ */
+export function computeLibraryDateRange(
+  preset: LibraryDatePreset,
+  options?: {
+    today?: Date;
+    selectedSpecificDate?: string;
+    customStartDate?: string;
+    customEndDate?: string;
+  }
+): { startDate?: string; endDate?: string } {
+  const today = options?.today || new Date();
+  const todayStr = formatLocalDate(today);
+
+  switch (preset) {
+    case 'today':
+      return { startDate: todayStr, endDate: todayStr };
+
+    case 'this_week': {
+      const day = today.getDay(); // 0 is Sunday
+      const diffToMonday = (day + 6) % 7;
+      const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - diffToMonday);
+      const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+      return {
+        startDate: formatLocalDate(monday),
+        endDate: formatLocalDate(sunday),
+      };
+    }
+
+    case 'this_month': {
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      return {
+        startDate: formatLocalDate(firstDay),
+        endDate: formatLocalDate(lastDay),
+      };
+    }
+
+    case 'specific_date':
+      return options?.selectedSpecificDate
+        ? { startDate: options.selectedSpecificDate, endDate: options.selectedSpecificDate }
+        : {};
+
+    case 'custom_range':
+      return {
+        startDate: options?.customStartDate || undefined,
+        endDate: options?.customEndDate || undefined,
+      };
+
+    case 'all':
+    default:
+      return {};
+  }
+}

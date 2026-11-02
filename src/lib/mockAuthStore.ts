@@ -1107,7 +1107,7 @@ export function createMockTask(params: {
       type: 'task_created',
       title: 'New Task Assigned',
       message: `Mentor assigned task "${cleanTitle}"`,
-      link: '/student/tasks',
+      link: '/student/library?tab=tasks',
       idempotencyKey: `task:${taskId}`,
     });
   }
@@ -1371,7 +1371,7 @@ export function createMockAssignment(params: {
       type: 'assignment_created',
       title: 'New Assignment Published',
       message: `Mentor assigned "${cleanTitle}" (${newAssignment.total_points || 100} pts)`,
-      link: '/student/assignments',
+      link: '/student/library?tab=assignments',
       idempotencyKey: `assignment:${assignmentId}`,
     });
   }
@@ -1508,9 +1508,9 @@ export function submitMockAssignment(params: {
     current.submission_type = params.submissionType;
     current.content = cleanContent;
     current.link_url = params.linkUrl?.trim() || (params.submissionType === 'link' ? cleanContent : null);
-    current.file_name = params.fileName || current.file_name;
-    current.file_size = params.fileSize || current.file_size;
-    current.file_path = params.filePath !== undefined ? (params.filePath || null) : current.file_path;
+    current.file_name = params.submissionType === 'file' ? (params.fileName || current.file_name) : null;
+    current.file_size = params.submissionType === 'file' ? (params.fileSize || current.file_size) : null;
+    current.file_path = params.submissionType === 'file' ? (params.filePath !== undefined ? (params.filePath || null) : current.file_path) : null;
     current.status = 'submitted';
     current.submitted_at = now;
     current.updated_at = now;
@@ -1613,7 +1613,7 @@ export function reviewMockSubmission(params: {
     type: 'submission_reviewed',
     title: 'Submission Reviewed',
     message: `Mentor reviewed your submission for "${assignmentTitle}"${params.score !== undefined && params.score !== null ? ` — Score: ${params.score}` : ''}`,
-    link: '/student/assignments',
+    link: '/student/library?tab=assignments',
     idempotencyKey: `submission_review:${params.submissionId}`,
   });
 
