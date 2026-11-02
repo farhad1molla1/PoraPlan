@@ -109,22 +109,32 @@ export async function getStudentEvaluations(studentId: string, programId?: strin
  * Lightweight count of evaluations for a student.
  */
 export async function getStudentEvaluationsCount(
-  studentId: string
+  studentId: string,
+  programId?: string
 ): Promise<{ count: number; error: Error | null }> {
   if (!studentId) {
     return { count: 0, error: new Error('Student ID is required.') };
   }
 
   if (!isSupabaseConfigured()) {
-    const list = getMockStudentEvaluations(studentId);
+    let list = getMockStudentEvaluations(studentId);
+    if (programId && programId !== 'all') {
+      list = list.filter((e) => !e.program_id || e.program_id === programId);
+    }
     return { count: list.length, error: null };
   }
 
   try {
-    const { count, error } = await supabase
+    let query = supabase
       .from('evaluations')
       .select('*', { count: 'exact', head: true })
       .eq('student_id', studentId);
+
+    if (programId && programId !== 'all') {
+      query = query.eq('program_id', programId);
+    }
+
+    const { count, error } = await query;
 
     if (error) {
       return { count: 0, error };
