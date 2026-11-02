@@ -281,6 +281,27 @@ export async function submitApplication(
       link: params.application_type === 'student' ? '/student/applications' : '/mentor/applications',
     });
 
+    // Notify administrators of incoming application
+    try {
+      const { data: adminProfiles } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin');
+      if (adminProfiles && adminProfiles.length > 0) {
+        for (const admin of adminProfiles) {
+          createNotification({
+            recipientId: admin.id,
+            actorId: params.applicant_id,
+            type: 'application_submitted',
+            title: 'New Program Application',
+            message: `A new ${params.application_type} application was submitted.`,
+            link: '/admin/applications',
+            idempotencyKey: `app_sub:${createdApp.id}:${admin.id}`,
+          }).catch(() => {});
+        }
+      }
+    } catch {}
+
     return { application: createdApp, error: null };
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
@@ -565,6 +586,54 @@ export async function adminManualEnrollStudent(input: {
           link: '/mentor/dashboard',
         });
       }
+
+      // 3. Cohort capacity alert check
+      try {
+        const { data: cohortData } = await supabase
+          .from('cohorts')
+          .select('id, name, capacity')
+          .eq('id', input.cohortId)
+          .single();
+        const maxCap = cohortData?.capacity || 0;
+        if (cohortData && maxCap > 0) {
+          const { count } = await supabase
+            .from('program_enrollments')
+            .select('*', { count: 'exact', head: true })
+            .eq('cohort_id', input.cohortId)
+            .in('status', ['active', 'completed']);
+          const activeCount = count || 0;
+          const ratio = activeCount / maxCap;
+          const { data: adminProfiles } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('role', 'admin');
+          if (adminProfiles && adminProfiles.length > 0) {
+            if (activeCount >= maxCap) {
+              for (const admin of adminProfiles) {
+                createNotification({
+                  recipientId: admin.id,
+                  type: 'capacity_alert',
+                  title: 'Cohort Capacity Reached',
+                  message: `Cohort "${cohortData.name}" has reached full capacity (${activeCount}/${maxCap}).`,
+                  link: '/admin/programs',
+                  idempotencyKey: `cohort_cap_full:${input.cohortId}`,
+                }).catch(() => {});
+              }
+            } else if (ratio >= 0.8) {
+              for (const admin of adminProfiles) {
+                createNotification({
+                  recipientId: admin.id,
+                  type: 'capacity_alert',
+                  title: 'Cohort Approaching Capacity',
+                  message: `Cohort "${cohortData.name}" is at ${Math.round(ratio * 100)}% capacity (${activeCount}/${maxCap}).`,
+                  link: '/admin/programs',
+                  idempotencyKey: `cohort_cap_near:${input.cohortId}:80pct`,
+                }).catch(() => {});
+              }
+            }
+          }
+        }
+      } catch {}
     }
 
     return {

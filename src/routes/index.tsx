@@ -39,6 +39,8 @@ import { MentorDoubtsPage } from '../pages/dashboard/MentorDoubtsPage';
 import { StudentAnnouncementsPage } from '../pages/dashboard/StudentAnnouncementsPage';
 import { MentorAnnouncementsPage } from '../pages/dashboard/MentorAnnouncementsPage';
 import { StudentNotificationsPage } from '../pages/dashboard/StudentNotificationsPage';
+import { MentorNotificationsPage } from '../pages/dashboard/MentorNotificationsPage';
+import { AdminNotificationsPage } from '../pages/dashboard/AdminNotificationsPage';
 import { ProfilePage } from '../pages/dashboard/ProfilePage';
 import { PublicProfilePage } from '../pages/dashboard/PublicProfilePage';
 import { MyApplicationsPage } from '../pages/dashboard/MyApplicationsPage';
@@ -348,6 +350,14 @@ export const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="mentor/notifications"
+          element={
+            <ProtectedRoute allowedRoles={['mentor', 'admin']}>
+              <MentorNotificationsPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Primary Admin Sector */}
         <Route
@@ -395,6 +405,14 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminUsersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/notifications"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminNotificationsPage />
             </ProtectedRoute>
           }
         />

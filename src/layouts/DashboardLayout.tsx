@@ -38,13 +38,13 @@ export const DashboardLayout: React.FC = () => {
   const [emailLinkMessage, setEmailLinkMessage] = useState<string | null>(null);
   const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);
 
-  // Poll/fetch unread notification count for active student
+  // Poll/fetch unread notification count for active user (Student, Mentor, Admin)
   React.useEffect(() => {
     let isMounted = true;
     const fetchUnread = async () => {
-      const studentId = profile?.id || user?.id;
-      if (studentId && role === 'student') {
-        const { count } = await getUnreadNotificationCount(studentId);
+      const activeUserId = profile?.id || user?.id;
+      if (activeUserId) {
+        const { count } = await getUnreadNotificationCount(activeUserId);
         if (isMounted) setUnreadNotifCount(count || 0);
       }
     };
@@ -122,6 +122,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Resources', shortLabel: 'Resources', to: '/mentor/resources', icon: BookMarked },
     { label: 'Doubts', shortLabel: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/mentor/announcements', icon: Megaphone },
+    { label: 'Notifications', shortLabel: 'Alerts', to: '/mentor/notifications', icon: Bell, badgeCount: unreadNotifCount },
     { label: 'My Applications', shortLabel: 'Apps', to: '/mentor/applications', icon: ClipboardList },
     { label: 'Subjects', shortLabel: 'Subjects', to: '/mentor/subjects', icon: BookOpen },
     { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
@@ -134,6 +135,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Enrollments Desk', shortLabel: 'Enrollments', to: '/admin/enrollments', icon: UserCheck },
     { label: 'Mentor Allocations', shortLabel: 'Mentors', to: '/admin/mentor-assignments', icon: Users },
     { label: 'User Directory', shortLabel: 'Users', to: '/admin/users', icon: Users },
+    { label: 'System Alerts', shortLabel: 'Alerts', to: '/admin/notifications', icon: Bell, badgeCount: unreadNotifCount },
     { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
 
@@ -151,11 +153,19 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
     { label: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
     { label: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
-    { label: 'Evals', to: '/mentor/evaluations', icon: Calendar },
+    { label: 'Alerts', to: '/mentor/notifications', icon: Bell, badgeCount: unreadNotifCount },
+  ];
+
+  const mobileAdminNavItems = [
+    { label: 'Admin', to: '/admin/dashboard', icon: ShieldCheck },
+    { label: 'Apps', to: '/admin/applications', icon: ClipboardList },
+    { label: 'Enroll', to: '/admin/enrollments', icon: UserCheck },
+    { label: 'Users', to: '/admin/users', icon: Users },
+    { label: 'Alerts', to: '/admin/notifications', icon: Bell, badgeCount: unreadNotifCount },
   ];
 
   const navItems = isStudent ? studentNavItems : isMentor ? mentorNavItems : adminNavItems;
-  const mobileNavItems = isStudent ? mobileStudentNavItems : isMentor ? mobileMentorNavItems : adminNavItems;
+  const mobileNavItems = isStudent ? mobileStudentNavItems : isMentor ? mobileMentorNavItems : mobileAdminNavItems;
 
   return (
     <div className="min-h-screen bg-brand-bg text-brand-dark flex flex-col font-sans">
@@ -198,22 +208,20 @@ export const DashboardLayout: React.FC = () => {
 
         {/* User profile controls & Sign Out */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Notifications Center Bell for Students */}
-          {isStudent && (
-            <Link
-              to="/student/notifications"
-              className="relative p-2 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex items-center justify-center text-brand-dark hover:text-brand-navy"
-              title="Notifications Center"
-              aria-label={`Notifications Center, ${unreadNotifCount} unread`}
-            >
-              <Bell className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-              {unreadNotifCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-brand-coral text-white font-mono font-bold text-[10px] leading-tight flex items-center justify-center border border-brand-dark shadow-xs">
-                  {unreadNotifCount > 99 ? '99+' : unreadNotifCount}
-                </span>
-              )}
-            </Link>
-          )}
+          {/* Notifications Center Bell */}
+          <Link
+            to={isMentor ? '/mentor/notifications' : isAdmin ? '/admin/notifications' : '/student/notifications'}
+            className="relative p-2 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex items-center justify-center text-brand-dark hover:text-brand-navy"
+            title="Notifications Center"
+            aria-label={`Notifications Center, ${unreadNotifCount} unread`}
+          >
+            <Bell className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            {unreadNotifCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-brand-coral text-white font-mono font-bold text-[10px] leading-tight flex items-center justify-center border border-brand-dark shadow-xs">
+                {unreadNotifCount > 99 ? '99+' : unreadNotifCount}
+              </span>
+            )}
+          </Link>
 
           {/* Profile Trigger Button */}
           <button

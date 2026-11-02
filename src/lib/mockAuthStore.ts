@@ -1547,6 +1547,19 @@ export function submitMockAssignment(params: {
     current.submitted_at = now;
     current.updated_at = now;
     mockSubmissions[existingIndex] = { ...current };
+
+    if (assignment.mentor_id) {
+      createMockNotification({
+        recipientId: assignment.mentor_id,
+        actorId: normalizedStudentId,
+        type: 'submission_created',
+        title: 'Student Submission Updated',
+        message: `Work updated for "${assignment.title}"`,
+        link: '/mentor/reviews',
+        idempotencyKey: `submission:${current.id}:${now}`,
+      });
+    }
+
     return { submission: { ...current }, error: null };
   }
 
@@ -1566,6 +1579,19 @@ export function submitMockAssignment(params: {
   };
 
   mockSubmissions.push(newSubmission);
+
+  if (assignment.mentor_id) {
+    createMockNotification({
+      recipientId: assignment.mentor_id,
+      actorId: normalizedStudentId,
+      type: 'submission_created',
+      title: 'New Student Submission',
+      message: `Work submitted for "${assignment.title}"`,
+      link: '/mentor/reviews',
+      idempotencyKey: `submission:${newSubmission.id}`,
+    });
+  }
+
   return { submission: { ...newSubmission }, error: null };
 }
 
@@ -2937,15 +2963,18 @@ export function createMockDoubt(params: {
   const normalizedStudentId = params.studentId === 'PP001' ? 'mock-student-pp001' : params.studentId;
 
   // Validate subject ownership if supplied
+  let subjectProgramId: string | undefined = undefined;
   if (params.subjectId) {
     const subject = mockSubjects.find((s) => s.id === params.subjectId);
     if (!subject || (subject.student_id !== normalizedStudentId && subject.student_id !== params.studentId)) {
       return { doubt: null, error: new Error('Selected study area does not belong to this student.') };
     }
+    subjectProgramId = (subject as any).program_id;
   }
 
   // Find effective assigned mentor for student (and program if supplied)
-  const effectiveMentor = getMockEffectiveMentorForStudent(normalizedStudentId, params.programId);
+  const effectiveProgramId = params.programId || subjectProgramId;
+  const effectiveMentor = getMockEffectiveMentorForStudent(normalizedStudentId, effectiveProgramId);
   const mentorId = effectiveMentor.mentor ? effectiveMentor.mentor.id : null;
 
   const doubtId = `mock-doubt-${Date.now()}`;
@@ -2955,7 +2984,7 @@ export function createMockDoubt(params: {
     id: doubtId,
     student_id: normalizedStudentId,
     mentor_id: mentorId,
-    program_id: params.programId || null,
+    program_id: effectiveProgramId || null,
     cohort_id: params.cohortId || null,
     subject_id: params.subjectId || null,
     plan_id: params.planId || null,
@@ -2974,6 +3003,19 @@ export function createMockDoubt(params: {
   };
 
   mockDoubts.unshift(newDoubt);
+
+  if (mentorId) {
+    createMockNotification({
+      recipientId: mentorId,
+      actorId: normalizedStudentId,
+      type: 'doubt_created',
+      title: 'New Student Question',
+      message: `Question posted: "${cleanTitle}"`,
+      link: '/mentor/doubts',
+      idempotencyKey: `doubt:${doubtId}`,
+    });
+  }
+
   return { doubt: { ...newDoubt }, error: null };
 }
 
@@ -3706,19 +3748,71 @@ export const mockNotifications: Notification[] = [
     idempotency_key: 'announcement:mock-announcement-001:mock-student-pp001',
     created_at: '2026-10-05T08:01:00Z',
   },
+  {
+    id: 'mock-notif-mentor-001',
+    recipient_id: 'mock-mentor-ppm001',
+    actor_id: 'mock-student-pp001',
+    type: 'submission_created',
+    title: 'New Assignment Submission',
+    message: 'Fahim Rahman submitted work for "Newtonian Mechanics & Dynamics Milestone".',
+    link: '/mentor/reviews',
+    read: false,
+    read_at: null,
+    idempotency_key: 'submission:mock-assign-001:mock-student-pp001',
+    created_at: '2026-10-14T14:30:00Z',
+  },
+  {
+    id: 'mock-notif-mentor-002',
+    recipient_id: 'mock-mentor-ppm001',
+    actor_id: 'mock-student-pp001',
+    type: 'doubt_created',
+    title: 'New Student Doubt Inquiry',
+    message: 'Fahim Rahman posted: "Normal force and friction on a double-incline Atwood setup".',
+    link: '/mentor/doubts',
+    read: true,
+    read_at: '2026-10-12T10:45:00Z',
+    idempotency_key: 'doubt:mock-doubt-001',
+    created_at: '2026-10-12T10:15:00Z',
+  },
+  {
+    id: 'mock-notif-admin-001',
+    recipient_id: 'mock-admin-ppa001',
+    actor_id: 'mock-student-pp001',
+    type: 'application_submitted',
+    title: 'New Program Application',
+    message: 'Fahim Rahman submitted an application for PoraPlan Academic Program 0.1 (Beta).',
+    link: '/admin/applications',
+    read: false,
+    read_at: null,
+    idempotency_key: 'app:app-seed-01',
+    created_at: '2026-10-15T09:00:00Z',
+  },
+  {
+    id: 'mock-notif-admin-002',
+    recipient_id: 'mock-admin-ppa001',
+    actor_id: null,
+    type: 'capacity_alert',
+    title: 'Cohort Approaching Capacity',
+    message: 'Cohort "Batch 67 - CSE Core" is at 85% capacity (17/20 scholars).',
+    link: '/admin/enrollments',
+    read: true,
+    read_at: '2026-10-16T16:20:00Z',
+    idempotency_key: 'cohort_cap_near:cohort-uu-cse-b67:80pct',
+    created_at: '2026-10-16T16:20:00Z',
+  },
 ];
 
-export function getMockStudentNotifications(studentId: string): EnrichedMockNotification[] {
-  const normalizedId = normalizeId(studentId);
-  const student = mockStore.find((u) => u.id === normalizedId);
+export function getMockUserNotifications(userId: string): EnrichedMockNotification[] {
+  const normalizedId = normalizeId(userId);
+  const user = mockStore.find((u) => u.id === normalizedId);
 
   return mockNotifications
-    .filter((n) => n.recipient_id === normalizedId || (student && n.recipient_id === student.poraplanId))
+    .filter((n) => n.recipient_id === normalizedId || (user && n.recipient_id === user.poraplanId))
     .map((n) => {
       const actor = n.actor_id ? mockStore.find((u) => u.id === n.actor_id) : null;
       return {
         ...n,
-        actor_name: actor?.fullName || (n.type === 'system' ? 'PoraPlan System' : 'Academic Faculty'),
+        actor_name: actor?.fullName || (n.type === 'system' ? 'PoraPlan System' : 'Academic Member'),
         actor_role: actor?.role,
         actor_poraplan_id: actor?.poraplanId,
       };
@@ -3726,12 +3820,16 @@ export function getMockStudentNotifications(studentId: string): EnrichedMockNoti
     .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
 }
 
-export function getMockUnreadNotificationCount(studentId: string): number {
-  const normalizedId = normalizeId(studentId);
-  const student = mockStore.find((u) => u.id === normalizedId);
+export const getMockStudentNotifications = getMockUserNotifications;
+export const getMockMentorNotifications = getMockUserNotifications;
+export const getMockAdminNotifications = getMockUserNotifications;
+
+export function getMockUnreadNotificationCount(userId: string): number {
+  const normalizedId = normalizeId(userId);
+  const user = mockStore.find((u) => u.id === normalizedId);
 
   return mockNotifications.filter(
-    (n) => !n.read && (n.recipient_id === normalizedId || (student && n.recipient_id === student.poraplanId))
+    (n) => !n.read && (n.recipient_id === normalizedId || (user && n.recipient_id === user.poraplanId))
   ).length;
 }
 
@@ -3772,14 +3870,25 @@ export function createMockNotification(data: {
   if (normalizedActorId) {
     const actor = mockStore.find((u) => u.id === normalizedActorId);
     if (actor?.role === 'student') {
-      return { notification: null, error: new Error('Students are not authorized to create notifications.') };
-    }
-    if (actor?.role === 'mentor') {
+      if (recipient?.role === 'mentor') {
+        const assigned = getMockAssignedStudents(normalizedRecipientId);
+        const isAssigned = assigned.some(
+          (s) => s.id === normalizedActorId || (actor && s.poraplan_id === actor.poraplanId)
+        );
+        if (!isAssigned) {
+          return { notification: null, error: new Error('Students can only notify their assigned mentors.') };
+        }
+      } else if (recipient?.role === 'admin') {
+        // Students/applicants can notify admins (e.g. application submissions)
+      } else {
+        return { notification: null, error: new Error('Students are not authorized to notify other students.') };
+      }
+    } else if (actor?.role === 'mentor') {
       const assigned = getMockAssignedStudents(normalizedActorId);
       const isAssigned = assigned.some(
         (s) => s.id === normalizedRecipientId || (recipient && s.poraplan_id === recipient.poraplanId)
       );
-      if (!isAssigned) {
+      if (!isAssigned && recipient?.role !== 'admin') {
         return { notification: null, error: new Error('Mentors can only notify students assigned to them.') };
       }
     }
@@ -4631,6 +4740,20 @@ export function createMockApplication(
     link: app.application_type === 'student' ? '/student/applications' : '/mentor/applications',
   });
 
+  // Notify administrators of incoming application
+  const adminUsers = mockStore.filter((u) => u.role === 'admin');
+  adminUsers.forEach((admin) => {
+    createMockNotification({
+      recipientId: admin.id,
+      actorId: app.applicant_id,
+      type: 'application_submitted',
+      title: 'New Program Application',
+      message: `A new ${app.application_type} application was submitted.`,
+      link: '/admin/applications',
+      idempotencyKey: `app_sub:${newApp.id}:${admin.id}`,
+    });
+  });
+
   return { application: newApp, error: null };
 }
 
@@ -4706,6 +4829,10 @@ export function adminReviewMockApplication(
         created_at: now,
         updated_at: now,
       });
+
+      if (app.cohort_id) {
+        checkAndTriggerMockCohortCapacityAlerts(app.cohort_id);
+      }
 
       // Send student notification
       createMockNotification({
@@ -5614,6 +5741,8 @@ export function adminManualEnrollMockStudent(
     updated_at: now,
   });
 
+  checkAndTriggerMockCohortCapacityAlerts(cohortId);
+
   if (mentorId) {
     // Deactivate previous active individual assignment for student in this program
     const existing = mockStudentMentorAssignments.find(
@@ -5651,4 +5780,41 @@ export function adminManualEnrollMockStudent(
     error: null,
   };
 }
+
+export function checkAndTriggerMockCohortCapacityAlerts(cohortId: string): void {
+  const cohort = mockCohorts.find((c) => c.id === cohortId);
+  const cap = (cohort as any)?.capacity || (cohort as any)?.max_capacity || 0;
+  if (!cohort || cap <= 0) return;
+
+  const activeCount = mockEnrollments.filter(
+    (e) => e.cohort_id === cohortId && ['active', 'completed'].includes(e.status)
+  ).length;
+  const ratio = activeCount / cap;
+  const adminUsers = mockStore.filter((u) => u.role === 'admin');
+
+  if (activeCount >= cap) {
+    adminUsers.forEach((admin) => {
+      createMockNotification({
+        recipientId: admin.id,
+        type: 'capacity_alert',
+        title: 'Cohort Capacity Reached',
+        message: `Cohort "${cohort.name}" has reached full capacity (${activeCount}/${cap}).`,
+        link: '/admin/programs',
+        idempotencyKey: `cohort_cap_full:${cohortId}`,
+      });
+    });
+  } else if (ratio >= 0.8) {
+    adminUsers.forEach((admin) => {
+      createMockNotification({
+        recipientId: admin.id,
+        type: 'capacity_alert',
+        title: 'Cohort Approaching Capacity',
+        message: `Cohort "${cohort.name}" is at ${Math.round(ratio * 100)}% capacity (${activeCount}/${cap}).`,
+        link: '/admin/programs',
+        idempotencyKey: `cohort_cap_near:${cohortId}:80pct`,
+      });
+    });
+  }
+}
+
 

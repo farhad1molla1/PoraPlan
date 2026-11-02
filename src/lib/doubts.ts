@@ -430,6 +430,18 @@ export async function createDoubt(params: {
       return { doubt: null, error: insertError || new Error('Failed to create doubt inquiry.') };
     }
 
+    if (mentorId) {
+      createNotification({
+        recipientId: mentorId,
+        actorId: params.studentId,
+        type: 'doubt_created',
+        title: 'New Student Question',
+        message: `Question posted: "${cleanTitle}"`,
+        link: '/mentor/doubts',
+        idempotencyKey: `doubt:${insertedDoubt.id}`,
+      }).catch(() => {});
+    }
+
     // 4. If no attachment, return immediately
     if (!params.attachmentFile) {
       return { doubt: insertedDoubt, error: null };

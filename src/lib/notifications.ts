@@ -12,7 +12,7 @@ import type {
   NotificationType,
 } from '../types/database';
 import {
-  getMockStudentNotifications,
+  getMockUserNotifications,
   getMockUnreadNotificationCount,
   createMockNotification,
   markMockNotificationAsRead,
@@ -33,25 +33,25 @@ function notifyUpdate() {
 }
 
 /**
- * Fetch all notifications belonging to a student.
+ * Fetch all notifications belonging to a member (Student, Mentor, or Admin).
  */
-export async function getStudentNotifications(studentId: string): Promise<{
+export async function getUserNotifications(userId: string): Promise<{
   notifications: NotificationWithActor[];
   error: Error | null;
 }> {
-  if (!studentId) {
-    return { notifications: [], error: new Error('Student ID is required.') };
+  if (!userId) {
+    return { notifications: [], error: new Error('User ID is required.') };
   }
 
   if (!isSupabaseConfigured()) {
-    const list = getMockStudentNotifications(studentId);
+    const list = getMockUserNotifications(userId);
     return { notifications: list as NotificationWithActor[], error: null };
   }
 
   try {
     const { data, error } = await (supabase.from('notifications') as any)
       .select('*, profiles!actor_id(full_name, role, poraplan_id)')
-      .eq('recipient_id', studentId)
+      .eq('recipient_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -70,7 +70,7 @@ export async function getStudentNotifications(studentId: string): Promise<{
       read_at: row.read_at,
       idempotency_key: row.idempotency_key,
       created_at: row.created_at,
-      actor_name: row.profiles?.full_name || (row.type === 'system' ? 'PoraPlan System' : 'Academic Faculty'),
+      actor_name: row.profiles?.full_name || (row.type === 'system' ? 'PoraPlan System' : 'Academic Member'),
       actor_role: row.profiles?.role,
       actor_poraplan_id: row.profiles?.poraplan_id,
     }));
@@ -82,19 +82,24 @@ export async function getStudentNotifications(studentId: string): Promise<{
   }
 }
 
+/** Backward-compatible & role-specific aliases */
+export const getStudentNotifications = getUserNotifications;
+export const getMentorNotifications = getUserNotifications;
+export const getAdminNotifications = getUserNotifications;
+
 /**
- * Get total unread notification count for a student.
+ * Get total unread notification count for a user (Student, Mentor, or Admin).
  */
-export async function getUnreadNotificationCount(studentId: string): Promise<{
+export async function getUnreadNotificationCount(userId: string): Promise<{
   count: number;
   error: Error | null;
 }> {
-  if (!studentId) {
-    return { count: 0, error: new Error('Student ID is required.') };
+  if (!userId) {
+    return { count: 0, error: new Error('User ID is required.') };
   }
 
   if (!isSupabaseConfigured()) {
-    const count = getMockUnreadNotificationCount(studentId);
+    const count = getMockUnreadNotificationCount(userId);
     return { count, error: null };
   }
 
@@ -102,7 +107,7 @@ export async function getUnreadNotificationCount(studentId: string): Promise<{
     const { count, error } = await supabase
       .from('notifications')
       .select('*', { count: 'exact', head: true })
-      .eq('recipient_id', studentId)
+      .eq('recipient_id', userId)
       .eq('read', false);
 
     if (error) {
@@ -115,6 +120,8 @@ export async function getUnreadNotificationCount(studentId: string): Promise<{
     return { count: 0, error };
   }
 }
+
+export const getStudentUnreadNotificationCount = getUnreadNotificationCount;
 
 /**
  * Create a notification for a recipient scholar.
@@ -199,17 +206,17 @@ export async function createNotification(params: {
  */
 export async function markNotificationAsRead(
   notificationId: string,
-  studentId: string
+  userId: string
 ): Promise<{
   notification: Notification | null;
   error: Error | null;
 }> {
-  if (!notificationId || !studentId) {
-    return { notification: null, error: new Error('Notification ID and Student ID are required.') };
+  if (!notificationId || !userId) {
+    return { notification: null, error: new Error('Notification ID and User ID are required.') };
   }
 
   if (!isSupabaseConfigured()) {
-    const res = markMockNotificationAsRead(notificationId, studentId);
+    const res = markMockNotificationAsRead(notificationId, userId);
     if (!res.error) notifyUpdate();
     return res;
   }
@@ -223,7 +230,7 @@ export async function markNotificationAsRead(
         read_at: now,
       })
       .eq('id', notificationId)
-      .eq('recipient_id', studentId)
+      .eq('recipient_id', userId)
       .select('*')
       .single();
 
@@ -240,18 +247,18 @@ export async function markNotificationAsRead(
 }
 
 /**
- * Mark all unread notifications for a student as read.
+ * Mark all unread notifications for a user as read.
  */
-export async function markAllNotificationsAsRead(studentId: string): Promise<{
+export async function markAllNotificationsAsRead(userId: string): Promise<{
   count: number;
   error: Error | null;
 }> {
-  if (!studentId) {
-    return { count: 0, error: new Error('Student ID is required.') };
+  if (!userId) {
+    return { count: 0, error: new Error('User ID is required.') };
   }
 
   if (!isSupabaseConfigured()) {
-    const res = markAllMockNotificationsAsRead(studentId);
+    const res = markAllMockNotificationsAsRead(userId);
     if (!res.error) notifyUpdate();
     return res;
   }
@@ -264,7 +271,7 @@ export async function markAllNotificationsAsRead(studentId: string): Promise<{
         read: true,
         read_at: now,
       })
-      .eq('recipient_id', studentId)
+      .eq('recipient_id', userId)
       .eq('read', false)
       .select('id');
 
@@ -285,17 +292,17 @@ export async function markAllNotificationsAsRead(studentId: string): Promise<{
  */
 export async function deleteNotification(
   notificationId: string,
-  studentId: string
+  userId: string
 ): Promise<{
   success: boolean;
   error: Error | null;
 }> {
-  if (!notificationId || !studentId) {
-    return { success: false, error: new Error('Notification ID and Student ID are required.') };
+  if (!notificationId || !userId) {
+    return { success: false, error: new Error('Notification ID and User ID are required.') };
   }
 
   if (!isSupabaseConfigured()) {
-    const res = deleteMockNotification(notificationId, studentId);
+    const res = deleteMockNotification(notificationId, userId);
     if (res.success) notifyUpdate();
     return res;
   }
@@ -305,7 +312,7 @@ export async function deleteNotification(
       .from('notifications')
       .delete()
       .eq('id', notificationId)
-      .eq('recipient_id', studentId);
+      .eq('recipient_id', userId);
 
     if (error) {
       return { success: false, error };

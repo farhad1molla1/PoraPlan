@@ -1047,6 +1047,10 @@ export type NotificationType =
   | 'doubt_replied'
   | 'announcement_published'
   | 'plan_updated'
+  | 'submission_created'
+  | 'doubt_created'
+  | 'application_submitted'
+  | 'capacity_alert'
   | 'system';
 
 export type Notification = {

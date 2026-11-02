@@ -422,6 +422,25 @@ export async function submitAssignment(params: {
       return { submission: null, error };
     }
 
+    try {
+      const { data: asg } = await supabase
+        .from('assignments')
+        .select('mentor_id, title')
+        .eq('id', params.assignmentId)
+        .single();
+      if (asg?.mentor_id) {
+        createNotification({
+          recipientId: asg.mentor_id,
+          actorId: params.studentId,
+          type: 'submission_created',
+          title: 'New Student Submission',
+          message: `Work submitted for "${asg.title}"`,
+          link: '/mentor/reviews',
+          idempotencyKey: `submission:${data.id}`,
+        }).catch(() => {});
+      }
+    } catch {}
+
     return { submission: data, error: null };
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
