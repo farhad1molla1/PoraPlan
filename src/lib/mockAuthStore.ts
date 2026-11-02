@@ -5447,3 +5447,176 @@ export function getMockMentorWorkload(): MentorWorkloadSummary[] {
     };
   });
 }
+
+/**
+ * Retrieve user profiles for admin directory with filtering.
+ */
+export function getMockUsers(filters?: {
+  role?: UserRole;
+  search?: string;
+  status?: AccountStatus;
+}): Profile[] {
+  let list = mockStore.map((acc) => getMockProfile(acc.id)!);
+
+  if (filters?.role) {
+    list = list.filter((p) => p.role === filters.role);
+  }
+
+  if (filters?.status) {
+    list = list.filter((p) => p.status === filters.status);
+  }
+
+  if (filters?.search && filters.search.trim()) {
+    const q = filters.search.toLowerCase().trim();
+    list = list.filter((p) =>
+      p.full_name.toLowerCase().includes(q) ||
+      p.email.toLowerCase().includes(q) ||
+      (p.poraplan_id && p.poraplan_id.toLowerCase().includes(q))
+    );
+  }
+
+  return list;
+}
+
+/**
+ * Atomic admin direct enrollment of a student into a cohort, with optional mentor assignment.
+ * Implements strict capacity, duplicate, and mentor eligibility validation.
+ */
+export function adminManualEnrollMockStudent(
+  studentId: string,
+  programId: string,
+  cohortId: string,
+  mentorId?: string,
+  notes?: string
+): {
+  success: boolean;
+  message: string;
+  enrollmentId?: string;
+  mentorAssignmentId?: string;
+  error: Error | null;
+} {
+  // 1. Validate student
+  const student = mockStore.find((acc) => acc.id === studentId);
+  if (!student) {
+    return { success: false, message: 'Student account not found.', error: new Error('Student not found.') };
+  }
+  if (student.role !== 'student') {
+    return { success: false, message: 'Selected user is not a student.', error: new Error('Selected user is not a student.') };
+  }
+
+  // 2. Validate program
+  const program = mockPrograms.find((p) => p.id === programId);
+  if (!program) {
+    return { success: false, message: 'Program not found.', error: new Error('Program not found.') };
+  }
+
+  // 3. Validate cohort
+  const cohort = mockCohorts.find((c) => c.id === cohortId && c.program_id === programId);
+  if (!cohort) {
+    return { success: false, message: 'Cohort not found or does not belong to the selected program.', error: new Error('Cohort not found.') };
+  }
+  if (cohort.status === 'completed' || cohort.status === 'archived') {
+    return { success: false, message: `Cannot enroll student: Cohort status is ${cohort.status}.`, error: new Error(`Cohort status is ${cohort.status}.`) };
+  }
+
+  // 4. Check cohort capacity
+  if (cohort.capacity) {
+    const currentActiveCount = mockEnrollments.filter(
+      (e) => e.cohort_id === cohortId && e.status === 'active'
+    ).length;
+    if (currentActiveCount >= cohort.capacity) {
+      return {
+        success: false,
+        message: `Cannot enroll student: Cohort capacity (${cohort.capacity} scholars) has been reached.`,
+        error: new Error(`Cohort capacity (${cohort.capacity} scholars) has been reached.`),
+      };
+    }
+  }
+
+  // 5. Check duplicate active enrollment
+  const isAlreadyEnrolled = mockEnrollments.some(
+    (e) =>
+      e.student_id === studentId &&
+      e.program_id === programId &&
+      (e.cohort_id || null) === (cohortId || null) &&
+      ['active', 'on_hold'].includes(e.status)
+  );
+  if (isAlreadyEnrolled) {
+    return {
+      success: false,
+      message: 'Student is already actively enrolled in this program/cohort.',
+      error: new Error('Student is already actively enrolled in this program/cohort.'),
+    };
+  }
+
+  // 6. Check mentor if provided
+  let newAssignmentId: string | undefined = undefined;
+  if (mentorId) {
+    if (mentorId === studentId) {
+      return { success: false, message: 'Student and Mentor cannot be the same account.', error: new Error('Student and Mentor cannot be the same account.') };
+    }
+    const mentor = mockStore.find((acc) => acc.id === mentorId);
+    if (!mentor || mentor.role !== 'mentor') {
+      return { success: false, message: 'Selected mentor is invalid.', error: new Error('Selected mentor is invalid.') };
+    }
+    const isEligible = mockApplications.some(
+      (a) => a.applicant_id === mentorId && a.program_id === programId && a.application_type === 'mentor' && a.status === 'approved'
+    );
+    if (!isEligible) {
+      return { success: false, message: 'Mentor is not eligible for this program.', error: new Error('Mentor is not eligible for this program.') };
+    }
+  }
+
+  // 7. Atomic creation
+  const now = new Date().toISOString();
+  const enrollmentId = `enr-${Date.now()}`;
+  mockEnrollments.push({
+    id: enrollmentId,
+    student_id: studentId,
+    program_id: programId,
+    cohort_id: cohortId,
+    application_id: null,
+    status: 'active',
+    enrolled_at: now,
+    created_at: now,
+    updated_at: now,
+  });
+
+  if (mentorId) {
+    // Deactivate previous active individual assignment for student in this program
+    const existing = mockStudentMentorAssignments.find(
+      (sma) => sma.student_id === studentId && sma.program_id === programId && sma.is_active
+    );
+    if (existing) {
+      existing.is_active = false;
+      existing.ended_at = now;
+      existing.updated_at = now;
+    }
+
+    newAssignmentId = `sma-${Date.now()}`;
+    mockStudentMentorAssignments.push({
+      id: newAssignmentId,
+      student_id: studentId,
+      mentor_id: mentorId,
+      program_id: programId,
+      cohort_id: cohortId,
+      assignment_type: 'individual',
+      assigned_by: 'mock-admin-ppa001',
+      assigned_at: now,
+      ended_at: null,
+      is_active: true,
+      notes: notes || null,
+      created_at: now,
+      updated_at: now,
+    });
+  }
+
+  return {
+    success: true,
+    message: 'Student successfully enrolled.',
+    enrollmentId,
+    mentorAssignmentId: newAssignmentId,
+    error: null,
+  };
+}
+

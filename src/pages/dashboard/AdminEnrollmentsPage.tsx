@@ -3,13 +3,17 @@ import {
   getEnrollments,
   updateEnrollmentStatus,
   getEnrollmentStatusBadgeVariant,
+  adminManualEnrollStudent,
 } from '../../lib/applications';
 import { getPrograms, getCohorts } from '../../lib/programs';
+import { getAdminUsers } from '../../lib/profiles';
+import { getEligibleMentorsForProgram } from '../../lib/mentorAssignments';
 import type {
   ProgramEnrollmentWithMeta,
   Program,
   Cohort,
   EnrollmentStatus,
+  Profile,
 } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
@@ -25,6 +29,7 @@ import {
   Layers,
   ChevronRight,
   Filter,
+  UserPlus,
 } from 'lucide-react';
 
 export const AdminEnrollmentsPage: React.FC = () => {
@@ -46,6 +51,108 @@ export const AdminEnrollmentsPage: React.FC = () => {
   const [newStatus, setNewStatus] = useState<EnrollmentStatus>('active');
   const [isUpdating, setIsUpdating] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Manual Direct Enrollment Modal State
+  const [enrollModalOpen, setEnrollModalOpen] = useState(false);
+  const [studentsList, setStudentsList] = useState<Profile[]>([]);
+  const [eligibleMentors, setEligibleMentors] = useState<Profile[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [loadingMentors, setLoadingMentors] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [selectedProgramId, setSelectedProgramId] = useState('');
+  const [selectedCohortId, setSelectedCohortId] = useState('');
+  const [selectedMentorId, setSelectedMentorId] = useState('');
+  const [enrollmentNotes, setEnrollmentNotes] = useState('');
+  const [isEnrolling, setIsEnrolling] = useState(false);
+  const [enrollError, setEnrollError] = useState<string | null>(null);
+
+  const openEnrollModal = async () => {
+    setEnrollModalOpen(true);
+    setEnrollError(null);
+    setSelectedStudentId('');
+    setSelectedProgramId('');
+    setSelectedCohortId('');
+    setSelectedMentorId('');
+    setEnrollmentNotes('');
+    setLoadingStudents(true);
+    try {
+      const res = await getAdminUsers({ role: 'student' });
+      setStudentsList(res.users || []);
+    } catch {
+      // fallback
+    } finally {
+      setLoadingStudents(false);
+    }
+  };
+
+  const handleProgramSelection = async (progId: string) => {
+    setSelectedProgramId(progId);
+    setSelectedCohortId('');
+    setSelectedMentorId('');
+    if (!progId) {
+      setEligibleMentors([]);
+      return;
+    }
+    setLoadingMentors(true);
+    try {
+      const res = await getEligibleMentorsForProgram(progId);
+      setEligibleMentors(res.mentors || []);
+    } catch {
+      setEligibleMentors([]);
+    } finally {
+      setLoadingMentors(false);
+    }
+  };
+
+  const handleDirectEnrollSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEnrollError(null);
+
+    if (!selectedStudentId) {
+      setEnrollError('Please select a student.');
+      return;
+    }
+    if (!selectedProgramId) {
+      setEnrollError('Please select a program.');
+      return;
+    }
+    if (!selectedCohortId) {
+      setEnrollError('Please select a cohort.');
+      return;
+    }
+
+    const studentObj = studentsList.find((s) => s.id === selectedStudentId);
+    const progObj = programs.find((p) => p.id === selectedProgramId);
+    const cohortObj = cohorts.find((c) => c.id === selectedCohortId);
+    const mentorObj = eligibleMentors.find((m) => m.id === selectedMentorId);
+
+    setIsEnrolling(true);
+    try {
+      const res = await adminManualEnrollStudent({
+        studentId: selectedStudentId,
+        programId: selectedProgramId,
+        cohortId: selectedCohortId,
+        mentorId: selectedMentorId || undefined,
+        studentName: studentObj?.full_name,
+        mentorName: mentorObj?.full_name,
+        programName: progObj?.name,
+        cohortName: cohortObj?.name,
+        notes: enrollmentNotes.trim() || undefined,
+      });
+
+      if (!res.success || res.error) {
+        setEnrollError(res.message || res.error?.message || 'Enrollment failed.');
+      } else {
+        setEnrollModalOpen(false);
+        setSuccessMessage(`Scholar ${studentObj?.full_name || 'Student'} enrolled successfully in ${progObj?.name || 'Program'}.`);
+        await loadData();
+      }
+    } catch (err: unknown) {
+      setEnrollError(err instanceof Error ? err.message : 'An unexpected error occurred during direct enrollment.');
+    } finally {
+      setIsEnrolling(false);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -213,6 +320,15 @@ export const AdminEnrollmentsPage: React.FC = () => {
                 <Layers className="w-4 h-4" />
               )}
               Refresh Roster
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={openEnrollModal}
+              className="gap-2 bg-[#0BA7B4] hover:bg-[#0BA7B4]/90 text-white font-bold"
+            >
+              <UserPlus className="w-4 h-4" />
+              Enroll Student
             </Button>
           </div>
         </div>
@@ -616,6 +732,188 @@ export const AdminEnrollmentsPage: React.FC = () => {
                 Save Status
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Direct Enrollment Modal */}
+      {enrollModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border-3 border-[#082B4C] shadow-[8px_8px_0_0_#082B4C] w-full max-w-lg p-6 animate-fade-in">
+            <div className="flex items-start justify-between border-b-2 border-[#082B4C]/10 pb-4">
+              <div>
+                <h3 className="text-lg font-black text-[#082B4C] flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-[#0BA7B4]" />
+                  Direct Student Enrollment
+                </h3>
+                <p className="text-xs text-[#082B4C]/70 mt-1">
+                  Enroll an existing student directly into an active cohort without requiring a public application.
+                </p>
+              </div>
+              <button
+                onClick={() => setEnrollModalOpen(false)}
+                className="text-[#082B4C]/50 hover:text-[#082B4C] p-1"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {enrollError && (
+              <div className="mt-4 p-3 bg-red-50 border-2 border-red-500 text-red-800 text-xs font-bold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
+                <span>{enrollError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleDirectEnrollSubmit} className="mt-4 space-y-4">
+              {/* 1. Select Student */}
+              <div>
+                <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider mb-1">
+                  1. Select Student <span className="text-red-500">*</span>
+                </label>
+                {loadingStudents ? (
+                  <div className="p-2 border-2 border-[#082B4C] bg-gray-50 text-xs text-[#082B4C]/60 flex items-center gap-2">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading scholars list...
+                  </div>
+                ) : (
+                  <select
+                    value={selectedStudentId}
+                    onChange={(e) => setSelectedStudentId(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                  >
+                    <option value="">-- Choose Student --</option>
+                    {studentsList.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.full_name} {s.poraplan_id ? `(${s.poraplan_id})` : ''} — {s.email}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* 2. Select Program */}
+              <div>
+                <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider mb-1">
+                  2. Select Program <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedProgramId}
+                  onChange={(e) => handleProgramSelection(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                >
+                  <option value="">-- Choose Program --</option>
+                  {programs.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.category.replace('_', ' ')})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 3. Select Cohort */}
+              <div>
+                <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider mb-1">
+                  3. Select Cohort <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedCohortId}
+                  onChange={(e) => setSelectedCohortId(e.target.value)}
+                  required
+                  disabled={!selectedProgramId}
+                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4] disabled:bg-gray-100 disabled:text-gray-400"
+                >
+                  <option value="">
+                    {!selectedProgramId ? '-- Select Program First --' : '-- Choose Cohort --'}
+                  </option>
+                  {cohorts
+                    .filter(
+                      (c) =>
+                        c.program_id === selectedProgramId &&
+                        c.status !== 'completed' &&
+                        c.status !== 'archived'
+                    )
+                    .map((c) => {
+                      const activeInCohort = enrollments.filter(
+                        (e) => e.cohort_id === c.id && e.status === 'active'
+                      ).length;
+                      const isFull = c.capacity ? activeInCohort >= c.capacity : false;
+                      return (
+                        <option key={c.id} value={c.id} disabled={isFull}>
+                          {c.name} ({c.code}) — Capacity: {activeInCohort}/{c.capacity || '∞'} {isFull ? '(FULL)' : ''}
+                        </option>
+                      );
+                    })}
+                </select>
+              </div>
+
+              {/* 4. Optional Mentor Allocation */}
+              <div>
+                <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider mb-1 flex items-center justify-between">
+                  <span>4. Assign Mentor (Optional)</span>
+                  {loadingMentors && <Loader2 className="w-3 h-3 animate-spin text-[#0BA7B4]" />}
+                </label>
+                <select
+                  value={selectedMentorId}
+                  onChange={(e) => setSelectedMentorId(e.target.value)}
+                  disabled={!selectedProgramId || loadingMentors}
+                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4] disabled:bg-gray-100 disabled:text-gray-400"
+                >
+                  <option value="">-- No Direct Mentor (Use Cohort Default) --</option>
+                  {eligibleMentors.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.full_name} {m.poraplan_id ? `(${m.poraplan_id})` : ''}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-[#082B4C]/60 mt-1">
+                  Only mentors eligible for the selected program appear here.
+                </p>
+              </div>
+
+              {/* 5. Remarks / Notes */}
+              <div>
+                <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider mb-1">
+                  5. Administrative Remarks
+                </label>
+                <textarea
+                  value={enrollmentNotes}
+                  onChange={(e) => setEnrollmentNotes(e.target.value)}
+                  rows={2}
+                  placeholder="Optional intake rationale, sponsorship details, or special terms..."
+                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                />
+              </div>
+
+              {/* Action buttons */}
+              <div className="pt-4 border-t-2 border-[#082B4C]/10 flex items-center justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEnrollModalOpen(false)}
+                  disabled={isEnrolling}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  disabled={isEnrolling || !selectedStudentId || !selectedProgramId || !selectedCohortId}
+                  className="gap-2 bg-[#0BA7B4] hover:bg-[#0BA7B4]/90 text-white font-bold"
+                >
+                  {isEnrolling ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="w-4 h-4" />
+                  )}
+                  Confirm Direct Enrollment
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}

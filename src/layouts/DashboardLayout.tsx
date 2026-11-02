@@ -133,6 +133,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Applications Desk', shortLabel: 'Apps', to: '/admin/applications', icon: ClipboardList },
     { label: 'Enrollments Desk', shortLabel: 'Enrollments', to: '/admin/enrollments', icon: UserCheck },
     { label: 'Mentor Allocations', shortLabel: 'Mentors', to: '/admin/mentor-assignments', icon: Users },
+    { label: 'User Directory', shortLabel: 'Users', to: '/admin/users', icon: Users },
     { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
 

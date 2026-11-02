@@ -7,6 +7,7 @@ import {
   getMockProfile,
   updateMockProfile,
   adminRegisterMockMember,
+  getMockUsers,
 } from './mockAuthStore';
 
 export interface PoraPlanIdResolution {
@@ -417,3 +418,45 @@ export async function adminRegisterMember(
     return { success: false, message: msg };
   }
 }
+
+/**
+ * Retrieve user directory profiles for platform administrators.
+ * Supports filtering by role, status, and searching across full name, email, and PoraPlan ID.
+ */
+export async function getAdminUsers(filters?: {
+  role?: UserRole;
+  search?: string;
+  status?: AccountStatus;
+}): Promise<{ users: Profile[]; error: Error | null }> {
+  if (!isSupabaseConfigured()) {
+    return { users: getMockUsers(filters), error: null };
+  }
+
+  try {
+    let query = supabase.from('profiles').select('*').order('created_at', { ascending: false });
+
+    if (filters?.role) {
+      query = query.eq('role', filters.role);
+    }
+
+    if (filters?.status) {
+      query = query.eq('status', filters.status);
+    }
+
+    if (filters?.search && filters.search.trim()) {
+      const q = filters.search.trim();
+      query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,poraplan_id.ilike.%${q}%`);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      return { users: [], error };
+    }
+
+    return { users: (data as Profile[]) || [], error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { users: [], error };
+  }
+}
+

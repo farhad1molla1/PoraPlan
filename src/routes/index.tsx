@@ -44,6 +44,7 @@ import { MyApplicationsPage } from '../pages/dashboard/MyApplicationsPage';
 import { AdminApplicationsPage } from '../pages/dashboard/AdminApplicationsPage';
 import { AdminEnrollmentsPage } from '../pages/dashboard/AdminEnrollmentsPage';
 import { AdminMentorAssignmentsPage } from '../pages/dashboard/AdminMentorAssignmentsPage';
+import { AdminUsersPage } from '../pages/dashboard/AdminUsersPage';
 import { useAuth } from '../hooks/useAuth';
 
 /**
@@ -385,6 +386,14 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminMentorAssignmentsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/users"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminUsersPage />
             </ProtectedRoute>
           }
         />

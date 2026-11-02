@@ -18,6 +18,7 @@ import {
   getMockProfile,
   getMockProgramById,
   getMockCohorts,
+  adminManualEnrollMockStudent,
 } from './mockAuthStore';
 import { createNotification } from './notifications';
 
@@ -460,3 +461,122 @@ export async function updateEnrollmentStatus(
     return { enrollment: null, error };
   }
 }
+
+/**
+ * Platform Administrator action: Manually and directly enroll a student into a program/cohort,
+ * with optional dedicated mentor assignment.
+ * Completely bypasses public application requirement.
+ * Atomically creates enrollment, sets active status, validates capacity, duplicate enrollment,
+ * and mentor eligibility, and dispatches an admission notification.
+ */
+export async function adminManualEnrollStudent(input: {
+  studentId: string;
+  programId: string;
+  cohortId: string;
+  mentorId?: string;
+  studentName?: string;
+  mentorName?: string;
+  programName?: string;
+  cohortName?: string;
+  notes?: string;
+  adminId?: string;
+}): Promise<{
+  success: boolean;
+  message: string;
+  enrollmentId?: string;
+  mentorAssignmentId?: string;
+  error: Error | null;
+}> {
+  if (!isSupabaseConfigured()) {
+    const res = adminManualEnrollMockStudent(
+      input.studentId,
+      input.programId,
+      input.cohortId,
+      input.mentorId,
+      input.notes
+    );
+
+    if (res.success) {
+      // 1. Notify Student
+      await createNotification({
+        recipientId: input.studentId,
+        actorId: input.adminId || null,
+        type: 'system',
+        title: 'Direct Program Admission',
+        message: `You have been directly enrolled in ${input.programName || 'a program'}${input.cohortName ? ` (${input.cohortName})` : ''}. Welcome to your academic journey!`,
+        link: '/student/dashboard',
+      });
+
+      // 2. Notify Mentor if assigned
+      if (input.mentorId) {
+        await createNotification({
+          recipientId: input.mentorId,
+          actorId: input.adminId || null,
+          type: 'system',
+          title: 'New Student Assignment',
+          message: `Scholar ${input.studentName || 'Student'} has been assigned to your mentorship in ${input.programName || 'the program'}.`,
+          link: '/mentor/dashboard',
+        });
+      }
+    }
+
+    return res;
+  }
+
+  try {
+    const { data, error } = await (supabase.rpc as any)('admin_manual_enroll_student', {
+      p_student_id: input.studentId,
+      p_program_id: input.programId,
+      p_cohort_id: input.cohortId,
+      p_mentor_id: input.mentorId || null,
+      p_notes: input.notes?.trim() || null,
+    });
+
+    if (error) {
+      return { success: false, message: error.message, error };
+    }
+
+    const res = data as unknown as {
+      success?: boolean;
+      message?: string;
+      enrollment_id?: string;
+      mentor_assignment_id?: string;
+    };
+
+    if (res?.success) {
+      // 1. Notify Student
+      await createNotification({
+        recipientId: input.studentId,
+        actorId: input.adminId || null,
+        type: 'system',
+        title: 'Direct Program Admission',
+        message: `You have been directly enrolled in ${input.programName || 'a program'}${input.cohortName ? ` (${input.cohortName})` : ''}. Welcome to your academic journey!`,
+        link: '/student/dashboard',
+      });
+
+      // 2. Notify Mentor if assigned
+      if (input.mentorId) {
+        await createNotification({
+          recipientId: input.mentorId,
+          actorId: input.adminId || null,
+          type: 'system',
+          title: 'New Student Assignment',
+          message: `Scholar ${input.studentName || 'Student'} has been assigned to your mentorship in ${input.programName || 'the program'}.`,
+          link: '/mentor/dashboard',
+        });
+      }
+    }
+
+    return {
+      success: Boolean(res?.success),
+      message: res?.message || 'Student enrolled successfully.',
+      enrollmentId: res?.enrollment_id,
+      mentorAssignmentId: res?.mentor_assignment_id,
+      error: null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { success: false, message: error.message, error };
+  }
+}
+
