@@ -5,25 +5,34 @@ import {
   generateStudentReport,
   type StudentAcademicReport,
   type ReportPeriod,
+  REPORT_THRESHOLDS,
 } from '../../lib/reports';
 import { formatLocalDate } from '../../lib/library';
 import { Button } from '../../components/common/Button';
 import {
   Printer,
   AlertTriangle,
-  BookOpen,
+  CheckCircle2,
+  Clock,
   Sparkles,
   RefreshCw,
   Loader2,
   AlertCircle,
   ArrowLeft,
+  Calendar,
+  FileText,
+  Target,
+  MessageSquareQuote,
+  HelpCircle,
+  Award,
+  ShieldCheck,
 } from 'lucide-react';
 
 export const StudentReportPage: React.FC = () => {
   const { user, profile } = useAuth();
   const studentId = profile?.id || user?.id || '';
 
-  const [period, setPeriod] = useState<ReportPeriod>('weekly');
+  const [period, setPeriod] = useState<ReportPeriod>('monthly');
   const [customStart, setCustomStart] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() - 14);
@@ -44,10 +53,14 @@ export const StudentReportPage: React.FC = () => {
         studentId,
         period,
         period === 'custom' ? customStart : undefined,
-        period === 'custom' ? customEnd : undefined
+        period === 'custom' ? customEnd : undefined,
+        {
+          requestingUserId: studentId,
+          requestingUserRole: 'student',
+        }
       );
       if (err) {
-        setError(err.message || 'Unable to generate academic progress report.');
+        setError(err.message || 'Unable to generate academic performance report.');
       } else {
         setReport(rep);
       }
@@ -70,20 +83,29 @@ export const StudentReportPage: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
-      {/* Print-specific A4 Stylesheet */}
+      {/* ========================================================================= */}
+      {/* PRINT-SPECIFIC A4 PORTRAIT STYLESHEET                                     */}
+      {/* ========================================================================= */}
       <style>{`
+        @page {
+          size: A4 portrait;
+          margin: 10mm 12mm 10mm 12mm;
+        }
         @media print {
-          @page {
-            size: A4 portrait;
-            margin: 12mm 15mm;
-          }
-          body {
+          html, body {
             background-color: #ffffff !important;
-            color: #000000 !important;
-            font-size: 10pt;
+            color: #082B4C !important;
+            font-size: 9.5pt !important;
+            line-height: 1.35 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           nav, aside, header, footer, .print\\:hidden {
             display: none !important;
+          }
+          .print\\:page-break {
+            page-break-after: always !important;
+            break-after: page !important;
           }
           .break-inside-avoid {
             break-inside: avoid !important;
@@ -92,10 +114,14 @@ export const StudentReportPage: React.FC = () => {
           .shadow-brutal, .shadow-brutal-sm, .shadow-brutal-xs {
             box-shadow: none !important;
           }
+          .border-2 {
+            border-width: 1px !important;
+          }
         }
       `}</style>
+
       {/* ========================================================================= */}
-      {/* 1. INTERACTIVE CONTROLS BAR (HIDDEN IN PRINT MODE)                        */}
+      {/* 1. INTERACTIVE CONTROL BAR (SCREEN ONLY — HIDDEN IN PRINT)                */}
       {/* ========================================================================= */}
       <div className="print:hidden p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -109,10 +135,10 @@ export const StudentReportPage: React.FC = () => {
             </Link>
           </div>
           <h1 className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
-            Academic Progress &amp; Performance Report
+            Academic Performance &amp; Improvement Report
           </h1>
           <p className="text-xs text-brand-muted mt-0.5">
-            Audit your task execution velocity, practice submission status, and milestone evaluations.
+            Audit syllabus execution, milestone evaluation scores, and targeted improvement actions.
           </p>
         </div>
 
@@ -134,18 +160,18 @@ export const StudentReportPage: React.FC = () => {
             variant="primary"
             size="sm"
             onClick={handlePrint}
-            className="flex items-center gap-1.5 shadow-brutal-xs"
+            className="flex items-center gap-1.5 shadow-brutal-xs bg-brand-navy text-white hover:bg-brand-navy/90"
           >
             <Printer className="w-4 h-4" />
-            <span>Print / Save PDF</span>
+            <span>Print / Save PDF (A4)</span>
           </Button>
         </div>
       </div>
 
-      {/* Period Filter Selector (Hidden in Print) */}
+      {/* Period Selector (Screen Only) */}
       <div className="print:hidden p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs font-mono">
-          <span className="font-bold text-brand-muted uppercase text-[10px]">Report Window:</span>
+          <span className="font-bold text-brand-muted uppercase text-[10px]">Audit Window:</span>
           {(['weekly', 'monthly', 'custom'] as ReportPeriod[]).map((p) => (
             <button
               key={p}
@@ -184,7 +210,7 @@ export const StudentReportPage: React.FC = () => {
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. REPORT CONTENT BODY (A4 PRINT FRIENDLY)                                */}
+      {/* 2. REPORT CONTENT BODY                                                    */}
       {/* ========================================================================= */}
       {loading ? (
         <div className="p-16 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center space-y-3">
@@ -193,7 +219,7 @@ export const StudentReportPage: React.FC = () => {
             COMPUTING ACADEMIC REPORT
           </h3>
           <p className="font-mono text-xs text-brand-muted">
-            Aggregating historical tasks, graded submissions, and milestone evaluations...
+            Analyzing cohort tasks, weighted evaluations, practice submissions, and study consistency...
           </p>
         </div>
       ) : error ? (
@@ -208,316 +234,660 @@ export const StudentReportPage: React.FC = () => {
           </div>
         </div>
       ) : report ? (
-        <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-6 print:border-none print:shadow-none print:p-0 print:space-y-4">
-          {/* Header & Scholar Identity Card */}
-          <header className="border-b-2 border-brand-dark pb-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-mono text-[10px] uppercase font-extrabold tracking-widest text-brand-teal bg-brand-bg px-2 py-0.5 border border-brand-dark">
-                  PORAPLAN ACADEMIC AUDIT
-                </span>
-                <span className="font-mono text-[10px] text-brand-muted">
-                  CONFIDENTIAL • SCHOLAR ARCHIVE
+        <div className="space-y-8 print:space-y-0">
+          {/* ===================================================================== */}
+          {/* PAGE 1: PERFORMANCE OVERVIEW                                          */}
+          {/* ===================================================================== */}
+          <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-6 print:border-none print:shadow-none print:p-0 print:space-y-5 print:page-break">
+            {/* Header: Logo, Branding, Metadata */}
+            <header className="border-b-2 border-brand-dark pb-4 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div className="flex items-start gap-3.5">
+                <img
+                  src="/poraplan-logo.png"
+                  alt="PoraPlan Logo"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/assets/poraplan-logo.png';
+                  }}
+                  className="w-12 h-12 object-contain rounded border border-brand-dark/20 bg-white p-1 shrink-0"
+                />
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[9px] uppercase font-extrabold tracking-widest text-brand-navy bg-brand-paper-tint px-2 py-0.5 border border-brand-dark">
+                      PORAPLAN ACADEMIC MENTORSHIP
+                    </span>
+                    <span className="font-mono text-[9px] text-brand-muted">
+                      CONFIDENTIAL • SCHOLAR ARCHIVE
+                    </span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-brand-navy tracking-tight">
+                    Academic Performance &amp; Improvement Report
+                  </h2>
+                  <p className="text-xs font-mono text-brand-muted">
+                    Official progress audit of syllabus execution, milestone exams, and targeted focus areas.
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-left sm:text-right space-y-0.5 text-xs font-mono border-t sm:border-t-0 pt-2 sm:pt-0 border-brand-dark/20 shrink-0">
+                <div className="text-brand-navy font-bold">
+                  <span className="text-brand-muted block text-[9px] uppercase tracking-wider">AUDIT WINDOW</span>
+                  <span>{report.dateRange.startDate} — {report.dateRange.endDate}</span>
+                </div>
+                <div className="text-[10px] text-brand-muted">
+                  Period: <span className="font-bold text-brand-dark">{report.dateRange.label}</span>
+                </div>
+                <div className="text-[10px] text-brand-muted">
+                  Generated: {new Date(report.generatedAt).toLocaleDateString()}
+                </div>
+              </div>
+            </header>
+
+            {/* Student & Mentor Academic Credentials Banner */}
+            <div className="p-3.5 border-2 border-brand-dark bg-brand-bg grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono break-inside-avoid">
+              <div>
+                <span className="text-brand-muted text-[10px] uppercase font-bold block">SCHOLAR NAME</span>
+                <span className="font-extrabold text-brand-navy text-sm">{report.studentName}</span>
+              </div>
+              <div>
+                <span className="text-brand-muted text-[10px] uppercase font-bold block">PORAPLAN ID</span>
+                <span className="font-extrabold text-brand-teal text-sm">{report.poraplanId}</span>
+              </div>
+              <div>
+                <span className="text-brand-muted text-[10px] uppercase font-bold block">ACADEMIC PROGRAM</span>
+                <span className="font-bold text-brand-dark">
+                  {report.programName || 'Academic Mentorship'}
+                  {report.cohortName ? ` (${report.cohortName})` : ''}
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-brand-navy tracking-tight">
-                Academic Progress Report
-              </h2>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono text-brand-dark pt-1">
-                <div>
-                  <span className="text-brand-muted font-bold">SCHOLAR: </span>
-                  <span className="font-extrabold">{report.studentName}</span>
+              <div>
+                <span className="text-brand-muted text-[10px] uppercase font-bold block">ASSIGNED MENTOR</span>
+                <span className="font-bold text-brand-dark">{report.mentorName || 'Lead Mentor'}</span>
+              </div>
+
+              {(report.university || report.department || report.batch || report.currentSemester) && (
+                <div className="col-span-2 sm:col-span-4 pt-2 border-t border-brand-dark/20 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-brand-muted">
+                  {report.university && (
+                    <span>
+                      <strong className="text-brand-dark">Institution:</strong> {report.university}
+                    </span>
+                  )}
+                  {report.department && (
+                    <span>
+                      <strong className="text-brand-dark">Department:</strong> {report.department}
+                    </span>
+                  )}
+                  {report.batch && (
+                    <span>
+                      <strong className="text-brand-dark">Batch:</strong> {report.batch}
+                    </span>
+                  )}
+                  {report.currentSemester && (
+                    <span>
+                      <strong className="text-brand-dark">Semester:</strong> {report.currentSemester}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 4 Core KPI Indicators */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 break-inside-avoid">
+              {/* 1. Task Completion Rate */}
+              <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
+                <div className="flex items-center justify-between text-brand-muted mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase">Task Completion</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-brand-teal" />
                 </div>
                 <div>
-                  <span className="text-brand-muted font-bold">ID: </span>
-                  <span className="font-bold text-brand-teal">{report.poraplanId}</span>
+                  <div className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy">
+                    {report.taskMetrics.isCompletionRateApplicable
+                      ? `${report.taskMetrics.completionRate}%`
+                      : 'N/A'}
+                  </div>
+                  <div className="text-[10px] font-mono mt-1 text-brand-muted">
+                    {report.taskMetrics.completed}/{report.taskMetrics.totalAssigned} scheduled tasks
+                  </div>
                 </div>
-                {report.studentEmail && (
-                  <div>
-                    <span className="text-brand-muted font-bold">EMAIL: </span>
-                    <span>{report.studentEmail}</span>
+                {report.taskMetrics.completionRateDelta !== null && report.taskMetrics.completionRateDelta !== undefined && (
+                  <div className={`text-[10px] font-mono font-bold mt-1.5 pt-1.5 border-t border-brand-dark/10 ${
+                    report.taskMetrics.completionRateDelta >= 0 ? 'text-emerald-700' : 'text-amber-700'
+                  }`}>
+                    {report.taskMetrics.completionRateDelta >= 0 ? '▲ +' : '▼ '}
+                    {report.taskMetrics.completionRateDelta}% vs prev cycle
                   </div>
                 )}
               </div>
-            </div>
 
-            <div className="text-left sm:text-right space-y-1 text-xs font-mono border-t sm:border-t-0 pt-2 sm:pt-0 border-brand-dark/20">
-              <div className="font-bold text-brand-navy bg-brand-paper-tint sm:bg-transparent p-2 sm:p-0 border sm:border-none border-brand-dark">
-                <span className="text-brand-muted block text-[10px] uppercase">AUDIT WINDOW</span>
-                <span>{report.dateRange.startDate} — {report.dateRange.endDate}</span>
-              </div>
-              {report.programName && (
-                <div className="text-[11px] text-brand-muted">
-                  <span className="font-bold">PROGRAM: </span>{report.programName}
+              {/* 2. Weighted Evaluation Average */}
+              <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
+                <div className="flex items-center justify-between text-brand-muted mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase">Weighted Mastery</span>
+                  <Award className="w-3.5 h-3.5 text-brand-navy" />
                 </div>
-              )}
-              {report.cohortName && (
-                <div className="text-[11px] text-brand-muted">
-                  <span className="font-bold">COHORT: </span>{report.cohortName}
+                <div>
+                  <div className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy">
+                    {report.evaluationMetrics.weightedAveragePercentage !== null
+                      ? `${report.evaluationMetrics.weightedAveragePercentage}%`
+                      : 'N/A'}
+                  </div>
+                  <div className="text-[10px] font-mono mt-1 text-brand-muted">
+                    {report.evaluationMetrics.scoredCount > 0
+                      ? `${report.evaluationMetrics.totalEarnedPoints}/${report.evaluationMetrics.totalPossiblePoints} pts (${report.evaluationMetrics.scoredCount} scored exam${report.evaluationMetrics.scoredCount === 1 ? '' : 's'})`
+                      : 'No scored exams in window'}
+                  </div>
                 </div>
-              )}
-              {report.mentorName && (
-                <div className="text-[11px] text-brand-teal font-bold">
-                  <span>MENTOR: </span>{report.mentorName}
-                </div>
-              )}
-            </div>
-          </header>
-
-          {/* KPI Summary Tiles */}
-          <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 print:grid-cols-4">
-            {/* Task Velocity */}
-            <div className="p-3.5 border-2 border-brand-dark bg-brand-bg flex flex-col justify-between">
-              <span className="font-mono text-[10px] font-bold text-brand-muted uppercase">TASKS EXECUTED</span>
-              <div className="my-1">
-                <span className="font-heading font-extrabold text-2xl text-brand-navy">
-                  {report.taskMetrics.completed}
-                </span>
-                <span className="font-mono text-xs text-brand-muted"> / {report.taskMetrics.totalAssigned}</span>
-              </div>
-              <div className="flex items-center justify-between text-[10px] font-mono font-bold">
-                <span className="text-brand-teal">{report.taskMetrics.completionRate}% completion</span>
-                {report.taskMetrics.overdue > 0 && (
-                  <span className="text-brand-coral">{report.taskMetrics.overdue} overdue</span>
+                {report.evaluationMetrics.evaluationAverageDelta !== null && report.evaluationMetrics.evaluationAverageDelta !== undefined && (
+                  <div className={`text-[10px] font-mono font-bold mt-1.5 pt-1.5 border-t border-brand-dark/10 ${
+                    report.evaluationMetrics.evaluationAverageDelta >= 0 ? 'text-emerald-700' : 'text-amber-700'
+                  }`}>
+                    {report.evaluationMetrics.evaluationAverageDelta >= 0 ? '▲ +' : '▼ '}
+                    {report.evaluationMetrics.evaluationAverageDelta}% vs prev cycle
+                  </div>
                 )}
               </div>
+
+              {/* 3. Assignment Submission Rate */}
+              <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
+                <div className="flex items-center justify-between text-brand-muted mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase">Practice Submissions</span>
+                  <FileText className="w-3.5 h-3.5 text-brand-teal" />
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy">
+                    {report.assignmentMetrics.isSubmissionRateApplicable
+                      ? `${report.assignmentMetrics.submissionRate}%`
+                      : 'N/A'}
+                  </div>
+                  <div className="text-[10px] font-mono mt-1 text-brand-muted">
+                    {report.assignmentMetrics.submitted}/{report.assignmentMetrics.totalAssigned} problem sets
+                  </div>
+                </div>
+                {report.assignmentMetrics.submissionRateDelta !== null && report.assignmentMetrics.submissionRateDelta !== undefined && (
+                  <div className={`text-[10px] font-mono font-bold mt-1.5 pt-1.5 border-t border-brand-dark/10 ${
+                    report.assignmentMetrics.submissionRateDelta >= 0 ? 'text-emerald-700' : 'text-amber-700'
+                  }`}>
+                    {report.assignmentMetrics.submissionRateDelta >= 0 ? '▲ +' : '▼ '}
+                    {report.assignmentMetrics.submissionRateDelta}% vs prev cycle
+                  </div>
+                )}
+              </div>
+
+              {/* 4. Active Study Cadence */}
+              <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
+                <div className="flex items-center justify-between text-brand-muted mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase">Study Cadence</span>
+                  <Calendar className="w-3.5 h-3.5 text-brand-gold" />
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy">
+                    {report.studyConsistency.activeStudyDays} <span className="text-base font-normal text-brand-muted">/ {report.studyConsistency.totalPeriodDays}d</span>
+                  </div>
+                  <div className="text-[10px] font-mono mt-1 text-brand-muted">
+                    {report.studyConsistency.consistencyPercentage}% verified active days
+                  </div>
+                </div>
+                <div className="text-[10px] font-mono text-brand-muted mt-1.5 pt-1.5 border-t border-brand-dark/10">
+                  {report.studyConsistency.verifiedEventsCount} verified completions
+                </div>
+              </div>
             </div>
 
-            {/* Practice Submissions */}
-            <div className="p-3.5 border-2 border-brand-dark bg-brand-bg flex flex-col justify-between">
-              <span className="font-mono text-[10px] font-bold text-brand-muted uppercase">ASSIGNMENTS</span>
-              <div className="my-1">
-                <span className="font-heading font-extrabold text-2xl text-brand-navy">
-                  {report.assignmentMetrics.submitted}
+            {/* Subject-wise Performance Matrix */}
+            <div className="space-y-2 break-inside-avoid">
+              <div className="flex items-center justify-between">
+                <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+                  <Target className="w-4 h-4 text-brand-teal" />
+                  <span>Subject Performance &amp; Mastery Matrix</span>
+                </h3>
+                <span className="text-[10px] font-mono text-brand-muted">
+                  Weighted Score Benchmark: {REPORT_THRESHOLDS.MASTERY_SCORE_MIN}% Mastery / &lt;{REPORT_THRESHOLDS.ATTENTION_SCORE_MAX}% Attention
                 </span>
-                <span className="font-mono text-xs text-brand-muted"> / {report.assignmentMetrics.totalAssigned}</span>
               </div>
-              <div className="flex items-center justify-between text-[10px] font-mono font-bold">
-                <span className="text-brand-teal">{report.assignmentMetrics.submissionRate}% turned in</span>
-                <span className="text-brand-muted">{report.assignmentMetrics.reviewed} reviewed</span>
-              </div>
-            </div>
 
-            {/* Graded Performance */}
-            <div className="p-3.5 border-2 border-brand-dark bg-brand-bg flex flex-col justify-between">
-              <span className="font-mono text-[10px] font-bold text-brand-muted uppercase">AVERAGE SCORE</span>
-              <div className="my-1">
-                <span className="font-heading font-extrabold text-2xl text-brand-navy">
-                  {report.evaluationMetrics.averageScorePercentage !== null
-                    ? `${report.evaluationMetrics.averageScorePercentage}%`
-                    : report.assignmentMetrics.averageScorePercentage !== null
-                    ? `${report.assignmentMetrics.averageScorePercentage}%`
-                    : '—'}
-                </span>
-              </div>
-              <span className="text-[10px] font-mono font-bold text-brand-teal">
-                {report.evaluationMetrics.scoredCount > 0
-                  ? `${report.evaluationMetrics.scoredCount} graded review(s)`
-                  : 'Awaiting graded sessions'}
-              </span>
-            </div>
-
-            {/* Study Time / Volume */}
-            <div className="p-3.5 border-2 border-brand-dark bg-brand-bg flex flex-col justify-between">
-              <span className="font-mono text-[10px] font-bold text-brand-muted uppercase">ESTIMATED EFFORT</span>
-              <div className="my-1">
-                <span className="font-heading font-extrabold text-2xl text-brand-teal">
-                  {Math.round((report.taskMetrics.totalEstimatedMinutes / 60) * 10) / 10}
-                </span>
-                <span className="font-mono text-xs text-brand-muted"> hours</span>
-              </div>
-              <span className="text-[10px] font-mono text-brand-muted">
-                {report.taskMetrics.totalEstimatedMinutes} focused minutes logged
-              </span>
-            </div>
-          </section>
-
-          {/* Attention Banner if Any */}
-          {report.subjectBreakdown.some((s) => s.needsAttention) && (
-            <div className="p-3.5 border-2 border-brand-dark bg-brand-coral-light/40 flex items-start gap-2.5 print:border-brand-dark">
-              <AlertTriangle className="w-4 h-4 text-brand-coral shrink-0 mt-0.5" />
-              <div className="space-y-0.5 text-xs">
-                <span className="font-heading font-bold text-brand-navy block">
-                  Academic Focus &amp; Attention Items
-                </span>
-                <ul className="list-disc pl-4 space-y-0.5 font-sans text-brand-dark text-xs">
-                  {report.subjectBreakdown
-                    .filter((s) => s.needsAttention && s.attentionReason)
-                    .map((s) => (
-                      <li key={s.subjectId}>
-                        <span className="font-bold">{s.subjectName}: </span>
-                        {s.attentionReason}
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {/* Subject-Wise Academic Breakdown */}
-          <section className="space-y-3 break-inside-avoid">
-            <div className="flex items-center justify-between border-b border-brand-dark/20 pb-1.5">
-              <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
-                <BookOpen className="w-4 h-4 text-brand-teal" />
-                Subject-Wise Performance Matrix
-              </h3>
-              <span className="text-[10px] font-mono text-brand-muted">
-                {report.subjectBreakdown.length} Active Study Areas
-              </span>
-            </div>
-
-            {report.subjectBreakdown.length > 0 ? (
-              <div className="border-2 border-brand-dark overflow-x-auto">
-                <table className="w-full text-left font-mono text-xs border-collapse">
-                  <thead className="bg-brand-paper-tint border-b-2 border-brand-dark text-[10px] uppercase font-bold text-brand-navy">
-                    <tr>
-                      <th className="p-2.5">Study Area</th>
-                      <th className="p-2.5 text-center">Tasks (Done / Total)</th>
-                      <th className="p-2.5 text-center">Task Rate</th>
-                      <th className="p-2.5 text-center">Assignments</th>
-                      <th className="p-2.5 text-center">Asg Score</th>
-                      <th className="p-2.5 text-center">Reviews</th>
-                      <th className="p-2.5 text-center">Status</th>
+              <div className="border-2 border-brand-dark overflow-x-auto bg-brand-paper">
+                <table className="w-full text-left border-collapse text-xs font-mono">
+                  <thead>
+                    <tr className="bg-brand-paper-tint border-b-2 border-brand-dark text-brand-navy">
+                      <th className="p-2.5 font-bold">Subject</th>
+                      <th className="p-2.5 font-bold text-center">Weighted Score</th>
+                      <th className="p-2.5 font-bold text-center">Exams</th>
+                      <th className="p-2.5 font-bold text-center">Tasks Completed</th>
+                      <th className="p-2.5 font-bold text-center">Practice Submitted</th>
+                      <th className="p-2.5 font-bold text-right">Academic Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y border-brand-dark/20 bg-brand-paper">
-                    {report.subjectBreakdown.map((subj) => (
-                      <tr key={subj.subjectId} className="hover:bg-brand-paper-tint/60 transition-colors">
-                        <td className="p-2.5 font-sans font-bold text-brand-navy">
-                          {subj.subjectName}
-                          {subj.subjectCode && (
-                            <span className="block font-mono text-[10px] text-brand-muted font-normal">
-                              {subj.subjectCode}
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-2.5 text-center font-bold">
-                          {subj.tasksCompleted} / {subj.tasksTotal}
-                        </td>
-                        <td className="p-2.5 text-center">
-                          <span
-                            className={`px-1.5 py-0.5 rounded border text-[10px] font-bold ${
-                              subj.tasksCompletionRate >= 80
-                                ? 'bg-green-100 text-green-900 border-green-300'
-                                : subj.tasksCompletionRate >= 50
-                                ? 'bg-amber-100 text-amber-900 border-amber-300'
-                                : 'bg-red-100 text-red-900 border-red-300'
-                            }`}
-                          >
-                            {subj.tasksCompletionRate}%
-                          </span>
-                        </td>
-                        <td className="p-2.5 text-center">
-                          {subj.assignmentsSubmitted} / {subj.assignmentsTotal}
-                        </td>
-                        <td className="p-2.5 text-center">
-                          {subj.assignmentsAverageScore !== null ? `${subj.assignmentsAverageScore}%` : '—'}
-                        </td>
-                        <td className="p-2.5 text-center font-bold">
-                          {subj.evaluationsCompleted} done
-                          {subj.evaluationsAverageScore !== null && (
-                            <span className="block text-[10px] text-brand-teal font-normal">
-                              ({subj.evaluationsAverageScore}% avg)
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-2.5 text-center">
-                          {subj.needsAttention ? (
-                            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-brand-coral text-white border border-brand-dark">
-                              Needs Focus
-                            </span>
-                          ) : (
-                            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-brand-teal text-white border border-brand-dark">
-                              On Track
-                            </span>
-                          )}
+                  <tbody className="divide-y divide-brand-dark/10">
+                    {report.subjectBreakdown.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-4 text-center text-brand-muted italic">
+                          No subjects assigned or active in this audit cycle.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      report.subjectBreakdown.map((subj) => (
+                        <tr key={subj.subjectId} className="hover:bg-brand-paper-tint/50">
+                          <td className="p-2.5 font-bold text-brand-navy">
+                            <div>{subj.subjectName}</div>
+                            {subj.subjectCode && (
+                              <span className="text-[10px] text-brand-muted font-normal">
+                                {subj.subjectCode}
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-2.5 text-center">
+                            {subj.evaluationsAverageScore !== null ? (
+                              <span
+                                className={`font-extrabold ${
+                                  subj.evaluationsAverageScore >= REPORT_THRESHOLDS.MASTERY_SCORE_MIN
+                                    ? 'text-emerald-700'
+                                    : subj.evaluationsAverageScore < REPORT_THRESHOLDS.ATTENTION_SCORE_MAX
+                                    ? 'text-red-700'
+                                    : 'text-brand-navy'
+                                }`}
+                              >
+                                {subj.evaluationsAverageScore}%
+                              </span>
+                            ) : (
+                              <span className="text-brand-muted">N/A</span>
+                            )}
+                          </td>
+                          <td className="p-2.5 text-center">
+                            {subj.evaluationsScoredCount > 0 ? (
+                              <span>
+                                {subj.evaluationsScoredCount} scored ({subj.evaluationsEarnedPoints}/{subj.evaluationsPossiblePoints} pts)
+                              </span>
+                            ) : subj.evaluationsCompleted > 0 ? (
+                              <span className="text-brand-muted">{subj.evaluationsCompleted} oral/unscored</span>
+                            ) : (
+                              <span className="text-brand-muted">0</span>
+                            )}
+                          </td>
+                          <td className="p-2.5 text-center">
+                            {subj.tasksTotal > 0 ? (
+                              <span>
+                                {subj.tasksCompleted}/{subj.tasksTotal} ({subj.tasksCompletionRate}%)
+                              </span>
+                            ) : (
+                              <span className="text-brand-muted">No tasks due</span>
+                            )}
+                          </td>
+                          <td className="p-2.5 text-center">
+                            {subj.assignmentsTotal > 0 ? (
+                              <span>
+                                {subj.assignmentsSubmitted}/{subj.assignmentsTotal}
+                                {subj.assignmentsReviewed > 0 && ` (${subj.assignmentsReviewed} reviewed)`}
+                              </span>
+                            ) : (
+                              <span className="text-brand-muted">No problem sets</span>
+                            )}
+                          </td>
+                          <td className="p-2.5 text-right">
+                            <span
+                              className={`px-2 py-0.5 border text-[10px] font-bold inline-block ${
+                                subj.performanceStatus === 'mastery'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-700'
+                                  : subj.performanceStatus === 'attention_required'
+                                  ? 'bg-red-50 text-red-800 border-red-700'
+                                  : subj.performanceStatus === 'insufficient_evidence'
+                                  ? 'bg-gray-100 text-gray-700 border-gray-400'
+                                  : 'bg-blue-50 text-blue-800 border-blue-700'
+                              }`}
+                            >
+                              {subj.performanceStatusLabel}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
-            ) : (
-              <p className="font-mono text-xs text-brand-muted p-4 border border-dashed border-brand-dark/30 text-center">
-                No active subjects associated with this scholar profile in the selected period.
-              </p>
-            )}
-          </section>
-
-          {/* Evaluations & Mentor Guidance Remarks */}
-          <section className="space-y-3 break-inside-avoid">
-            <div className="flex items-center justify-between border-b border-brand-dark/20 pb-1.5">
-              <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-brand-gold" />
-                Evaluations &amp; Mentor Guidance History
-              </h3>
-              <span className="text-[10px] font-mono text-brand-muted">
-                {report.evaluationMetrics.recentFeedback.length} Graded Session(s) Recorded
-              </span>
             </div>
 
-            {report.evaluationMetrics.recentFeedback.length > 0 ? (
-              <div className="space-y-3">
-                {report.evaluationMetrics.recentFeedback.map((fb) => (
-                  <div
-                    key={fb.id}
-                    className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs space-y-2 break-inside-avoid"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-dark/15 pb-2">
-                      <div>
-                        <span className="font-heading font-bold text-sm text-brand-navy block">
-                          {fb.title}
+            {/* Assignment & Practice Execution Summary */}
+            <div className="p-3.5 border-2 border-brand-dark bg-brand-bg space-y-2 break-inside-avoid">
+              <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-brand-navy flex items-center justify-between">
+                <span>Practice Assignment Quality &amp; Grading Status</span>
+                <span className="text-[10px] font-mono text-brand-muted">
+                  {report.assignmentMetrics.totalAssigned} Unique Problem Sets Assigned
+                </span>
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs font-mono">
+                <div className="p-2 border border-brand-dark/20 bg-white">
+                  <span className="text-brand-muted text-[10px] block">SUBMITTED</span>
+                  <span className="font-extrabold text-brand-navy text-base">
+                    {report.assignmentMetrics.submitted}
+                  </span>
+                  <span className="text-[10px] text-brand-muted block">
+                    {report.assignmentMetrics.submittedOnTime} on-time, {report.assignmentMetrics.submittedLate} late
+                  </span>
+                </div>
+                <div className="p-2 border border-brand-dark/20 bg-white">
+                  <span className="text-brand-muted text-[10px] block">PENDING REVIEW</span>
+                  <span className="font-extrabold text-amber-700 text-base">
+                    {report.assignmentMetrics.pendingReview}
+                  </span>
+                  <span className="text-[10px] text-brand-muted block">With mentor</span>
+                </div>
+                <div className="p-2 border border-brand-dark/20 bg-white">
+                  <span className="text-brand-muted text-[10px] block">REVIEWED &amp; GRADED</span>
+                  <span className="font-extrabold text-emerald-700 text-base">
+                    {report.assignmentMetrics.reviewed}
+                  </span>
+                  <span className="text-[10px] text-brand-muted block">
+                    {report.assignmentMetrics.averageScorePercentage !== null
+                      ? `Avg: ${report.assignmentMetrics.averageScorePercentage}%`
+                      : 'Graded'}
+                  </span>
+                </div>
+                <div className="p-2 border border-brand-dark/20 bg-white">
+                  <span className="text-brand-muted text-[10px] block">REVISION REQUESTED</span>
+                  <span className="font-extrabold text-red-700 text-base">
+                    {report.assignmentMetrics.needsRevision}
+                  </span>
+                  <span className="text-[10px] text-brand-muted block">Awaiting student resubmission</span>
+                </div>
+                <div className="p-2 border border-brand-dark/20 bg-white">
+                  <span className="text-brand-muted text-[10px] block">NOT SUBMITTED</span>
+                  <span className="font-extrabold text-brand-muted text-base">
+                    {report.assignmentMetrics.unsubmitted}
+                  </span>
+                  <span className="text-[10px] text-brand-muted block">Outstanding</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Page 1 Footer */}
+            <footer className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-[10px] font-mono text-brand-muted break-inside-avoid">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-brand-teal" />
+                <span>PoraPlan Academic Mentorship Platform • Official Scholar Progress Archive</span>
+              </div>
+              <div className="font-bold">Page 1 of 2</div>
+            </footer>
+          </article>
+
+          {/* ===================================================================== */}
+          {/* PAGE BREAK (CLEAN SEPARATION FOR A4 PRINT)                            */}
+          {/* ===================================================================== */}
+          <div className="print:page-break my-6 print:my-0 border-t-2 border-dashed border-brand-dark/20 print:border-none" />
+
+          {/* ===================================================================== */}
+          {/* PAGE 2: INSIGHTS & ACTIONABLE IMPROVEMENT                             */}
+          {/* ===================================================================== */}
+          <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-6 print:border-none print:shadow-none print:p-0 print:space-y-4">
+            {/* Page 2 Running Header */}
+            <header className="border-b-2 border-brand-dark pb-3 flex items-center justify-between text-xs font-mono">
+              <div className="flex items-center gap-3">
+                <span className="font-extrabold text-brand-navy">{report.studentName}</span>
+                <span className="text-brand-teal font-bold">{report.poraplanId}</span>
+                <span className="text-brand-muted">
+                  {report.programName || 'Academic Mentorship'}
+                </span>
+              </div>
+              <div className="text-brand-muted font-bold">
+                Academic Performance &amp; Improvement Report • Page 2 of 2
+              </div>
+            </header>
+
+            {/* Section 1: Task Backlog & Overdue Radar */}
+            <div className="space-y-2 break-inside-avoid">
+              <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-brand-gold" />
+                <span>Task Backlog &amp; Deadline Status</span>
+              </h3>
+              <div className="p-3.5 border-2 border-brand-dark bg-brand-bg grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+                <div>
+                  <span className="text-brand-muted text-[10px] uppercase font-bold block">
+                    OVERDUE TASKS
+                  </span>
+                  <span className={`text-xl font-extrabold ${report.taskMetrics.overdue > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
+                    {report.taskMetrics.overdue} task{report.taskMetrics.overdue === 1 ? '' : 's'}
+                  </span>
+                  <p className="text-[10px] text-brand-muted mt-0.5">
+                    {report.taskMetrics.overdue > 0
+                      ? 'Action needed: prioritize in upcoming study session'
+                      : 'Zero overdue tasks in reporting window'}
+                  </p>
+                </div>
+
+                <div>
+                  <span className="text-brand-muted text-[10px] uppercase font-bold block">
+                    ON-TIME COMPLETION RATIO
+                  </span>
+                  <span className="text-xl font-extrabold text-brand-navy">
+                    {report.taskMetrics.completed > 0
+                      ? `${Math.round((report.taskMetrics.onTimeCompleted / report.taskMetrics.completed) * 100)}%`
+                      : 'N/A'}
+                  </span>
+                  <p className="text-[10px] text-brand-muted mt-0.5">
+                    {report.taskMetrics.onTimeCompleted} on-time, {report.taskMetrics.lateCompleted} completed late
+                  </p>
+                </div>
+
+                <div>
+                  <span className="text-brand-muted text-[10px] uppercase font-bold block">
+                    PENDING IN-PROGRESS TASKS
+                  </span>
+                  <span className="text-xl font-extrabold text-brand-navy">
+                    {report.taskMetrics.pending + report.taskMetrics.inProgress}
+                  </span>
+                  <p className="text-[10px] text-brand-muted mt-0.5">
+                    Scheduled tasks awaiting execution
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 2: Academic Strengths & Attention Areas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 break-inside-avoid">
+              {/* Strengths */}
+              <div className="p-3.5 border-2 border-brand-dark bg-emerald-50/40 space-y-2">
+                <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>Verified Academic Strengths</span>
+                </h4>
+                {report.insights.observations.filter((o) => o.type === 'strength').length > 0 ? (
+                  <ul className="space-y-1.5 text-xs font-mono text-emerald-950">
+                    {report.insights.observations
+                      .filter((o) => o.type === 'strength')
+                      .map((obs, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="text-emerald-700 font-bold shrink-0">•</span>
+                          <span>{obs.text}</span>
+                        </li>
+                      ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs font-mono text-brand-muted italic">
+                    Additional evaluation data needed to declare verified subject mastery.
+                  </p>
+                )}
+              </div>
+
+              {/* Areas Requiring Attention */}
+              <div className="p-3.5 border-2 border-brand-dark bg-red-50/40 space-y-2">
+                <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-red-900 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 text-red-700" />
+                  <span>Areas Requiring Focus &amp; Attention</span>
+                </h4>
+                {report.insights.observations.filter((o) => o.type === 'attention').length > 0 ? (
+                  <ul className="space-y-1.5 text-xs font-mono text-red-950">
+                    {report.insights.observations
+                      .filter((o) => o.type === 'attention')
+                      .map((obs, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="text-red-700 font-bold shrink-0">•</span>
+                          <span>{obs.text}</span>
+                        </li>
+                      ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs font-mono text-emerald-800 font-bold">
+                    ✓ No critical academic deficits or overdue backlogs flagged in this window.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Section 3: Evaluation Feedback Highlights & Mentor Remarks */}
+            <div className="space-y-2 break-inside-avoid">
+              <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+                <MessageSquareQuote className="w-4 h-4 text-brand-teal" />
+                <span>Evaluation Remarks &amp; Mentor Guidance</span>
+              </h3>
+              {report.evaluationMetrics.recentFeedback.length === 0 ? (
+                <div className="p-3 border-2 border-brand-dark bg-brand-bg text-xs font-mono text-brand-muted italic">
+                  No mentor evaluation notes recorded within this reporting window.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {report.evaluationMetrics.recentFeedback.map((fb) => (
+                    <div
+                      key={fb.id}
+                      className="p-3 border-2 border-brand-dark bg-brand-bg text-xs font-mono space-y-1"
+                    >
+                      <div className="flex items-center justify-between font-bold text-brand-navy">
+                        <span>
+                          {fb.title} {fb.subjectName ? `(${fb.subjectName})` : ''}
                         </span>
-                        <div className="flex items-center gap-2 text-[10px] font-mono text-brand-muted">
-                          <span>Date: {fb.date}</span>
-                          {fb.subjectName && <span>• Subject: {fb.subjectName}</span>}
-                          {fb.mentorName && <span>• Evaluator: {fb.mentorName}</span>}
-                        </div>
+                        <span className="text-[10px] text-brand-muted">
+                          {fb.date} {fb.scorePercentage !== null ? `• Score: ${fb.scorePercentage}%` : ''}
+                        </span>
                       </div>
-                      {fb.scorePercentage !== null && (
-                        <div className="px-2.5 py-1 border border-brand-dark bg-brand-teal-light font-mono text-xs font-bold text-brand-navy">
-                          Score: {fb.scorePercentage}%
-                        </div>
+                      {fb.feedback && (
+                        <p className="text-brand-dark">
+                          <strong className="text-brand-navy">Feedback:</strong> "{fb.feedback}"
+                        </p>
+                      )}
+                      {fb.recommendation && (
+                        <p className="text-brand-teal font-bold">
+                          <strong>Mentor Recommendation:</strong> {fb.recommendation}
+                        </p>
                       )}
                     </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-                    {fb.feedback && (
-                      <p className="text-xs font-sans text-brand-dark leading-relaxed whitespace-pre-line">
-                        {fb.feedback}
-                      </p>
-                    )}
+            {/* Section 4: Doubts Desk Inquiry Velocity */}
+            <div className="p-3.5 border-2 border-brand-dark bg-brand-bg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono break-inside-avoid">
+              <div className="flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-brand-teal shrink-0" />
+                <div>
+                  <span className="font-bold text-brand-navy block">
+                    Doubts Desk Problem-Solving Velocity
+                  </span>
+                  <span className="text-[10px] text-brand-muted">
+                    Student inquiry engagement and question turnaround time
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 text-xs font-mono">
+                <div>
+                  <span className="text-brand-muted text-[10px] block">CREATED</span>
+                  <span className="font-bold text-brand-dark">{report.doubtMetrics.createdInPeriod}</span>
+                </div>
+                <div>
+                  <span className="text-brand-muted text-[10px] block">RESOLVED</span>
+                  <span className="font-bold text-emerald-700">{report.doubtMetrics.resolvedInPeriod}</span>
+                </div>
+                <div>
+                  <span className="text-brand-muted text-[10px] block">PENDING</span>
+                  <span className="font-bold text-amber-700">{report.doubtMetrics.pendingInPeriod}</span>
+                </div>
+                {report.doubtMetrics.averageResolutionHours !== null && (
+                  <div>
+                    <span className="text-brand-muted text-[10px] block">AVG RESOLUTION</span>
+                    <span className="font-bold text-brand-dark">
+                      {report.doubtMetrics.averageResolutionHours} hrs
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
 
-                    {fb.recommendation && (
-                      <div className="p-2.5 border border-brand-dark bg-brand-paper-tint text-xs space-y-0.5">
-                        <span className="font-mono text-[10px] uppercase font-bold text-brand-teal block">
-                          Key Recommendation:
-                        </span>
-                        <p className="font-sans text-brand-dark">{fb.recommendation}</p>
+            {/* Section 5: Prioritized Action Plan (Top 3 Recommendations) */}
+            <div className="space-y-2 break-inside-avoid">
+              <div className="flex items-center justify-between">
+                <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-brand-gold" />
+                  <span>Prioritized Action Plan for Next Cycle</span>
+                </h3>
+                <span className="text-[10px] font-mono text-brand-muted">
+                  Deterministic, Evidence-Based Next Steps
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {report.recommendations.map((rec) => (
+                  <div
+                    key={rec.id}
+                    className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col sm:flex-row sm:items-start gap-3"
+                  >
+                    <div className="shrink-0">
+                      <span
+                        className={`px-2 py-0.5 border text-[10px] font-bold uppercase inline-block ${
+                          rec.priority === 'P1'
+                            ? 'bg-red-700 text-white border-red-900'
+                            : rec.priority === 'P2'
+                            ? 'bg-amber-600 text-white border-amber-800'
+                            : 'bg-brand-navy text-white border-brand-dark'
+                        }`}
+                      >
+                        {rec.priority} • {rec.priorityLabel}
+                      </span>
+                    </div>
+                    <div className="space-y-1 text-xs font-mono flex-1">
+                      <div className="font-extrabold text-brand-navy text-sm">{rec.title}</div>
+                      <div className="text-[11px] text-brand-muted">
+                        <strong className="text-brand-dark">Evidence:</strong> {rec.evidence}
                       </div>
-                    )}
+                      <div className="text-brand-dark">
+                        <strong className="text-brand-navy">Recommended Action:</strong> {rec.recommendedAction}
+                      </div>
+                      <div className="text-[11px] text-brand-teal font-bold pt-0.5">
+                        <span>Target Outcome:</span> {rec.measurableSuccessIndicator}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="p-4 border border-dashed border-brand-dark/30 text-center font-mono text-xs text-brand-muted">
-                No evaluated sessions recorded during this reporting window.
-              </div>
-            )}
-          </section>
+            </div>
 
-          {/* Report Footer Certification */}
-          <footer className="border-t-2 border-brand-dark pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[10px] font-mono text-brand-muted">
-            <div>
-              <span>PoraPlan Platform Verification Engine • Automated Academic Audit</span>
-              <span className="block text-[9px] text-brand-muted/80">
-                Generated at: {new Date(report.generatedAt).toLocaleString()}
-              </span>
+            {/* Page 2 Sign-off / Verification Block */}
+            <div className="pt-4 border-t-2 border-brand-dark grid grid-cols-2 gap-4 text-xs font-mono break-inside-avoid">
+              <div className="space-y-1">
+                <span className="text-brand-muted text-[10px] uppercase font-bold block">
+                  SCHOLAR ACKNOWLEDGMENT
+                </span>
+                <div className="h-9 border-b border-brand-dark/40 flex items-end">
+                  <span className="text-brand-dark font-bold">{report.studentName}</span>
+                </div>
+                <span className="text-[9px] text-brand-muted">Digital Student Record</span>
+              </div>
+              <div className="space-y-1">
+                <span className="text-brand-muted text-[10px] uppercase font-bold block">
+                  MENTOR VERIFICATION &amp; SIGN-OFF
+                </span>
+                <div className="h-9 border-b border-brand-dark/40 flex items-end">
+                  <span className="text-brand-dark font-bold">
+                    {report.mentorName ? `${report.mentorName} (Verified)` : 'PoraPlan Academic Team'}
+                  </span>
+                </div>
+                <span className="text-[9px] text-brand-muted">Lead Academic Mentor Signature</span>
+              </div>
             </div>
-            <div className="text-left sm:text-right font-bold text-brand-navy">
-              <span>"You study. We organize how, what and when."</span>
-            </div>
-          </footer>
-        </article>
+
+            {/* Page 2 Footer */}
+            <footer className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-[10px] font-mono text-brand-muted break-inside-avoid">
+              <div>PoraPlan Academic Performance &amp; Improvement Report • Archive Copy</div>
+              <div className="font-bold">Page 2 of 2</div>
+            </footer>
+          </article>
+        </div>
       ) : null}
     </div>
   );
