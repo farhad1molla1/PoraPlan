@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -12,13 +12,27 @@ import {
   type TaskWithMeta,
   type StudentTaskFilters,
 } from '../../lib/tasks';
-import { getAcademicFileSignedUrl } from '../../lib/storage';
+import {
+  getStudentAssignments,
+  submitAssignment,
+  type AssignmentWithMeta,
+} from '../../lib/assignments';
+import {
+  validateAcademicFile,
+  uploadAcademicFile,
+  getAcademicFileSignedUrl,
+  deleteAcademicFile,
+} from '../../lib/storage';
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
 import {
   parseLibraryTab,
   type AcademicLibraryTab,
 } from '../../lib/library';
-import type { Subject, TaskStatus } from '../../types/database';
+import type {
+  Subject,
+  TaskStatus,
+  SubmissionType,
+} from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import {
@@ -45,6 +59,9 @@ import {
   Eye,
   Info,
   CheckCircle,
+  Send,
+  FileCheck,
+  FileUp,
 } from 'lucide-react';
 
 type DatePreset = 'all' | 'today' | 'this_week' | 'this_month' | 'specific_date' | 'custom_range';
@@ -107,7 +124,38 @@ export const StudentLibraryPage: React.FC = () => {
   const [customStartDate, setCustomStartDate] = useState<string>('');
   const [customEndDate, setCustomEndDate] = useState<string>('');
 
-  // Attachment Viewer Modal State
+  // ---------------------------------------------------------------------------
+  // TAB 3: ASSIGNMENTS & SUBMISSIONS STATE
+  // ---------------------------------------------------------------------------
+  const [assignments, setAssignments] = useState<AssignmentWithMeta[]>([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(false);
+  const [assignmentsError, setAssignmentsError] = useState<string | null>(null);
+
+  // Assignment Filters
+  const [assignmentSearch, setAssignmentSearch] = useState('');
+  const [assignmentSubjectFilter, setAssignmentSubjectFilter] = useState('all');
+  const [assignmentStatusFilter, setAssignmentStatusFilter] = useState<
+    'all' | 'pending' | 'submitted' | 'under_review' | 'reviewed' | 'needs_revision'
+  >('all');
+  const [assignmentDateFilter, setAssignmentDateFilter] = useState<'all' | 'upcoming' | 'past_due'>('all');
+
+  // Active Assignment Submission Form State
+  const [activeAssignmentId, setActiveAssignmentId] = useState<string | null>(null);
+  const [submissionType, setSubmissionType] = useState<SubmissionType>('text');
+  const [textContent, setTextContent] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
+  const [fileName, setFileName] = useState('');
+  const [fileSize, setFileSize] = useState<number | undefined>(undefined);
+  const [existingFilePath, setExistingFilePath] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFileObjectUrl, setSelectedFileObjectUrl] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formSuccess, setFormSuccess] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Unified Attachment Viewer Modal State (Shared for Tasks & Submissions)
   const [viewerModal, setViewerModal] = useState<{
     isOpen: boolean;
     fileName: string;
@@ -126,7 +174,31 @@ export const StudentLibraryPage: React.FC = () => {
     error: null,
   });
 
-  // Load Subjects
+  // Clean up Object URL for selected assignment file upload
+  useEffect(() => {
+    if (selectedFile && typeof window !== 'undefined' && typeof window.URL?.createObjectURL === 'function') {
+      let url: string | null = null;
+      try {
+        url = URL.createObjectURL(selectedFile);
+        setSelectedFileObjectUrl(url);
+      } catch {
+        // Fallback for headless environments
+      }
+      return () => {
+        if (url) {
+          try {
+            URL.revokeObjectURL(url);
+          } catch {
+            // ignore
+          }
+        }
+      };
+    } else {
+      setSelectedFileObjectUrl(null);
+    }
+  }, [selectedFile]);
+
+  // Load Subjects once
   useEffect(() => {
     let mounted = true;
     if (studentId) {
@@ -233,8 +305,6 @@ export const StudentLibraryPage: React.FC = () => {
       subjectId: taskSubjectFilter !== 'all' ? taskSubjectFilter : undefined,
     };
 
-    // PostgREST filter for explicit database statuses ('pending' | 'in_progress' | 'completed')
-    // If 'overdue', we fetch all and filter in client (since overdue is due_date < today AND status != completed)
     if (taskStatusFilter !== 'all' && taskStatusFilter !== 'overdue') {
       queryFilters.status = taskStatusFilter as TaskStatus;
     }
@@ -276,13 +346,250 @@ export const StudentLibraryPage: React.FC = () => {
     }
   };
 
-  // Attachment Preview Handler
+  // ---------------------------------------------------------------------------
+  // LOAD TAB 3: ASSIGNMENTS & SUBMISSIONS DATA
+  // ---------------------------------------------------------------------------
+  const loadAssignments = useCallback(() => {
+    if (!studentId) return;
+    setAssignmentsLoading(true);
+    setAssignmentsError(null);
+    getStudentAssignments(studentId)
+      .then((res) => {
+        if (res.error) {
+          setAssignmentsError(res.error.message);
+        } else {
+          setAssignments(res.assignments);
+        }
+        setAssignmentsLoading(false);
+      })
+      .catch((err: unknown) => {
+        setAssignmentsError(err instanceof Error ? err.message : 'Failed to load assignments.');
+        setAssignmentsLoading(false);
+      });
+  }, [studentId]);
+
+  useEffect(() => {
+    if (activeTab === 'assignments' && studentId) {
+      loadAssignments();
+    }
+  }, [activeTab, studentId, loadAssignments]);
+
+  // ---------------------------------------------------------------------------
+  // SUBMISSION FORM HANDLERS (TAB 3)
+  // ---------------------------------------------------------------------------
+  const handleOpenSubmission = (assignment: AssignmentWithMeta) => {
+    const isLocked =
+      assignment.status === 'closed' ||
+      assignment.status === 'archived' ||
+      (assignment.submission &&
+        (assignment.submission.status === 'under_review' ||
+          assignment.submission.status === 'reviewed'));
+
+    if (isLocked) return;
+
+    if (activeAssignmentId === assignment.id) {
+      // Toggle drawer closed
+      setActiveAssignmentId(null);
+      return;
+    }
+
+    setActiveAssignmentId(assignment.id);
+    setFormError(null);
+    setFormSuccess(null);
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    if (assignment.submission) {
+      setSubmissionType(assignment.submission.submission_type);
+      setTextContent(assignment.submission.content || '');
+      setLinkUrl(assignment.submission.link_url || '');
+      setFileName(assignment.submission.file_name || '');
+      setFileSize(assignment.submission.file_size || undefined);
+      setExistingFilePath(assignment.submission.file_path || null);
+    } else {
+      setSubmissionType('text');
+      setTextContent('');
+      setLinkUrl('');
+      setFileName('');
+      setFileSize(undefined);
+      setExistingFilePath(null);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateAcademicFile(file);
+    if (!validation.valid) {
+      setFormError(validation.error || 'Invalid file selected.');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    setSelectedFile(file);
+    setFileName(file.name);
+    setFileSize(file.size);
+    setFormError(null);
+
+    if (!textContent.trim()) {
+      const formattedSize =
+        file.size < 1024 * 1024
+          ? `${Math.round(file.size / 1024)} KB`
+          : `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+      setTextContent(`Attached file: ${file.name} (${formattedSize})`);
+    }
+  };
+
+  const handleRemoveSelectedFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    const currentAssignment = assignments.find((a) => a.id === activeAssignmentId);
+    if (
+      currentAssignment?.submission?.file_name &&
+      currentAssignment.submission.submission_type === 'file'
+    ) {
+      setFileName(currentAssignment.submission.file_name);
+      setFileSize(currentAssignment.submission.file_size || undefined);
+      setExistingFilePath(currentAssignment.submission.file_path || null);
+    } else {
+      setFileName('');
+      setFileSize(undefined);
+      setExistingFilePath(null);
+    }
+  };
+
+  const handleSubmitWork = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeAssignmentId || !studentId) return;
+
+    const currentAssignment = assignments.find((a) => a.id === activeAssignmentId);
+    if (!currentAssignment) return;
+
+    if (
+      currentAssignment.submission &&
+      (currentAssignment.submission.status === 'under_review' ||
+        currentAssignment.submission.status === 'reviewed')
+    ) {
+      setFormError(
+        'This submission is currently under mentor review or has already been graded. Modifications are locked.'
+      );
+      return;
+    }
+
+    let finalContent = textContent.trim();
+    if (submissionType === 'link') {
+      const cleanUrl = linkUrl.trim();
+      if (!cleanUrl) {
+        setFormError('Please enter an external link URL.');
+        return;
+      }
+      if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+        setFormError('External link must begin with http:// or https://');
+        return;
+      }
+      if (!finalContent) {
+        finalContent = cleanUrl;
+      }
+    } else if (submissionType === 'file') {
+      if (!selectedFile && !existingFilePath && !fileName) {
+        setFormError('Please attach a document (PDF, PNG, JPG, WebP, or DOCX).');
+        return;
+      }
+      if (!finalContent) {
+        finalContent = selectedFile
+          ? `Attached file: ${selectedFile.name}`
+          : `Attached document: ${fileName}`;
+      }
+    } else {
+      if (!finalContent) {
+        setFormError('Submission text cannot be empty.');
+        return;
+      }
+    }
+
+    setSubmitting(true);
+    setFormError(null);
+    setFormSuccess(null);
+
+    let resolvedFilePath: string | undefined = existingFilePath || undefined;
+    let resolvedFileName: string | undefined = fileName || undefined;
+    let resolvedFileSize: number | undefined = fileSize || undefined;
+    let newUploadPath: string | null = null;
+
+    if (submissionType === 'file' && selectedFile) {
+      const { path: uploadedPath, error: uploadErr } = await uploadAcademicFile({
+        category: 'submissions',
+        entityId: activeAssignmentId,
+        studentId,
+        file: selectedFile,
+      });
+
+      if (uploadErr || !uploadedPath) {
+        setFormError(uploadErr?.message || 'Failed to upload attachment file. Please try again.');
+        setSubmitting(false);
+        return;
+      }
+
+      newUploadPath = uploadedPath;
+      resolvedFilePath = uploadedPath;
+      resolvedFileName = selectedFile.name;
+      resolvedFileSize = selectedFile.size;
+    }
+
+    const { submission, error: submitErr } = await submitAssignment({
+      assignmentId: activeAssignmentId,
+      studentId,
+      submissionType,
+      content: finalContent,
+      linkUrl: submissionType === 'link' ? linkUrl.trim() : undefined,
+      fileName: submissionType === 'file' ? resolvedFileName : undefined,
+      fileSize: submissionType === 'file' ? resolvedFileSize : undefined,
+      filePath: submissionType === 'file' ? resolvedFilePath : undefined,
+    });
+
+    if (submitErr) {
+      if (newUploadPath) {
+        await deleteAcademicFile(newUploadPath).catch(() => {});
+      }
+      setSubmitting(false);
+      setFormError(`Failed to save submission: ${submitErr.message}`);
+      return;
+    }
+
+    if (
+      newUploadPath &&
+      currentAssignment.submission?.file_path &&
+      currentAssignment.submission.file_path !== newUploadPath
+    ) {
+      deleteAcademicFile(currentAssignment.submission.file_path).catch(() => {});
+    }
+
+    setSubmitting(false);
+    setSelectedFile(null);
+    setFormSuccess('Your assignment work has been submitted successfully!');
+
+    setAssignments((prev) =>
+      prev.map((a) => (a.id === activeAssignmentId ? { ...a, submission } : a))
+    );
+  };
+
+  // ---------------------------------------------------------------------------
+  // ATTACHMENT PREVIEW & DOWNLOAD HANDLERS
+  // ---------------------------------------------------------------------------
   const handlePreviewAttachment = async (attachment: {
     name?: string | null;
     size?: number | null;
     path?: string | null;
   }) => {
-    const name = attachment.name || 'task-attachment';
+    const name = attachment.name || 'attachment';
     if (!attachment.path) {
       setViewerModal({
         isOpen: true,
@@ -323,7 +630,6 @@ export const StudentLibraryPage: React.FC = () => {
     }
   };
 
-  // Attachment Download Handler
   const handleDownloadAttachment = async (attachment: {
     name?: string | null;
     path?: string | null;
@@ -350,19 +656,20 @@ export const StudentLibraryPage: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  // Filtered Tasks for Display (includes client text search & overdue check)
+  // ---------------------------------------------------------------------------
+  // FILTERED COMPUTATIONS
+  // ---------------------------------------------------------------------------
+  // Filtered Tasks for Display (Tab 2)
   const filteredTasks = useMemo(() => {
     const todayStr = new Date().toISOString().split('T')[0];
     const q = taskSearch.trim().toLowerCase();
 
     return tasks.filter((task) => {
-      // Overdue filter check
       if (taskStatusFilter === 'overdue') {
         const isOverdue = task.due_date && task.due_date < todayStr && task.status !== 'completed';
         if (!isOverdue) return false;
       }
 
-      // Quick text search
       if (q) {
         const matchesTitle = task.title.toLowerCase().includes(q);
         const matchesDesc = task.description?.toLowerCase().includes(q) || false;
@@ -374,7 +681,6 @@ export const StudentLibraryPage: React.FC = () => {
     });
   }, [tasks, taskStatusFilter, taskSearch]);
 
-  // Compute Task Statistics
   const taskStats = useMemo(() => {
     const todayStr = new Date().toISOString().split('T')[0];
     const total = tasks.length;
@@ -387,6 +693,65 @@ export const StudentLibraryPage: React.FC = () => {
 
     return { total, completed, inProgress, pending, overdue };
   }, [tasks]);
+
+  // Filtered Assignments for Display (Tab 3)
+  const filteredAssignments = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const q = assignmentSearch.trim().toLowerCase();
+
+    return assignments.filter((a) => {
+      // Subject filter
+      if (assignmentSubjectFilter !== 'all' && a.subject_id !== assignmentSubjectFilter) {
+        return false;
+      }
+
+      // Status filter
+      if (assignmentStatusFilter !== 'all') {
+        if (assignmentStatusFilter === 'pending') {
+          if (a.submission) return false;
+        } else if (assignmentStatusFilter === 'submitted') {
+          if (!a.submission || a.submission.status !== 'submitted') return false;
+        } else if (assignmentStatusFilter === 'under_review') {
+          if (!a.submission || a.submission.status !== 'under_review') return false;
+        } else if (assignmentStatusFilter === 'reviewed') {
+          if (!a.submission || a.submission.status !== 'reviewed') return false;
+        } else if (assignmentStatusFilter === 'needs_revision') {
+          if (!a.submission || a.submission.status !== 'needs_revision') return false;
+        }
+      }
+
+      // Date filter
+      if (assignmentDateFilter === 'upcoming') {
+        if (a.due_date && a.due_date < todayStr) return false;
+      } else if (assignmentDateFilter === 'past_due') {
+        if (!a.due_date || a.due_date >= todayStr) return false;
+      }
+
+      // Text search
+      if (q) {
+        const matchesTitle = a.title.toLowerCase().includes(q);
+        const matchesInst = a.instructions?.toLowerCase().includes(q) || false;
+        const matchesSubj = a.subject_name?.toLowerCase().includes(q) || false;
+        const matchesContent = a.submission?.content?.toLowerCase().includes(q) || false;
+        if (!matchesTitle && !matchesInst && !matchesSubj && !matchesContent) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [assignments, assignmentSubjectFilter, assignmentStatusFilter, assignmentDateFilter, assignmentSearch]);
+
+  const assignmentStats = useMemo(() => {
+    const total = assignments.length;
+    const pending = assignments.filter((a) => !a.submission).length;
+    const submitted = assignments.filter((a) => a.submission && a.submission.status === 'submitted').length;
+    const underReview = assignments.filter((a) => a.submission && a.submission.status === 'under_review').length;
+    const reviewed = assignments.filter((a) => a.submission && a.submission.status === 'reviewed').length;
+    const needsRevision = assignments.filter((a) => a.submission && a.submission.status === 'needs_revision').length;
+
+    return { total, pending, submitted, underReview, reviewed, needsRevision };
+  }, [assignments]);
 
   // Helper formatting functions
   const formatDate = (isoString?: string | null) => {
@@ -469,6 +834,13 @@ export const StudentLibraryPage: React.FC = () => {
     setCustomEndDate('');
   };
 
+  const clearAssignmentFilters = () => {
+    setAssignmentSearch('');
+    setAssignmentSubjectFilter('all');
+    setAssignmentStatusFilter('all');
+    setAssignmentDateFilter('all');
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* ========================================================================= */}
@@ -500,6 +872,11 @@ export const StudentLibraryPage: React.FC = () => {
             <Link to="/student/tasks">
               <Button variant="outline" size="sm">
                 Today's Tasks
+              </Button>
+            </Link>
+            <Link to="/student/assignments">
+              <Button variant="outline" size="sm">
+                Practice Assignments
               </Button>
             </Link>
           </div>
@@ -560,6 +937,13 @@ export const StudentLibraryPage: React.FC = () => {
           >
             <Layers className="w-4 h-4" />
             <span>Assignments & Submissions</span>
+            <span
+              className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
+                activeTab === 'assignments' ? 'bg-brand-navy text-white' : 'bg-brand-paper text-brand-muted'
+              }`}
+            >
+              {assignments.length}
+            </span>
           </button>
         </div>
       </section>
@@ -1253,67 +1637,750 @@ export const StudentLibraryPage: React.FC = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 3: ASSIGNMENTS & SUBMISSIONS (FOUNDATION / PLACEHOLDER)               */}
+      {/* TAB 3: ASSIGNMENTS & SUBMISSIONS (FULL MILESTONE 5 INTEGRATION)             */}
       {/* ========================================================================= */}
       {activeTab === 'assignments' && (
         <div className="space-y-6 animate-fadeIn">
-          <section className="p-6 sm:p-8 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b-2 border-brand-dark/20">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Badge variant="gold" size="sm">
-                    INTEGRATION IN PROGRESS
-                  </Badge>
-                  <span className="font-mono text-xs text-brand-muted">Milestone 5 Foundation</span>
-                </div>
-                <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
-                  Assignments & Submissions Portfolio
-                </h2>
-                <p className="font-sans text-xs sm:text-sm text-brand-muted max-w-2xl">
-                  Practice problem sets, homework submissions, and mentor grading feedback are being unified here. You will be able to submit work, review scores, and track your revision status in one integrated view.
-                </p>
+          {/* Milestone 5 Foundation / Integration Indicator */}
+          <div className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Badge variant="gold" size="sm">
+                  CURRICULUM PORTFOLIO
+                </Badge>
+                <span className="font-mono text-xs text-brand-muted">Milestone 5 Foundation</span>
               </div>
+              <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
+                Assignments &amp; Submissions Portfolio
+              </h2>
+              <p className="font-sans text-xs sm:text-sm text-brand-muted max-w-2xl">
+                Review distributed practice problem sets, submit text, link, or document solutions, and track mentor grading feedback.
+              </p>
+            </div>
 
-              <Link to="/student/assignments" className="shrink-0">
-                <Button variant="primary" size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                  Go to Practice Assignments
+            <div className="flex items-center gap-2 shrink-0">
+              <Link to="/student/assignments">
+                <Button variant="outline" size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                  Practice Assignments
                 </Button>
               </Link>
             </div>
+          </div>
 
-            {/* Feature Previews */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 border-2 border-brand-dark bg-brand-bg shadow-brutal-xs space-y-2">
-                <div className="flex items-center gap-2 text-brand-navy font-heading font-bold text-sm">
-                  <Layers className="w-4 h-4 text-brand-coral" />
-                  <span>Practice Problem Sets</span>
-                </div>
-                <p className="font-sans text-xs text-brand-muted">
-                  Structured homework instructions, point allocations, due dates, and curriculum plan linkages.
-                </p>
+          {/* Filter Bar */}
+          <section className="p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              {/* Text Search */}
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
+                <input
+                  type="text"
+                  placeholder="Search assignments by title, instructions, subject, or content..."
+                  value={assignmentSearch}
+                  onChange={(e) => setAssignmentSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
+                />
               </div>
 
-              <div className="p-4 border-2 border-brand-dark bg-brand-bg shadow-brutal-xs space-y-2">
-                <div className="flex items-center gap-2 text-brand-navy font-heading font-bold text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-brand-teal" />
-                  <span>Mentor Reviews & Scores</span>
-                </div>
-                <p className="font-sans text-xs text-brand-muted">
-                  Review graded scores, qualitative mentor feedback comments, and revision requests.
-                </p>
-              </div>
+              {/* Subject Filter */}
+              <select
+                value={assignmentSubjectFilter}
+                onChange={(e) => setAssignmentSubjectFilter(e.target.value)}
+                className="px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
+              >
+                <option value="all">All Subjects ({subjects.length})</option>
+                {subjects.map((sub) => (
+                  <option key={sub.id} value={sub.id}>
+                    {sub.name}
+                  </option>
+                ))}
+              </select>
 
-              <div className="p-4 border-2 border-brand-dark bg-brand-bg shadow-brutal-xs space-y-2">
-                <div className="flex items-center gap-2 text-brand-navy font-heading font-bold text-sm">
-                  <Paperclip className="w-4 h-4 text-brand-gold" />
-                  <span>Submission Attachments</span>
-                </div>
-                <p className="font-sans text-xs text-brand-muted">
-                  Upload PDF, Word, or image homework submissions with live in-app attachment preview and downloads.
-                </p>
+              {/* Status Filter */}
+              <select
+                value={assignmentStatusFilter}
+                onChange={(e) =>
+                  setAssignmentStatusFilter(
+                    e.target.value as
+                      | 'all'
+                      | 'pending'
+                      | 'submitted'
+                      | 'under_review'
+                      | 'reviewed'
+                      | 'needs_revision'
+                  )
+                }
+                className="px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
+              >
+                <option value="all">All Statuses ({assignments.length})</option>
+                <option value="pending">To Submit ({assignmentStats.pending})</option>
+                <option value="submitted">Submitted ({assignmentStats.submitted})</option>
+                <option value="under_review">Under Review ({assignmentStats.underReview})</option>
+                <option value="reviewed">Reviewed / Graded ({assignmentStats.reviewed})</option>
+                <option value="needs_revision">Revision Requested ({assignmentStats.needsRevision})</option>
+              </select>
+
+              {/* Date Filter */}
+              <select
+                value={assignmentDateFilter}
+                onChange={(e) =>
+                  setAssignmentDateFilter(e.target.value as 'all' | 'upcoming' | 'past_due')
+                }
+                className="px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
+              >
+                <option value="all">All Due Dates</option>
+                <option value="upcoming">Upcoming &amp; Current</option>
+                <option value="past_due">Past Due Date</option>
+              </select>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAssignmentFilters}
+                  title="Clear all assignment filters"
+                >
+                  Reset
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadAssignments}
+                  disabled={assignmentsLoading}
+                  leftIcon={<RefreshCw className={`w-3.5 h-3.5 ${assignmentsLoading ? 'animate-spin' : ''}`} />}
+                >
+                  Reload
+                </Button>
               </div>
             </div>
           </section>
+
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs space-y-1">
+              <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
+                Total Sets
+              </span>
+              <div className="font-mono text-lg font-black text-brand-navy">
+                {assignmentStats.total}
+              </div>
+            </div>
+
+            <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs space-y-1">
+              <span className="font-mono text-[10px] uppercase font-bold text-amber-700">
+                To Submit
+              </span>
+              <div className="font-mono text-lg font-black text-amber-700">
+                {assignmentStats.pending}
+              </div>
+            </div>
+
+            <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs space-y-1">
+              <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
+                Submitted
+              </span>
+              <div className="font-mono text-lg font-black text-brand-teal">
+                {assignmentStats.submitted}
+              </div>
+            </div>
+
+            <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs space-y-1">
+              <span className="font-mono text-[10px] uppercase font-bold text-green-700">
+                Reviewed
+              </span>
+              <div className="font-mono text-lg font-black text-green-700">
+                {assignmentStats.reviewed}
+              </div>
+            </div>
+
+            <div className="col-span-2 sm:col-span-1 p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs space-y-1">
+              <span className="font-mono text-[10px] uppercase font-bold text-brand-coral">
+                Under Review
+              </span>
+              <div className="font-mono text-lg font-black text-brand-coral">
+                {assignmentStats.underReview}
+              </div>
+            </div>
+          </div>
+
+          {/* Assignments Content List */}
+          {assignmentsLoading ? (
+            <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col items-center justify-center space-y-3">
+              <Loader2 className="w-8 h-8 text-brand-gold animate-spin" />
+              <p className="font-mono text-xs text-brand-muted">Loading assignments & submissions...</p>
+            </div>
+          ) : assignmentsError ? (
+            <div className="p-6 border-2 border-brand-dark bg-red-50 shadow-brutal space-y-3">
+              <div className="flex items-center gap-2 text-red-700 font-bold font-mono text-sm">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <span>Error loading assignments</span>
+              </div>
+              <p className="font-mono text-xs text-brand-dark">{assignmentsError}</p>
+              <Button variant="outline" size="sm" onClick={loadAssignments}>
+                Retry
+              </Button>
+            </div>
+          ) : filteredAssignments.length === 0 ? (
+            <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center space-y-4">
+              <Layers className="w-12 h-12 text-brand-muted mx-auto stroke-1" />
+              <div className="space-y-1">
+                <h3 className="font-heading font-extrabold text-lg text-brand-navy">
+                  No assignments found
+                </h3>
+                <p className="font-sans text-xs sm:text-sm text-brand-muted max-w-md mx-auto">
+                  {assignmentSearch ||
+                  assignmentSubjectFilter !== 'all' ||
+                  assignmentStatusFilter !== 'all' ||
+                  assignmentDateFilter !== 'all'
+                    ? 'No assignments match your current filters. Try adjusting or resetting your filter criteria.'
+                    : 'Your mentors have not assigned any practice problem sets yet.'}
+                </p>
+              </div>
+              {(assignmentSearch ||
+                assignmentSubjectFilter !== 'all' ||
+                assignmentStatusFilter !== 'all' ||
+                assignmentDateFilter !== 'all') && (
+                <Button variant="outline" size="sm" onClick={clearAssignmentFilters}>
+                  Clear All Filters
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredAssignments.map((assignment) => {
+                const hasSubmission = Boolean(assignment.submission);
+                const isSelected = activeAssignmentId === assignment.id;
+                const isClosed = assignment.status === 'closed' || assignment.status === 'archived';
+                const submissionStatus = assignment.submission?.status;
+                const isLocked =
+                  isClosed ||
+                  (hasSubmission &&
+                    (submissionStatus === 'under_review' || submissionStatus === 'reviewed'));
+                const todayStr = new Date().toISOString().split('T')[0];
+                const isPastDue =
+                  assignment.due_date && assignment.due_date < todayStr && !hasSubmission;
+
+                return (
+                  <div
+                    key={assignment.id}
+                    className={`border-2 border-brand-dark bg-brand-paper transition-all ${
+                      isSelected
+                        ? 'shadow-brutal ring-2 ring-brand-navy'
+                        : 'shadow-brutal hover:shadow-brutal-md'
+                    }`}
+                  >
+                    <div className="p-5 sm:p-6 space-y-4">
+                      {/* Top Badges & Meta */}
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {assignment.subject_name && (
+                            <Badge variant="navy" size="sm">
+                              {assignment.subject_name}
+                            </Badge>
+                          )}
+
+                          {assignment.plan_title && (
+                            <Badge variant="muted" size="sm">
+                              {assignment.plan_title}
+                            </Badge>
+                          )}
+
+                          {/* Submission Status Badge */}
+                          <Badge
+                            variant={
+                              !hasSubmission
+                                ? 'gold'
+                                : submissionStatus === 'reviewed'
+                                ? 'teal'
+                                : submissionStatus === 'needs_revision'
+                                ? 'danger'
+                                : submissionStatus === 'under_review'
+                                ? 'gold'
+                                : 'navy'
+                            }
+                            size="sm"
+                          >
+                            {!hasSubmission
+                              ? 'TO SUBMIT'
+                              : submissionStatus === 'needs_revision'
+                              ? 'REVISION REQUESTED'
+                              : submissionStatus === 'under_review'
+                              ? 'UNDER REVIEW'
+                              : submissionStatus === 'reviewed'
+                              ? 'GRADED'
+                              : 'SUBMITTED'}
+                          </Badge>
+
+                          {isClosed && (
+                            <Badge variant="muted" size="sm">
+                              CLOSED
+                            </Badge>
+                          )}
+
+                          {isPastDue && (
+                            <Badge variant="danger" size="sm">
+                              PAST DUE
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Points & Due Date */}
+                        <div className="flex items-center gap-3 font-mono text-xs text-brand-muted">
+                          {assignment.total_points && (
+                            <span className="font-bold text-brand-navy bg-brand-bg px-2 py-0.5 border border-brand-dark/20">
+                              {assignment.total_points} PTS
+                            </span>
+                          )}
+
+                          {assignment.due_date && (
+                            <span
+                              className={`flex items-center gap-1 ${
+                                isPastDue ? 'text-red-600 font-bold' : ''
+                              }`}
+                            >
+                              <Calendar className="w-3.5 h-3.5" />
+                              <span>Due: {assignment.due_date}</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Title & Instructions */}
+                      <div>
+                        <h3 className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy">
+                          {assignment.title}
+                        </h3>
+                        {assignment.instructions && (
+                          <div className="mt-2.5 p-3.5 border-2 border-brand-dark bg-brand-bg font-sans text-xs sm:text-sm text-brand-dark whitespace-pre-wrap leading-relaxed shadow-brutal-xs">
+                            {assignment.instructions}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Existing Student Submission Box */}
+                      {hasSubmission && (
+                        <div className="space-y-3">
+                          {/* Revision Request Banner */}
+                          {submissionStatus === 'needs_revision' && (
+                            <div className="p-3 border-2 border-red-500 bg-red-50 text-red-800 text-xs flex items-start gap-2 shadow-brutal-xs">
+                              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                              <div>
+                                <strong className="block font-bold">Revision Requested by Mentor</strong>
+                                <span>Please review mentor corrections below and update your solution or document attachment.</span>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="p-4 border-2 border-brand-teal bg-teal-50/50 shadow-brutal-xs space-y-3">
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-teal/20 pb-2">
+                              <span className="font-mono text-xs font-bold text-brand-teal uppercase flex items-center gap-1.5">
+                                <CheckCircle2 className="w-4 h-4 text-brand-teal" />
+                                Your Submitted Solution ({assignment.submission?.submission_type.toUpperCase()})
+                              </span>
+                              <span className="font-mono text-[11px] text-brand-muted">
+                                Turned in: {formatDateTime(assignment.submission?.submitted_at)}
+                              </span>
+                            </div>
+
+                            {/* Link submission */}
+                            {assignment.submission?.submission_type === 'link' ? (
+                              <div className="flex items-center gap-2">
+                                <ExternalLink className="w-4 h-4 text-brand-teal shrink-0" />
+                                <a
+                                  href={assignment.submission.link_url || assignment.submission.content}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs sm:text-sm text-brand-teal font-mono underline break-all hover:text-brand-navy font-bold"
+                                >
+                                  {assignment.submission.link_url || assignment.submission.content}
+                                </a>
+                              </div>
+                            ) : assignment.submission?.submission_type === 'file' ? (
+                              <div className="space-y-2">
+                                <div className="p-3 border-2 border-brand-dark bg-brand-paper flex flex-wrap items-center justify-between gap-3 shadow-brutal-xs">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <Paperclip className="w-4 h-4 text-brand-teal shrink-0" />
+                                    <div className="min-w-0">
+                                      <span className="font-mono text-xs font-bold text-brand-navy truncate block">
+                                        {assignment.submission.file_name || 'Submission Attachment'}
+                                      </span>
+                                      {assignment.submission.file_size && (
+                                        <span className="font-mono text-[10px] text-brand-muted">
+                                          {formatFileSize(assignment.submission.file_size)}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() =>
+                                        handlePreviewAttachment({
+                                          name: assignment.submission!.file_name,
+                                          size: assignment.submission!.file_size,
+                                          path: assignment.submission!.file_path,
+                                        })
+                                      }
+                                      leftIcon={<Eye className="w-3.5 h-3.5 text-brand-teal" />}
+                                    >
+                                      Preview
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() =>
+                                        handleDownloadAttachment({
+                                          name: assignment.submission!.file_name,
+                                          path: assignment.submission!.file_path,
+                                        })
+                                      }
+                                      leftIcon={<Download className="w-3.5 h-3.5 text-brand-dark" />}
+                                    >
+                                      Download
+                                    </Button>
+                                  </div>
+                                </div>
+
+                                {assignment.submission.content && (
+                                  <p className="font-sans text-xs text-brand-dark whitespace-pre-wrap leading-relaxed">
+                                    {assignment.submission.content}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="font-sans text-xs sm:text-sm text-brand-dark whitespace-pre-wrap leading-relaxed">
+                                {assignment.submission?.content}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Mentor Feedback & Score Display */}
+                          {assignment.submission?.feedback ? (
+                            <div className="p-4 border-2 border-brand-navy bg-brand-paper-tint shadow-brutal-xs space-y-2">
+                              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-navy/20 pb-2">
+                                <span className="font-mono text-xs font-bold text-brand-navy uppercase flex items-center gap-1.5">
+                                  <FileCheck className="w-4 h-4 text-brand-teal" />
+                                  Mentor Review &amp; Evaluation
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  {assignment.submission.score !== undefined &&
+                                    assignment.submission.score !== null && (
+                                      <Badge variant="teal" size="sm">
+                                        SCORE: {assignment.submission.score} /{' '}
+                                        {assignment.total_points || 100} PTS
+                                      </Badge>
+                                    )}
+                                  {assignment.submission.reviewed_at && (
+                                    <span className="font-mono text-[11px] text-brand-muted">
+                                      Reviewed: {formatDate(assignment.submission.reviewed_at)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="font-sans text-xs sm:text-sm text-brand-dark leading-relaxed whitespace-pre-wrap">
+                                {assignment.submission.feedback}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="p-3 border border-brand-dark/20 bg-brand-bg font-mono text-xs text-brand-muted flex items-center gap-2 shadow-brutal-xs">
+                              <Clock className="w-3.5 h-3.5 text-brand-gold" />
+                              <span>
+                                Status: <strong>Awaiting Mentor Review</strong> — your submission is in the queue.
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Bottom Action Bar */}
+                      <div className="pt-2 border-t border-brand-dark/15 flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
+                        <span className="text-[11px] text-brand-muted">
+                          Assigned: {formatDate(assignment.created_at)}
+                        </span>
+
+                        <div>
+                          {isLocked ? (
+                            <span className="font-mono text-xs font-bold text-brand-muted flex items-center gap-1.5">
+                              {isClosed ? (
+                                'Assignment Closed'
+                              ) : submissionStatus === 'under_review' ? (
+                                <span className="text-brand-coral flex items-center gap-1">
+                                  <Clock className="w-3.5 h-3.5" />
+                                  Under Mentor Review (Locked)
+                                </span>
+                              ) : (
+                                <span className="text-green-700 flex items-center gap-1">
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  Graded &amp; Evaluated
+                                </span>
+                              )}
+                            </span>
+                          ) : (
+                            <Button
+                              variant={hasSubmission ? 'outline' : 'primary'}
+                              size="sm"
+                              onClick={() => handleOpenSubmission(assignment)}
+                              leftIcon={
+                                isSelected ? (
+                                  <X className="w-3.5 h-3.5" />
+                                ) : (
+                                  <Send className="w-3.5 h-3.5" />
+                                )
+                              }
+                            >
+                              {isSelected
+                                ? 'Close Drawer'
+                                : submissionStatus === 'needs_revision'
+                                ? 'Submit Revision'
+                                : hasSubmission
+                                ? 'Edit Submission'
+                                : 'Submit Work'}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Expandable Submission Drawer */}
+                      {isSelected && !isLocked && (
+                        <div className="mt-4 p-4 sm:p-5 border-2 border-brand-dark bg-brand-bg shadow-brutal space-y-4 animate-fadeIn">
+                          <div className="border-b-2 border-brand-dark/15 pb-3 flex items-center justify-between">
+                            <h4 className="font-heading font-extrabold text-base text-brand-navy flex items-center gap-2">
+                              <Send className="w-4 h-4 text-brand-teal" />
+                              {hasSubmission ? 'Update Your Submission' : 'Submit Assignment Work'}
+                            </h4>
+                            <button
+                              type="button"
+                              onClick={() => setActiveAssignmentId(null)}
+                              className="p-1 border border-brand-dark bg-brand-paper hover:bg-brand-bg shadow-brutal-xs"
+                              title="Cancel"
+                            >
+                              <X className="w-4 h-4 text-brand-dark" />
+                            </button>
+                          </div>
+
+                          {formError && (
+                            <div className="p-3 border-2 border-red-500 bg-red-50 text-red-700 text-xs font-mono flex items-center gap-2 shadow-brutal-xs">
+                              <AlertCircle className="w-4 h-4 shrink-0" />
+                              <span>{formError}</span>
+                            </div>
+                          )}
+
+                          {formSuccess && (
+                            <div className="p-3 border-2 border-green-600 bg-green-50 text-green-800 text-xs font-mono flex items-center gap-2 shadow-brutal-xs">
+                              <CheckCircle className="w-4 h-4 shrink-0" />
+                              <span>{formSuccess}</span>
+                            </div>
+                          )}
+
+                          <form onSubmit={handleSubmitWork} className="space-y-4">
+                            {/* Submission Type Switcher */}
+                            <div className="space-y-1">
+                              <label className="font-mono text-xs font-bold text-brand-navy uppercase block">
+                                Solution Type
+                              </label>
+                              <div className="flex flex-wrap gap-2">
+                                {(
+                                  [
+                                    { type: 'text', label: 'Written Derivation / Text' },
+                                    { type: 'link', label: 'External Resource Link' },
+                                    { type: 'file', label: 'Upload Document / Scan' },
+                                  ] as { type: SubmissionType; label: string }[]
+                                ).map((st) => (
+                                  <button
+                                    key={st.type}
+                                    type="button"
+                                    onClick={() => setSubmissionType(st.type)}
+                                    className={`px-3 py-1.5 border-2 border-brand-dark font-mono text-xs font-bold transition-all ${
+                                      submissionType === st.type
+                                        ? 'bg-brand-teal text-white shadow-brutal-xs -translate-y-0.5'
+                                        : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
+                                    }`}
+                                  >
+                                    {st.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Submission Type 1: Link */}
+                            {submissionType === 'link' && (
+                              <div className="space-y-1 animate-fadeIn">
+                                <label className="font-mono text-xs font-bold text-brand-navy block">
+                                  Resource or Repository URL (must start with https://)
+                                </label>
+                                <input
+                                  type="url"
+                                  placeholder="https://github.com/... or https://docs.google.com/..."
+                                  value={linkUrl}
+                                  onChange={(e) => setLinkUrl(e.target.value)}
+                                  className="w-full px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                                  required
+                                />
+                              </div>
+                            )}
+
+                            {/* Submission Type 2: File Attachment */}
+                            {submissionType === 'file' && (
+                              <div className="space-y-2 animate-fadeIn">
+                                <label className="font-mono text-xs font-bold text-brand-navy block">
+                                  Attach Document (PDF, PNG, JPG, WebP, or DOCX — max 10MB)
+                                </label>
+
+                                <input
+                                  ref={fileInputRef}
+                                  type="file"
+                                  accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+                                  onChange={handleFileSelect}
+                                  className="hidden"
+                                  id={`library-file-input-${assignment.id}`}
+                                />
+
+                                {selectedFile ? (
+                                  <div className="p-3 border-2 border-brand-dark bg-brand-paper flex flex-wrap items-center justify-between gap-3 shadow-brutal-xs">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <FileUp className="w-4 h-4 text-brand-teal shrink-0" />
+                                      <div className="min-w-0">
+                                        <span className="font-mono text-xs font-bold text-brand-navy truncate block">
+                                          {selectedFile.name}
+                                        </span>
+                                        <span className="font-mono text-[10px] text-brand-muted">
+                                          {formatFileSize(selectedFile.size)} (Ready to upload)
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      {selectedFileObjectUrl && (
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() =>
+                                            setViewerModal({
+                                              isOpen: true,
+                                              fileName: selectedFile.name,
+                                              filePath: null,
+                                              fileUrl: selectedFileObjectUrl,
+                                              fileSize: selectedFile.size,
+                                              loading: false,
+                                              error: null,
+                                            })
+                                          }
+                                        >
+                                          Preview
+                                        </Button>
+                                      )}
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleRemoveSelectedFile}
+                                      >
+                                        Remove
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : fileName ? (
+                                  <div className="p-3 border-2 border-brand-dark bg-brand-paper flex flex-wrap items-center justify-between gap-3 shadow-brutal-xs">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <Paperclip className="w-4 h-4 text-brand-teal shrink-0" />
+                                      <div className="min-w-0">
+                                        <span className="font-mono text-xs font-bold text-brand-navy truncate block">
+                                          Current: {fileName}
+                                        </span>
+                                        {fileSize && (
+                                          <span className="font-mono text-[10px] text-brand-muted">
+                                            {formatFileSize(fileSize)}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <label
+                                      htmlFor={`library-file-input-${assignment.id}`}
+                                      className="px-3 py-1.5 border-2 border-brand-dark font-mono text-xs font-bold bg-brand-paper hover:bg-brand-bg shadow-brutal-xs cursor-pointer inline-flex items-center gap-1.5"
+                                    >
+                                      <span>Replace File</span>
+                                    </label>
+                                  </div>
+                                ) : (
+                                  <label
+                                    htmlFor={`library-file-input-${assignment.id}`}
+                                    className="p-4 border-2 border-dashed border-brand-dark bg-brand-paper hover:bg-brand-paper-tint text-center block cursor-pointer transition-colors shadow-brutal-xs"
+                                  >
+                                    <FileUp className="w-6 h-6 text-brand-muted mx-auto mb-1" />
+                                    <span className="font-mono text-xs font-bold text-brand-navy block">
+                                      Click to choose an academic solution file
+                                    </span>
+                                    <span className="font-mono text-[10px] text-brand-muted block mt-0.5">
+                                      PDF, PNG, JPG, WebP, DOCX up to 10MB
+                                    </span>
+                                  </label>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Notes / Written Explanation Textarea */}
+                            <div className="space-y-1">
+                              <label className="font-mono text-xs font-bold text-brand-navy block">
+                                {submissionType === 'text'
+                                  ? 'Solution Derivation & Answers'
+                                  : 'Submission Notes & Observations (Optional)'}
+                              </label>
+                              <textarea
+                                rows={4}
+                                placeholder={
+                                  submissionType === 'text'
+                                    ? 'Enter your complete mathematical derivation, answer steps, or code solution here...'
+                                    : 'Add any notes, assumptions, or questions for your mentor regarding this submission...'
+                                }
+                                value={textContent}
+                                onChange={(e) => setTextContent(e.target.value)}
+                                className="w-full p-3 border-2 border-brand-dark font-mono text-xs bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs leading-relaxed"
+                              />
+                            </div>
+
+                            {/* Form Action Buttons */}
+                            <div className="pt-2 flex items-center justify-end gap-3">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setActiveAssignmentId(null)}
+                                disabled={submitting}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                type="submit"
+                                variant="primary"
+                                size="sm"
+                                disabled={submitting}
+                                leftIcon={
+                                  submitting ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <Send className="w-3.5 h-3.5" />
+                                  )
+                                }
+                              >
+                                {submitting ? 'Submitting...' : 'Turn in Assignment'}
+                              </Button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -1455,7 +2522,7 @@ export const StudentLibraryPage: React.FC = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* 5. ATTACHMENT VIEWER MODAL (TAB 2)                                        */}
+      {/* 5. UNIFIED ATTACHMENT VIEWER MODAL (TABS 2 & 3)                           */}
       {/* ========================================================================= */}
       <AttachmentViewerModal
         isOpen={viewerModal.isOpen}

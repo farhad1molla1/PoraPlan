@@ -27,7 +27,6 @@ import {
   createMockTask,
   updateMockTask,
   deleteMockTask,
-  getMockTaskById,
 } from '../src/lib/mockAuthStore';
 
 let totalTests = 0;
