@@ -20,6 +20,11 @@ import {
   type AssignmentWithMeta,
 } from '../../lib/assignments';
 import {
+  getStudentEvaluations,
+  getStudentEvaluationsCount,
+  type EvaluationWithMeta,
+} from '../../lib/evaluations';
+import {
   validateAcademicFile,
   uploadAcademicFile,
   getAcademicFileSignedUrl,
@@ -37,6 +42,7 @@ import type {
   Subject,
   TaskStatus,
   SubmissionType,
+  EvaluationFormat,
 } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
@@ -67,6 +73,8 @@ import {
   Send,
   FileCheck,
   FileUp,
+  Award,
+  Sparkles,
 } from 'lucide-react';
 
 type DatePreset = LibraryDatePreset;
@@ -84,10 +92,12 @@ export const StudentLibraryPage: React.FC = () => {
     resources: number | null;
     tasks: number | null;
     assignments: number | null;
+    evaluations: number | null;
   }>({
     resources: null,
     tasks: null,
     assignments: null,
+    evaluations: null,
   });
 
   const handleTabChange = (tab: AcademicLibraryTab) => {
@@ -139,6 +149,21 @@ export const StudentLibraryPage: React.FC = () => {
   );
   const [customStartDate, setCustomStartDate] = useState<string>('');
   const [customEndDate, setCustomEndDate] = useState<string>('');
+
+  // ---------------------------------------------------------------------------
+  // TAB 4: EVALUATIONS & CHECKPOINTS STATE (Milestone 12)
+  // ---------------------------------------------------------------------------
+  const [evaluations, setEvaluations] = useState<EvaluationWithMeta[]>([]);
+  const [evaluationsLoading, setEvaluationsLoading] = useState(false);
+  const [evaluationsError, setEvaluationsError] = useState<string | null>(null);
+  const [evaluationSearch, setEvaluationSearch] = useState('');
+  const [evaluationSubjectFilter, setEvaluationSubjectFilter] = useState('all');
+  const [evaluationStatusFilter, setEvaluationStatusFilter] = useState<'all' | 'scheduled' | 'completed' | 'cancelled'>('all');
+  const [evaluationFormatFilter, setEvaluationFormatFilter] = useState<'all' | EvaluationFormat>('all');
+  const [evaluationDatePreset, setEvaluationDatePreset] = useState<LibraryDatePreset>('all');
+  const [evaluationSpecificDate, _setEvaluationSpecificDate] = useState('');
+  const [evaluationCustomStartDate, setEvaluationCustomStartDate] = useState('');
+  const [evaluationCustomEndDate, setEvaluationCustomEndDate] = useState('');
 
   // ---------------------------------------------------------------------------
   // TAB 3: ASSIGNMENTS & SUBMISSIONS STATE
@@ -356,6 +381,32 @@ export const StudentLibraryPage: React.FC = () => {
     }
   }, [activeTab, studentId, loadAssignments]);
 
+  const loadEvaluations = useCallback(() => {
+    if (!studentId) return;
+    setEvaluationsLoading(true);
+    setEvaluationsError(null);
+    getStudentEvaluations(studentId)
+      .then((res) => {
+        if (res.error) {
+          setEvaluationsError(res.error.message);
+        } else {
+          setEvaluations(res.evaluations);
+          setTabCounts((prev) => ({ ...prev, evaluations: res.evaluations.length }));
+        }
+        setEvaluationsLoading(false);
+      })
+      .catch((err: unknown) => {
+        setEvaluationsError(err instanceof Error ? err.message : 'Failed to load evaluations.');
+        setEvaluationsLoading(false);
+      });
+  }, [studentId]);
+
+  useEffect(() => {
+    if (activeTab === 'evaluations' && studentId) {
+      loadEvaluations();
+    }
+  }, [activeTab, studentId, loadEvaluations]);
+
   // Background prefetch for tab badge counts (PL-AUD-003)
   useEffect(() => {
     if (!studentId) return;
@@ -381,10 +432,20 @@ export const StudentLibraryPage: React.FC = () => {
         .catch(() => {});
     }
 
+    if (tabCounts.evaluations === null && activeTab !== 'evaluations') {
+      getStudentEvaluationsCount(studentId)
+        .then(({ count, error }) => {
+          if (isMounted && !error) {
+            setTabCounts((prev) => ({ ...prev, evaluations: count }));
+          }
+        })
+        .catch(() => {});
+    }
+
     return () => {
       isMounted = false;
     };
-  }, [studentId, activeTab, tabCounts.tasks, tabCounts.assignments]);
+  }, [studentId, activeTab, tabCounts.tasks, tabCounts.assignments, tabCounts.evaluations]);
 
   // ---------------------------------------------------------------------------
   // SUBMISSION FORM HANDLERS (TAB 3)
@@ -719,6 +780,71 @@ export const StudentLibraryPage: React.FC = () => {
     return { total, completed, inProgress, pending, overdue };
   }, [tasks]);
 
+  // Filtered Evaluations (Tab 4)
+  const evaluationDateRange = useMemo(() => {
+    return computeLibraryDateRange(evaluationDatePreset, {
+      selectedSpecificDate: evaluationSpecificDate,
+      customStartDate: evaluationCustomStartDate,
+      customEndDate: evaluationCustomEndDate,
+    });
+  }, [evaluationDatePreset, evaluationSpecificDate, evaluationCustomStartDate, evaluationCustomEndDate]);
+
+  const filteredEvaluations = useMemo(() => {
+    return evaluations.filter((e) => {
+      if (evaluationSearch.trim()) {
+        const q = evaluationSearch.toLowerCase();
+        const matchTitle = (e.title || '').toLowerCase().includes(q);
+        const matchDesc = (e.description || '').toLowerCase().includes(q);
+        const matchFeedback = (e.feedback || '').toLowerCase().includes(q);
+        const matchRec = (e.recommendation || '').toLowerCase().includes(q);
+        const matchSubj = (e.subject_name || '').toLowerCase().includes(q);
+        const matchMentor = (e.mentor_name || '').toLowerCase().includes(q);
+        if (!matchTitle && !matchDesc && !matchFeedback && !matchRec && !matchSubj && !matchMentor) {
+          return false;
+        }
+      }
+      if (evaluationSubjectFilter !== 'all' && e.subject_id !== evaluationSubjectFilter) {
+        return false;
+      }
+      if (evaluationStatusFilter !== 'all' && e.status !== evaluationStatusFilter) {
+        return false;
+      }
+      if (evaluationFormatFilter !== 'all' && e.format !== evaluationFormatFilter) {
+        return false;
+      }
+      if (evaluationDateRange.startDate && e.scheduled_date < evaluationDateRange.startDate) {
+        return false;
+      }
+      if (evaluationDateRange.endDate && e.scheduled_date > evaluationDateRange.endDate) {
+        return false;
+      }
+      return true;
+    });
+  }, [
+    evaluations,
+    evaluationSearch,
+    evaluationSubjectFilter,
+    evaluationStatusFilter,
+    evaluationFormatFilter,
+    evaluationDateRange,
+  ]);
+
+  // Tab 4 Computed Metrics
+  const evalMetrics = useMemo(() => {
+    const total = evaluations.length;
+    const completed = evaluations.filter((e) => e.status === 'completed').length;
+    const scheduled = evaluations.filter((e) => e.status === 'scheduled').length;
+    const scoredList = evaluations.filter((e) => e.status === 'completed' && typeof e.score === 'number' && e.total_points);
+    const avgScore = scoredList.length > 0
+      ? Math.round(
+          (scoredList.reduce((acc, curr) => acc + ((curr.score! / (curr.total_points || 100)) * 100), 0) /
+            scoredList.length) *
+            10
+        ) / 10
+      : null;
+    return { total, completed, scheduled, avgScore };
+  }, [evaluations]);
+
   // Filtered Assignments for Display (Tab 3)
   const filteredAssignments = useMemo(() => {
     const todayStr = formatLocalDate(new Date());
@@ -985,6 +1111,33 @@ export const StudentLibraryPage: React.FC = () => {
                 ? tabCounts.assignments
                 : assignments.length > 0
                 ? assignments.length
+                : '...'}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleTabChange('evaluations')}
+            className={`px-4 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-2 ${
+              activeTab === 'evaluations'
+                ? 'bg-brand-navy text-white shadow-brutal-sm -translate-y-0.5'
+                : 'bg-brand-bg text-brand-dark hover:bg-brand-paper-tint'
+            }`}
+            aria-selected={activeTab === 'evaluations'}
+          >
+            <Calendar className="w-4 h-4" />
+            <span>Evaluations</span>
+            <span
+              className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
+                activeTab === 'evaluations' ? 'bg-brand-gold text-brand-dark font-bold' : 'bg-brand-paper text-brand-muted'
+              }`}
+            >
+              {evaluationsLoading && activeTab === 'evaluations' && tabCounts.evaluations === null
+                ? '...'
+                : tabCounts.evaluations !== null
+                ? tabCounts.evaluations
+                : evaluations.length > 0
+                ? evaluations.length
                 : '...'}
             </span>
           </button>
@@ -2422,6 +2575,418 @@ export const StudentLibraryPage: React.FC = () => {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 4: EVALUATIONS & CHECKPOINTS (Milestone 12)                           */}
+      {/* ========================================================================= */}
+      {activeTab === 'evaluations' && (
+        <div className="space-y-6 animate-fadeIn">
+          {/* Milestone 12 Evaluation Integration Banner */}
+          <div className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs uppercase font-bold text-brand-teal bg-brand-bg px-2 py-0.5 border border-brand-dark">
+                  ACADEMIC LIBRARY • TAB 4
+                </span>
+                <span className="font-mono text-[10px] font-bold text-brand-muted uppercase">
+                  MILESTONE 12 INTEGRATION
+                </span>
+              </div>
+              <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy">
+                Periodic Check-ins &amp; Evaluated Milestones
+              </h3>
+              <p className="font-sans text-xs text-brand-muted max-w-2xl leading-relaxed">
+                Review scheduled checkpoints, oral walkthroughs, and graded feedback recorded by your mentor. Every evaluation tests concept comprehension and provides actionable recommendations to refine your study roadmap.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Link to="/student/reports">
+                <Button variant="primary" size="sm" className="flex items-center gap-1.5 shadow-brutal-xs">
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Progress Reports</span>
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadEvaluations}
+                disabled={evaluationsLoading}
+                className="flex items-center gap-1.5"
+                title="Refresh evaluations"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${evaluationsLoading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Sync</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">TOTAL REVIEWS</span>
+                <Calendar className="w-4 h-4 text-brand-navy stroke-[2.2]" />
+              </div>
+              <div className="font-heading font-extrabold text-2xl text-brand-navy">
+                {evalMetrics.total}
+              </div>
+              <span className="text-[10px] font-mono text-brand-muted mt-0.5">Assigned check-ins</span>
+            </div>
+
+            <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">COMPLETED</span>
+                <CheckCircle2 className="w-4 h-4 text-brand-teal stroke-[2.2]" />
+              </div>
+              <div className="font-heading font-extrabold text-2xl text-brand-teal">
+                {evalMetrics.completed}
+              </div>
+              <span className="text-[10px] font-mono text-brand-muted mt-0.5">Milestones verified</span>
+            </div>
+
+            <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-mono text-[10px] uppercase font-bold text-brand-gold">SCHEDULED</span>
+                <Clock className="w-4 h-4 text-brand-gold stroke-[2.2]" />
+              </div>
+              <div className="font-heading font-extrabold text-2xl text-brand-dark">
+                {evalMetrics.scheduled}
+              </div>
+              <span className="text-[10px] font-mono text-brand-muted mt-0.5">Upcoming sessions</span>
+            </div>
+
+            <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">AVERAGE SCORE</span>
+                <Award className="w-4 h-4 text-brand-navy stroke-[2.2]" />
+              </div>
+              <div className="font-heading font-extrabold text-2xl text-brand-navy">
+                {evalMetrics.avgScore !== null ? `${evalMetrics.avgScore}%` : '—'}
+              </div>
+              <span className="text-[10px] font-mono text-brand-teal font-bold mt-0.5">
+                {evalMetrics.avgScore !== null ? 'Concept retention' : 'Awaiting scored sessions'}
+              </span>
+            </div>
+          </div>
+
+          {/* Filter Bar */}
+          <section className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              {/* Search */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search evaluations, mentor feedback, recommendations..."
+                  value={evaluationSearch}
+                  onChange={(e) => setEvaluationSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                />
+              </div>
+
+              {/* Subject Filter */}
+              <div className="w-full md:w-52">
+                <select
+                  aria-label="Filter evaluations by subject"
+                  value={evaluationSubjectFilter}
+                  onChange={(e) => setEvaluationSubjectFilter(e.target.value)}
+                  className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-xs font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                >
+                  <option value="all">All Study Areas ({evaluations.length})</option>
+                  {subjects.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} {s.code ? `(${s.code})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status Filter */}
+              <div className="w-full md:w-44">
+                <select
+                  aria-label="Filter evaluations by status"
+                  value={evaluationStatusFilter}
+                  onChange={(e) => setEvaluationStatusFilter(e.target.value as any)}
+                  className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-xs font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="scheduled">Scheduled Check-ins</option>
+                  <option value="completed">Completed &amp; Graded</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              {/* Format Filter */}
+              <div className="w-full md:w-44">
+                <select
+                  aria-label="Filter evaluations by format"
+                  value={evaluationFormatFilter}
+                  onChange={(e) => setEvaluationFormatFilter(e.target.value as any)}
+                  className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-xs font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                >
+                  <option value="all">All Formats</option>
+                  <option value="oral">Oral Walkthrough</option>
+                  <option value="written">Written Review</option>
+                  <option value="practical">Practical Checkpoint</option>
+                  <option value="quiz">Interactive Quiz</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Date Preset Controls */}
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-brand-dark/15 text-xs font-mono">
+              <span className="text-brand-muted font-bold text-[10px] uppercase mr-1">Date Horizon:</span>
+              {(['all', 'today', 'this_week', 'this_month', 'custom_range'] as LibraryDatePreset[]).map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setEvaluationDatePreset(preset)}
+                  className={`px-2.5 py-1 border border-brand-dark font-mono text-xs font-bold transition-all ${
+                    evaluationDatePreset === preset
+                      ? 'bg-brand-navy text-white shadow-brutal-xs'
+                      : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
+                  }`}
+                >
+                  {preset === 'all'
+                    ? 'All Time'
+                    : preset === 'today'
+                    ? 'Today'
+                    : preset === 'this_week'
+                    ? 'This Week'
+                    : preset === 'this_month'
+                    ? 'This Month'
+                    : 'Custom Range'}
+                </button>
+              ))}
+
+              {evaluationDatePreset === 'custom_range' && (
+                <div className="flex items-center gap-1.5 ml-2">
+                  <input
+                    type="date"
+                    value={evaluationCustomStartDate}
+                    onChange={(e) => setEvaluationCustomStartDate(e.target.value)}
+                    className="px-2 py-0.5 border border-brand-dark bg-brand-bg text-xs font-mono"
+                    aria-label="Custom Start Date"
+                  />
+                  <span>to</span>
+                  <input
+                    type="date"
+                    value={evaluationCustomEndDate}
+                    onChange={(e) => setEvaluationCustomEndDate(e.target.value)}
+                    className="px-2 py-0.5 border border-brand-dark bg-brand-bg text-xs font-mono"
+                    aria-label="Custom End Date"
+                  />
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Evaluations Feed */}
+          {evaluationsLoading ? (
+            <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center space-y-3">
+              <Loader2 className="w-8 h-8 text-brand-teal animate-spin mx-auto" />
+              <p className="font-heading font-extrabold text-sm text-brand-navy">
+                LOADING EVALUATION CHECKPOINTS
+              </p>
+              <span className="font-mono text-xs text-brand-muted block">
+                Retrieving scheduled reviews and calibrated milestones...
+              </span>
+            </div>
+          ) : evaluationsError ? (
+            <div className="p-6 border-2 border-brand-dark bg-red-50 text-red-900 shadow-brutal flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-700 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <span className="font-heading font-bold text-sm block">Failed to load evaluations</span>
+                <p className="font-mono text-xs text-red-800">{evaluationsError}</p>
+                <Button variant="outline" size="sm" onClick={loadEvaluations} className="mt-2">
+                  Retry
+                </Button>
+              </div>
+            </div>
+          ) : filteredEvaluations.length > 0 ? (
+            <div className="space-y-4">
+              {filteredEvaluations.map((item) => {
+                const isCompleted = item.status === 'completed';
+                const isScheduled = item.status === 'scheduled';
+                const scorePct =
+                  isCompleted && typeof item.score === 'number' && item.total_points
+                    ? Math.round((item.score / item.total_points) * 100)
+                    : null;
+
+                return (
+                  <div
+                    key={item.id}
+                    className="p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-4"
+                  >
+                    {/* Header Row */}
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="space-y-1.5 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge
+                            variant={item.format === 'oral' ? 'teal' : item.format === 'written' ? 'gold' : 'navy'}
+                            size="sm"
+                          >
+                            {(item.format || 'session').toUpperCase()} ASSESSMENT
+                          </Badge>
+
+                          <Badge
+                            variant={isCompleted ? 'teal' : isScheduled ? 'gold' : 'muted'}
+                            size="sm"
+                          >
+                            {item.status.toUpperCase()}
+                          </Badge>
+
+                          {item.subject_name && (
+                            <span className="px-2 py-0.5 border border-brand-dark/40 bg-brand-paper-tint text-[10px] font-mono font-bold text-brand-navy">
+                              {item.subject_name}
+                            </span>
+                          )}
+
+                          {item.plan_title && (
+                            <span className="px-2 py-0.5 border border-brand-dark/20 bg-brand-paper text-[10px] font-mono text-brand-muted truncate max-w-[200px]">
+                              Plan: {item.plan_title}
+                            </span>
+                          )}
+                        </div>
+
+                        <h4 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy">
+                          {item.title}
+                        </h4>
+
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-brand-muted">
+                          <span className="flex items-center gap-1 text-brand-dark font-medium">
+                            <Calendar className="w-3.5 h-3.5 text-brand-gold" />
+                            {item.scheduled_date} {item.scheduled_time ? `at ${item.scheduled_time}` : ''}
+                          </span>
+                          <span>•</span>
+                          <span>Duration: {item.duration_minutes || 30} mins</span>
+                          <span>•</span>
+                          <span>Points: {item.total_points || 100}</span>
+                          {item.mentor_name && (
+                            <>
+                              <span>•</span>
+                              <span className="text-brand-teal font-bold">Mentor: {item.mentor_name}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Recorded Score Box */}
+                      {isCompleted && item.score !== null && item.score !== undefined && (
+                        <div className="shrink-0 text-right p-3 border-2 border-brand-dark bg-brand-teal-light shadow-brutal-xs min-w-[140px]">
+                          <span className="font-mono text-[10px] uppercase font-bold text-brand-navy block">
+                            EVALUATION SCORE
+                          </span>
+                          <div className="font-heading font-extrabold text-2xl text-brand-navy">
+                            {item.score}
+                            <span className="text-xs font-mono font-normal text-brand-muted">
+                              {' '}/ {item.total_points || 100}
+                            </span>
+                          </div>
+                          {scorePct !== null && (
+                            <div className="font-mono text-[10px] font-bold text-brand-teal mt-0.5">
+                              {scorePct}% Mastery
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Scope & Description */}
+                    {item.description && (
+                      <div className="p-3 border border-brand-dark/20 bg-brand-paper-tint text-xs space-y-1 leading-relaxed">
+                        <span className="font-mono text-[10px] uppercase font-bold text-brand-muted block">
+                          Scope &amp; Focus Area:
+                        </span>
+                        <p className="font-sans text-brand-dark">{item.description}</p>
+                      </div>
+                    )}
+
+                    {/* Scheduled Callout */}
+                    {isScheduled && (
+                      <div className="p-3.5 border-2 border-dashed border-brand-gold/80 bg-brand-gold-light/40 flex items-start gap-3">
+                        <Clock className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+                        <div className="space-y-0.5 text-xs">
+                          <span className="font-heading font-bold text-brand-navy block">
+                            Upcoming Check-in Session
+                          </span>
+                          <p className="text-brand-muted leading-relaxed">
+                            Scheduled for {item.scheduled_date}. Prepare questions, formulas, and homework proofs in advance. Your mentor will walk through practice challenges and answer your Doubts Desk queries.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Mentor Feedback & Recommendation */}
+                    {isCompleted && item.feedback && (
+                      <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs space-y-2.5">
+                        <div className="flex items-center justify-between border-b border-brand-dark/20 pb-2">
+                          <span className="font-mono text-xs font-bold text-brand-navy uppercase flex items-center gap-1.5">
+                            <Sparkles className="w-4 h-4 text-brand-gold" />
+                            Mentor Assessment &amp; Retention Notes
+                          </span>
+                          {item.evaluated_at && (
+                            <span className="font-mono text-[10px] text-brand-muted">
+                              Evaluated: {new Date(item.evaluated_at).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-xs font-sans text-brand-dark leading-relaxed whitespace-pre-line">
+                          {item.feedback}
+                        </p>
+
+                        {item.recommendation && (
+                          <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1 mt-2">
+                            <span className="font-mono text-[10px] uppercase font-extrabold text-brand-teal flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              Actionable Recommendation &amp; Adjustments:
+                            </span>
+                            <p className="text-xs font-sans text-brand-dark leading-relaxed">
+                              {item.recommendation}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-12 border-2 border-dashed border-brand-dark/30 bg-brand-paper text-center space-y-3">
+              <Calendar className="w-10 h-10 text-brand-muted mx-auto stroke-[1.5]" />
+              <div className="space-y-1">
+                <h4 className="font-heading font-extrabold text-base text-brand-navy">
+                  No evaluations match selected filters
+                </h4>
+                <p className="font-sans text-xs text-brand-muted max-w-md mx-auto leading-relaxed">
+                  {evaluations.length === 0
+                    ? 'No evaluation sessions or graded reviews have been scheduled by your mentor yet. Check back once your mentor assigns your first milestone checkpoint.'
+                    : 'Try clearing your search query, adjusting the date range, or resetting status filters to view historical check-ins.'}
+                </p>
+              </div>
+              {(evaluationSearch || evaluationSubjectFilter !== 'all' || evaluationStatusFilter !== 'all' || evaluationFormatFilter !== 'all' || evaluationDatePreset !== 'all') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEvaluationSearch('');
+                    setEvaluationSubjectFilter('all');
+                    setEvaluationStatusFilter('all');
+                    setEvaluationFormatFilter('all');
+                    setEvaluationDatePreset('all');
+                  }}
+                  className="mt-2"
+                >
+                  Clear All Filters
+                </Button>
+              )}
             </div>
           )}
         </div>

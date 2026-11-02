@@ -25,6 +25,7 @@ import {
   ClipboardList,
   UserCheck,
   Users,
+  BarChart3,
 } from 'lucide-react';
 import { getUnreadNotificationCount } from '../lib/notifications';
 
@@ -102,6 +103,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Assignments', shortLabel: 'Practice', to: '/student/assignments', icon: FileText },
     { label: 'Evaluations', shortLabel: 'Eval', to: '/student/evaluations', icon: Calendar },
     { label: 'Progress', shortLabel: 'Progress', to: '/student/progress', icon: TrendingUp },
+    { label: 'Academic Reports', shortLabel: 'Reports', to: '/student/reports', icon: BarChart3 },
     { label: 'Academic Library', shortLabel: 'Library', to: '/student/library', icon: BookMarked },
     { label: 'Doubts', shortLabel: 'Doubts', to: '/student/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/student/announcements', icon: Megaphone },
@@ -119,6 +121,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Review Submissions', shortLabel: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
     { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/evaluations', icon: Calendar },
     { label: 'Student Progress', shortLabel: 'Progress', to: '/mentor/progress', icon: TrendingUp },
+    { label: 'Scholar Reports', shortLabel: 'Reports', to: '/mentor/reports', icon: BarChart3 },
     { label: 'Resources', shortLabel: 'Resources', to: '/mentor/resources', icon: BookMarked },
     { label: 'Doubts', shortLabel: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/mentor/announcements', icon: Megaphone },

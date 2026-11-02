@@ -28,7 +28,7 @@ import { MentorTasksPage } from '../pages/dashboard/MentorTasksPage';
 import { StudentAssignmentsPage } from '../pages/dashboard/StudentAssignmentsPage';
 import { MentorAssignmentsPage } from '../pages/dashboard/MentorAssignmentsPage';
 import { MentorReviewQueuePage } from '../pages/dashboard/MentorReviewQueuePage';
-import { StudentEvaluationsPage } from '../pages/dashboard/StudentEvaluationsPage';
+// StudentEvaluationsPage retained as legacy fallback or superseded by StudentEvaluationsRedirect
 import { MentorEvaluationsPage } from '../pages/dashboard/MentorEvaluationsPage';
 import { StudentProgressPage } from '../pages/dashboard/StudentProgressPage';
 import { MentorProgressPage } from '../pages/dashboard/MentorProgressPage';
@@ -41,6 +41,8 @@ import { MentorAnnouncementsPage } from '../pages/dashboard/MentorAnnouncementsP
 import { StudentNotificationsPage } from '../pages/dashboard/StudentNotificationsPage';
 import { MentorNotificationsPage } from '../pages/dashboard/MentorNotificationsPage';
 import { AdminNotificationsPage } from '../pages/dashboard/AdminNotificationsPage';
+import { StudentReportPage } from '../pages/dashboard/StudentReportPage';
+import { MentorReportPage } from '../pages/dashboard/MentorReportPage';
 import { ProfilePage } from '../pages/dashboard/ProfilePage';
 import { PublicProfilePage } from '../pages/dashboard/PublicProfilePage';
 import { MyApplicationsPage } from '../pages/dashboard/MyApplicationsPage';
@@ -88,6 +90,17 @@ const DashboardRedirect: React.FC = () => {
 const StudentResourcesRedirect: React.FC = () => {
   const location = useLocation();
   return <Navigate to={{ pathname: '/student/library', search: location.search }} replace />;
+};
+
+/**
+ * Backward compatibility redirect for /student/evaluations -> /student/library?tab=evaluations.
+ * Preserves query parameters across navigation.
+ */
+const StudentEvaluationsRedirect: React.FC = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  searchParams.set('tab', 'evaluations');
+  return <Navigate to={{ pathname: '/student/library', search: `?${searchParams.toString()}` }} replace />;
 };
 
 export const AppRoutes: React.FC = () => {
@@ -144,7 +157,15 @@ export const AppRoutes: React.FC = () => {
           path="student/evaluations"
           element={
             <ProtectedRoute allowedRoles={['student', 'admin']}>
-              <StudentEvaluationsPage />
+              <StudentEvaluationsRedirect />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="student/reports"
+          element={
+            <ProtectedRoute allowedRoles={['student', 'admin']}>
+              <StudentReportPage />
             </ProtectedRoute>
           }
         />
@@ -283,6 +304,14 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['mentor', 'admin']}>
               <MentorProgressPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="mentor/reports"
+          element={
+            <ProtectedRoute allowedRoles={['mentor', 'admin']}>
+              <MentorReportPage />
             </ProtectedRoute>
           }
         />

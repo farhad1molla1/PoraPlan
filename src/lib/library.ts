@@ -8,12 +8,13 @@
  * - assignments
  */
 
-export type AcademicLibraryTab = 'resources' | 'tasks' | 'assignments';
+export type AcademicLibraryTab = 'resources' | 'tasks' | 'assignments' | 'evaluations';
 
 export const ACADEMIC_LIBRARY_TABS: readonly AcademicLibraryTab[] = [
   'resources',
   'tasks',
   'assignments',
+  'evaluations',
 ] as const;
 
 export const DEFAULT_ACADEMIC_LIBRARY_TAB: AcademicLibraryTab = 'resources';
