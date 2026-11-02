@@ -29,13 +29,15 @@ import {
   ShieldCheck,
   Calendar,
   Award,
+  Check,
+  X,
 } from 'lucide-react';
 
 export const MentorReportPage: React.FC = () => {
   const { user, profile } = useAuth();
   const mentorId = profile?.id || user?.id || '';
 
-  const [period, setPeriod] = useState<ReportPeriod>('monthly');
+  const [period, setPeriod] = useState<ReportPeriod>('schedule');
   const [customStart, setCustomStart] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() - 14);
@@ -129,20 +131,47 @@ export const MentorReportPage: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
-      {/* Print-specific A4 Portrait Stylesheet */}
+      {/* Dedicated Academic Typography & Print-specific A4 Stylesheet */}
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,600&display=swap');
+
+        .academic-doc {
+          font-family: 'Source Sans 3', 'Noto Sans Bengali', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          color: #082B4C;
+          line-height: 1.45;
+        }
+
+        .academic-heading,
+        .academic-doc h1,
+        .academic-doc h2,
+        .academic-doc h3,
+        .academic-doc h4,
+        .academic-serif {
+          font-family: 'Source Serif 4', 'Noto Serif Bengali', Georgia, 'Times New Roman', Cambria, serif;
+          font-feature-settings: 'cv01', 'cv02', 'onum';
+        }
+
+        .academic-sans {
+          font-family: 'Source Sans 3', 'Noto Sans Bengali', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
         @page {
           size: A4 portrait;
           margin: 10mm 12mm 10mm 12mm;
         }
+
         @media print {
           html, body {
             background-color: #ffffff !important;
             color: #082B4C !important;
-            font-size: 9.5pt !important;
+            font-size: 9.2pt !important;
             line-height: 1.35 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            font-family: 'Source Sans 3', 'Noto Sans Bengali', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+          }
+          .academic-heading, h1, h2, h3, h4, .academic-serif {
+            font-family: 'Source Serif 4', 'Noto Serif Bengali', Georgia, serif !important;
           }
           nav, aside, header, footer, .print\\:hidden {
             display: none !important;
@@ -216,7 +245,7 @@ export const MentorReportPage: React.FC = () => {
         {/* Period Selector */}
         <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
           <span className="font-bold text-brand-muted uppercase text-[10px]">Window:</span>
-          {(['weekly', 'monthly', 'custom'] as ReportPeriod[]).map((p) => (
+          {(['schedule', 'weekly', 'monthly', 'custom'] as ReportPeriod[]).map((p) => (
             <button
               key={p}
               type="button"
@@ -227,7 +256,13 @@ export const MentorReportPage: React.FC = () => {
                   : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
               }`}
             >
-              {p === 'weekly' ? 'Weekly (Last 7 Days)' : p === 'monthly' ? 'Monthly (Last 30 Days)' : 'Custom Period'}
+              {p === 'schedule'
+                ? 'Task Schedule (Active Syllabus)'
+                : p === 'weekly'
+                ? 'Weekly (Last 7 Days)'
+                : p === 'monthly'
+                ? 'Monthly (Last 30 Days)'
+                : 'Custom Range'}
             </button>
           ))}
 
@@ -296,7 +331,7 @@ export const MentorReportPage: React.FC = () => {
           </div>
         </div>
       ) : mentorReport ? (
-        <div className="space-y-6">
+        <div className="academic-doc space-y-6">
           {/* ===================================================================== */}
           {/* VIEW A: ROSTER OVERVIEW (WHEN ALL STUDENTS SELECTED)                  */}
           {/* ===================================================================== */}
@@ -316,23 +351,23 @@ export const MentorReportPage: React.FC = () => {
                   />
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-[9px] uppercase font-extrabold tracking-widest text-brand-gold bg-brand-paper-tint px-2 py-0.5 border border-brand-dark">
+                      <span className="academic-sans text-[9px] uppercase font-bold tracking-widest text-brand-gold bg-brand-paper-tint px-2 py-0.5 border border-brand-dark">
                         PORAPLAN MENTORSHIP OVERSIGHT
                       </span>
-                      <span className="font-mono text-[9px] text-brand-muted">
+                      <span className="academic-sans text-[9px] text-brand-muted">
                         CONFIDENTIAL • FACULTY ROSTER ARCHIVE
                       </span>
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-brand-navy tracking-tight">
+                    <h2 className="academic-heading text-xl sm:text-2xl font-bold text-brand-navy tracking-tight">
                       Mentee Academic Performance &amp; Triage Roster
                     </h2>
-                    <p className="text-xs font-mono text-brand-muted">
+                    <p className="academic-sans text-xs text-brand-muted">
                       Operational audit of assigned scholars, task velocity, assignment reviews, and interventions.
                     </p>
                   </div>
                 </div>
 
-                <div className="text-left sm:text-right space-y-0.5 text-xs font-mono border-t sm:border-t-0 pt-2 sm:pt-0 border-brand-dark/20 shrink-0">
+                <div className="text-left sm:text-right space-y-0.5 text-xs academic-sans border-t sm:border-t-0 pt-2 sm:pt-0 border-brand-dark/20 shrink-0">
                   <div className="text-brand-navy font-bold">
                     <span className="text-brand-muted block text-[9px] uppercase tracking-wider">AUDIT WINDOW</span>
                     <span>{mentorReport.dateRange.startDate} — {mentorReport.dateRange.endDate}</span>
@@ -346,23 +381,23 @@ export const MentorReportPage: React.FC = () => {
                 </div>
               </header>
 
-              {/* Roster Overview KPIs (4 Minimal Cards) */}
+              {/* Roster Overview KPIs */}
               <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 break-inside-avoid">
                 {/* 1. Task Velocity */}
                 <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                   <div className="flex items-center justify-between text-brand-muted mb-1">
-                    <span className="font-mono text-[10px] font-bold uppercase">Tasks Executed</span>
+                    <span className="academic-sans text-[10px] font-bold uppercase">Tasks Executed</span>
                     <CheckCircle2 className="w-3.5 h-3.5 text-brand-teal" />
                   </div>
                   <div>
-                    <span className="font-heading font-extrabold text-2xl text-brand-navy">
+                    <span className="academic-heading font-bold text-2xl text-brand-navy">
                       {mentorReport.aggregateMetrics.totalTasksCompleted}
                     </span>
-                    <span className="font-mono text-xs text-brand-muted">
+                    <span className="academic-sans text-xs text-brand-muted">
                       {' '}/ {mentorReport.aggregateMetrics.totalTasksAssigned}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono font-bold text-brand-teal mt-1 pt-1 border-t border-brand-dark/10">
+                  <span className="text-[10px] academic-sans font-bold text-brand-teal mt-1 pt-1 border-t border-brand-dark/10">
                     {mentorReport.aggregateMetrics.overallTaskCompletionRate}% roster velocity
                   </span>
                 </div>
@@ -370,12 +405,12 @@ export const MentorReportPage: React.FC = () => {
                 {/* 2. Reviews Queue */}
                 <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                   <div className="flex items-center justify-between text-brand-muted mb-1">
-                    <span className="font-mono text-[10px] font-bold uppercase">Submissions Queue</span>
+                    <span className="academic-sans text-[10px] font-bold uppercase">Submissions Queue</span>
                     <FileText className="w-3.5 h-3.5 text-brand-navy" />
                   </div>
                   <div>
                     <span
-                      className={`font-heading font-extrabold text-2xl ${
+                      className={`academic-heading font-bold text-2xl ${
                         mentorReport.aggregateMetrics.totalSubmissionsPendingReview > 0
                           ? 'text-amber-700'
                           : 'text-emerald-700'
@@ -383,9 +418,9 @@ export const MentorReportPage: React.FC = () => {
                     >
                       {mentorReport.aggregateMetrics.totalSubmissionsPendingReview}
                     </span>
-                    <span className="font-mono text-xs text-brand-muted"> pending</span>
+                    <span className="academic-sans text-xs text-brand-muted"> pending</span>
                   </div>
-                  <span className="text-[10px] font-mono font-bold text-brand-muted mt-1 pt-1 border-t border-brand-dark/10">
+                  <span className="text-[10px] academic-sans font-bold text-brand-muted mt-1 pt-1 border-t border-brand-dark/10">
                     {mentorReport.aggregateMetrics.totalPendingRevisions} revision resubmission(s)
                   </span>
                 </div>
@@ -393,16 +428,16 @@ export const MentorReportPage: React.FC = () => {
                 {/* 3. Milestone Evaluations */}
                 <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                   <div className="flex items-center justify-between text-brand-muted mb-1">
-                    <span className="font-mono text-[10px] font-bold uppercase">Evaluations</span>
+                    <span className="academic-sans text-[10px] font-bold uppercase">Evaluations</span>
                     <Award className="w-3.5 h-3.5 text-brand-teal" />
                   </div>
                   <div>
-                    <span className="font-heading font-extrabold text-2xl text-brand-navy">
+                    <span className="academic-heading font-bold text-2xl text-brand-navy">
                       {mentorReport.aggregateMetrics.totalEvaluationsCompleted}
                     </span>
-                    <span className="font-mono text-xs text-brand-muted"> completed</span>
+                    <span className="academic-sans text-xs text-brand-muted"> completed</span>
                   </div>
-                  <span className="text-[10px] font-mono font-bold text-brand-muted mt-1 pt-1 border-t border-brand-dark/10">
+                  <span className="text-[10px] academic-sans font-bold text-brand-muted mt-1 pt-1 border-t border-brand-dark/10">
                     {mentorReport.aggregateMetrics.totalEvaluationsUpcoming} upcoming milestone(s)
                   </span>
                 </div>
@@ -410,12 +445,12 @@ export const MentorReportPage: React.FC = () => {
                 {/* 4. Attention Triage */}
                 <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                   <div className="flex items-center justify-between text-brand-muted mb-1">
-                    <span className="font-mono text-[10px] font-bold uppercase">Attention Triage</span>
+                    <span className="academic-sans text-[10px] font-bold uppercase">Attention Triage</span>
                     <AlertTriangle className="w-3.5 h-3.5 text-brand-gold" />
                   </div>
                   <div>
                     <span
-                      className={`font-heading font-extrabold text-2xl ${
+                      className={`academic-heading font-bold text-2xl ${
                         mentorReport.aggregateMetrics.scholarsNeedingAttentionCount > 0
                           ? 'text-red-700'
                           : 'text-emerald-700'
@@ -423,11 +458,11 @@ export const MentorReportPage: React.FC = () => {
                     >
                       {mentorReport.aggregateMetrics.scholarsNeedingAttentionCount}
                     </span>
-                    <span className="font-mono text-xs text-brand-muted">
+                    <span className="academic-sans text-xs text-brand-muted">
                       {' '}of {mentorReport.assignedStudentsCount} scholars
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono font-bold text-brand-muted mt-1 pt-1 border-t border-brand-dark/10">
+                  <span className="text-[10px] academic-sans font-bold text-brand-muted mt-1 pt-1 border-t border-brand-dark/10">
                     {mentorReport.aggregateMetrics.scholarsNeedingAttentionCount > 0
                       ? 'Requires mentor check-in'
                       : 'All scholars on track'}
@@ -438,18 +473,18 @@ export const MentorReportPage: React.FC = () => {
               {/* Roster Progress Table */}
               <section className="space-y-3 break-inside-avoid">
                 <div className="flex items-center justify-between border-b border-brand-dark/20 pb-1.5">
-                  <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+                  <h3 className="academic-heading font-bold text-sm sm:text-base text-brand-navy flex items-center gap-1.5">
                     <Users className="w-4 h-4 text-brand-teal" />
                     <span>Assigned Mentees Performance &amp; Triage Status</span>
                   </h3>
-                  <span className="text-[10px] font-mono text-brand-muted">
+                  <span className="text-[10px] academic-sans text-brand-muted">
                     {mentorReport.studentSummaries.length} Scholars Listed
                   </span>
                 </div>
 
                 {mentorReport.studentSummaries.length > 0 ? (
                   <div className="border-2 border-brand-dark overflow-x-auto bg-brand-paper">
-                    <table className="w-full text-left font-mono text-xs border-collapse">
+                    <table className="w-full text-left academic-sans text-xs border-collapse">
                       <thead className="bg-brand-paper-tint border-b-2 border-brand-dark text-[10px] uppercase font-bold text-brand-navy">
                         <tr>
                           <th className="p-2.5">Scholar</th>
@@ -457,6 +492,7 @@ export const MentorReportPage: React.FC = () => {
                           <th className="p-2.5 text-center">Velocity</th>
                           <th className="p-2.5 text-center">Problem Sets</th>
                           <th className="p-2.5 text-center">Exams Avg</th>
+                          <th className="p-2.5 text-center">Schedule Consistency</th>
                           <th className="p-2.5 text-center">Triage Status</th>
                           <th className="p-2.5 text-right print:hidden">Action</th>
                         </tr>
@@ -529,6 +565,18 @@ export const MentorReportPage: React.FC = () => {
                               )}
                             </td>
                             <td className="p-2.5 text-center">
+                              {s.consistencyPercentage !== null ? (
+                                <span>
+                                  <strong className="text-brand-navy">{s.consistencyPercentage}%</strong>
+                                  <span className="block text-[9px] text-brand-muted">
+                                    {s.activeStudyDays}/{s.scheduledDaysCount} scheduled days
+                                  </span>
+                                </span>
+                              ) : (
+                                <span className="text-brand-muted text-[10px]">N/A (No tasks)</span>
+                              )}
+                            </td>
+                            <td className="p-2.5 text-center">
                               {s.attentionLevel === 'critical' ? (
                                 <span
                                   className="px-2 py-0.5 border text-[10px] font-bold bg-red-100 text-red-900 border-red-700 inline-block"
@@ -549,7 +597,7 @@ export const MentorReportPage: React.FC = () => {
                                 </span>
                               )}
                               {s.attentionReason && (
-                                <span className="block text-[9px] text-brand-muted truncate max-w-[160px] mx-auto mt-0.5" title={s.attentionReason}>
+                                <span className="block text-[9px] text-brand-muted truncate max-w-[150px] mx-auto mt-0.5" title={s.attentionReason}>
                                   {s.attentionReason}
                                 </span>
                               )}
@@ -558,7 +606,7 @@ export const MentorReportPage: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => setSelectedStudentId(s.studentId)}
-                                className="px-2.5 py-1 border border-brand-dark bg-brand-bg text-[10px] font-mono font-bold text-brand-navy hover:bg-brand-navy hover:text-white transition-colors"
+                                className="px-2.5 py-1 border border-brand-dark bg-brand-bg text-[10px] academic-sans font-bold text-brand-navy hover:bg-brand-navy hover:text-white transition-colors"
                               >
                                 View Report
                               </button>
@@ -569,14 +617,14 @@ export const MentorReportPage: React.FC = () => {
                     </table>
                   </div>
                 ) : (
-                  <div className="p-8 border border-dashed border-brand-dark/30 text-center font-mono text-xs text-brand-muted">
+                  <div className="p-8 border border-dashed border-brand-dark/30 text-center academic-sans text-xs text-brand-muted">
                     No scholars currently assigned to your mentorship roster.
                   </div>
                 )}
               </section>
 
               {/* Roster Report Footer */}
-              <footer className="border-t-2 border-brand-dark pt-3 flex items-center justify-between text-[10px] font-mono text-brand-muted break-inside-avoid">
+              <footer className="border-t-2 border-brand-dark pt-3 flex items-center justify-between text-[10px] academic-sans text-brand-muted break-inside-avoid">
                 <div className="flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-brand-teal" />
                   <span>PoraPlan Platform Mentorship Analytics • Confidential Faculty Roster</span>
@@ -594,13 +642,13 @@ export const MentorReportPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSelectedStudentId('all')}
-                  className="text-xs font-mono font-bold text-brand-navy hover:underline flex items-center gap-1"
+                  className="text-xs academic-sans font-bold text-brand-navy hover:underline flex items-center gap-1"
                 >
                   <ArrowRight className="w-3.5 h-3.5 rotate-180" />
                   <span>← Back to Full Mentee Roster</span>
                 </button>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-brand-muted">
+                  <span className="text-xs academic-sans text-brand-muted">
                     Inspecting: <strong className="text-brand-navy">{studentDetailReport.studentName}</strong>
                   </span>
                   <Button
@@ -632,29 +680,29 @@ export const MentorReportPage: React.FC = () => {
                     />
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-[9px] uppercase font-extrabold tracking-widest text-brand-navy bg-brand-paper-tint px-2 py-0.5 border border-brand-dark">
+                        <span className="academic-sans text-[9px] uppercase font-bold tracking-widest text-brand-navy bg-brand-paper-tint px-2 py-0.5 border border-brand-dark">
                           PORAPLAN ACADEMIC MENTORSHIP
                         </span>
-                        <span className="font-mono text-[9px] text-brand-muted">
+                        <span className="academic-sans text-[9px] text-brand-muted">
                           CONFIDENTIAL • MENTOR AUDIT COPY
                         </span>
                       </div>
-                      <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-brand-navy tracking-tight">
+                      <h2 className="academic-heading text-xl sm:text-2xl font-bold text-brand-navy tracking-tight">
                         Academic Performance &amp; Improvement Report
                       </h2>
-                      <p className="text-xs font-mono text-brand-muted">
+                      <p className="academic-sans text-xs text-brand-muted">
                         Official progress audit of syllabus execution, milestone exams, and targeted focus areas.
                       </p>
                     </div>
                   </div>
 
-                  <div className="text-left sm:text-right space-y-0.5 text-xs font-mono border-t sm:border-t-0 pt-2 sm:pt-0 border-brand-dark/20 shrink-0">
+                  <div className="text-left sm:text-right space-y-0.5 text-xs academic-sans border-t sm:border-t-0 pt-2 sm:pt-0 border-brand-dark/20 shrink-0">
                     <div className="text-brand-navy font-bold">
                       <span className="text-brand-muted block text-[9px] uppercase tracking-wider">AUDIT WINDOW</span>
                       <span>{studentDetailReport.dateRange.startDate} — {studentDetailReport.dateRange.endDate}</span>
                     </div>
                     <div className="text-[10px] text-brand-muted">
-                      Period: <span className="font-bold text-brand-dark">{studentDetailReport.dateRange.label}</span>
+                      Schedule: <strong className="text-brand-dark">{studentDetailReport.studyConsistency.totalScheduledDays} Scheduled Study Day{studentDetailReport.studyConsistency.totalScheduledDays === 1 ? '' : 's'}</strong>
                     </div>
                     <div className="text-[10px] text-brand-muted">
                       Generated: {new Date(studentDetailReport.generatedAt).toLocaleDateString()}
@@ -663,67 +711,42 @@ export const MentorReportPage: React.FC = () => {
                 </header>
 
                 {/* Credentials Banner */}
-                <div className="p-3.5 border-2 border-brand-dark bg-brand-bg grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono break-inside-avoid">
+                <div className="p-3.5 border-2 border-brand-dark bg-brand-bg grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs academic-sans break-inside-avoid">
                   <div>
                     <span className="text-brand-muted text-[10px] uppercase font-bold block">SCHOLAR NAME</span>
-                    <span className="font-extrabold text-brand-navy text-sm">{studentDetailReport.studentName}</span>
+                    <span className="font-bold text-brand-navy text-sm">{studentDetailReport.studentName}</span>
                   </div>
                   <div>
                     <span className="text-brand-muted text-[10px] uppercase font-bold block">PORAPLAN ID</span>
-                    <span className="font-extrabold text-brand-teal text-sm">{studentDetailReport.poraplanId}</span>
+                    <span className="font-bold text-brand-teal text-sm">{studentDetailReport.poraplanId}</span>
                   </div>
                   <div>
                     <span className="text-brand-muted text-[10px] uppercase font-bold block">ACADEMIC PROGRAM</span>
-                    <span className="font-bold text-brand-dark">
+                    <span className="font-semibold text-brand-dark">
                       {studentDetailReport.programName || 'Academic Mentorship'}
                       {studentDetailReport.cohortName ? ` (${studentDetailReport.cohortName})` : ''}
                     </span>
                   </div>
                   <div>
                     <span className="text-brand-muted text-[10px] uppercase font-bold block">ASSIGNED MENTOR</span>
-                    <span className="font-bold text-brand-dark">{studentDetailReport.mentorName || mentorReport.mentorName}</span>
+                    <span className="font-semibold text-brand-dark">{studentDetailReport.mentorName || mentorReport.mentorName}</span>
                   </div>
-
-                  {(studentDetailReport.university || studentDetailReport.department || studentDetailReport.batch || studentDetailReport.currentSemester) && (
-                    <div className="col-span-2 sm:col-span-4 pt-2 border-t border-brand-dark/20 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-brand-muted">
-                      {studentDetailReport.university && (
-                        <span>
-                          <strong className="text-brand-dark">Institution:</strong> {studentDetailReport.university}
-                        </span>
-                      )}
-                      {studentDetailReport.department && (
-                        <span>
-                          <strong className="text-brand-dark">Department:</strong> {studentDetailReport.department}
-                        </span>
-                      )}
-                      {studentDetailReport.batch && (
-                        <span>
-                          <strong className="text-brand-dark">Batch:</strong> {studentDetailReport.batch}
-                        </span>
-                      )}
-                      {studentDetailReport.currentSemester && (
-                        <span>
-                          <strong className="text-brand-dark">Semester:</strong> {studentDetailReport.currentSemester}
-                        </span>
-                      )}
-                    </div>
-                  )}
                 </div>
 
                 {/* 4 Core KPIs */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 break-inside-avoid">
                   <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[10px] font-mono font-bold uppercase">Task Completion</span>
+                      <span className="text-[10px] academic-sans font-bold uppercase">Task Completion</span>
                       <CheckCircle2 className="w-3.5 h-3.5 text-brand-teal" />
                     </div>
                     <div>
-                      <div className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy">
+                      <div className="academic-heading text-2xl sm:text-3xl font-bold text-brand-navy">
                         {studentDetailReport.taskMetrics.isCompletionRateApplicable
                           ? `${studentDetailReport.taskMetrics.completionRate}%`
                           : 'N/A'}
                       </div>
-                      <div className="text-[10px] font-mono mt-1 text-brand-muted">
+                      <div className="text-[10px] academic-sans mt-1 text-brand-muted">
                         {studentDetailReport.taskMetrics.completed}/{studentDetailReport.taskMetrics.totalAssigned} scheduled
                       </div>
                     </div>
@@ -731,16 +754,16 @@ export const MentorReportPage: React.FC = () => {
 
                   <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[10px] font-mono font-bold uppercase">Weighted Mastery</span>
+                      <span className="text-[10px] academic-sans font-bold uppercase">Weighted Mastery</span>
                       <Award className="w-3.5 h-3.5 text-brand-navy" />
                     </div>
                     <div>
-                      <div className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy">
+                      <div className="academic-heading text-2xl sm:text-3xl font-bold text-brand-navy">
                         {studentDetailReport.evaluationMetrics.weightedAveragePercentage !== null
                           ? `${studentDetailReport.evaluationMetrics.weightedAveragePercentage}%`
                           : 'N/A'}
                       </div>
-                      <div className="text-[10px] font-mono mt-1 text-brand-muted">
+                      <div className="text-[10px] academic-sans mt-1 text-brand-muted">
                         {studentDetailReport.evaluationMetrics.scoredCount > 0
                           ? `${studentDetailReport.evaluationMetrics.totalEarnedPoints}/${studentDetailReport.evaluationMetrics.totalPossiblePoints} pts`
                           : 'No scored exams'}
@@ -750,16 +773,16 @@ export const MentorReportPage: React.FC = () => {
 
                   <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[10px] font-mono font-bold uppercase">Practice Submissions</span>
+                      <span className="text-[10px] academic-sans font-bold uppercase">Practice Submissions</span>
                       <FileText className="w-3.5 h-3.5 text-brand-teal" />
                     </div>
                     <div>
-                      <div className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy">
+                      <div className="academic-heading text-2xl sm:text-3xl font-bold text-brand-navy">
                         {studentDetailReport.assignmentMetrics.isSubmissionRateApplicable
                           ? `${studentDetailReport.assignmentMetrics.submissionRate}%`
                           : 'N/A'}
                       </div>
-                      <div className="text-[10px] font-mono mt-1 text-brand-muted">
+                      <div className="text-[10px] academic-sans mt-1 text-brand-muted">
                         {studentDetailReport.assignmentMetrics.submitted}/{studentDetailReport.assignmentMetrics.totalAssigned} problem sets
                       </div>
                     </div>
@@ -767,15 +790,17 @@ export const MentorReportPage: React.FC = () => {
 
                   <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[10px] font-mono font-bold uppercase">Study Cadence</span>
+                      <span className="text-[10px] academic-sans font-bold uppercase">Schedule Consistency</span>
                       <Calendar className="w-3.5 h-3.5 text-brand-gold" />
                     </div>
                     <div>
-                      <div className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy">
-                        {studentDetailReport.studyConsistency.activeStudyDays} <span className="text-base font-normal text-brand-muted">/ {studentDetailReport.studyConsistency.totalPeriodDays}d</span>
+                      <div className="academic-heading text-2xl sm:text-3xl font-bold text-brand-navy">
+                        {studentDetailReport.studyConsistency.consistencyPercentage !== null
+                          ? `${studentDetailReport.studyConsistency.consistencyPercentage}%`
+                          : 'N/A'}
                       </div>
-                      <div className="text-[10px] font-mono mt-1 text-brand-muted">
-                        {studentDetailReport.studyConsistency.consistencyPercentage}% verified active
+                      <div className="text-[10px] academic-sans mt-1 text-brand-muted">
+                        {studentDetailReport.studyConsistency.consistentScheduledDays} of {studentDetailReport.studyConsistency.totalScheduledDays} scheduled days
                       </div>
                     </div>
                   </div>
@@ -784,14 +809,14 @@ export const MentorReportPage: React.FC = () => {
                 {/* Subject Breakdown Matrix */}
                 <div className="space-y-2 break-inside-avoid">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+                    <h3 className="academic-heading font-bold text-sm sm:text-base text-brand-navy flex items-center gap-1.5">
                       <Target className="w-4 h-4 text-brand-teal" />
                       <span>Subject Performance &amp; Mastery Matrix</span>
                     </h3>
                   </div>
 
                   <div className="border-2 border-brand-dark overflow-x-auto bg-brand-paper">
-                    <table className="w-full text-left border-collapse text-xs font-mono">
+                    <table className="w-full text-left border-collapse text-xs academic-sans">
                       <thead>
                         <tr className="bg-brand-paper-tint border-b-2 border-brand-dark text-brand-navy">
                           <th className="p-2.5 font-bold">Subject</th>
@@ -839,7 +864,7 @@ export const MentorReportPage: React.FC = () => {
                 </div>
 
                 {/* Page 1 Footer */}
-                <footer className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-[10px] font-mono text-brand-muted break-inside-avoid">
+                <footer className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-[10px] academic-sans text-brand-muted break-inside-avoid">
                   <div>PoraPlan Academic Performance Report • Scholar {studentDetailReport.studentName}</div>
                   <div className="font-bold">Page 1 of 2</div>
                 </footer>
@@ -849,39 +874,108 @@ export const MentorReportPage: React.FC = () => {
               <div className="print:page-break my-6 print:my-0 border-t-2 border-dashed border-brand-dark/20 print:border-none" />
 
               {/* Page 2 of Mentee Report */}
-              <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-6 print:border-none print:shadow-none print:p-0 print:space-y-4">
-                <header className="border-b-2 border-brand-dark pb-3 flex items-center justify-between text-xs font-mono">
+              <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-5 print:border-none print:shadow-none print:p-0 print:space-y-4">
+                <header className="border-b-2 border-brand-dark pb-3 flex items-center justify-between text-xs academic-sans">
                   <div className="flex items-center gap-3">
-                    <span className="font-extrabold text-brand-navy">{studentDetailReport.studentName}</span>
+                    <span className="font-bold text-brand-navy">{studentDetailReport.studentName}</span>
                     <span className="text-brand-teal font-bold">{studentDetailReport.poraplanId}</span>
                   </div>
-                  <div className="text-brand-muted font-bold">
+                  <div className="text-brand-muted font-semibold">
                     Academic Performance &amp; Improvement Report • Page 2 of 2
                   </div>
                 </header>
 
+                {/* Daily Consistency Graph in Mentee Inspection */}
+                <section className="space-y-2 break-inside-avoid">
+                  <div className="flex items-center justify-between">
+                    <h3 className="academic-heading font-bold text-sm sm:text-base text-brand-navy flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-brand-teal" />
+                      <span>Daily Schedule Execution Consistency</span>
+                    </h3>
+                    <span className="text-[10px] academic-sans text-brand-muted">
+                      {studentDetailReport.studyConsistency.totalScheduledDays} Mentor-Scheduled Days
+                    </span>
+                  </div>
+
+                  {studentDetailReport.studyConsistency.totalScheduledDays === 0 ? (
+                    <div className="p-3.5 border-2 border-brand-dark bg-brand-bg text-center text-xs academic-sans text-brand-muted italic">
+                      No mentor-scheduled tasks were assigned during this audit window.
+                    </div>
+                  ) : (
+                    <div className="p-3 border-2 border-brand-dark bg-white space-y-2.5">
+                      <div className="flex items-end justify-between gap-2 overflow-x-auto pt-1 pb-1">
+                        {studentDetailReport.studyConsistency.scheduledDays.map((day) => {
+                          const onTimePct = day.assignedCount > 0 ? (day.completedOnTimeCount / day.assignedCount) * 100 : 0;
+                          const latePct = day.assignedCount > 0 ? (day.completedLateCount / day.assignedCount) * 100 : 0;
+                          const pendingPct = day.assignedCount > 0 ? (day.pendingCount / day.assignedCount) * 100 : 0;
+
+                          return (
+                            <div
+                              key={day.date}
+                              className="flex-1 min-w-[32px] max-w-[60px] flex flex-col items-center gap-1"
+                            >
+                              <span className="text-[9px] academic-sans font-bold text-brand-navy">
+                                {day.totalCompletedCount}/{day.assignedCount}
+                              </span>
+                              <div className="w-full h-14 border border-brand-dark/40 bg-brand-bg rounded-t overflow-hidden flex flex-col-reverse">
+                                {onTimePct > 0 && <div style={{ height: `${onTimePct}%` }} className="w-full bg-brand-teal" />}
+                                {latePct > 0 && <div style={{ height: `${latePct}%` }} className="w-full bg-brand-gold" />}
+                                {pendingPct > 0 && <div style={{ height: `${pendingPct}%` }} className="w-full bg-slate-200" />}
+                              </div>
+                              <div className="flex items-center justify-center">
+                                {day.isConsistent ? (
+                                  <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] text-white ${day.isOnTime ? 'bg-emerald-600' : 'bg-amber-600'}`}>
+                                    <Check className="w-2 h-2 stroke-[3]" />
+                                  </span>
+                                ) : (
+                                  <span className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] text-white bg-red-600">
+                                    <X className="w-2 h-2 stroke-[3]" />
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[9px] academic-sans font-semibold text-brand-dark text-center whitespace-nowrap">
+                                {day.dayLabel}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="pt-1.5 border-t border-brand-dark/10 flex items-center justify-between text-[9px] academic-sans text-brand-muted">
+                        <div className="flex items-center gap-2">
+                          <span className="flex items-center gap-1"><span className="w-2 h-2 bg-brand-teal inline-block" /> On-Time</span>
+                          <span className="flex items-center gap-1"><span className="w-2 h-2 bg-brand-gold inline-block" /> Late</span>
+                          <span className="flex items-center gap-1"><span className="w-2 h-2 bg-slate-200 border border-brand-dark/30 inline-block" /> Pending</span>
+                          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-600 inline-block" /> Missed Day</span>
+                        </div>
+                        <span>Consistency Rate: {studentDetailReport.studyConsistency.consistencyPercentage}%</span>
+                      </div>
+                    </div>
+                  )}
+                </section>
+
                 {/* Backlog Radar */}
                 <div className="space-y-2 break-inside-avoid">
-                  <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+                  <h3 className="academic-heading font-bold text-sm sm:text-base text-brand-navy flex items-center gap-1.5">
                     <Clock className="w-4 h-4 text-brand-gold" />
                     <span>Task Backlog &amp; Deadline Status</span>
                   </h3>
-                  <div className="p-3.5 border-2 border-brand-dark bg-brand-bg grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+                  <div className="p-3.5 border-2 border-brand-dark bg-brand-bg grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs academic-sans">
                     <div>
                       <span className="text-brand-muted text-[10px] uppercase font-bold block">OVERDUE TASKS</span>
-                      <span className={`text-xl font-extrabold ${studentDetailReport.taskMetrics.overdue > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
+                      <span className={`text-xl font-bold ${studentDetailReport.taskMetrics.overdue > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
                         {studentDetailReport.taskMetrics.overdue}
                       </span>
                     </div>
                     <div>
                       <span className="text-brand-muted text-[10px] uppercase font-bold block">PENDING REVISIONS</span>
-                      <span className={`text-xl font-extrabold ${studentDetailReport.assignmentMetrics.needsRevision > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
+                      <span className={`text-xl font-bold ${studentDetailReport.assignmentMetrics.needsRevision > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
                         {studentDetailReport.assignmentMetrics.needsRevision}
                       </span>
                     </div>
                     <div>
                       <span className="text-brand-muted text-[10px] uppercase font-bold block">ON-TIME EXECUTION</span>
-                      <span className="text-xl font-extrabold text-brand-navy">
+                      <span className="text-xl font-bold text-brand-navy">
                         {studentDetailReport.taskMetrics.completed > 0
                           ? `${Math.round((studentDetailReport.taskMetrics.onTimeCompleted / studentDetailReport.taskMetrics.completed) * 100)}%`
                           : 'N/A'}
@@ -893,11 +987,11 @@ export const MentorReportPage: React.FC = () => {
                 {/* Observations & Strengths */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 break-inside-avoid">
                   <div className="p-3.5 border-2 border-brand-dark bg-emerald-50/40 space-y-2">
-                    <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
+                    <h4 className="academic-heading font-bold text-xs uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
                       <span>Verified Strengths</span>
                     </h4>
-                    <ul className="space-y-1.5 text-xs font-mono text-emerald-950">
+                    <ul className="space-y-1.5 text-xs academic-sans text-emerald-950">
                       {studentDetailReport.insights.observations
                         .filter((o) => o.type === 'strength')
                         .map((obs, idx) => (
@@ -910,11 +1004,11 @@ export const MentorReportPage: React.FC = () => {
                   </div>
 
                   <div className="p-3.5 border-2 border-brand-dark bg-red-50/40 space-y-2">
-                    <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-red-900 flex items-center gap-1.5">
+                    <h4 className="academic-heading font-bold text-xs uppercase tracking-wider text-red-900 flex items-center gap-1.5">
                       <AlertTriangle className="w-3.5 h-3.5 text-red-700" />
                       <span>Areas Requiring Focus</span>
                     </h4>
-                    <ul className="space-y-1.5 text-xs font-mono text-red-950">
+                    <ul className="space-y-1.5 text-xs academic-sans text-red-950">
                       {studentDetailReport.insights.observations
                         .filter((o) => o.type === 'attention')
                         .map((obs, idx) => (
@@ -929,20 +1023,20 @@ export const MentorReportPage: React.FC = () => {
 
                 {/* Evaluation Feedback */}
                 <div className="space-y-2 break-inside-avoid">
-                  <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+                  <h3 className="academic-heading font-bold text-sm sm:text-base text-brand-navy flex items-center gap-1.5">
                     <MessageSquareQuote className="w-4 h-4 text-brand-teal" />
                     <span>Evaluation Remarks &amp; Recommendations</span>
                   </h3>
                   <div className="space-y-2">
                     {studentDetailReport.evaluationMetrics.recentFeedback.map((fb) => (
-                      <div key={fb.id} className="p-3 border-2 border-brand-dark bg-brand-bg text-xs font-mono space-y-1">
+                      <div key={fb.id} className="p-3 border-2 border-brand-dark bg-brand-bg text-xs academic-sans space-y-1">
                         <div className="flex items-center justify-between font-bold text-brand-navy">
                           <span>{fb.title}</span>
                           <span className="text-[10px] text-brand-muted">{fb.date}</span>
                         </div>
                         {fb.feedback && <p className="text-brand-dark"><strong>Feedback:</strong> "{fb.feedback}"</p>}
                         {fb.recommendation && (
-                          <p className="text-brand-teal font-bold">
+                          <p className="text-brand-teal font-semibold">
                             <strong>Recommended Next Step:</strong> {fb.recommendation}
                           </p>
                         )}
@@ -953,29 +1047,29 @@ export const MentorReportPage: React.FC = () => {
 
                 {/* Recommendations */}
                 <div className="space-y-2 break-inside-avoid">
-                  <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+                  <h3 className="academic-heading font-bold text-sm sm:text-base text-brand-navy flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-brand-gold" />
                     <span>Prioritized Improvement Recommendations</span>
                   </h3>
                   <div className="space-y-2">
                     {studentDetailReport.recommendations.map((rec) => (
-                      <div key={rec.id} className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs text-xs font-mono space-y-1">
+                      <div key={rec.id} className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs text-xs academic-sans space-y-1">
                         <div className="flex items-center gap-2">
                           <span className="px-1.5 py-0.5 border text-[9px] font-bold bg-brand-navy text-white">
                             {rec.priority} • {rec.priorityLabel}
                           </span>
-                          <span className="font-extrabold text-brand-navy">{rec.title}</span>
+                          <span className="font-bold text-brand-navy">{rec.title}</span>
                         </div>
                         <p className="text-brand-muted"><strong>Evidence:</strong> {rec.evidence}</p>
                         <p className="text-brand-dark"><strong>Action:</strong> {rec.recommendedAction}</p>
-                        <p className="text-brand-teal font-bold"><strong>Outcome Target:</strong> {rec.measurableSuccessIndicator}</p>
+                        <p className="text-brand-teal font-semibold"><strong>Outcome Target:</strong> {rec.measurableSuccessIndicator}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Footer */}
-                <footer className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-[10px] font-mono text-brand-muted break-inside-avoid">
+                <footer className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-[10px] academic-sans text-brand-muted break-inside-avoid">
                   <div>PoraPlan Academic Performance &amp; Improvement Report • Lead Mentor Review</div>
                   <div className="font-bold">Page 2 of 2</div>
                 </footer>

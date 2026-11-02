@@ -1,24 +1,22 @@
 /**
- * PoraPlan — Academic Performance & Improvement Reporting Service Layer (Milestone 12.2)
+ * PoraPlan — Academic Performance & Improvement Reporting Service Layer (Milestone 12.2.1)
  *
  * Implements an evidence-based, deterministic reporting engine for Students and Mentors.
  *
  * Core Principles:
- * 1. Consistent Cohort Logic: Tasks and assignments due within the reporting window form
- *    the primary cohort denominator.
- * 2. Unambiguous Cohort Cutoffs: Distinguishes on-time vs. late completions and avoids mixing
- *    all-time backlog counts with window-filtered completion percentages.
- * 3. Weighted Evaluation Mastery: (total scored points earned / total possible points) * 100.
+ * 1. Dynamic Schedule Window & Consistent Cohort Logic: The reporting period is derived
+ *    from mentor-assigned tasks. Gaps between scheduled days do not penalize the student.
+ * 2. Dedicated Academic Consistency Formula:
+ *    Consistency = (Scheduled days with >= 1 completed task / Total eligible scheduled days) * 100.
+ *    Unscheduled calendar days are excluded. Zero-denominator cohorts return N/A (null).
+ * 3. On-Time vs. Late Differentiation: Late completions are distinguished and tracked per scheduled day
+ *    without mutating the original due-date cohort.
+ * 4. Weighted Evaluation Mastery: (total scored points earned / total possible points) * 100.
  *    Unscored walkthroughs/oral reviews are excluded from numeric averages and preserved as qualitative feedback.
- * 4. Unique Assignment Distinction: Revisions do not inflate the unique count of submitted assignments.
- * 5. Verified Study Consistency: Active study days are counted from verified task completions,
- *    assignment submissions, and evaluations on unique local calendar dates (UTC+6 Bangladesh Standard Time).
- * 6. Evidence-Based Insights (3 Tiers):
- *    - Tier 1: Calculated Academic Facts (pure deterministic numbers)
- *    - Tier 2: Rule-Based Observations (objective thresholds for strengths and attention areas)
- *    - Tier 3: Stored Mentor Judgment (actual feedback and recommendations from evaluation records)
+ * 5. Unique Assignment Distinction: Revisions do not inflate the unique count of submitted assignments.
+ * 6. Multi-Tier Insights: Level 1 Facts, Level 2 Observations, Level 3 Stored Mentor Guidance.
  * 7. Actionable Improvement Recommendations: Max 3 prioritized, transparent, deterministic action items.
- * 8. Strict Authorization: Mentors can only query students actively assigned to them.
+ * 8. Strict Authorization: Mentors can only query students actively assigned to them; students can only view their own.
  */
 
 import { formatLocalDate } from './library';
@@ -103,7 +101,7 @@ async function getSupabaseBackend(): Promise<SupabaseBackend> {
   }
 }
 
-export type ReportPeriod = 'weekly' | 'monthly' | 'custom';
+export type ReportPeriod = 'schedule' | 'weekly' | 'monthly' | 'custom';
 
 export const REPORT_THRESHOLDS = {
   /** Minimum evaluation percentage to qualify as Strong Mastery */
@@ -125,6 +123,7 @@ export interface ReportDateRange {
   previousStartDate?: string;
   previousEndDate?: string;
   daysCount: number;
+  scheduledDaysCount?: number;
 }
 
 export interface SubjectReportItem {
@@ -155,6 +154,32 @@ export interface ActivityDayItem {
   assignmentsSubmitted: number;
   evaluationsCompleted: number;
   totalActivities: number;
+}
+
+export interface ScheduledDayConsistencyItem {
+  date: string; // YYYY-MM-DD local
+  dayLabel: string; // e.g. "15 Oct"
+  assignedCount: number;
+  completedOnTimeCount: number;
+  completedLateCount: number;
+  totalCompletedCount: number;
+  pendingCount: number;
+  isConsistent: boolean; // >= 1 completed task on this scheduled day
+  isOnTime: boolean; // >= 1 on-time completed task
+}
+
+export interface StudyConsistencyMetrics {
+  totalScheduledDays: number;
+  consistentScheduledDays: number;
+  onTimeScheduledDays: number;
+  consistencyPercentage: number | null; // null when totalScheduledDays === 0
+  onTimeConsistencyPercentage: number | null;
+  isConsistencyApplicable: boolean;
+  scheduledDays: ScheduledDayConsistencyItem[];
+  // Compatibility aliases:
+  activeStudyDays: number;
+  totalPeriodDays: number;
+  verifiedEventsCount: number;
 }
 
 export interface ReportObservation {
@@ -246,12 +271,7 @@ export interface StudentAcademicReport {
     }>;
     formatBreakdown: Record<string, { count: number; scoredCount: number; averageScore: number | null }>;
   };
-  studyConsistency: {
-    activeStudyDays: number;
-    totalPeriodDays: number;
-    consistencyPercentage: number;
-    verifiedEventsCount: number;
-  };
+  studyConsistency: StudyConsistencyMetrics;
   doubtMetrics: {
     createdInPeriod: number;
     resolvedInPeriod: number;
@@ -296,6 +316,8 @@ export interface ScholarReportSummary {
   evaluationsScheduled: number;
   averageScorePercentage: number | null;
   activeStudyDays: number;
+  scheduledDaysCount: number;
+  consistencyPercentage: number | null;
   needsAttention: boolean;
   attentionReason?: string;
   attentionLevel: 'critical' | 'warning' | 'normal';
@@ -320,6 +342,20 @@ export interface MentorAcademicReport {
     totalEvaluationsUpcoming: number;
     scholarsNeedingAttentionCount: number;
   };
+}
+
+/**
+ * Format a calendar date string (YYYY-MM-DD) into a concise academic label (e.g. "15 Oct").
+ */
+export function formatDayMonth(dateStr: string): string {
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const day = parseInt(parts[2], 10);
+    const monthIdx = parseInt(parts[1], 10) - 1;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${day} ${months[monthIdx] || ''}`.trim();
+  }
+  return dateStr;
 }
 
 /**
@@ -364,6 +400,20 @@ export function computeReportDateRange(
       previousStartDate: formatLocalDate(prevStart),
       previousEndDate: formatLocalDate(prevEnd),
       daysCount: 30,
+    };
+  }
+
+  if (period === 'schedule') {
+    const startStr = customStart?.trim() || todayStr;
+    const endStr = customEnd?.trim() || todayStr;
+    const sDate = new Date(startStr);
+    const eDate = new Date(endStr);
+    const diffDays = Math.max(1, Math.round((eDate.getTime() - sDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+    return {
+      startDate: startStr,
+      endDate: endStr,
+      label: `Active Task Schedule (${startStr} to ${endStr})`,
+      daysCount: isNaN(diffDays) ? 1 : diffDays,
     };
   }
 
@@ -414,7 +464,7 @@ export function isDateInRange(
 
 /**
  * Generates an Academic Progress & Improvement Report for a Student.
- * Enforces role-based caller authorization when requesting user credentials are provided.
+ * Dynamically bounds reporting dates based on mentor-assigned tasks when 'schedule' period is selected.
  */
 export async function generateStudentReport(
   studentId: string,
@@ -430,10 +480,6 @@ export async function generateStudentReport(
   if (!studentId) {
     return { report: null, error: new Error('Student ID is required.') };
   }
-
-  const dateRange = computeReportDateRange(period, customStart, customEnd, options?.referenceDate);
-  const now = options?.referenceDate ? options.referenceDate.toISOString() : new Date().toISOString();
-  const todayLocal = formatLocalDate(options?.referenceDate || new Date());
 
   const backend = await getSupabaseBackend();
 
@@ -473,7 +519,7 @@ export async function generateStudentReport(
   }
 
   if (!backend.isConfigured || !backend.supabase) {
-    return generateMockStudentReport(studentId, period, dateRange, now, todayLocal, options?.referenceDate);
+    return generateMockStudentReport(studentId, period, customStart, customEnd, options?.referenceDate);
   }
 
   const { supabase, getAssignedMentors, getStudentEvaluations, getStudentDoubts } = backend;
@@ -512,6 +558,24 @@ export async function generateStudentReport(
       .eq('student_id', studentId);
     const allTasks: Task[] = (tasksData || []) as any;
 
+    // Dynamic schedule range derivation
+    let derivedStart = customStart;
+    let derivedEnd = customEnd;
+    if (period === 'schedule') {
+      const scheduledDueDates = allTasks
+        .filter((t) => (t.status as string) !== 'cancelled' && t.due_date)
+        .map((t) => toLocalDateStr(t.due_date)!)
+        .sort();
+      if (scheduledDueDates.length > 0) {
+        derivedStart = scheduledDueDates[0];
+        derivedEnd = scheduledDueDates[scheduledDueDates.length - 1];
+      }
+    }
+
+    const dateRange = computeReportDateRange(period, derivedStart, derivedEnd, options?.referenceDate);
+    const now = options?.referenceDate ? options.referenceDate.toISOString() : new Date().toISOString();
+    const todayLocal = formatLocalDate(options?.referenceDate || new Date());
+
     // 4. Fetch Assignments & Submissions
     const { data: asgData } = await supabase
       .from('assignments')
@@ -536,7 +600,7 @@ export async function generateStudentReport(
       allDoubts = doubts || [];
     }
 
-    // Optional: Calculate previous period data for trend comparison
+    // Previous period data for trend comparison
     let previousPeriodData: {
       taskCompletionRate: number | null;
       assignmentSubmissionRate: number | null;
@@ -716,7 +780,7 @@ function buildStudentReportFromData(params: {
     return Boolean(dueStr && dueStr < todayLocal);
   });
 
-  // Also count any outstanding tasks across all time that are currently overdue (for backlog radar)
+  // Outstanding tasks across all time that are currently overdue (for backlog radar)
   const allOverdueTasks = params.tasks.filter((t) => {
     if (t.status === 'completed' || (t.status as string) === 'cancelled') return false;
     const dueStr = toLocalDateStr(t.due_date);
@@ -905,49 +969,107 @@ function buildStudentReportFromData(params: {
     }));
 
   // --------------------------------------------------------------------------
-  // 4. VERIFIED STUDY CONSISTENCY (ACTIVE STUDY DAYS)
-  // Count of distinct local calendar dates in Bangladesh (UTC+6) with >=1 verified completion
+  // 4. SCHEDULE-BASED STUDY CONSISTENCY & DAILY VISUALIZATION (MILESTONE 12.2.1)
+  // Evaluates strictly eligible mentor-scheduled task days. Unscheduled days are excluded.
+  // Formula: (Scheduled days with >= 1 completed task / Total eligible scheduled days) * 100
   // --------------------------------------------------------------------------
-  const activeDatesSet = new Set<string>();
-  const activityMap = new Map<string, { tasks: number; asgs: number; evals: number }>();
+  const scheduledTasksMap = new Map<string, Task[]>();
 
-  function registerActivity(dateStr: string | null, type: 'tasks' | 'asgs' | 'evals') {
-    if (!dateStr || !isDateInRange(dateStr, dateRange.startDate, dateRange.endDate)) return;
-    activeDatesSet.add(dateStr);
-    const curr = activityMap.get(dateStr) || { tasks: 0, asgs: 0, evals: 0 };
-    curr[type]++;
-    activityMap.set(dateStr, curr);
-  }
-
-  // A. Tasks completed
-  params.tasks.forEach((t) => {
-    if (t.status === 'completed' && t.completed_at) {
-      registerActivity(toLocalDateStr(t.completed_at), 'tasks');
+  eligibleTasks.forEach((t) => {
+    const schedDate = toLocalDateStr(t.due_date) || toLocalDateStr(t.created_at);
+    if (schedDate) {
+      const existing = scheduledTasksMap.get(schedDate) || [];
+      existing.push(t);
+      scheduledTasksMap.set(schedDate, existing);
     }
   });
 
-  // B. Assignments submitted
+  const sortedScheduledDates = Array.from(scheduledTasksMap.keys()).sort();
+  const scheduledDays: ScheduledDayConsistencyItem[] = sortedScheduledDates.map((date) => {
+    const dayTasks = scheduledTasksMap.get(date) || [];
+    const assignedCount = dayTasks.length;
+
+    let completedOnTimeCount = 0;
+    let completedLateCount = 0;
+
+    dayTasks.forEach((t) => {
+      if (t.status === 'completed') {
+        const compDate = toLocalDateStr(t.completed_at);
+        const dueDate = toLocalDateStr(t.due_date);
+        if (compDate && dueDate && compDate > dueDate) {
+          completedLateCount++;
+        } else {
+          completedOnTimeCount++;
+        }
+      }
+    });
+
+    const totalCompletedCount = completedOnTimeCount + completedLateCount;
+    const pendingCount = Math.max(0, assignedCount - totalCompletedCount);
+    const isConsistent = totalCompletedCount > 0;
+    const isOnTime = completedOnTimeCount > 0;
+
+    return {
+      date,
+      dayLabel: formatDayMonth(date),
+      assignedCount,
+      completedOnTimeCount,
+      completedLateCount,
+      totalCompletedCount,
+      pendingCount,
+      isConsistent,
+      isOnTime,
+    };
+  });
+
+  const totalScheduledDays = scheduledDays.length;
+  const consistentScheduledDays = scheduledDays.filter((d) => d.isConsistent).length;
+  const onTimeScheduledDays = scheduledDays.filter((d) => d.isOnTime).length;
+
+  const scheduledConsistencyPercentage =
+    totalScheduledDays > 0
+      ? Math.round((consistentScheduledDays / totalScheduledDays) * 100)
+      : null;
+
+  const onTimeConsistencyPercentage =
+    totalScheduledDays > 0
+      ? Math.round((onTimeScheduledDays / totalScheduledDays) * 100)
+      : null;
+
+  // Daily activity events for timeline reference
+  const activityMap = new Map<string, { tasks: number; asgs: number; evals: number }>();
+  completedTasks.forEach((t) => {
+    if (t.completed_at) {
+      const d = toLocalDateStr(t.completed_at);
+      if (d) {
+        const curr = activityMap.get(d) || { tasks: 0, asgs: 0, evals: 0 };
+        curr.tasks++;
+        activityMap.set(d, curr);
+      }
+    }
+  });
+
   eligibleAssignments.forEach((a) => {
-    const rawList: Submission[] = Array.isArray(a.submissions)
-      ? a.submissions
-      : a.submissions
-      ? [a.submissions]
-      : [];
+    const rawList: Submission[] = Array.isArray(a.submissions) ? a.submissions : a.submissions ? [a.submissions] : [];
     const sub = rawList.find((s) => s.student_id === params.studentId) || a.submission;
     if (sub && sub.submitted_at) {
-      registerActivity(toLocalDateStr(sub.submitted_at), 'asgs');
+      const d = toLocalDateStr(sub.submitted_at);
+      if (d) {
+        const curr = activityMap.get(d) || { tasks: 0, asgs: 0, evals: 0 };
+        curr.asgs++;
+        activityMap.set(d, curr);
+      }
     }
   });
 
-  // C. Evaluations completed
   completedEvals.forEach((e) => {
     const d = e.scheduled_date || toLocalDateStr(e.evaluated_at);
-    registerActivity(d, 'evals');
+    if (d) {
+      const curr = activityMap.get(d) || { tasks: 0, asgs: 0, evals: 0 };
+      curr.evals++;
+      activityMap.set(d, curr);
+    }
   });
-
-  const activeStudyDays = activeDatesSet.size;
-  const consistencyPercentage =
-    dateRange.daysCount > 0 ? Math.round((activeStudyDays / dateRange.daysCount) * 100) : 0;
 
   const studyActivityTimeline: ActivityDayItem[] = Array.from(activityMap.entries())
     .map(([date, counts]) => ({
@@ -959,10 +1081,10 @@ function buildStudentReportFromData(params: {
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  const verifiedEventsCount = studyActivityTimeline.reduce(
-    (sum, d) => sum + d.totalActivities,
-    0
-  );
+  const verifiedEventsCount = studyActivityTimeline.reduce((sum, d) => sum + d.totalActivities, 0);
+
+  // Set scheduled days count on dateRange metadata
+  params.dateRange.scheduledDaysCount = totalScheduledDays;
 
   // --------------------------------------------------------------------------
   // 5. DOUBTS DESK INQUIRY METRICS
@@ -1115,9 +1237,6 @@ function buildStudentReportFromData(params: {
 
   // --------------------------------------------------------------------------
   // 7. MULTI-TIER ACADEMIC INSIGHTS
-  // Level 1: Deterministic Calculated Facts
-  // Level 2: Rule-Based Observations
-  // Level 3: Stored Mentor Judgment
   // --------------------------------------------------------------------------
   const facts: string[] = [];
 
@@ -1145,9 +1264,13 @@ function buildStudentReportFromData(params: {
     );
   }
 
-  facts.push(
-    `Maintained an active study cadence on ${activeStudyDays} of ${dateRange.daysCount} calendar days (${consistencyPercentage}% consistency).`
-  );
+  if (totalScheduledDays > 0 && scheduledConsistencyPercentage !== null) {
+    facts.push(
+      `Completed assigned tasks on ${consistentScheduledDays} of ${totalScheduledDays} mentor-scheduled study days (${scheduledConsistencyPercentage}% schedule consistency).`
+    );
+  } else {
+    facts.push('No mentor-scheduled task days were assigned in this audit period; consistency tracking is marked N/A.');
+  }
 
   const observations: ReportObservation[] = [];
 
@@ -1198,7 +1321,6 @@ function buildStudentReportFromData(params: {
 
   // --------------------------------------------------------------------------
   // 8. PRIORITIZED ACTIONABLE RECOMMENDATIONS (MAX 3)
-  // Transparent, deterministic, rule-driven next steps with measurable success indicators.
   // --------------------------------------------------------------------------
   const recommendations: ReportRecommendation[] = [];
 
@@ -1278,9 +1400,9 @@ function buildStudentReportFromData(params: {
       priority: 'P3',
       priorityLabel: 'Recommended',
       title: 'Maintain Consistent Study Cadence',
-      evidence: `Strong study rhythm with ${activeStudyDays} active days in this reporting period.`,
-      recommendedAction: 'Continue daily study sessions and prepare for the upcoming curriculum milestone.',
-      measurableSuccessIndicator: `Maintain >= 80% task completion and active study cadence.`,
+      evidence: `Consistent execution on ${consistentScheduledDays} of ${totalScheduledDays} scheduled study days.`,
+      recommendedAction: 'Continue daily task completion and prepare for the upcoming curriculum milestone.',
+      measurableSuccessIndicator: `Maintain >= 80% task completion across upcoming scheduled days.`,
     });
   }
 
@@ -1348,9 +1470,16 @@ function buildStudentReportFromData(params: {
       formatBreakdown,
     },
     studyConsistency: {
-      activeStudyDays,
-      totalPeriodDays: dateRange.daysCount,
-      consistencyPercentage,
+      totalScheduledDays,
+      consistentScheduledDays,
+      onTimeScheduledDays,
+      consistencyPercentage: scheduledConsistencyPercentage,
+      onTimeConsistencyPercentage,
+      isConsistencyApplicable: totalScheduledDays > 0,
+      scheduledDays,
+      // Compatibility aliases:
+      activeStudyDays: consistentScheduledDays,
+      totalPeriodDays: totalScheduledDays > 0 ? totalScheduledDays : dateRange.daysCount,
       verifiedEventsCount,
     },
     doubtMetrics: {
@@ -1372,15 +1501,14 @@ function buildStudentReportFromData(params: {
 }
 
 /**
- * Mock implementation of Student Progress Report.
+ * Mock implementation of Student Progress Report with dynamic schedule derivation.
  */
 function generateMockStudentReport(
   studentId: string,
   period: ReportPeriod,
-  dateRange: ReportDateRange,
-  now: string,
-  todayLocal: string,
-  _referenceDate?: Date
+  customStart?: string,
+  customEnd?: string,
+  referenceDate?: Date
 ): { report: StudentAcademicReport | null; error: Error | null } {
   const normalizedId = studentId === 'PP001' ? 'mock-student-pp001' : studentId;
   const user = getMockUserById(normalizedId);
@@ -1401,6 +1529,24 @@ function generateMockStudentReport(
   const cohort = activeEnr?.cohort_id ? getMockCohorts().find((c) => c.id === activeEnr.cohort_id) : undefined;
   const assignedMentors = getMockAssignedMentors(normalizedId);
   const mentor = assignedMentors[0];
+
+  // Dynamic schedule window determination
+  let derivedStart = customStart;
+  let derivedEnd = customEnd;
+  if (period === 'schedule') {
+    const scheduledDueDates = tasks
+      .filter((t) => (t.status as string) !== 'cancelled' && t.due_date)
+      .map((t) => toLocalDateStr(t.due_date)!)
+      .sort();
+    if (scheduledDueDates.length > 0) {
+      derivedStart = scheduledDueDates[0];
+      derivedEnd = scheduledDueDates[scheduledDueDates.length - 1];
+    }
+  }
+
+  const dateRange = computeReportDateRange(period, derivedStart, derivedEnd, referenceDate);
+  const now = referenceDate ? referenceDate.toISOString() : new Date().toISOString();
+  const todayLocal = formatLocalDate(referenceDate || new Date());
 
   let previousPeriodData: {
     taskCompletionRate: number | null;
@@ -1615,7 +1761,9 @@ export async function generateMentorReport(
         evaluationsCompleted: sReport.evaluationMetrics.completed,
         evaluationsScheduled: sReport.evaluationMetrics.upcoming,
         averageScorePercentage: sReport.evaluationMetrics.averageScorePercentage,
-        activeStudyDays: sReport.studyConsistency.activeStudyDays,
+        activeStudyDays: sReport.studyConsistency.consistentScheduledDays,
+        scheduledDaysCount: sReport.studyConsistency.totalScheduledDays,
+        consistencyPercentage: sReport.studyConsistency.consistencyPercentage,
         needsAttention: attentionLevel !== 'normal',
         attentionReason,
         attentionLevel,
