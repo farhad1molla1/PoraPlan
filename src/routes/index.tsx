@@ -28,7 +28,6 @@ import { MentorTasksPage } from '../pages/dashboard/MentorTasksPage';
 import { StudentAssignmentsPage } from '../pages/dashboard/StudentAssignmentsPage';
 import { MentorAssignmentsPage } from '../pages/dashboard/MentorAssignmentsPage';
 import { MentorReviewQueuePage } from '../pages/dashboard/MentorReviewQueuePage';
-// StudentEvaluationsPage retained as legacy fallback or superseded by StudentEvaluationsRedirect
 import { MentorEvaluationsPage } from '../pages/dashboard/MentorEvaluationsPage';
 import { StudentProgressPage } from '../pages/dashboard/StudentProgressPage';
 import { MentorProgressPage } from '../pages/dashboard/MentorProgressPage';
