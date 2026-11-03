@@ -275,6 +275,7 @@ export type ProgramEnrollment = {
   application_id?: string | null;
   status: EnrollmentStatus;
   enrolled_at: string;
+  billing_start_date?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -287,6 +288,7 @@ export type ProgramEnrollmentInsert = {
   application_id?: string | null;
   status?: EnrollmentStatus;
   enrolled_at?: string;
+  billing_start_date?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -306,6 +308,169 @@ export type ProgramEnrollmentWithMeta = ProgramEnrollment & {
   program?: Program | null;
   cohort?: Cohort | null;
   application?: ProgramApplication | null;
+};
+
+// ==============================================================================
+// Module 11: Payment & Billing Management Types (Strictly No Amount Fields)
+// ==============================================================================
+
+export type PaymentMethod = 'bkash' | 'nagad' | 'upay' | 'cash' | 'bank';
+
+export type StudentPaymentStatus = 'pending' | 'partial' | 'paid' | 'overdue' | 'waived';
+
+export type MentorPaymentStatus = 'pending' | 'partial' | 'paid';
+
+export type StudentPaymentRecord = {
+  id: string;
+  enrollment_id: string;
+  student_id: string;
+  cycle_start_date: string;
+  cycle_end_date: string;
+  next_due_date: string;
+  status: StudentPaymentStatus;
+  payment_method?: PaymentMethod | null;
+  transaction_reference?: string | null;
+  payment_date?: string | null;
+  waived_reason?: string | null;
+  recorded_by?: string | null;
+  is_deleted: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type StudentPaymentRecordInsert = {
+  id?: string;
+  enrollment_id: string;
+  student_id: string;
+  cycle_start_date: string;
+  cycle_end_date: string;
+  next_due_date: string;
+  status?: StudentPaymentStatus;
+  payment_method?: PaymentMethod | null;
+  transaction_reference?: string | null;
+  payment_date?: string | null;
+  waived_reason?: string | null;
+  recorded_by?: string | null;
+  is_deleted?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type StudentPaymentRecordUpdate = Partial<StudentPaymentRecordInsert>;
+
+export type StudentPaymentRecordWithMeta = StudentPaymentRecord & {
+  student?: Profile | null;
+  enrollment?: ProgramEnrollment | null;
+  events?: PaymentEvent[];
+  recorder?: Profile | null;
+};
+
+export type MentorPaymentRecord = {
+  id: string;
+  mentor_id: string;
+  related_student_id?: string | null;
+  related_enrollment_id?: string | null;
+  billing_month: string;
+  status: MentorPaymentStatus;
+  payment_method?: PaymentMethod | null;
+  transaction_reference?: string | null;
+  payout_date?: string | null;
+  recorded_by?: string | null;
+  is_deleted: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type MentorPaymentRecordInsert = {
+  id?: string;
+  mentor_id: string;
+  related_student_id?: string | null;
+  related_enrollment_id?: string | null;
+  billing_month: string;
+  status?: MentorPaymentStatus;
+  payment_method?: PaymentMethod | null;
+  transaction_reference?: string | null;
+  payout_date?: string | null;
+  recorded_by?: string | null;
+  is_deleted?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type MentorPaymentRecordUpdate = Partial<MentorPaymentRecordInsert>;
+
+export type MentorPaymentRecordWithMeta = MentorPaymentRecord & {
+  mentor?: Profile | null;
+  related_student?: Profile | null;
+  related_enrollment?: ProgramEnrollment | null;
+  events?: PaymentEvent[];
+  recorder?: Profile | null;
+};
+
+export type PaymentEvent = {
+  id: string;
+  record_type: 'student' | 'mentor';
+  student_payment_id?: string | null;
+  mentor_payment_id?: string | null;
+  payment_method: PaymentMethod;
+  transaction_reference?: string | null;
+  payment_date: string;
+  note?: string | null;
+  recorded_by?: string | null;
+  created_at?: string;
+};
+
+export type PaymentEventInsert = {
+  id?: string;
+  record_type: 'student' | 'mentor';
+  student_payment_id?: string | null;
+  mentor_payment_id?: string | null;
+  payment_method: PaymentMethod;
+  transaction_reference?: string | null;
+  payment_date?: string;
+  note?: string | null;
+  recorded_by?: string | null;
+  created_at?: string;
+};
+
+export type PaymentAdminNote = {
+  id: string;
+  record_type: 'student_payment' | 'mentor_payment' | 'enrollment';
+  record_id: string;
+  note: string;
+  created_by: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PaymentAdminNoteInsert = {
+  id?: string;
+  record_type: 'student_payment' | 'mentor_payment' | 'enrollment';
+  record_id: string;
+  note: string;
+  created_by: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type BillingDateAuditLog = {
+  id: string;
+  enrollment_id: string;
+  old_billing_start_date: string;
+  new_billing_start_date: string;
+  reason: string;
+  changed_by: string;
+  created_at?: string;
+};
+
+export type BillingDateAuditLogInsert = {
+  id?: string;
+  enrollment_id: string;
+  old_billing_start_date: string;
+  new_billing_start_date: string;
+  reason: string;
+  changed_by: string;
+  created_at?: string;
 };
 
 export type MentorStudent = {

@@ -55,8 +55,26 @@ import type {
   StudentMentorAssignment,
   EffectiveMentorResolution,
   MentorWorkloadSummary,
+  StudentPaymentStatus,
+  MentorPaymentStatus,
+  StudentPaymentRecord,
+  StudentPaymentRecordInsert,
+  StudentPaymentRecordUpdate,
+  StudentPaymentRecordWithMeta,
+  MentorPaymentRecord,
+  MentorPaymentRecordInsert,
+  MentorPaymentRecordUpdate,
+  MentorPaymentRecordWithMeta,
+  PaymentEvent,
+  PaymentEventInsert,
+  PaymentAdminNote,
+  BillingDateAuditLog,
 } from '../types/database';
 import { sha256 } from './crypto';
+import {
+  deriveDefaultBillingStartDate,
+  toBangladeshDateStr,
+} from './billingCycles';
 
 export interface MockAccountRecord {
   id: string;
@@ -4699,9 +4717,34 @@ const mockEnrollments: ProgramEnrollment[] = [
     cohort_id: 'cohort-uu-cse-b67',
     application_id: 'app-seed-01',
     status: 'active',
-    enrolled_at: new Date(Date.now() - 25 * 86400000).toISOString(),
-    created_at: new Date(Date.now() - 25 * 86400000).toISOString(),
-    updated_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+    enrolled_at: '2026-09-15T10:00:00.000Z',
+    billing_start_date: '2026-09-15',
+    created_at: '2026-09-15T10:00:00.000Z',
+    updated_at: '2026-09-15T10:00:00.000Z',
+  },
+  {
+    id: 'enr-seed-02',
+    student_id: 'mock-student-pp002',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
+    application_id: 'app-seed-02',
+    status: 'active',
+    enrolled_at: '2026-08-31T12:00:00.000Z',
+    billing_start_date: '2026-08-31',
+    created_at: '2026-08-31T12:00:00.000Z',
+    updated_at: '2026-08-31T12:00:00.000Z',
+  },
+  {
+    id: 'enr-seed-03',
+    student_id: 'mock-student-pp003',
+    program_id: 'prog-academic-01',
+    cohort_id: 'cohort-uu-cse-b67',
+    application_id: null,
+    status: 'active',
+    enrolled_at: '2026-10-01T09:00:00.000Z',
+    billing_start_date: '2026-10-05',
+    created_at: '2026-10-01T09:00:00.000Z',
+    updated_at: '2026-10-01T09:00:00.000Z',
   },
 ];
 
@@ -4875,6 +4918,7 @@ export function adminReviewMockApplication(
         application_id: app.id,
         status: 'active',
         enrolled_at: now,
+        billing_start_date: deriveDefaultBillingStartDate(now),
         created_at: now,
         updated_at: now,
       });
@@ -5786,6 +5830,7 @@ export function adminManualEnrollMockStudent(
     application_id: null,
     status: 'active',
     enrolled_at: now,
+    billing_start_date: deriveDefaultBillingStartDate(now),
     created_at: now,
     updated_at: now,
   });
@@ -5865,5 +5910,734 @@ export function checkAndTriggerMockCohortCapacityAlerts(cohortId: string): void 
     });
   }
 }
+// ==============================================================================
+// Module 11: Payment & Billing Management Mock Store (Strictly No Amounts)
+// ==============================================================================
 
+const INITIAL_MOCK_STUDENT_PAYMENT_RECORDS: StudentPaymentRecord[] = [
+  {
+    id: 'mock-spr-001',
+    enrollment_id: 'enr-seed-01',
+    student_id: 'mock-student-pp001',
+    cycle_start_date: '2026-09-15',
+    cycle_end_date: '2026-10-15',
+    next_due_date: '2026-10-15',
+    status: 'paid',
+    payment_method: 'bkash',
+    transaction_reference: 'TRX915BKASH01',
+    payment_date: '2026-09-16',
+    recorded_by: 'mock-admin-ppa001',
+    is_deleted: false,
+    created_at: '2026-09-16T10:00:00.000Z',
+    updated_at: '2026-09-16T10:00:00.000Z',
+  },
+  {
+    id: 'mock-spr-002',
+    enrollment_id: 'enr-seed-01',
+    student_id: 'mock-student-pp001',
+    cycle_start_date: '2026-10-15',
+    cycle_end_date: '2026-11-15',
+    next_due_date: '2026-11-15',
+    status: 'paid',
+    payment_method: 'nagad',
+    transaction_reference: 'TRX1015NAGAD02',
+    payment_date: '2026-10-15',
+    recorded_by: 'mock-admin-ppa001',
+    is_deleted: false,
+    created_at: '2026-10-15T11:00:00.000Z',
+    updated_at: '2026-10-15T11:00:00.000Z',
+  },
+  {
+    id: 'mock-spr-003',
+    enrollment_id: 'enr-seed-01',
+    student_id: 'mock-student-pp001',
+    cycle_start_date: '2026-11-15',
+    cycle_end_date: '2026-12-15',
+    next_due_date: '2026-12-15',
+    status: 'pending',
+    payment_method: null,
+    transaction_reference: null,
+    payment_date: null,
+    recorded_by: null,
+    is_deleted: false,
+    created_at: '2026-11-01T00:00:00.000Z',
+    updated_at: '2026-11-01T00:00:00.000Z',
+  },
+  {
+    id: 'mock-spr-004',
+    enrollment_id: 'enr-seed-02',
+    student_id: 'mock-student-pp002',
+    cycle_start_date: '2026-08-31',
+    cycle_end_date: '2026-09-30',
+    next_due_date: '2026-09-30',
+    status: 'paid',
+    payment_method: 'bkash',
+    transaction_reference: 'TRX0831BK01',
+    payment_date: '2026-08-31',
+    recorded_by: 'mock-admin-ppa001',
+    is_deleted: false,
+    created_at: '2026-08-31T14:00:00.000Z',
+    updated_at: '2026-08-31T14:00:00.000Z',
+  },
+  {
+    id: 'mock-spr-005',
+    enrollment_id: 'enr-seed-02',
+    student_id: 'mock-student-pp002',
+    cycle_start_date: '2026-09-30',
+    cycle_end_date: '2026-10-31',
+    next_due_date: '2026-10-31',
+    status: 'partial',
+    payment_method: 'bkash',
+    transaction_reference: 'TRX0930BK01',
+    payment_date: '2026-10-01',
+    recorded_by: 'mock-admin-ppa001',
+    is_deleted: false,
+    created_at: '2026-10-01T15:00:00.000Z',
+    updated_at: '2026-10-05T12:00:00.000Z',
+  },
+  {
+    id: 'mock-spr-006',
+    enrollment_id: 'enr-seed-03',
+    student_id: 'mock-student-pp003',
+    cycle_start_date: '2026-10-05',
+    cycle_end_date: '2026-11-05',
+    next_due_date: '2026-11-05',
+    status: 'waived',
+    payment_method: null,
+    transaction_reference: null,
+    payment_date: null,
+    waived_reason: 'Merit scholarship waiver for inaugural cycle',
+    recorded_by: 'mock-admin-ppa001',
+    is_deleted: false,
+    created_at: '2026-10-05T10:00:00.000Z',
+    updated_at: '2026-10-05T10:00:00.000Z',
+  },
+];
 
+const INITIAL_MOCK_MENTOR_PAYMENT_RECORDS: MentorPaymentRecord[] = [
+  {
+    id: 'mock-mpr-001',
+    mentor_id: 'mock-mentor-ppm001',
+    related_student_id: 'mock-student-pp001',
+    related_enrollment_id: 'enr-seed-01',
+    billing_month: '2026-09',
+    status: 'paid',
+    payment_method: 'bkash',
+    transaction_reference: 'MPR-BK-0926',
+    payout_date: '2026-10-02',
+    recorded_by: 'mock-admin-ppa001',
+    is_deleted: false,
+    created_at: '2026-10-02T10:00:00.000Z',
+    updated_at: '2026-10-02T10:00:00.000Z',
+  },
+  {
+    id: 'mock-mpr-002',
+    mentor_id: 'mock-mentor-ppm001',
+    related_student_id: 'mock-student-pp001',
+    related_enrollment_id: 'enr-seed-01',
+    billing_month: '2026-10',
+    status: 'paid',
+    payment_method: 'bank',
+    transaction_reference: 'MPR-EBL-1026',
+    payout_date: '2026-11-01',
+    recorded_by: 'mock-admin-ppa001',
+    is_deleted: false,
+    created_at: '2026-11-01T11:00:00.000Z',
+    updated_at: '2026-11-01T11:00:00.000Z',
+  },
+  {
+    id: 'mock-mpr-003',
+    mentor_id: 'mock-mentor-ppm001',
+    related_student_id: 'mock-student-pp001',
+    related_enrollment_id: 'enr-seed-01',
+    billing_month: '2026-11',
+    status: 'pending',
+    payment_method: null,
+    transaction_reference: null,
+    payout_date: null,
+    recorded_by: null,
+    is_deleted: false,
+    created_at: '2026-11-01T00:00:00.000Z',
+    updated_at: '2026-11-01T00:00:00.000Z',
+  },
+];
+
+const INITIAL_MOCK_PAYMENT_EVENTS: PaymentEvent[] = [
+  {
+    id: 'mock-pe-001',
+    record_type: 'student',
+    student_payment_id: 'mock-spr-001',
+    mentor_payment_id: null,
+    payment_method: 'bkash',
+    transaction_reference: 'TRX915BKASH01',
+    payment_date: '2026-09-16',
+    note: 'Initial cycle payment via bKash',
+    recorded_by: 'mock-admin-ppa001',
+    created_at: '2026-09-16T10:00:00.000Z',
+  },
+  {
+    id: 'mock-pe-002',
+    record_type: 'student',
+    student_payment_id: 'mock-spr-002',
+    mentor_payment_id: null,
+    payment_method: 'nagad',
+    transaction_reference: 'TRX1015NAGAD02',
+    payment_date: '2026-10-15',
+    note: 'Cycle 2 renewal payment via Nagad',
+    recorded_by: 'mock-admin-ppa001',
+    created_at: '2026-10-15T11:00:00.000Z',
+  },
+  {
+    id: 'mock-pe-003',
+    record_type: 'student',
+    student_payment_id: 'mock-spr-005',
+    mentor_payment_id: null,
+    payment_method: 'bkash',
+    transaction_reference: 'TRX0930BK01',
+    payment_date: '2026-10-01',
+    note: 'First installment via bKash',
+    recorded_by: 'mock-admin-ppa001',
+    created_at: '2026-10-01T15:00:00.000Z',
+  },
+  {
+    id: 'mock-pe-004',
+    record_type: 'student',
+    student_payment_id: 'mock-spr-005',
+    mentor_payment_id: null,
+    payment_method: 'nagad',
+    transaction_reference: 'TRX1005NG02',
+    payment_date: '2026-10-05',
+    note: 'Second installment via Nagad',
+    recorded_by: 'mock-admin-ppa001',
+    created_at: '2026-10-05T12:00:00.000Z',
+  },
+  {
+    id: 'mock-pe-005',
+    record_type: 'mentor',
+    student_payment_id: null,
+    mentor_payment_id: 'mock-mpr-001',
+    payment_method: 'bkash',
+    transaction_reference: 'MPR-BK-0926',
+    payment_date: '2026-10-02',
+    note: 'September mentor stipend payout',
+    recorded_by: 'mock-admin-ppa001',
+    created_at: '2026-10-02T10:00:00.000Z',
+  },
+  {
+    id: 'mock-pe-006',
+    record_type: 'mentor',
+    student_payment_id: null,
+    mentor_payment_id: 'mock-mpr-002',
+    payment_method: 'bank',
+    transaction_reference: 'MPR-EBL-1026',
+    payment_date: '2026-11-01',
+    note: 'October mentor stipend payout via bank EFT',
+    recorded_by: 'mock-admin-ppa001',
+    created_at: '2026-11-01T11:00:00.000Z',
+  },
+];
+
+const INITIAL_MOCK_PAYMENT_ADMIN_NOTES: PaymentAdminNote[] = [
+  {
+    id: 'mock-pan-001',
+    record_type: 'student_payment',
+    record_id: 'mock-spr-005',
+    note: 'Student split payment across bKash and Nagad. Marked partial until final confirmation.',
+    created_by: 'mock-admin-ppa001',
+    created_at: '2026-10-01T15:05:00.000Z',
+    updated_at: '2026-10-01T15:05:00.000Z',
+  },
+  {
+    id: 'mock-pan-002',
+    record_type: 'enrollment',
+    record_id: 'enr-seed-03',
+    note: 'Adjusted billing start date to 2026-10-05 due to orientation delay.',
+    created_by: 'mock-admin-ppa001',
+    created_at: '2026-10-01T10:00:00.000Z',
+    updated_at: '2026-10-01T10:00:00.000Z',
+  },
+];
+
+const INITIAL_MOCK_BILLING_DATE_AUDIT_LOGS: BillingDateAuditLog[] = [
+  {
+    id: 'mock-bdal-001',
+    enrollment_id: 'enr-seed-03',
+    old_billing_start_date: '2026-10-01',
+    new_billing_start_date: '2026-10-05',
+    reason: 'Orientation delayed by 4 days upon student request',
+    changed_by: 'mock-admin-ppa001',
+    created_at: '2026-10-01T10:00:00.000Z',
+  },
+];
+
+let mockStudentPaymentRecords: StudentPaymentRecord[] = [...INITIAL_MOCK_STUDENT_PAYMENT_RECORDS];
+let mockMentorPaymentRecords: MentorPaymentRecord[] = [...INITIAL_MOCK_MENTOR_PAYMENT_RECORDS];
+let mockPaymentEvents: PaymentEvent[] = [...INITIAL_MOCK_PAYMENT_EVENTS];
+let mockPaymentAdminNotes: PaymentAdminNote[] = [...INITIAL_MOCK_PAYMENT_ADMIN_NOTES];
+let mockBillingDateAuditLogs: BillingDateAuditLog[] = [...INITIAL_MOCK_BILLING_DATE_AUDIT_LOGS];
+
+/**
+ * Resets all payment and billing mock collections to initial seed data.
+ * Useful for test suites and state isolation.
+ */
+export function resetMockPaymentStore(): void {
+  mockStudentPaymentRecords = [...INITIAL_MOCK_STUDENT_PAYMENT_RECORDS];
+  mockMentorPaymentRecords = [...INITIAL_MOCK_MENTOR_PAYMENT_RECORDS];
+  mockPaymentEvents = [...INITIAL_MOCK_PAYMENT_EVENTS];
+  mockPaymentAdminNotes = [...INITIAL_MOCK_PAYMENT_ADMIN_NOTES];
+  mockBillingDateAuditLogs = [...INITIAL_MOCK_BILLING_DATE_AUDIT_LOGS];
+}
+
+function normalizePaymentStudentId(id?: string | null): string | undefined {
+  if (!id) return undefined;
+  const lower = id.toLowerCase();
+  if (lower === 'pp001' || lower === 'mock-student-pp001') return 'mock-student-pp001';
+  if (lower === 'pp002' || lower === 'mock-student-pp002') return 'mock-student-pp002';
+  if (lower === 'pp003' || lower === 'mock-student-pp003') return 'mock-student-pp003';
+  return id;
+}
+
+function normalizePaymentMentorId(id?: string | null): string | undefined {
+  if (!id) return undefined;
+  const lower = id.toLowerCase();
+  if (lower === 'ppm001' || lower === 'mock-mentor-ppm001') return 'mock-mentor-ppm001';
+  return id;
+}
+
+// --- Student Payment Records ---
+
+export function getMockStudentPaymentRecords(filters?: {
+  studentId?: string;
+  enrollmentId?: string;
+  status?: StudentPaymentStatus;
+  includeDeleted?: boolean;
+}): StudentPaymentRecord[] {
+  let list = [...mockStudentPaymentRecords];
+
+  if (!filters?.includeDeleted) {
+    list = list.filter((r) => !r.is_deleted);
+  }
+
+  const normalizedStudent = normalizePaymentStudentId(filters?.studentId);
+  if (normalizedStudent) {
+    list = list.filter((r) => r.student_id === normalizedStudent);
+  }
+
+  if (filters?.enrollmentId) {
+    list = list.filter((r) => r.enrollment_id === filters.enrollmentId);
+  }
+
+  if (filters?.status) {
+    list = list.filter((r) => r.status === filters.status);
+  }
+
+  return list.sort((a, b) => b.cycle_start_date.localeCompare(a.cycle_start_date));
+}
+
+export function getMockStudentPaymentRecordById(
+  id: string,
+  options?: { withMeta?: boolean }
+): StudentPaymentRecordWithMeta | StudentPaymentRecord | null {
+  const record = mockStudentPaymentRecords.find((r) => r.id === id);
+  if (!record || record.is_deleted) return null;
+
+  if (!options?.withMeta) {
+    return { ...record };
+  }
+
+  const student = getMockProfile(record.student_id);
+  const enrollment = mockEnrollments.find((e) => e.id === record.enrollment_id) || null;
+  const events = mockPaymentEvents.filter((e) => e.student_payment_id === record.id);
+  const recorder = record.recorded_by ? getMockProfile(record.recorded_by) : null;
+
+  const result: StudentPaymentRecordWithMeta = {
+    ...record,
+    student,
+    enrollment,
+    events,
+    recorder,
+  };
+
+  return result;
+}
+
+export function createMockStudentPaymentRecord(
+  data: StudentPaymentRecordInsert,
+  adminId?: string
+): { record: StudentPaymentRecord | null; error: Error | null } {
+  // Verify enrollment exists and matches student
+  const enrollment = mockEnrollments.find((e) => e.id === data.enrollment_id);
+  if (!enrollment) {
+    return { record: null, error: new Error('Enrollment not found for student payment record.') };
+  }
+
+  const normalizedStudent = normalizePaymentStudentId(data.student_id);
+  if (enrollment.student_id !== normalizedStudent) {
+    return { record: null, error: new Error('Student ID does not match enrollment.') };
+  }
+
+  const now = new Date().toISOString();
+  const id = data.id || `spr-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+  const record: StudentPaymentRecord = {
+    id,
+    enrollment_id: data.enrollment_id,
+    student_id: normalizedStudent || data.student_id,
+    cycle_start_date: data.cycle_start_date,
+    cycle_end_date: data.cycle_end_date,
+    next_due_date: data.next_due_date,
+    status: data.status || 'pending',
+    payment_method: data.payment_method || null,
+    transaction_reference: data.transaction_reference || null,
+    payment_date: data.payment_date || null,
+    waived_reason: data.waived_reason || null,
+    recorded_by: adminId || data.recorded_by || null,
+    is_deleted: false,
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockStudentPaymentRecords.push(record);
+  return { record, error: null };
+}
+
+export function updateMockStudentPaymentRecord(
+  id: string,
+  updates: StudentPaymentRecordUpdate,
+  adminId?: string
+): { record: StudentPaymentRecord | null; error: Error | null } {
+  const index = mockStudentPaymentRecords.findIndex((r) => r.id === id);
+  if (index === -1) {
+    return { record: null, error: new Error('Student payment record not found.') };
+  }
+
+  const existing = mockStudentPaymentRecords[index];
+  const now = new Date().toISOString();
+
+  mockStudentPaymentRecords[index] = {
+    ...existing,
+    ...updates,
+    recorded_by: adminId || updates.recorded_by || existing.recorded_by,
+    updated_at: now,
+  };
+
+  return { record: mockStudentPaymentRecords[index], error: null };
+}
+
+export function softDeleteMockStudentPaymentRecord(
+  id: string,
+  _adminId?: string
+): { success: boolean; error: Error | null } {
+  const index = mockStudentPaymentRecords.findIndex((r) => r.id === id);
+  if (index === -1) {
+    return { success: false, error: new Error('Student payment record not found.') };
+  }
+
+  mockStudentPaymentRecords[index] = {
+    ...mockStudentPaymentRecords[index],
+    is_deleted: true,
+    updated_at: new Date().toISOString(),
+  };
+
+  return { success: true, error: null };
+}
+
+// --- Mentor Payment Records ---
+
+export function getMockMentorPaymentRecords(filters?: {
+  mentorId?: string;
+  billingMonth?: string;
+  status?: MentorPaymentStatus;
+  includeDeleted?: boolean;
+}): MentorPaymentRecord[] {
+  let list = [...mockMentorPaymentRecords];
+
+  if (!filters?.includeDeleted) {
+    list = list.filter((r) => !r.is_deleted);
+  }
+
+  const normalizedMentor = normalizePaymentMentorId(filters?.mentorId);
+  if (normalizedMentor) {
+    list = list.filter((r) => r.mentor_id === normalizedMentor);
+  }
+
+  if (filters?.billingMonth) {
+    list = list.filter((r) => r.billing_month === filters.billingMonth);
+  }
+
+  if (filters?.status) {
+    list = list.filter((r) => r.status === filters.status);
+  }
+
+  return list.sort((a, b) => b.billing_month.localeCompare(a.billing_month));
+}
+
+export function getMockMentorPaymentRecordById(
+  id: string,
+  options?: { withMeta?: boolean }
+): MentorPaymentRecordWithMeta | MentorPaymentRecord | null {
+  const record = mockMentorPaymentRecords.find((r) => r.id === id);
+  if (!record || record.is_deleted) return null;
+
+  if (!options?.withMeta) {
+    return { ...record };
+  }
+
+  const mentor = getMockProfile(record.mentor_id);
+  const student = record.related_student_id ? getMockProfile(record.related_student_id) : null;
+  const enrollment = record.related_enrollment_id ? mockEnrollments.find((e) => e.id === record.related_enrollment_id) || null : null;
+  const events = mockPaymentEvents.filter((e) => e.mentor_payment_id === record.id);
+  const recorder = record.recorded_by ? getMockProfile(record.recorded_by) : null;
+
+  const result: MentorPaymentRecordWithMeta = {
+    ...record,
+    mentor,
+    related_student: student,
+    related_enrollment: enrollment,
+    events,
+    recorder,
+  };
+
+  return result;
+}
+
+export function createMockMentorPaymentRecord(
+  data: MentorPaymentRecordInsert,
+  adminId?: string
+): { record: MentorPaymentRecord | null; error: Error | null } {
+  const normalizedMentor = normalizePaymentMentorId(data.mentor_id);
+  if (!normalizedMentor) {
+    return { record: null, error: new Error('Mentor ID is required.') };
+  }
+
+  const now = new Date().toISOString();
+  const id = data.id || `mpr-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+  const record: MentorPaymentRecord = {
+    id,
+    mentor_id: normalizedMentor,
+    related_student_id: normalizePaymentStudentId(data.related_student_id) || null,
+    related_enrollment_id: data.related_enrollment_id || null,
+    billing_month: data.billing_month,
+    status: data.status || 'pending',
+    payment_method: data.payment_method || null,
+    transaction_reference: data.transaction_reference || null,
+    payout_date: data.payout_date || null,
+    recorded_by: adminId || data.recorded_by || null,
+    is_deleted: false,
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockMentorPaymentRecords.push(record);
+  return { record, error: null };
+}
+
+export function updateMockMentorPaymentRecord(
+  id: string,
+  updates: MentorPaymentRecordUpdate,
+  adminId?: string
+): { record: MentorPaymentRecord | null; error: Error | null } {
+  const index = mockMentorPaymentRecords.findIndex((r) => r.id === id);
+  if (index === -1) {
+    return { record: null, error: new Error('Mentor payment record not found.') };
+  }
+
+  const existing = mockMentorPaymentRecords[index];
+  const now = new Date().toISOString();
+
+  mockMentorPaymentRecords[index] = {
+    ...existing,
+    ...updates,
+    recorded_by: adminId || updates.recorded_by || existing.recorded_by,
+    updated_at: now,
+  };
+
+  return { record: mockMentorPaymentRecords[index], error: null };
+}
+
+export function softDeleteMockMentorPaymentRecord(
+  id: string,
+  _adminId?: string
+): { success: boolean; error: Error | null } {
+  const index = mockMentorPaymentRecords.findIndex((r) => r.id === id);
+  if (index === -1) {
+    return { success: false, error: new Error('Mentor payment record not found.') };
+  }
+
+  mockMentorPaymentRecords[index] = {
+    ...mockMentorPaymentRecords[index],
+    is_deleted: true,
+    updated_at: new Date().toISOString(),
+  };
+
+  return { success: true, error: null };
+}
+
+// --- Payment Events ---
+
+export function getMockPaymentEvents(filters?: {
+  studentPaymentId?: string;
+  mentorPaymentId?: string;
+  recordType?: 'student' | 'mentor';
+}): PaymentEvent[] {
+  let list = [...mockPaymentEvents];
+
+  if (filters?.recordType) {
+    list = list.filter((e) => e.record_type === filters.recordType);
+  }
+
+  if (filters?.studentPaymentId) {
+    list = list.filter((e) => e.student_payment_id === filters.studentPaymentId);
+  }
+
+  if (filters?.mentorPaymentId) {
+    list = list.filter((e) => e.mentor_payment_id === filters.mentorPaymentId);
+  }
+
+  return list.sort((a, b) => b.payment_date.localeCompare(a.payment_date));
+}
+
+export function createMockPaymentEvent(
+  data: PaymentEventInsert,
+  adminId?: string
+): { event: PaymentEvent | null; error: Error | null } {
+  if (data.record_type === 'student' && !data.student_payment_id) {
+    return { event: null, error: new Error('student_payment_id is required for student payment events.') };
+  }
+  if (data.record_type === 'mentor' && !data.mentor_payment_id) {
+    return { event: null, error: new Error('mentor_payment_id is required for mentor payment events.') };
+  }
+
+  const now = new Date().toISOString();
+  const id = data.id || `pe-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+  const event: PaymentEvent = {
+    id,
+    record_type: data.record_type,
+    student_payment_id: data.student_payment_id || null,
+    mentor_payment_id: data.mentor_payment_id || null,
+    payment_method: data.payment_method,
+    transaction_reference: data.transaction_reference || null,
+    payment_date: data.payment_date || toBangladeshDateStr(),
+    note: data.note || null,
+    recorded_by: adminId || data.recorded_by || null,
+    created_at: now,
+  };
+
+  mockPaymentEvents.push(event);
+  return { event, error: null };
+}
+
+// --- Admin Private Notes ---
+
+export function getMockPaymentAdminNotes(
+  recordType: 'student_payment' | 'mentor_payment' | 'enrollment',
+  recordId: string,
+  callerRole?: string
+): PaymentAdminNote[] {
+  // Strictly restricted to admins
+  if (callerRole !== 'admin') {
+    return [];
+  }
+
+  return mockPaymentAdminNotes
+    .filter((n) => n.record_type === recordType && n.record_id === recordId)
+    .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+}
+
+export function createMockPaymentAdminNote(params: {
+  recordType: 'student_payment' | 'mentor_payment' | 'enrollment';
+  recordId: string;
+  note: string;
+  adminId: string;
+  callerRole?: string;
+}): { note: PaymentAdminNote | null; error: Error | null } {
+  if (params.callerRole && params.callerRole !== 'admin') {
+    return { note: null, error: new Error('Unauthorized: only administrators can author payment notes.') };
+  }
+
+  if (!params.note.trim()) {
+    return { note: null, error: new Error('Note content cannot be empty.') };
+  }
+
+  const now = new Date().toISOString();
+  const noteRecord: PaymentAdminNote = {
+    id: `pan-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    record_type: params.recordType,
+    record_id: params.recordId,
+    note: params.note.trim(),
+    created_by: params.adminId,
+    created_at: now,
+    updated_at: now,
+  };
+
+  mockPaymentAdminNotes.push(noteRecord);
+  return { note: noteRecord, error: null };
+}
+
+// --- Billing Start Date Override & Audit Logging ---
+
+export function overrideMockBillingStartDate(
+  enrollmentId: string,
+  newStartDate: string,
+  reason: string,
+  adminId: string
+): {
+  success: boolean;
+  enrollment: ProgramEnrollment | null;
+  auditLog: BillingDateAuditLog | null;
+  error: Error | null;
+} {
+  const enrollmentIndex = mockEnrollments.findIndex((e) => e.id === enrollmentId);
+  if (enrollmentIndex === -1) {
+    return { success: false, enrollment: null, auditLog: null, error: new Error('Enrollment not found.') };
+  }
+
+  if (!reason || !reason.trim()) {
+    return {
+      success: false,
+      enrollment: null,
+      auditLog: null,
+      error: new Error('Reason is required when overriding billing start date.'),
+    };
+  }
+
+  const existing = mockEnrollments[enrollmentIndex];
+  const oldStartDate = existing.billing_start_date || deriveDefaultBillingStartDate(existing.enrolled_at);
+  const now = new Date().toISOString();
+
+  // 1. Append audit log
+  const auditLog: BillingDateAuditLog = {
+    id: `bdal-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    enrollment_id: enrollmentId,
+    old_billing_start_date: oldStartDate,
+    new_billing_start_date: newStartDate,
+    reason: reason.trim(),
+    changed_by: adminId,
+    created_at: now,
+  };
+  mockBillingDateAuditLogs.push(auditLog);
+
+  // 2. Update enrollment billing start date
+  mockEnrollments[enrollmentIndex] = {
+    ...existing,
+    billing_start_date: newStartDate,
+    updated_at: now,
+  };
+
+  return {
+    success: true,
+    enrollment: mockEnrollments[enrollmentIndex],
+    auditLog,
+    error: null,
+  };
+}
+
+export function getMockBillingDateAuditLogs(enrollmentId?: string): BillingDateAuditLog[] {
+  let list = [...mockBillingDateAuditLogs];
+  if (enrollmentId) {
+    list = list.filter((l) => l.enrollment_id === enrollmentId);
+  }
+  return list.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+}
