@@ -1,5 +1,5 @@
 -- ==============================================================================
--- PoraPlan Milestone 11.2: Payment & Billing Data Foundation
+-- PoraPlan Milestone 11.2.2: Payment & Billing Data Foundation (Hardened)
 -- Module 11: Payment & Billing Management
 --
 -- STRICT ARCHITECTURAL CONSTRAINTS:
@@ -15,6 +15,10 @@
 --    Isolated in a dedicated table inaccessible to students and mentors.
 -- 6. IMMUTABLE BILLING DATE AUDIT:
 --    Append-only tracking for billing_start_date administrative adjustments.
+-- 7. RESTRICTED DELETION INTEGRITY:
+--    Payment and audit history protected with ON DELETE RESTRICT.
+-- 8. ACTIVE CYCLE UNIQUENESS:
+--    One active record per enrollment/cycle and mentor/billing month.
 -- ==============================================================================
 
 -- 1. EXTEND PROGRAM ENROLLMENTS WITH BILLING START DATE
@@ -26,9 +30,38 @@ UPDATE public.program_enrollments
 SET billing_start_date = (enrolled_at AT TIME ZONE 'Asia/Dhaka')::DATE
 WHERE billing_start_date IS NULL;
 
--- Default new enrollments to current Bangladesh local date
+-- Default new enrollments to current Bangladesh local date as a fallback
 ALTER TABLE public.program_enrollments
   ALTER COLUMN billing_start_date SET DEFAULT ((now() AT TIME ZONE 'Asia/Dhaka')::DATE);
+
+-- SEC-11.2-002: Dedicated BEFORE INSERT OR UPDATE trigger to guarantee default derivation
+CREATE OR REPLACE FUNCTION public.set_default_billing_start_date()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  -- On INSERT: If billing_start_date was not explicitly specified, derive from enrolled_at in Asia/Dhaka
+  IF TG_OP = 'INSERT' THEN
+    IF NEW.billing_start_date IS NULL THEN
+      NEW.billing_start_date := (NEW.enrolled_at AT TIME ZONE 'Asia/Dhaka')::DATE;
+    END IF;
+  -- On UPDATE: Do NOT overwrite an existing authorized billing_start_date with NULL
+  ELSIF TG_OP = 'UPDATE' THEN
+    IF NEW.billing_start_date IS NULL AND OLD.billing_start_date IS NOT NULL THEN
+      NEW.billing_start_date := OLD.billing_start_date;
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_set_default_billing_start_date ON public.program_enrollments;
+CREATE TRIGGER trg_set_default_billing_start_date
+  BEFORE INSERT OR UPDATE ON public.program_enrollments
+  FOR EACH ROW
+  EXECUTE FUNCTION public.set_default_billing_start_date();
 
 -- Composite index to enforce relational integrity between enrollment and student
 CREATE UNIQUE INDEX IF NOT EXISTS idx_program_enrollments_id_student
@@ -56,12 +89,18 @@ CREATE TABLE IF NOT EXISTS public.student_payment_records (
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
 
-  -- Enforce relational consistency: student_id must match program_enrollments.student_id
+  -- SEC-11.2-004: Enforce relational consistency with ON DELETE RESTRICT
+  -- Prevents accidental cascade-deletion of historical student financial records
   CONSTRAINT fk_student_payment_enrollment_student
     FOREIGN KEY (enrollment_id, student_id)
     REFERENCES public.program_enrollments(id, student_id)
-    ON DELETE CASCADE
+    ON DELETE RESTRICT
 );
+
+-- SEC-11.2-001: Enforce single active cycle record per enrollment
+CREATE UNIQUE INDEX IF NOT EXISTS idx_student_payment_active_cycle
+  ON public.student_payment_records (enrollment_id, cycle_start_date)
+  WHERE (is_deleted = false);
 
 CREATE INDEX IF NOT EXISTS idx_student_payment_records_student
   ON public.student_payment_records (student_id);
@@ -86,7 +125,8 @@ CREATE INDEX IF NOT EXISTS idx_student_payment_tx_ref
 -- 3. MENTOR PAYMENT RECORDS TABLE (Independent flow)
 CREATE TABLE IF NOT EXISTS public.mentor_payment_records (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  mentor_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  -- SEC-11.2-004: ON DELETE RESTRICT preserves mentor payout history
+  mentor_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
   related_student_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   related_enrollment_id UUID REFERENCES public.program_enrollments(id) ON DELETE SET NULL,
   billing_month DATE NOT NULL, -- Normalized to 1st of target month (e.g. 2026-11-01)
@@ -99,6 +139,11 @@ CREATE TABLE IF NOT EXISTS public.mentor_payment_records (
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+-- SEC-11.2-001: Enforce single active payout record per mentor and billing month
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mentor_payment_active_month
+  ON public.mentor_payment_records (mentor_id, billing_month)
+  WHERE (is_deleted = false);
 
 CREATE INDEX IF NOT EXISTS idx_mentor_payment_records_mentor
   ON public.mentor_payment_records (mentor_id);
@@ -165,7 +210,8 @@ CREATE INDEX IF NOT EXISTS idx_payment_admin_notes_record
 -- 6. IMMUTABLE BILLING DATE AUDIT LOG TABLE
 CREATE TABLE IF NOT EXISTS public.billing_date_audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  enrollment_id UUID NOT NULL REFERENCES public.program_enrollments(id) ON DELETE CASCADE,
+  -- SEC-11.2-004: ON DELETE RESTRICT guarantees audit history cannot be purged
+  enrollment_id UUID NOT NULL REFERENCES public.program_enrollments(id) ON DELETE RESTRICT,
   old_billing_start_date DATE NOT NULL,
   new_billing_start_date DATE NOT NULL,
   reason TEXT NOT NULL,
@@ -196,7 +242,8 @@ CREATE POLICY "Students can view own payment records"
   FOR SELECT
   TO authenticated
   USING (
-    student_id = auth.uid() OR
+    -- SEC-11.2-003: Student can only view their own NON-DELETED records
+    (student_id = auth.uid() AND is_deleted = false) OR
     EXISTS (
       SELECT 1 FROM public.profiles
       WHERE id = auth.uid() AND role = 'admin' AND status = 'active'
@@ -228,7 +275,8 @@ CREATE POLICY "Mentors can view own payout records"
   FOR SELECT
   TO authenticated
   USING (
-    mentor_id = auth.uid() OR
+    -- SEC-11.2-003: Mentor can only view their own NON-DELETED records
+    (mentor_id = auth.uid() AND is_deleted = false) OR
     EXISTS (
       SELECT 1 FROM public.profiles
       WHERE id = auth.uid() AND role = 'admin' AND status = 'active'
@@ -265,13 +313,15 @@ CREATE POLICY "Users can view permitted payment events"
       SELECT 1 FROM public.profiles
       WHERE id = auth.uid() AND role = 'admin' AND status = 'active'
     ) OR
-    -- Student can view events under their own student payment record
+    -- SEC-11.2-003: Student can view events under their own non-deleted student payment record
     (record_type = 'student' AND student_payment_id IN (
-      SELECT id FROM public.student_payment_records WHERE student_id = auth.uid()
+      SELECT id FROM public.student_payment_records
+      WHERE student_id = auth.uid() AND is_deleted = false
     )) OR
-    -- Mentor can view events under their own mentor payment record
+    -- SEC-11.2-003: Mentor can view events under their own non-deleted mentor payment record
     (record_type = 'mentor' AND mentor_payment_id IN (
-      SELECT id FROM public.mentor_payment_records WHERE mentor_id = auth.uid()
+      SELECT id FROM public.mentor_payment_records
+      WHERE mentor_id = auth.uid() AND is_deleted = false
     ))
   );
 

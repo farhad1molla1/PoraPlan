@@ -6276,6 +6276,17 @@ export function createMockStudentPaymentRecord(
     return { record: null, error: new Error('Student ID does not match enrollment.') };
   }
 
+  // SEC-11.2-001: Prevent duplicate active cycle records
+  const existingActive = mockStudentPaymentRecords.find(
+    (r) => !r.is_deleted && r.enrollment_id === data.enrollment_id && r.cycle_start_date === data.cycle_start_date
+  );
+  if (existingActive) {
+    return {
+      record: null,
+      error: new Error('An active payment record already exists for this enrollment and billing cycle.'),
+    };
+  }
+
   const now = new Date().toISOString();
   const id = data.id || `spr-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
@@ -6408,6 +6419,17 @@ export function createMockMentorPaymentRecord(
   const normalizedMentor = normalizePaymentMentorId(data.mentor_id);
   if (!normalizedMentor) {
     return { record: null, error: new Error('Mentor ID is required.') };
+  }
+
+  // SEC-11.2-001: Prevent duplicate active mentor month records
+  const existingActive = mockMentorPaymentRecords.find(
+    (r) => !r.is_deleted && r.mentor_id === normalizedMentor && r.billing_month === data.billing_month
+  );
+  if (existingActive) {
+    return {
+      record: null,
+      error: new Error('An active payout record already exists for this mentor and billing month.'),
+    };
   }
 
   const now = new Date().toISOString();
@@ -6553,6 +6575,14 @@ export function createMockPaymentAdminNote(params: {
   adminId: string;
   callerRole?: string;
 }): { note: PaymentAdminNote | null; error: Error | null } {
+  const admin = getMockAccountById(params.adminId);
+  if (!admin || admin.role !== 'admin' || admin.status !== 'active') {
+    return {
+      note: null,
+      error: new Error('Unauthorized: only active administrators can author payment notes.'),
+    };
+  }
+
   if (params.callerRole && params.callerRole !== 'admin') {
     return { note: null, error: new Error('Unauthorized: only administrators can author payment notes.') };
   }
@@ -6600,6 +6630,16 @@ export function overrideMockBillingStartDate(
       enrollment: null,
       auditLog: null,
       error: new Error('Reason is required when overriding billing start date.'),
+    };
+  }
+
+  const admin = getMockAccountById(adminId);
+  if (!admin || admin.role !== 'admin' || admin.status !== 'active') {
+    return {
+      success: false,
+      enrollment: null,
+      auditLog: null,
+      error: new Error('Unauthorized: only active administrators can override billing start date.'),
     };
   }
 

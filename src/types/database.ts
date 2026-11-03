@@ -1862,6 +1862,36 @@ export type Database = {
           }
         ];
       };
+      student_payment_records: {
+        Row: StudentPaymentRecord;
+        Insert: StudentPaymentRecordInsert;
+        Update: StudentPaymentRecordUpdate;
+        Relationships: [];
+      };
+      mentor_payment_records: {
+        Row: MentorPaymentRecord;
+        Insert: MentorPaymentRecordInsert;
+        Update: MentorPaymentRecordUpdate;
+        Relationships: [];
+      };
+      payment_events: {
+        Row: PaymentEvent;
+        Insert: PaymentEventInsert;
+        Update: Partial<PaymentEventInsert>;
+        Relationships: [];
+      };
+      payment_admin_notes: {
+        Row: PaymentAdminNote;
+        Insert: PaymentAdminNoteInsert;
+        Update: Partial<PaymentAdminNoteInsert>;
+        Relationships: [];
+      };
+      billing_date_audit_logs: {
+        Row: BillingDateAuditLog;
+        Insert: BillingDateAuditLogInsert;
+        Update: Partial<BillingDateAuditLogInsert>;
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;

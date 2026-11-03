@@ -287,13 +287,13 @@ assert(
 const allowedStudentStatuses = ['pending', 'partial', 'paid', 'overdue', 'waived'] as const;
 const allowedMentorStatuses = ['pending', 'partial', 'paid'] as const;
 
-const studentStatusesValid = allowedStudentStatuses.every((st) => {
+const studentStatusesValid = allowedStudentStatuses.every((st, idx) => {
   const { record } = createMockStudentPaymentRecord({
     enrollment_id: 'enr-seed-02',
     student_id: 'mock-student-pp002',
-    cycle_start_date: '2026-12-01',
-    cycle_end_date: '2027-01-01',
-    next_due_date: '2027-01-01',
+    cycle_start_date: `2027-0${idx + 1}-01`,
+    cycle_end_date: `2027-0${idx + 2}-01`,
+    next_due_date: `2027-0${idx + 2}-01`,
     status: st,
     waived_reason: st === 'waived' ? 'Test waiver' : null,
   });
