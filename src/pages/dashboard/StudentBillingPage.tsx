@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
   getMyStudentPaymentRecords,
-  getAdminStudentPaymentRecords,
   getPaymentEvents,
 } from '../../lib/payments';
 import { formatCalendarDate } from '../../lib/billingCycles';
@@ -93,11 +91,8 @@ function getStatusBadge(status: StudentPaymentStatus) {
 }
 
 export const StudentBillingPage: React.FC = () => {
-  const { user, profile, role } = useAuth();
-  const [searchParams] = useSearchParams();
-  const paramStudentId = searchParams.get('studentId');
-  const isAdmin = role === 'admin';
-  const targetStudentId = isAdmin && paramStudentId ? paramStudentId : (profile?.id || user?.id || '');
+  const { user, profile } = useAuth();
+  const studentId = profile?.id || user?.id || '';
 
   const [records, setRecords] = useState<StudentPaymentRecord[]>([]);
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
@@ -108,32 +103,23 @@ export const StudentBillingPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | StudentPaymentStatus>('all');
 
   const fetchRecords = useCallback(async () => {
-    if (!targetStudentId) return;
+    if (!studentId) return;
     setLoading(true);
     setError(null);
 
     try {
-      if (isAdmin && paramStudentId) {
-        const res = await getAdminStudentPaymentRecords({ studentId: paramStudentId });
-        if (res.error) throw res.error;
-        setRecords(res.records);
-        if (res.records.length > 0 && !selectedRecordId) {
-          setSelectedRecordId(res.records[0].id);
-        }
-      } else {
-        const res = await getMyStudentPaymentRecords();
-        if (res.error) throw res.error;
-        setRecords(res.records);
-        if (res.records.length > 0 && !selectedRecordId) {
-          setSelectedRecordId(res.records[0].id);
-        }
+      const res = await getMyStudentPaymentRecords();
+      if (res.error) throw res.error;
+      setRecords(res.records);
+      if (res.records.length > 0 && !selectedRecordId) {
+        setSelectedRecordId(res.records[0].id);
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Unable to load payment and billing records.');
     } finally {
       setLoading(false);
     }
-  }, [isAdmin, paramStudentId, targetStudentId, selectedRecordId]);
+  }, [studentId, selectedRecordId]);
 
   useEffect(() => {
     fetchRecords();
@@ -196,12 +182,6 @@ export const StudentBillingPage: React.FC = () => {
           <p className="text-xs sm:text-sm font-sans text-brand-paper/80">
             Monitor your enrollment billing cycles, payment records, and renewal status.
           </p>
-          {isAdmin && paramStudentId && (
-            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 mt-1 bg-brand-paper/10 border border-brand-paper/30 text-xs font-mono text-brand-gold">
-              <Info className="w-3.5 h-3.5" />
-              Viewing student record ID: {paramStudentId}
-            </div>
-          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -344,7 +324,7 @@ export const StudentBillingPage: React.FC = () => {
                 <div className="mt-4 p-3 bg-brand-paper-tint border border-brand-dark/30 text-xs font-sans text-brand-dark flex items-start gap-2">
                   <Info className="w-4 h-4 text-brand-muted shrink-0 mt-0.5" />
                   <div>
-                    <strong className="font-bold">Waiver Note: </strong>
+                    <strong className="font-bold">Waiver Reason: </strong>
                     {activeRecord.waived_reason}
                   </div>
                 </div>
@@ -514,11 +494,6 @@ export const StudentBillingPage: React.FC = () => {
                               <span className="text-brand-muted">Ref:</span>
                               <span className="font-bold">{evt.transaction_reference || 'Not applicable'}</span>
                             </div>
-                            {evt.note && (
-                              <div className="text-[11px] font-sans text-brand-muted border-t border-brand-dark/10 pt-1 mt-1">
-                                {evt.note}
-                              </div>
-                            )}
                           </div>
                         ))}
                       </div>
@@ -537,3 +512,4 @@ export const StudentBillingPage: React.FC = () => {
     </div>
   );
 };
+

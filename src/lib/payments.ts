@@ -260,6 +260,14 @@ export async function getMyStudentPaymentRecordById(
       return { record: null, error: new Error('Unauthorized: cannot access another student payment record.') };
     }
 
+    // Strip internal admin notes from non-admin responses
+    if (auth.role !== 'admin' && 'events' in record && Array.isArray((record as StudentPaymentRecordWithMeta).events)) {
+      (record as StudentPaymentRecordWithMeta).events = (record as StudentPaymentRecordWithMeta).events?.map((e) => ({
+        ...e,
+        note: null,
+      }));
+    }
+
     return { record, error: null };
   }
 
@@ -287,7 +295,15 @@ export async function getMyStudentPaymentRecordById(
       return { record: null, error: new Error('Unauthorized: cannot access another student payment record.') };
     }
 
-    return { record: data as unknown as StudentPaymentRecordWithMeta, error: null };
+    const result = data as unknown as StudentPaymentRecordWithMeta;
+    if (auth.role !== 'admin' && result.events && Array.isArray(result.events)) {
+      result.events = result.events.map((e) => ({
+        ...e,
+        note: null,
+      }));
+    }
+
+    return { record: result, error: null };
   } catch (err: unknown) {
     return {
       record: null,
@@ -376,6 +392,14 @@ export async function getMyMentorPaymentRecordById(
       return { record: null, error: new Error('Unauthorized: cannot access another mentor payout record.') };
     }
 
+    // Strip internal admin notes from non-admin responses
+    if (auth.role !== 'admin' && 'events' in record && Array.isArray((record as MentorPaymentRecordWithMeta).events)) {
+      (record as MentorPaymentRecordWithMeta).events = (record as MentorPaymentRecordWithMeta).events?.map((e) => ({
+        ...e,
+        note: null,
+      }));
+    }
+
     return { record, error: null };
   }
 
@@ -403,7 +427,15 @@ export async function getMyMentorPaymentRecordById(
       return { record: null, error: new Error('Unauthorized: cannot access another mentor payout record.') };
     }
 
-    return { record: data as unknown as MentorPaymentRecordWithMeta, error: null };
+    const result = data as unknown as MentorPaymentRecordWithMeta;
+    if (auth.role !== 'admin' && result.events && Array.isArray(result.events)) {
+      result.events = result.events.map((e) => ({
+        ...e,
+        note: null,
+      }));
+    }
+
+    return { record: result, error: null };
   } catch (err: unknown) {
     return {
       record: null,
@@ -762,6 +794,12 @@ export async function getPaymentEvents(
   const auth = await resolveAuthContext();
   if (auth.error) return { events: [], error: auth.error };
 
+  const sanitizeEvents = (evts: PaymentEvent[]): PaymentEvent[] => {
+    if (auth.role === 'admin') return evts;
+    // Strip internal admin notes from non-admin responses
+    return evts.map((e) => ({ ...e, note: null }));
+  };
+
   const sb = await getSupabaseBackend();
   if (!sb.isConfigured || !sb.supabase) {
     if (recordType === 'student') {
@@ -775,7 +813,8 @@ export async function getPaymentEvents(
       if (auth.role !== 'student' && auth.role !== 'admin') {
         return { events: [], error: new Error('Unauthorized.') };
       }
-      return { events: getMockPaymentEvents({ studentPaymentId: recordId, recordType: 'student' }), error: null };
+      const rawEvents = getMockPaymentEvents({ studentPaymentId: recordId, recordType: 'student' });
+      return { events: sanitizeEvents(rawEvents), error: null };
     } else {
       const parent = getMockMentorPaymentRecordById(recordId);
       if (!parent || parent.is_deleted) {
@@ -787,7 +826,8 @@ export async function getPaymentEvents(
       if (auth.role !== 'mentor' && auth.role !== 'admin') {
         return { events: [], error: new Error('Unauthorized.') };
       }
-      return { events: getMockPaymentEvents({ mentorPaymentId: recordId, recordType: 'mentor' }), error: null };
+      const rawEvents = getMockPaymentEvents({ mentorPaymentId: recordId, recordType: 'mentor' });
+      return { events: sanitizeEvents(rawEvents), error: null };
     }
   }
 
@@ -802,7 +842,8 @@ export async function getPaymentEvents(
 
     const { data, error } = await query.order('payment_date', { ascending: false });
     if (error) throw error;
-    return { events: (data as PaymentEvent[]) || [], error: null };
+    const rawEvents = (data as PaymentEvent[]) || [];
+    return { events: sanitizeEvents(rawEvents), error: null };
   } catch (err: unknown) {
     return {
       events: [],

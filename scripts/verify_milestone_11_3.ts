@@ -79,12 +79,15 @@ async function main() {
     assert(content.includes('export const StudentBillingPage'), 'Must export StudentBillingPage component');
   });
 
-  runScenario('Route /student/billing registered in src/routes/index.tsx', () => {
+  runScenario('Route /student/billing registered in src/routes/index.tsx for student only', () => {
     const routeFile = path.resolve(process.cwd(), 'src/routes/index.tsx');
     const content = fs.readFileSync(routeFile, 'utf-8');
     assert(content.includes('path="student/billing"'), 'Must define path="student/billing"');
     assert(content.includes('<StudentBillingPage />'), 'Must mount <StudentBillingPage />');
-    assert(content.includes("allowedRoles={['student', 'admin']}"), 'Must allow student and admin roles');
+    assert(content.includes("allowedRoles={['student']}"), 'Must restrict strictly to student role');
+    assert(!content.includes("allowedRoles={['student', 'admin']}\n              <StudentBillingPage />") &&
+           !content.includes("allowedRoles={['student', 'admin']}>\n              <StudentBillingPage />"),
+           'Must not include admin in student/billing allowedRoles');
   });
 
   runScenario('DashboardLayout sidebar contains Billing & Payments link', () => {
@@ -128,6 +131,14 @@ async function main() {
     }
   });
 
+  runScenario('StudentBillingPage.tsx does not render admin notes or event notes', () => {
+    const filePath = path.resolve(process.cwd(), 'src/pages/dashboard/StudentBillingPage.tsx');
+    const content = fs.readFileSync(filePath, 'utf-8');
+    assert(!content.includes('evt.note'), 'StudentBillingPage must not render evt.note');
+    assert(!content.includes('payment_admin_notes'), 'StudentBillingPage must not query or display payment_admin_notes');
+    assert(!content.includes('Waiver Note:'), 'StudentBillingPage should not label waiver as note');
+  });
+
   // --------------------------------------------------------------------------
   // Category C: Service Layer Integration & Student Isolation
   // --------------------------------------------------------------------------
@@ -166,13 +177,47 @@ async function main() {
     assert(error !== null, 'Must return error on cross-student event lookup');
   });
 
-  await runScenario('Student A retrieves their own child payment events', async () => {
+  await runScenario('Student A retrieves their own child payment events with note stripped (null)', async () => {
     setMockCurrentSession(studentA);
     const { events, error } = await getPaymentEvents('student', 'mock-spr-001');
     assert.strictEqual(error, null);
     assert.strictEqual(events.length, 1);
     assert.strictEqual(events[0].id, 'mock-pe-001');
     assert.strictEqual(events[0].transaction_reference, 'TRX915BKASH01');
+    // Note must be stripped to null for student caller
+    assert.strictEqual(events[0].note, null, 'Student caller must receive note: null');
+  });
+
+  await runScenario('Student A withMeta record retrieval strips event notes', async () => {
+    setMockCurrentSession(studentA);
+    const { record, error } = await getMyStudentPaymentRecordById('mock-spr-001', { withMeta: true });
+    assert.strictEqual(error, null);
+    assert(record !== null);
+    const meta = record as unknown as { events?: { note?: string | null }[] };
+    assert(Array.isArray(meta.events) && meta.events.length > 0);
+    assert(meta.events.every((e) => e.note === null), 'All embedded event notes must be null for student');
+  });
+
+  await runScenario('Admin caller preserves event note in service response', async () => {
+    setMockCurrentSession(adminUser);
+    const { events, error } = await getPaymentEvents('student', 'mock-spr-001');
+    assert.strictEqual(error, null);
+    assert.strictEqual(events.length, 1);
+    // Admin receives the full internal note
+    assert.strictEqual(events[0].note, 'Initial cycle payment via bKash', 'Admin must receive event note intact');
+  });
+
+  await runScenario('Mentor is denied access to student payment records and events', async () => {
+    setMockCurrentSession('mock-mentor-ppm001');
+    const recordsRes = await getMyStudentPaymentRecords();
+    assert.strictEqual(recordsRes.records.length, 0);
+    assert(recordsRes.error !== null);
+    assert(recordsRes.error.message.includes('Access denied'));
+
+    const eventsRes = await getPaymentEvents('student', 'mock-spr-001');
+    assert.strictEqual(eventsRes.events.length, 0);
+    assert(eventsRes.error !== null);
+    assert(eventsRes.error.message.includes('Unauthorized'));
   });
 
   await runScenario('Soft-deleted records are hidden from Student view', async () => {
@@ -262,7 +307,7 @@ async function main() {
   console.log(` Summary: ${passedTests}/${totalTests} scenarios passed.`);
   console.log('===============================================================\n');
 
-  assert(totalTests === 14 && passedTests === 14, 'All 14 verification scenarios must pass');
+  assert(totalTests === 18 && passedTests === 18, 'All 18 verification scenarios must pass');
 }
 
 main().catch((err) => {
