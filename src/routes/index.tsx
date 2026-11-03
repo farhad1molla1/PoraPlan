@@ -41,6 +41,7 @@ import { StudentNotificationsPage } from '../pages/dashboard/StudentNotification
 import { MentorNotificationsPage } from '../pages/dashboard/MentorNotificationsPage';
 import { AdminNotificationsPage } from '../pages/dashboard/AdminNotificationsPage';
 import { StudentReportPage } from '../pages/dashboard/StudentReportPage';
+import { StudentBillingPage } from '../pages/dashboard/StudentBillingPage';
 import { MentorReportPage } from '../pages/dashboard/MentorReportPage';
 import { ProfilePage } from '../pages/dashboard/ProfilePage';
 import { PublicProfilePage } from '../pages/dashboard/PublicProfilePage';
@@ -182,6 +183,14 @@ export const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['student', 'admin']}>
               <StudentLibraryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="student/billing"
+          element={
+            <ProtectedRoute allowedRoles={['student', 'admin']}>
+              <StudentBillingPage />
             </ProtectedRoute>
           }
         />

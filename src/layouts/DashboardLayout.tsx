@@ -26,6 +26,7 @@ import {
   UserCheck,
   Users,
   BarChart3,
+  CreditCard,
 } from 'lucide-react';
 import { getUnreadNotificationCount } from '../lib/notifications';
 
@@ -105,6 +106,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Progress', shortLabel: 'Progress', to: '/student/progress', icon: TrendingUp },
     { label: 'Academic Reports', shortLabel: 'Reports', to: '/student/reports', icon: BarChart3 },
     { label: 'Academic Library', shortLabel: 'Library', to: '/student/library', icon: BookMarked },
+    { label: 'Billing & Payments', shortLabel: 'Billing', to: '/student/billing', icon: CreditCard },
     { label: 'Doubts', shortLabel: 'Doubts', to: '/student/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/student/announcements', icon: Megaphone },
     { label: 'Notifications', shortLabel: 'Alerts', to: '/student/notifications', icon: Bell, badgeCount: unreadNotifCount },
