@@ -125,6 +125,7 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Student Progress', shortLabel: 'Progress', to: '/mentor/progress', icon: TrendingUp },
     { label: 'Scholar Reports', shortLabel: 'Reports', to: '/mentor/reports', icon: BarChart3 },
     { label: 'Resources', shortLabel: 'Resources', to: '/mentor/resources', icon: BookMarked },
+    { label: 'Payout History', shortLabel: 'Payouts', to: '/mentor/payouts', icon: CreditCard },
     { label: 'Doubts', shortLabel: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/mentor/announcements', icon: Megaphone },
     { label: 'Notifications', shortLabel: 'Alerts', to: '/mentor/notifications', icon: Bell, badgeCount: unreadNotifCount },
