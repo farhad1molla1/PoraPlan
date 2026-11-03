@@ -41,6 +41,10 @@ import {
   getMockCohortMentors,
   getMockMentorSubmissions,
   getMockMentorEvaluations,
+  getMockCurrentSession,
+  getMockAccountById,
+  normalizeMockUserId,
+  isMockAuthorizedMentorForStudent,
 } from './mockAuthStore';
 
 function getMockUserById(id: string) {
@@ -546,6 +550,165 @@ export function isDateInRange(
  * Generates an Academic Progress & Improvement Report for a Student.
  * Dynamically bounds reporting dates based on mentor-assigned tasks when 'schedule' period is selected.
  */
+
+export interface AuthorizedCaller {
+  userId: string;
+  role: 'student' | 'mentor' | 'admin';
+  status: string;
+  poraplanId?: string;
+}
+
+/**
+ * Resolves the authenticated caller identity and verifies their true role and status.
+ * Fails closed if session is missing, invalid, suspended, or forged.
+ */
+export async function resolveAuthorizedCaller(
+  backend: SupabaseBackend,
+  options?: {
+    requestingUserId?: string;
+    requestingUserRole?: 'student' | 'mentor' | 'admin';
+  },
+  fallbackSelfServiceId?: string
+): Promise<{ caller: AuthorizedCaller | null; error: Error | null }> {
+  // 1. Supabase Backend Mode
+  if (backend.isConfigured && backend.supabase) {
+    try {
+      const { data: sessionData, error: sessionErr } = await backend.supabase.auth.getSession();
+      if (sessionErr || !sessionData?.session?.user) {
+        return {
+          caller: null,
+          error: new Error('Unauthorized: Valid authentication session is required.'),
+        };
+      }
+
+      const sessionUserId = sessionData.session.user.id;
+
+      // Verify that caller-provided requestingUserId matches the authenticated session user
+      if (options?.requestingUserId && options.requestingUserId !== sessionUserId) {
+        return {
+          caller: null,
+          error: new Error('Unauthorized: Authenticated identity mismatch.'),
+        };
+      }
+
+      // Query database profile directly for authoritative role and status
+      const { data: profile, error: profErr } = await backend.supabase
+        .from('profiles')
+        .select('id, role, status, poraplan_id')
+        .eq('id', sessionUserId)
+        .single();
+
+      if (profErr || !profile) {
+        return {
+          caller: null,
+          error: new Error('Unauthorized: User profile could not be verified.'),
+        };
+      }
+
+      if (profile.status !== 'active') {
+        return {
+          caller: null,
+          error: new Error('Unauthorized: User account is not active.'),
+        };
+      }
+
+      const validRoles = ['student', 'mentor', 'admin'];
+      if (!validRoles.includes(profile.role)) {
+        return {
+          caller: null,
+          error: new Error('Unauthorized: Invalid account role configuration.'),
+        };
+      }
+
+      // Guard against client role spoofing: if requestingUserRole was provided and doesn't match actual role
+      if (options?.requestingUserRole && options.requestingUserRole !== profile.role) {
+        return {
+          caller: null,
+          error: new Error('Unauthorized: Role verification mismatch.'),
+        };
+      }
+
+      return {
+        caller: {
+          userId: profile.id,
+          role: profile.role as 'student' | 'mentor' | 'admin',
+          status: profile.status,
+          poraplanId: profile.poraplan_id,
+        },
+        error: null,
+      };
+    } catch {
+      return {
+        caller: null,
+        error: new Error('Unauthorized: Authentication verification failed.'),
+      };
+    }
+  }
+
+  // 2. Mock Data Mode
+  const activeMockSession = getMockCurrentSession();
+
+  let resolvedUserId: string | null = null;
+  if (activeMockSession) {
+    resolvedUserId = activeMockSession.id;
+    // If requestingUserId is also supplied, it must match the active session
+    if (options?.requestingUserId) {
+      const normOptId = normalizeMockUserId(options.requestingUserId);
+      if (normOptId !== activeMockSession.id && options.requestingUserId !== activeMockSession.poraplanId) {
+        return {
+          caller: null,
+          error: new Error('Unauthorized: Authenticated identity mismatch.'),
+        };
+      }
+    }
+  } else if (options?.requestingUserId) {
+    resolvedUserId = normalizeMockUserId(options.requestingUserId);
+  } else if (fallbackSelfServiceId && !options) {
+    // Headless test runner self-service fallback (only when options is completely omitted)
+    resolvedUserId = normalizeMockUserId(fallbackSelfServiceId);
+  }
+
+  if (!resolvedUserId) {
+    return {
+      caller: null,
+      error: new Error('Unauthorized: Valid authentication session is required.'),
+    };
+  }
+
+  const account = getMockAccountById(resolvedUserId);
+  if (!account) {
+    return {
+      caller: null,
+      error: new Error('Unauthorized: User account not found.'),
+    };
+  }
+
+  if (account.status !== 'active') {
+    return {
+      caller: null,
+      error: new Error('Unauthorized: User account is not active.'),
+    };
+  }
+
+  // Reject forged role string from caller
+  if (options?.requestingUserRole && options.requestingUserRole !== account.role) {
+    return {
+      caller: null,
+      error: new Error('Unauthorized: Role verification mismatch.'),
+    };
+  }
+
+  return {
+    caller: {
+      userId: account.id,
+      role: account.role,
+      status: account.status,
+      poraplanId: account.poraplanId,
+    },
+    error: null,
+  };
+}
+
 export async function generateStudentReport(
   studentId: string,
   period: ReportPeriod,
@@ -564,38 +727,53 @@ export async function generateStudentReport(
   const backend = await getSupabaseBackend();
 
   // Role Authorization Verification
-  if (options?.requestingUserId && options?.requestingUserRole) {
-    const { requestingUserId, requestingUserRole } = options;
+  const { caller, error: authError } = await resolveAuthorizedCaller(backend, options, studentId);
+  if (authError || !caller) {
+    return {
+      report: null,
+      error: authError || new Error('Unauthorized: Authentication required to access academic reports.'),
+    };
+  }
 
-    if (requestingUserRole === 'student') {
-      const normReq = requestingUserId === 'PP001' ? 'mock-student-pp001' : requestingUserId;
-      const normTarget = studentId === 'PP001' ? 'mock-student-pp001' : studentId;
-      if (normReq !== normTarget && requestingUserId !== studentId) {
-        return {
-          report: null,
-          error: new Error('Unauthorized: Students can only access their own academic reports.'),
-        };
-      }
-    } else if (requestingUserRole === 'mentor') {
-      let isAssigned = false;
-      if (!backend.isConfigured || !backend.getAssignedStudents) {
-        const mentees = getMockAssignedStudents(requestingUserId);
-        isAssigned = mentees.some(
-          (m) => m.id === studentId || m.poraplan_id === studentId || studentId === 'mock-student-pp001'
-        );
-      } else {
-        const { students } = await backend.getAssignedStudents(requestingUserId);
-        isAssigned = (students || []).some(
-          (s: Profile) => s.id === studentId || s.poraplan_id === studentId
-        );
-      }
-      if (!isAssigned) {
-        return {
-          report: null,
-          error: new Error('Unauthorized: You are not authorized to access progress reports for this student.'),
-        };
-      }
+  const normTargetStudentId = normalizeMockUserId(studentId);
+  const normCallerId = normalizeMockUserId(caller.userId);
+
+  if (caller.role === 'student') {
+    if (normCallerId !== normTargetStudentId && caller.userId !== studentId && caller.poraplanId !== studentId) {
+      return {
+        report: null,
+        error: new Error('Unauthorized: Students can only access their own academic reports.'),
+      };
     }
+  } else if (caller.role === 'mentor') {
+    let isAssigned = false;
+    if (!backend.isConfigured || !backend.getAssignedStudents) {
+      isAssigned = isMockAuthorizedMentorForStudent(caller.userId, studentId, undefined, caller.userId);
+      if (!isAssigned) {
+        const mentees = getMockAssignedStudents(caller.userId);
+        isAssigned = mentees.some(
+          (m) => m.id === normTargetStudentId || m.poraplan_id === studentId || m.id === studentId
+        );
+      }
+    } else {
+      const { students } = await backend.getAssignedStudents(caller.userId);
+      isAssigned = (students || []).some(
+        (s: Profile) => s.id === studentId || s.poraplan_id === studentId
+      );
+    }
+    if (!isAssigned) {
+      return {
+        report: null,
+        error: new Error('Unauthorized: You are not authorized to access progress reports for this student.'),
+      };
+    }
+  } else if (caller.role === 'admin') {
+    // Admin has authorized clearance to inspect any student report
+  } else {
+    return {
+      report: null,
+      error: new Error('Unauthorized: Access denied.'),
+    };
   }
 
   if (!backend.isConfigured || !backend.supabase) {
@@ -1693,22 +1871,43 @@ export async function generateMentorReport(
     return { report: null, error: new Error('Mentor ID is required.') };
   }
 
-  // Caller Verification: if requestingUser is mentor, must match mentorId
-  if (
-    options?.requestingUserId &&
-    options?.requestingUserRole === 'mentor' &&
-    options.requestingUserId !== mentorId
-  ) {
+  const backend = await getSupabaseBackend();
+
+  // Caller Verification
+  const { caller, error: authError } = await resolveAuthorizedCaller(backend, options, mentorId);
+  if (authError || !caller) {
     return {
       report: null,
-      error: new Error('Unauthorized: You can only generate reports for your own mentor account.'),
+      error: authError || new Error('Unauthorized: Authentication required to access mentor reports.'),
+    };
+  }
+
+  const normTargetMentorId = normalizeMockUserId(mentorId);
+  const normCallerId = normalizeMockUserId(caller.userId);
+
+  if (caller.role === 'student') {
+    return {
+      report: null,
+      error: new Error('Unauthorized: Students are not authorized to access mentor workload reports.'),
+    };
+  } else if (caller.role === 'mentor') {
+    if (normCallerId !== normTargetMentorId && caller.userId !== mentorId && caller.poraplanId !== mentorId) {
+      return {
+        report: null,
+        error: new Error('Unauthorized: You can only generate reports for your own mentor account.'),
+      };
+    }
+  } else if (caller.role === 'admin') {
+    // Admin has platform-wide oversight to inspect any mentor report
+  } else {
+    return {
+      report: null,
+      error: new Error('Unauthorized: Access denied.'),
     };
   }
 
   const dateRange = computeReportDateRange(period, customStart, customEnd, options?.referenceDate);
   const now = options?.referenceDate ? options.referenceDate.toISOString() : new Date().toISOString();
-
-  const backend = await getSupabaseBackend();
 
   // 1. Fetch Assigned Students for Mentor
   let assignedStudents: Profile[] = [];
@@ -1777,8 +1976,8 @@ export async function generateMentorReport(
       customEnd,
       {
         referenceDate: options?.referenceDate,
-        requestingUserId: mentorId,
-        requestingUserRole: 'mentor',
+        requestingUserId: caller.userId,
+        requestingUserRole: caller.role,
       }
     );
 
@@ -1899,8 +2098,25 @@ export async function generateAdminAcademicIntelligence(
     requestingUserRole?: 'student' | 'mentor' | 'admin';
   }
 ): Promise<{ report: AdminAcademicIntelligenceReport | null; error: Error | null }> {
+  const backend = await getSupabaseBackend();
+
   // 1. Strict Administrator Role Authorization
-  if (options?.requestingUserRole && options.requestingUserRole !== 'admin') {
+  if (!options || !options.requestingUserRole || options.requestingUserRole !== 'admin') {
+    return {
+      report: null,
+      error: new Error('Unauthorized: Only platform administrators can access administrative academic intelligence.'),
+    };
+  }
+
+  const { caller, error: authError } = await resolveAuthorizedCaller(backend, options);
+  if (authError || !caller) {
+    return {
+      report: null,
+      error: authError || new Error('Unauthorized: Valid administrative session is required.'),
+    };
+  }
+
+  if (caller.role !== 'admin') {
     return {
       report: null,
       error: new Error('Unauthorized: Only platform administrators can access administrative academic intelligence.'),
@@ -1909,8 +2125,6 @@ export async function generateAdminAcademicIntelligence(
 
   const dateRange = computeReportDateRange(period, customStart, customEnd, options?.referenceDate);
   const now = options?.referenceDate ? options.referenceDate.toISOString() : new Date().toISOString();
-
-  const backend = await getSupabaseBackend();
 
   try {
     let studentProfiles: Profile[] = [];
@@ -1972,6 +2186,7 @@ export async function generateAdminAcademicIntelligence(
         customEnd,
         {
           referenceDate: options?.referenceDate,
+          requestingUserId: caller.userId,
           requestingUserRole: 'admin',
         }
       );

@@ -261,8 +261,57 @@ export function authenticateMockPoraPlanId(
 /**
  * Get account by unique mock ID (for session recovery on refresh).
  */
+let currentMockSessionUserId: string | null = null;
+
+export function setMockCurrentSession(userId: string | null): void {
+  currentMockSessionUserId = userId ? normalizeMockUserId(userId) : null;
+}
+
+export function normalizeMockUserId(id: string): string {
+  const clean = id.trim();
+  const lower = clean.toLowerCase();
+  if (lower === 'pp001' || lower === 'mock-student-pp001') return 'mock-student-pp001';
+  if (lower === 'pp002' || lower === 'mock-student-pp002') return 'mock-student-pp002';
+  if (lower === 'pp003' || lower === 'mock-student-pp003') return 'mock-student-pp003';
+  if (lower === 'ppm001' || lower === 'mock-mentor-ppm001') return 'mock-mentor-ppm001';
+  if (lower === 'ppm002' || lower === 'mock-mentor-ppm002') return 'mock-mentor-ppm002';
+  if (lower === 'ppa001' || lower === 'admin' || lower === 'mock-admin-001' || lower === 'mock-admin-ppa001') {
+    return 'mock-admin-ppa001';
+  }
+  return clean;
+}
+
+export function getMockCurrentSession(): MockAccountRecord | null {
+  if (currentMockSessionUserId) {
+    const acc = getMockAccountById(currentMockSessionUserId);
+    if (acc) return acc;
+  }
+  if (typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined') {
+    try {
+      const cachedId = sessionStorage.getItem('poraplan_mock_session');
+      if (cachedId) {
+        const acc = getMockAccountById(cachedId);
+        if (acc) return acc;
+      }
+    } catch {
+      // Storage access restricted
+    }
+  }
+  return null;
+}
+
 export function getMockAccountById(id: string): MockAccountRecord | null {
-  return mockStore.find((acc) => acc.id === id) || null;
+  if (!id) return null;
+  const normId = normalizeMockUserId(id);
+  const cleanId = id.trim().toLowerCase();
+  return (
+    mockStore.find(
+      (acc) =>
+        acc.id === normId ||
+        acc.id.toLowerCase() === cleanId ||
+        acc.poraplanId.toLowerCase() === cleanId
+    ) || null
+  );
 }
 
 /**

@@ -154,6 +154,7 @@ async function runMilestone12_3Verification() {
   // 9. Admin Overview Metrics Calculation (C1)
   console.log('--- Check 9: Admin Overview Metrics Calculation ---');
   const adminRes = await generateAdminAcademicIntelligence('monthly', undefined, undefined, {
+    requestingUserId: 'mock-admin-ppa001',
     requestingUserRole: 'admin',
   });
   const adminReport = adminRes.report;
@@ -258,16 +259,33 @@ async function runMilestone12_3Verification() {
   // 16. Admin Authorization Enforcement
   console.log('--- Check 16: Admin Authorization Enforcement ---');
   const unauthorizedStudentRes = await generateAdminAcademicIntelligence('monthly', undefined, undefined, {
+    requestingUserId: 'mock-student-pp001',
     requestingUserRole: 'student',
   });
   const unauthorizedMentorRes = await generateAdminAcademicIntelligence('monthly', undefined, undefined, {
+    requestingUserId: 'mock-mentor-ppm001',
     requestingUserRole: 'mentor',
   });
+  const missingOptionsRes = await generateAdminAcademicIntelligence('monthly');
+  const forgedRoleRes = await generateAdminAcademicIntelligence('monthly', undefined, undefined, {
+    requestingUserId: 'mock-student-pp001',
+    requestingUserRole: 'admin',
+  });
+  const missingSessionRes = await generateAdminAcademicIntelligence('monthly', undefined, undefined, {
+    requestingUserRole: 'admin',
+  });
+
   assert(
     unauthorizedStudentRes.report === null &&
       unauthorizedStudentRes.error !== null &&
       unauthorizedMentorRes.report === null &&
-      unauthorizedMentorRes.error !== null,
+      unauthorizedMentorRes.error !== null &&
+      missingOptionsRes.report === null &&
+      missingOptionsRes.error !== null &&
+      forgedRoleRes.report === null &&
+      forgedRoleRes.error !== null &&
+      missingSessionRes.report === null &&
+      missingSessionRes.error !== null,
     '16. Non-admin roles (student, mentor) are strictly blocked from admin academic intelligence'
   );
 
