@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { updateProfile, uploadAvatar } from '../../lib/profiles';
+import {
+  getEnrollments,
+  getEnrollmentStatusBadgeVariant,
+} from '../../lib/applications';
+import type { ProgramEnrollmentWithMeta } from '../../types/database';
 import { Badge, type BadgeVariant } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import {
@@ -17,7 +22,34 @@ import {
   Edit3,
   Info,
   Loader2,
+  Layers,
+  Calendar,
 } from 'lucide-react';
+
+const getCategoryBadgeVariant = (category?: string): BadgeVariant => {
+  if (category === 'skillsprint') return 'gold';
+  return 'navy';
+};
+
+const getCategoryLabel = (category?: string): string => {
+  if (category === 'skillsprint') return 'Upskilling Program';
+  return 'Academic Program';
+};
+
+const getStatusLabel = (status: string): string => {
+  switch (status) {
+    case 'active':
+      return 'Active';
+    case 'on_hold':
+      return 'On Hold';
+    case 'completed':
+      return 'Completed';
+    case 'withdrawn':
+      return 'Withdrawn';
+    default:
+      return status;
+  }
+};
 
 export const ProfilePage: React.FC = () => {
   const { user, profile, role, poraplanId, refreshProfile, connectEmail } = useAuth();
@@ -28,6 +60,10 @@ export const ProfilePage: React.FC = () => {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Student program enrollments state
+  const [enrollments, setEnrollments] = useState<ProgramEnrollmentWithMeta[]>([]);
+  const [loadingEnrollments, setLoadingEnrollments] = useState(false);
 
   // Email connection banner state
   const [emailToLink, setEmailToLink] = useState('');
@@ -80,6 +116,37 @@ export const ProfilePage: React.FC = () => {
   const isStudent = role === 'student';
   const isMentor = role === 'mentor';
   const isAdmin = role === 'admin';
+
+  // Fetch student enrollments when in student role
+  useEffect(() => {
+    let isMounted = true;
+    if (isStudent && userId) {
+      setLoadingEnrollments(true);
+      getEnrollments({ studentId: userId })
+        .then(({ enrollments: data, error }) => {
+          if (!isMounted) return;
+          if (!error && data) {
+            setEnrollments(data);
+          }
+        })
+        .catch(() => {
+          // Gracefully continue with empty list
+        })
+        .finally(() => {
+          if (isMounted) setLoadingEnrollments(false);
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [isStudent, userId]);
+
+  const activeEnrollments = enrollments.filter(
+    (e) => e.status === 'active' || e.status === 'on_hold'
+  );
+  const historicalEnrollments = enrollments.filter(
+    (e) => e.status === 'completed' || e.status === 'withdrawn'
+  );
 
   const roleLabel = isStudent ? 'Student' : isMentor ? 'Mentor' : isAdmin ? 'Administrator' : 'Scholar';
   const roleBadgeVariant: BadgeVariant = isStudent ? 'teal' : isMentor ? 'gold' : 'navy';
@@ -429,6 +496,195 @@ export const ProfilePage: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Section: PoraPlan Program & Cohort Enrollments (Student Only) */}
+            {isStudent && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-brand-gold stroke-[2.5]" />
+                    <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider">
+                      Enrolled Programs & Cohorts
+                    </h3>
+                  </div>
+                  {enrollments.length > 0 && (
+                    <span className="font-mono text-xs text-brand-muted">
+                      {activeEnrollments.length} Active{historicalEnrollments.length > 0 ? ` • ${historicalEnrollments.length} Historical` : ''}
+                    </span>
+                  )}
+                </div>
+
+                {loadingEnrollments ? (
+                  <div className="p-4 border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-center gap-2 font-mono text-xs text-brand-muted shadow-brutal-xs">
+                    <Loader2 className="w-4 h-4 animate-spin text-brand-teal" />
+                    <span>Loading enrollment records...</span>
+                  </div>
+                ) : enrollments.length === 0 ? (
+                  <div className="p-4 border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center space-y-1">
+                    <p className="font-sans font-semibold text-xs sm:text-sm text-brand-dark">
+                      No active or historical program enrollments recorded.
+                    </p>
+                    <p className="font-sans text-xs text-brand-muted">
+                      Your programs and assigned cohorts will appear here once an application is accepted or an administrator directly enrolls you.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Current / Active Enrollments */}
+                    {activeEnrollments.length > 0 && (
+                      <div className="space-y-2.5">
+                        <span className="font-mono text-[10px] uppercase tracking-wider font-bold text-brand-teal block">
+                          Current Enrollment{activeEnrollments.length > 1 ? 's' : ''}
+                        </span>
+                        <div className="grid grid-cols-1 gap-3">
+                          {activeEnrollments.map((enr) => (
+                            <div
+                              key={enr.id}
+                              className="p-4 border-2 border-brand-dark bg-brand-paper-tint space-y-3 shadow-brutal-xs"
+                            >
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-brand-dark/20 pb-2.5">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Badge variant={getCategoryBadgeVariant(enr.program?.category)} size="sm">
+                                    {getCategoryLabel(enr.program?.category)}
+                                  </Badge>
+                                  <Badge
+                                    variant={getEnrollmentStatusBadgeVariant(enr.status)}
+                                    size="sm"
+                                    className="font-bold uppercase tracking-wider"
+                                  >
+                                    {getStatusLabel(enr.status)}
+                                  </Badge>
+                                </div>
+                                {enr.enrolled_at && (
+                                  <span className="font-mono text-xs text-brand-muted flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5 text-brand-teal" />
+                                    Enrolled {new Date(enr.enrolled_at).toLocaleDateString(undefined, {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                    })}
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="space-y-1">
+                                <h4 className="font-heading font-extrabold text-base text-brand-navy">
+                                  {enr.program?.name || 'Academic Mentorship Program'}
+                                </h4>
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-brand-dark">
+                                  {enr.cohort?.name && (
+                                    <span className="flex items-center gap-1">
+                                      <span className="text-brand-muted">Cohort / Batch:</span>
+                                      <span className="font-bold">{enr.cohort.name}</span>
+                                      {enr.cohort.code && (
+                                        <span className="text-brand-muted">({enr.cohort.code})</span>
+                                      )}
+                                    </span>
+                                  )}
+                                  {enr.cohort?.start_date && (
+                                    <span className="text-brand-muted">
+                                      Term:{' '}
+                                      <span className="text-brand-dark font-medium">
+                                        {new Date(enr.cohort.start_date).toLocaleDateString(undefined, {
+                                          month: 'short',
+                                          year: 'numeric',
+                                        })}
+                                        {enr.cohort.end_date
+                                          ? ` – ${new Date(enr.cohort.end_date).toLocaleDateString(undefined, {
+                                              month: 'short',
+                                              year: 'numeric',
+                                            })}`
+                                          : ''}
+                                      </span>
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Past / Completed Enrollments */}
+                    {historicalEnrollments.length > 0 && (
+                      <div className="space-y-2.5">
+                        <span className="font-mono text-[10px] uppercase tracking-wider font-bold text-brand-muted block">
+                          Past / Completed Enrollment{historicalEnrollments.length > 1 ? 's' : ''}
+                        </span>
+                        <div className="grid grid-cols-1 gap-3">
+                          {historicalEnrollments.map((enr) => (
+                            <div
+                              key={enr.id}
+                              className="p-4 border-2 border-brand-dark/50 bg-brand-paper-tint/60 space-y-3 shadow-brutal-xs"
+                            >
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-brand-dark/20 pb-2.5">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Badge variant="paper" size="sm">
+                                    {getCategoryLabel(enr.program?.category)}
+                                  </Badge>
+                                  <Badge
+                                    variant={getEnrollmentStatusBadgeVariant(enr.status)}
+                                    size="sm"
+                                    className="font-bold uppercase tracking-wider"
+                                  >
+                                    {getStatusLabel(enr.status)}
+                                  </Badge>
+                                </div>
+                                {enr.enrolled_at && (
+                                  <span className="font-mono text-xs text-brand-muted flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5 text-brand-muted" />
+                                    Enrolled {new Date(enr.enrolled_at).toLocaleDateString(undefined, {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                    })}
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="space-y-1">
+                                <h4 className="font-heading font-extrabold text-base text-brand-navy">
+                                  {enr.program?.name || 'Academic Mentorship Program'}
+                                </h4>
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-brand-dark">
+                                  {enr.cohort?.name && (
+                                    <span className="flex items-center gap-1">
+                                      <span className="text-brand-muted">Cohort:</span>
+                                      <span className="font-bold">{enr.cohort.name}</span>
+                                      {enr.cohort.code && (
+                                        <span className="text-brand-muted">({enr.cohort.code})</span>
+                                      )}
+                                    </span>
+                                  )}
+                                  {enr.cohort?.start_date && (
+                                    <span className="text-brand-muted">
+                                      Term:{' '}
+                                      <span className="text-brand-dark font-medium">
+                                        {new Date(enr.cohort.start_date).toLocaleDateString(undefined, {
+                                          month: 'short',
+                                          year: 'numeric',
+                                        })}
+                                        {enr.cohort.end_date
+                                          ? ` – ${new Date(enr.cohort.end_date).toLocaleDateString(undefined, {
+                                              month: 'short',
+                                              year: 'numeric',
+                                            })}`
+                                          : ''}
+                                      </span>
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Section: Academic Biography / Study Philosophy */}
             <div>
