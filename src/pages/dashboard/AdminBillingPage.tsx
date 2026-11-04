@@ -23,6 +23,10 @@ import {
   diffInDays,
   isValidCalendarDate,
   toBangladeshDateStr,
+  isUpcomingReminderDue,
+  isCycleOverdue,
+  getDaysInMonth,
+  parseCalendarDate,
 } from '../../lib/billingCycles';
 import { getAdminUsers } from '../../lib/profiles';
 import { getEnrollments } from '../../lib/applications';
@@ -51,18 +55,28 @@ import {
   Clock,
   Layers,
   AlertTriangle,
-  Calendar,
+  Calendar as CalendarIcon,
   User,
   Plus,
   Edit2,
   Trash2,
-  MessageSquare,
   History,
   Search,
   X,
   GraduationCap,
   Check,
+  ChevronRight,
+  ChevronLeft,
+  Eye,
+  ShieldCheck,
+  ArrowRight,
+  Lock,
+  Hash,
 } from 'lucide-react';
+
+// ==============================================================================
+// HELPER FORMATTERS
+// ==============================================================================
 
 function formatBillingMonth(monthStr: string): string {
   if (!monthStr) return 'Not recorded';
@@ -102,15 +116,15 @@ function formatPaymentMethod(method?: string | null): string {
 function getStudentStatusBadge(status: StudentPaymentStatus) {
   switch (status) {
     case 'paid':
-      return <Badge variant="teal" size="sm" className="gap-1"><CheckCircle2 className="w-3 h-3" />Paid</Badge>;
+      return <Badge variant="teal" size="sm" className="gap-1 font-bold"><CheckCircle2 className="w-3 h-3" />Paid</Badge>;
     case 'pending':
-      return <Badge variant="gold" size="sm" className="gap-1"><Clock className="w-3 h-3" />Pending</Badge>;
+      return <Badge variant="gold" size="sm" className="gap-1 font-bold"><Clock className="w-3 h-3" />Pending</Badge>;
     case 'partial':
-      return <Badge variant="paper" size="sm" className="gap-1"><Layers className="w-3 h-3" />Partial</Badge>;
+      return <Badge variant="paper" size="sm" className="gap-1 font-bold"><Layers className="w-3 h-3" />Partial</Badge>;
     case 'overdue':
-      return <Badge variant="danger" size="sm" className="gap-1"><AlertTriangle className="w-3 h-3" />Overdue</Badge>;
+      return <Badge variant="danger" size="sm" className="gap-1 font-bold"><AlertTriangle className="w-3 h-3" />Overdue</Badge>;
     case 'waived':
-      return <Badge variant="muted" size="sm" className="gap-1"><Check className="w-3 h-3" />Waived</Badge>;
+      return <Badge variant="muted" size="sm" className="gap-1 font-bold"><Check className="w-3 h-3" />Waived</Badge>;
     default:
       return <Badge variant="paper" size="sm">{status}</Badge>;
   }
@@ -119,17 +133,21 @@ function getStudentStatusBadge(status: StudentPaymentStatus) {
 function getMentorStatusBadge(status: MentorPaymentStatus) {
   switch (status) {
     case 'paid':
-      return <Badge variant="teal" size="sm" className="gap-1"><CheckCircle2 className="w-3 h-3" />Paid</Badge>;
+      return <Badge variant="teal" size="sm" className="gap-1 font-bold"><CheckCircle2 className="w-3 h-3" />Paid</Badge>;
     case 'pending':
-      return <Badge variant="gold" size="sm" className="gap-1"><Clock className="w-3 h-3" />Pending</Badge>;
+      return <Badge variant="gold" size="sm" className="gap-1 font-bold"><Clock className="w-3 h-3" />Pending</Badge>;
     case 'partial':
-      return <Badge variant="paper" size="sm" className="gap-1"><Layers className="w-3 h-3" />Partial</Badge>;
+      return <Badge variant="paper" size="sm" className="gap-1 font-bold"><Layers className="w-3 h-3" />Partial</Badge>;
     default:
       return <Badge variant="paper" size="sm">{status}</Badge>;
   }
 }
 
-type DeskTab = 'overview' | 'student_payments' | 'mentor_payouts' | 'audit_notes';
+type DeskTab = 'overview' | 'student_payments' | 'mentor_payouts' | 'calendar' | 'audit_notes';
+
+// ==============================================================================
+// MAIN COMPONENT: ADMIN BILLING OPERATIONS DESK
+// ==============================================================================
 
 export const AdminBillingPage: React.FC = () => {
   const { role } = useAuth();
@@ -153,8 +171,20 @@ export const AdminBillingPage: React.FC = () => {
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [studentStatusFilter, setStudentStatusFilter] = useState<'all' | StudentPaymentStatus>('all');
+  const [studentProgramFilter, setStudentProgramFilter] = useState<string>('all');
+  const [studentDueFilter, setStudentDueFilter] = useState<'all' | 'overdue' | 'reminder_due' | 'due_this_month'>('all');
+  const [studentMethodFilter, setStudentMethodFilter] = useState<string>('all');
+
+  const [mentorSearchQuery, setMentorSearchQuery] = useState('');
   const [mentorStatusFilter, setMentorStatusFilter] = useState<'all' | MentorPaymentStatus>('all');
-  const [programFilter, setProgramFilter] = useState<string>('all');
+  const [mentorMethodFilter, setMentorMethodFilter] = useState<string>('all');
+
+  // Activity Log Filter
+  const [activityTypeFilter, setActivityTypeFilter] = useState<'all' | 'overrides' | 'waivers'>('all');
+
+  // Dedicated Record Details Drawers State
+  const [selectedStudentRecordForDrawer, setSelectedStudentRecordForDrawer] = useState<StudentPaymentRecord | null>(null);
+  const [selectedMentorRecordForDrawer, setSelectedMentorRecordForDrawer] = useState<MentorPaymentRecord | null>(null);
 
   // Modals State
   const [isCreateStudentModalOpen, setIsCreateStudentModalOpen] = useState(false);
@@ -181,6 +211,12 @@ export const AdminBillingPage: React.FC = () => {
   const [newAnchorDate, setNewAnchorDate] = useState('');
   const [anchorOverrideReason, setAnchorOverrideReason] = useState('');
   const [isOverridingAnchor, setIsOverridingAnchor] = useState(false);
+
+  // Calendar View State
+  const todayBD = useMemo(() => toBangladeshDateStr(), []);
+  const [calendarYear, setCalendarYear] = useState(() => parseCalendarDate(todayBD).year);
+  const [calendarMonth, setCalendarMonth] = useState(() => parseCalendarDate(todayBD).month);
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string>(todayBD);
 
   // Load all desk data
   const loadDeskData = useCallback(async () => {
@@ -217,12 +253,22 @@ export const AdminBillingPage: React.FC = () => {
       setEnrollments(enrollmentsRes.enrollments || []);
       setPrograms(programsRes.programs || []);
       setAuditLogs(auditLogsRes.logs || []);
+
+      // If drawer is open, keep drawer record synced
+      if (selectedStudentRecordForDrawer) {
+        const updated = studentRecsRes.records.find((r) => r.id === selectedStudentRecordForDrawer.id);
+        if (updated) setSelectedStudentRecordForDrawer(updated);
+      }
+      if (selectedMentorRecordForDrawer) {
+        const updated = mentorRecsRes.records.find((r) => r.id === selectedMentorRecordForDrawer.id);
+        if (updated) setSelectedMentorRecordForDrawer(updated);
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load billing operations data.');
     } finally {
       setLoading(false);
     }
-  }, [isAdmin]);
+  }, [isAdmin, selectedStudentRecordForDrawer, selectedMentorRecordForDrawer]);
 
   useEffect(() => {
     loadDeskData();
@@ -261,7 +307,7 @@ export const AdminBillingPage: React.FC = () => {
         map.set(r.transaction_reference.trim().toLowerCase(), {
           type: 'Student Payment',
           id: r.id,
-          date: r.cycle_start_date,
+          date: r.payment_date ? formatCalendarDate(r.payment_date) : formatCalendarDate(r.cycle_start_date),
         });
       }
     });
@@ -270,103 +316,198 @@ export const AdminBillingPage: React.FC = () => {
         map.set(r.transaction_reference.trim().toLowerCase(), {
           type: 'Mentor Payout',
           id: r.id,
-          date: r.billing_month,
+          date: r.payout_date ? formatCalendarDate(r.payout_date) : formatBillingMonth(r.billing_month),
         });
       }
     });
     return map;
   }, [studentRecords, mentorRecords]);
 
-  // Status Summary Counts (Strictly Record Counts, Absolutely NO Amounts)
-  const summaryCounts = useMemo(() => {
-    return {
-      totalStudent: studentRecords.length,
-      studentPending: studentRecords.filter((r) => r.status === 'pending').length,
-      studentPartial: studentRecords.filter((r) => r.status === 'partial').length,
-      studentPaid: studentRecords.filter((r) => r.status === 'paid').length,
-      studentOverdue: studentRecords.filter((r) => r.status === 'overdue').length,
-      studentWaived: studentRecords.filter((r) => r.status === 'waived').length,
-      totalMentor: mentorRecords.length,
-      mentorPending: mentorRecords.filter((r) => r.status === 'pending').length,
-      mentorPartial: mentorRecords.filter((r) => r.status === 'partial').length,
-      mentorPaid: mentorRecords.filter((r) => r.status === 'paid').length,
-    };
+  // Duplicate Reference Count Map
+  const duplicateReferenceCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    studentRecords.forEach((r) => {
+      if (r.transaction_reference && r.transaction_reference.trim()) {
+        const key = r.transaction_reference.trim().toUpperCase();
+        counts.set(key, (counts.get(key) || 0) + 1);
+      }
+    });
+    mentorRecords.forEach((r) => {
+      if (r.transaction_reference && r.transaction_reference.trim()) {
+        const key = r.transaction_reference.trim().toUpperCase();
+        counts.set(key, (counts.get(key) || 0) + 1);
+      }
+    });
+    return counts;
   }, [studentRecords, mentorRecords]);
 
-  // Filtered Student Payment Records
+  const duplicateReferencesList = useMemo(() => {
+    const duplicates: { ref: string; count: number }[] = [];
+    duplicateReferenceCounts.forEach((count, ref) => {
+      if (count > 1) {
+        duplicates.push({ ref, count });
+      }
+    });
+    return duplicates;
+  }, [duplicateReferenceCounts]);
+
+  // Metrics Calculation
+  const metrics = useMemo(() => {
+    const today = toBangladeshDateStr();
+
+    let studentPending = 0;
+    let studentPaid = 0;
+    let studentOverdue = 0;
+    let studentWaived = 0;
+    let studentPartial = 0;
+
+    studentRecords.forEach((r) => {
+      if (r.status === 'paid') studentPaid++;
+      else if (r.status === 'pending') studentPending++;
+      else if (r.status === 'overdue') studentOverdue++;
+      else if (r.status === 'waived') studentWaived++;
+      else if (r.status === 'partial') studentPartial++;
+    });
+
+    let mentorPending = 0;
+    let mentorPaid = 0;
+    let mentorPartial = 0;
+
+    mentorRecords.forEach((r) => {
+      if (r.status === 'paid') mentorPaid++;
+      else if (r.status === 'pending') mentorPending++;
+      else if (r.status === 'partial') mentorPartial++;
+    });
+
+    const activeEnrollments = enrollments.filter((e) => e.status === 'active');
+
+    // Upcoming renewals within 14 days
+    const upcomingRenewals: {
+      enrollment: ProgramEnrollmentWithMeta;
+      student: Profile | null;
+      program: Program | null;
+      cycleStartDate: string;
+      cycleEndDate: string;
+      nextDueDate: string;
+      daysUntilDue: number;
+      isReminderDue: boolean;
+    }[] = [];
+
+    activeEnrollments.forEach((e) => {
+      const anchorDate = e.billing_start_date || (e.enrolled_at ? e.enrolled_at.substring(0, 10) : today);
+      const activePeriod = findCycleForReferenceDate(anchorDate, today);
+      const daysUntilDue = diffInDays(today, activePeriod.nextDueDate);
+
+      if (daysUntilDue >= 0 && daysUntilDue <= 14) {
+        upcomingRenewals.push({
+          enrollment: e,
+          student: studentsMap.get(e.student_id) || null,
+          program: programsMap.get(e.program_id) || null,
+          cycleStartDate: activePeriod.cycleStartDate,
+          cycleEndDate: activePeriod.cycleEndDate,
+          nextDueDate: activePeriod.nextDueDate,
+          daysUntilDue,
+          isReminderDue: isUpcomingReminderDue(activePeriod.nextDueDate, today),
+        });
+      }
+    });
+
+    upcomingRenewals.sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+
+    const needsAttentionCount = studentOverdue + studentPending + duplicateReferencesList.length;
+
+    return {
+      studentPending,
+      studentPaid,
+      studentOverdue,
+      studentWaived,
+      studentPartial,
+      mentorPending,
+      mentorPaid,
+      mentorPartial,
+      totalStudentRecords: studentRecords.length,
+      totalMentorRecords: mentorRecords.length,
+      activeEnrollmentsCount: activeEnrollments.length,
+      upcomingRenewals,
+      needsAttentionCount,
+    };
+  }, [studentRecords, mentorRecords, enrollments, studentsMap, programsMap, duplicateReferencesList]);
+
+  // Filtered Student Records
   const filteredStudentRecords = useMemo(() => {
-    return studentRecords.filter((rec) => {
-      if (studentStatusFilter !== 'all' && rec.status !== studentStatusFilter) {
-        return false;
-      }
-      const student = studentsMap.get(rec.student_id);
-      const enrollment = enrollmentsMap.get(rec.enrollment_id);
+    const today = toBangladeshDateStr();
 
-      if (programFilter !== 'all' && enrollment?.program_id !== programFilter) {
-        return false;
-      }
+    return studentRecords.filter((r) => {
+      const student = studentsMap.get(r.student_id);
+      const enrollment = enrollmentsMap.get(r.enrollment_id);
 
+      // Search query
       if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const studentName = student?.full_name?.toLowerCase() || '';
-        const poraplanId = student?.poraplan_id?.toLowerCase() || '';
-        const ref = rec.transaction_reference?.toLowerCase() || '';
-        if (!studentName.includes(query) && !poraplanId.includes(query) && !ref.includes(query)) {
-          return false;
-        }
+        const q = searchQuery.toLowerCase();
+        const nameMatch = student?.full_name?.toLowerCase().includes(q);
+        const emailMatch = student?.email?.toLowerCase().includes(q);
+        const idMatch = student?.poraplan_id?.toLowerCase().includes(q);
+        const refMatch = r.transaction_reference?.toLowerCase().includes(q);
+        if (!nameMatch && !emailMatch && !idMatch && !refMatch) return false;
+      }
+
+      // Status filter
+      if (studentStatusFilter !== 'all' && r.status !== studentStatusFilter) {
+        return false;
+      }
+
+      // Program filter
+      if (studentProgramFilter !== 'all' && enrollment?.program_id !== studentProgramFilter) {
+        return false;
+      }
+
+      // Payment Method filter
+      if (studentMethodFilter !== 'all' && r.payment_method !== studentMethodFilter) {
+        return false;
+      }
+
+      // Due date filter
+      if (studentDueFilter === 'overdue') {
+        if (!isCycleOverdue(r.next_due_date, today)) return false;
+      } else if (studentDueFilter === 'reminder_due') {
+        if (!isUpcomingReminderDue(r.next_due_date, today)) return false;
+      } else if (studentDueFilter === 'due_this_month') {
+        const currentYearMonth = today.substring(0, 7);
+        if (!r.next_due_date.startsWith(currentYearMonth)) return false;
       }
 
       return true;
     });
-  }, [studentRecords, studentStatusFilter, programFilter, searchQuery, studentsMap, enrollmentsMap]);
+  }, [studentRecords, searchQuery, studentStatusFilter, studentProgramFilter, studentMethodFilter, studentDueFilter, studentsMap, enrollmentsMap]);
 
-  // Filtered Mentor Payout Records
+  // Filtered Mentor Records
   const filteredMentorRecords = useMemo(() => {
-    return mentorRecords.filter((rec) => {
-      if (mentorStatusFilter !== 'all' && rec.status !== mentorStatusFilter) {
+    return mentorRecords.filter((r) => {
+      const mentor = mentorsMap.get(r.mentor_id);
+
+      // Search query
+      if (mentorSearchQuery.trim()) {
+        const q = mentorSearchQuery.toLowerCase();
+        const nameMatch = mentor?.full_name?.toLowerCase().includes(q);
+        const emailMatch = mentor?.email?.toLowerCase().includes(q);
+        const refMatch = r.transaction_reference?.toLowerCase().includes(q);
+        const monthMatch = r.billing_month.toLowerCase().includes(q);
+        if (!nameMatch && !emailMatch && !refMatch && !monthMatch) return false;
+      }
+
+      // Status filter
+      if (mentorStatusFilter !== 'all' && r.status !== mentorStatusFilter) {
         return false;
       }
-      const mentor = mentorsMap.get(rec.mentor_id);
 
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const mentorName = mentor?.full_name?.toLowerCase() || '';
-        const poraplanId = mentor?.poraplan_id?.toLowerCase() || '';
-        const ref = rec.transaction_reference?.toLowerCase() || '';
-        const month = rec.billing_month.toLowerCase();
-        if (!mentorName.includes(query) && !poraplanId.includes(query) && !ref.includes(query) && !month.includes(query)) {
-          return false;
-        }
+      // Method filter
+      if (mentorMethodFilter !== 'all' && r.payment_method !== mentorMethodFilter) {
+        return false;
       }
 
       return true;
     });
-  }, [mentorRecords, mentorStatusFilter, searchQuery, mentorsMap]);
-
-  // Upcoming Student Billing Renewals based on billing_start_date anchor
-  const upcomingStudentRenewals = useMemo(() => {
-    const todayStr = toBangladeshDateStr();
-    return enrollments
-      .filter((e) => e.status === 'active' && e.billing_start_date)
-      .map((e) => {
-        const cycle = findCycleForReferenceDate(e.billing_start_date!, todayStr);
-        const daysRemaining = diffInDays(todayStr, cycle.nextDueDate);
-        const student = studentsMap.get(e.student_id);
-        const program = programsMap.get(e.program_id);
-        return {
-          enrollmentId: e.id,
-          studentName: student?.full_name || 'Scholar',
-          poraplanId: student?.poraplan_id || '',
-          programName: program?.name || 'Academic Program',
-          cycleStartDate: cycle.cycleStartDate,
-          cycleEndDate: cycle.cycleEndDate,
-          nextDueDate: cycle.nextDueDate,
-          daysRemaining,
-        };
-      })
-      .sort((a, b) => a.daysRemaining - b.daysRemaining)
-      .slice(0, 5);
-  }, [enrollments, studentsMap, programsMap]);
+  }, [mentorRecords, mentorSearchQuery, mentorStatusFilter, mentorMethodFilter, mentorsMap]);
 
   // Event Modal Handlers
   const openEventsModal = async (type: 'student' | 'mentor', id: string, title: string) => {
@@ -388,7 +529,6 @@ export const AdminBillingPage: React.FC = () => {
     setActiveNoteTarget({ recordType, id, title });
     setIsNotesModalOpen(true);
     setNotesLoading(true);
-    setNewNoteText('');
     try {
       const res = await getPaymentAdminNotes(recordType, id);
       setActiveNotes(res.notes);
@@ -399,7 +539,8 @@ export const AdminBillingPage: React.FC = () => {
     }
   };
 
-  const handleAddAdminNote = async () => {
+  const handleAddNote = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!activeNoteTarget || !newNoteText.trim()) return;
     try {
       const res = await createPaymentAdminNote({
@@ -415,21 +556,27 @@ export const AdminBillingPage: React.FC = () => {
         setTimeout(() => setActionSuccess(null), 3000);
       }
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to save admin note.');
+      alert(err instanceof Error ? err.message : 'Failed to save note.');
     }
   };
 
-  // Billing Start Date Override Handlers
+  // Billing Anchor Modal Handlers
   const openBillingAnchorModal = (enrollment: ProgramEnrollmentWithMeta) => {
     setActiveAnchorEnrollment(enrollment);
-    setNewAnchorDate(enrollment.billing_start_date || toBangladeshDateStr());
+    setNewAnchorDate(enrollment.billing_start_date || (enrollment.enrolled_at ? enrollment.enrolled_at.substring(0, 10) : toBangladeshDateStr()));
     setAnchorOverrideReason('');
     setIsBillingAnchorModalOpen(true);
   };
 
-  const handleOverrideBillingAnchor = async () => {
-    if (!activeAnchorEnrollment || !newAnchorDate || !anchorOverrideReason.trim()) {
-      alert('Please provide a valid date and a mandatory reason for this billing anchor change.');
+  const handleSaveBillingAnchor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeAnchorEnrollment) return;
+    if (!isValidCalendarDate(newAnchorDate)) {
+      alert('Please enter a valid date in YYYY-MM-DD format.');
+      return;
+    }
+    if (!anchorOverrideReason.trim()) {
+      alert('A detailed operational reason is required to adjust billing start date.');
       return;
     }
 
@@ -440,10 +587,9 @@ export const AdminBillingPage: React.FC = () => {
         newBillingStartDate: newAnchorDate,
         reason: anchorOverrideReason.trim(),
       });
-
       if (res.error) throw res.error;
 
-      setActionSuccess(`Billing anchor updated for enrollment. Historical payment records remain preserved.`);
+      setActionSuccess('Billing start date updated and audit log recorded.');
       setIsBillingAnchorModalOpen(false);
       loadDeskData();
       setTimeout(() => setActionSuccess(null), 4000);
@@ -454,15 +600,18 @@ export const AdminBillingPage: React.FC = () => {
     }
   };
 
-  // Soft Delete Handlers
-  const handleDeleteStudentPayment = async (id: string) => {
-    if (!confirm('Are you sure you want to soft-delete this student payment record? It will be hidden from standard views.')) {
+  // Soft-Delete Handlers
+  const handleSoftDeleteStudent = async (id: string) => {
+    if (!confirm('Are you sure you want to soft-delete this student payment record? It will be removed from all active student views and desk summaries.')) {
       return;
     }
     try {
       const res = await softDeleteStudentPaymentRecord(id);
       if (res.error) throw res.error;
       setActionSuccess('Student payment record soft-deleted successfully.');
+      if (selectedStudentRecordForDrawer?.id === id) {
+        setSelectedStudentRecordForDrawer(null);
+      }
       loadDeskData();
       setTimeout(() => setActionSuccess(null), 3000);
     } catch (err: unknown) {
@@ -470,61 +619,162 @@ export const AdminBillingPage: React.FC = () => {
     }
   };
 
-  const handleDeleteMentorPayout = async (id: string) => {
-    if (!confirm('Are you sure you want to soft-delete this mentor payout record?')) {
+  const handleSoftDeleteMentor = async (id: string) => {
+    if (!confirm('Are you sure you want to soft-delete this mentor payout record? It will be removed from active payout summaries.')) {
       return;
     }
     try {
       const res = await softDeleteMentorPaymentRecord(id);
       if (res.error) throw res.error;
       setActionSuccess('Mentor payout record soft-deleted successfully.');
+      if (selectedMentorRecordForDrawer?.id === id) {
+        setSelectedMentorRecordForDrawer(null);
+      }
       loadDeskData();
       setTimeout(() => setActionSuccess(null), 3000);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to delete payout record.');
+      alert(err instanceof Error ? err.message : 'Failed to delete record.');
     }
   };
 
+  // Calendar Helpers
+  const daysInMonth = useMemo(() => {
+    return getDaysInMonth(calendarYear, calendarMonth);
+  }, [calendarYear, calendarMonth]);
+
+  const monthFirstDayWeekday = useMemo(() => {
+    // 0 = Sun, 1 = Mon, ..., 6 = Sat
+    const d = new Date(Date.UTC(calendarYear, calendarMonth - 1, 1));
+    return d.getUTCDay();
+  }, [calendarYear, calendarMonth]);
+
+  const calendarEventsByDay = useMemo(() => {
+    const map = new Map<string, { renewals: ProgramEnrollmentWithMeta[]; records: StudentPaymentRecord[] }>();
+    const monthPrefix = `${calendarYear}-${String(calendarMonth).padStart(2, '0')}`;
+
+    // Map existing student payment records
+    studentRecords.forEach((rec) => {
+      if (rec.next_due_date.startsWith(monthPrefix)) {
+        const list = map.get(rec.next_due_date) || { renewals: [], records: [] };
+        list.records.push(rec);
+        map.set(rec.next_due_date, list);
+      }
+    });
+
+    // Map scheduled renewals for active enrollments
+    enrollments.filter((e) => e.status === 'active').forEach((enr) => {
+      const anchor = enr.billing_start_date || (enr.enrolled_at ? enr.enrolled_at.substring(0, 10) : todayBD);
+      // Scan cycles in current calendar window
+      for (let k = 0; k < 24; k++) {
+        const period = computeBillingPeriod(anchor, k);
+        if (period.nextDueDate.startsWith(monthPrefix)) {
+          const list = map.get(period.nextDueDate) || { renewals: [], records: [] };
+          if (!list.renewals.some((r) => r.id === enr.id)) {
+            list.renewals.push(enr);
+          }
+          map.set(period.nextDueDate, list);
+        }
+      }
+    });
+
+    return map;
+  }, [calendarYear, calendarMonth, studentRecords, enrollments, todayBD]);
+
+  const calendarMonthLabel = useMemo(() => {
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return `${monthNames[calendarMonth - 1]} ${calendarYear}`;
+  }, [calendarYear, calendarMonth]);
+
+  const handlePrevMonth = () => {
+    if (calendarMonth === 1) {
+      setCalendarMonth(12);
+      setCalendarYear((y) => y - 1);
+    } else {
+      setCalendarMonth((m) => m - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (calendarMonth === 12) {
+      setCalendarMonth(1);
+      setCalendarYear((y) => y + 1);
+    } else {
+      setCalendarMonth((m) => m + 1);
+    }
+  };
+
+  const handleTodayCalendar = () => {
+    const { year, month } = parseCalendarDate(todayBD);
+    setCalendarYear(year);
+    setCalendarMonth(month);
+    setSelectedCalendarDate(todayBD);
+  };
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Header Banner */}
-      <div className="bg-brand-navy text-brand-paper p-5 sm:p-6 border-2 border-brand-dark shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* ===================================================================== */}
+      {/* TOP DESK HEADER BAR                                                   */}
+      {/* ===================================================================== */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b-2 border-brand-dark">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-brand-gold text-brand-dark border-2 border-brand-dark shadow-brutal-xs">
+            <span className="p-1.5 bg-brand-navy text-white border-2 border-brand-dark shadow-brutal-xs inline-flex">
               <CreditCard className="w-5 h-5" />
-            </div>
-            <h1 className="text-xl sm:text-2xl font-heading font-extrabold tracking-tight text-brand-paper">
-              Billing Management
+            </span>
+            <h1 className="text-xl sm:text-2xl font-heading font-extrabold text-brand-navy tracking-tight">
+              Billing Operations Desk
             </h1>
+            <Badge variant="teal" size="sm" className="hidden sm:inline-flex">
+              Admin Ops
+            </Badge>
           </div>
-          <p className="text-xs sm:text-sm font-sans text-brand-paper/80">
-            Admin Operations Desk: Manage student payments, mentor payouts, billing anchors, and audit trails.
+          <p className="text-xs sm:text-sm font-sans text-brand-muted">
+            Institutional management for scholar payment cycles, mentor disbursements, and calendar anchors.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={loadDeskData}
-            disabled={loading}
             leftIcon={<RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />}
-            className="bg-brand-paper text-brand-dark"
+            disabled={loading}
           >
-            Refresh
+            Sync Data
+          </Button>
+
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setIsCreateStudentModalOpen(true)}
+            leftIcon={<Plus className="w-3.5 h-3.5" />}
+          >
+            Record Cycle
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsCreateMentorModalOpen(true)}
+            leftIcon={<Plus className="w-3.5 h-3.5" />}
+          >
+            Disburse Payout
           </Button>
         </div>
       </div>
 
-      {/* Success Notification */}
+      {/* Success Notification Alert */}
       {actionSuccess && (
-        <div className="p-3 bg-brand-teal/15 border-2 border-brand-dark text-brand-navy font-bold text-xs sm:text-sm flex items-center justify-between shadow-brutal-xs">
+        <div className="p-3 bg-teal-50 border-2 border-teal-600 shadow-brutal-xs flex items-center justify-between text-teal-900 text-xs font-bold font-sans">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-brand-teal shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-teal-600" />
             <span>{actionSuccess}</span>
           </div>
-          <button type="button" onClick={() => setActionSuccess(null)} className="hover:opacity-75">
+          <button type="button" onClick={() => setActionSuccess(null)} className="text-teal-700 hover:text-teal-900">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -532,143 +782,258 @@ export const AdminBillingPage: React.FC = () => {
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 bg-red-50 border-2 border-brand-dark shadow-brutal-sm flex items-start gap-3 text-red-900">
-          <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-          <div className="flex-1 text-sm font-sans">
-            <p className="font-bold">Error loading billing desk</p>
-            <p className="text-xs text-red-700 mt-0.5">{error}</p>
+        <div className="p-3 bg-red-50 border-2 border-brand-dark shadow-brutal-xs flex items-center justify-between text-red-900 text-xs font-bold font-sans">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            <span>{error}</span>
           </div>
-          <Button variant="outline" size="sm" onClick={loadDeskData} className="shrink-0">
+          <Button variant="outline" size="sm" onClick={loadDeskData}>
             Retry
           </Button>
         </div>
       )}
 
-      {/* Top Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 border-2 border-brand-dark bg-brand-paper p-1 shadow-brutal-xs">
+      {/* ===================================================================== */}
+      {/* 5-TAB WORKSPACE NAVIGATION                                            */}
+      {/* ===================================================================== */}
+      <div className="flex items-center gap-1.5 border-b-2 border-brand-dark overflow-x-auto pb-px">
         <button
           type="button"
           onClick={() => setActiveTab('overview')}
-          className={`px-3 sm:px-4 py-2 font-heading text-xs sm:text-sm font-bold uppercase transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider border-t-2 border-l-2 border-r-2 border-brand-dark transition-all flex items-center gap-2 shrink-0 ${
             activeTab === 'overview'
-              ? 'bg-brand-navy text-brand-paper border border-brand-dark shadow-brutal-xs'
-              : 'text-brand-dark hover:bg-brand-bg'
+              ? 'bg-brand-paper text-brand-navy shadow-brutal-xs translate-y-0.5'
+              : 'bg-brand-paper/50 text-brand-muted hover:bg-brand-paper hover:text-brand-dark'
           }`}
         >
-          <Layers className="w-4 h-4" />
-          Overview
+          <Layers className="w-4 h-4 text-brand-teal" />
+          <span>Overview</span>
+          {metrics.needsAttentionCount > 0 && (
+            <span className="px-1.5 py-0.2 bg-rose-500 text-white font-mono font-bold text-[10px] rounded-full">
+              {metrics.needsAttentionCount}
+            </span>
+          )}
         </button>
+
         <button
           type="button"
           onClick={() => setActiveTab('student_payments')}
-          className={`px-3 sm:px-4 py-2 font-heading text-xs sm:text-sm font-bold uppercase transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider border-t-2 border-l-2 border-r-2 border-brand-dark transition-all flex items-center gap-2 shrink-0 ${
             activeTab === 'student_payments'
-              ? 'bg-brand-navy text-brand-paper border border-brand-dark shadow-brutal-xs'
-              : 'text-brand-dark hover:bg-brand-bg'
+              ? 'bg-brand-paper text-brand-navy shadow-brutal-xs translate-y-0.5'
+              : 'bg-brand-paper/50 text-brand-muted hover:bg-brand-paper hover:text-brand-dark'
           }`}
         >
-          <GraduationCap className="w-4 h-4" />
-          Student Payments ({summaryCounts.totalStudent})
+          <GraduationCap className="w-4 h-4 text-brand-teal" />
+          <span>Student Payments</span>
+          <span className="font-mono text-xs text-brand-muted">({studentRecords.length})</span>
         </button>
+
         <button
           type="button"
           onClick={() => setActiveTab('mentor_payouts')}
-          className={`px-3 sm:px-4 py-2 font-heading text-xs sm:text-sm font-bold uppercase transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider border-t-2 border-l-2 border-r-2 border-brand-dark transition-all flex items-center gap-2 shrink-0 ${
             activeTab === 'mentor_payouts'
-              ? 'bg-brand-navy text-brand-paper border border-brand-dark shadow-brutal-xs'
-              : 'text-brand-dark hover:bg-brand-bg'
+              ? 'bg-brand-paper text-brand-navy shadow-brutal-xs translate-y-0.5'
+              : 'bg-brand-paper/50 text-brand-muted hover:bg-brand-paper hover:text-brand-dark'
           }`}
         >
-          <User className="w-4 h-4" />
-          Mentor Payouts ({summaryCounts.totalMentor})
+          <User className="w-4 h-4 text-brand-teal" />
+          <span>Mentor Payouts</span>
+          <span className="font-mono text-xs text-brand-muted">({mentorRecords.length})</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('calendar')}
+          className={`px-4 py-2 text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider border-t-2 border-l-2 border-r-2 border-brand-dark transition-all flex items-center gap-2 shrink-0 ${
+            activeTab === 'calendar'
+              ? 'bg-brand-paper text-brand-navy shadow-brutal-xs translate-y-0.5'
+              : 'bg-brand-paper/50 text-brand-muted hover:bg-brand-paper hover:text-brand-dark'
+          }`}
+        >
+          <CalendarIcon className="w-4 h-4 text-brand-teal" />
+          <span>Billing Calendar</span>
+        </button>
+
         <button
           type="button"
           onClick={() => setActiveTab('audit_notes')}
-          className={`px-3 sm:px-4 py-2 font-heading text-xs sm:text-sm font-bold uppercase transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider border-t-2 border-l-2 border-r-2 border-brand-dark transition-all flex items-center gap-2 shrink-0 ${
             activeTab === 'audit_notes'
-              ? 'bg-brand-navy text-brand-paper border border-brand-dark shadow-brutal-xs'
-              : 'text-brand-dark hover:bg-brand-bg'
+              ? 'bg-brand-paper text-brand-navy shadow-brutal-xs translate-y-0.5'
+              : 'bg-brand-paper/50 text-brand-muted hover:bg-brand-paper hover:text-brand-dark'
           }`}
         >
-          <History className="w-4 h-4" />
-          Audit & History ({auditLogs.length})
+          <History className="w-4 h-4 text-brand-teal" />
+          <span>Activity & Audit Log</span>
+          <span className="font-mono text-xs text-brand-muted">({auditLogs.length})</span>
         </button>
       </div>
 
-      {/* TAB 1: OVERVIEW */}
+      {/* ===================================================================== */}
+      {/* TAB 1: OPERATIONAL OVERVIEW & ATTENTION                                */}
+      {/* ===================================================================== */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Operational Count Summaries (STRICTLY Record Counts, Absolutely NO Amounts) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <div className="p-3 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs">
-              <span className="text-[10px] font-mono uppercase text-brand-muted block">Student Pending</span>
-              <span className="text-xl font-heading font-extrabold text-amber-600">{summaryCounts.studentPending}</span>
+          {/* Operations Metrics Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+            <div className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs">
+              <span className="font-mono text-[10px] uppercase text-brand-muted block">Needs Attention</span>
+              <div className="mt-1 flex items-baseline gap-1.5">
+                <span className={`text-2xl font-heading font-extrabold ${metrics.needsAttentionCount > 0 ? 'text-rose-600' : 'text-brand-navy'}`}>
+                  {metrics.needsAttentionCount}
+                </span>
+                <span className="text-[11px] font-mono text-brand-muted">items</span>
+              </div>
+              <span className="text-[10px] font-sans text-brand-muted mt-1 block">
+                {metrics.studentOverdue} overdue, {duplicateReferencesList.length} duplicate ref
+              </span>
             </div>
-            <div className="p-3 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs">
-              <span className="text-[10px] font-mono uppercase text-brand-muted block">Student Partial</span>
-              <span className="text-xl font-heading font-extrabold text-blue-600">{summaryCounts.studentPartial}</span>
+
+            <div className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs">
+              <span className="font-mono text-[10px] uppercase text-brand-muted block">Pending Cycles</span>
+              <div className="mt-1 flex items-baseline gap-1.5">
+                <span className="text-2xl font-heading font-extrabold text-amber-600">
+                  {metrics.studentPending}
+                </span>
+                <span className="text-[11px] font-mono text-brand-muted">records</span>
+              </div>
+              <span className="text-[10px] font-sans text-brand-muted mt-1 block">Awaiting confirmation</span>
             </div>
-            <div className="p-3 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs">
-              <span className="text-[10px] font-mono uppercase text-brand-muted block">Student Paid</span>
-              <span className="text-xl font-heading font-extrabold text-teal-600">{summaryCounts.studentPaid}</span>
+
+            <div className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs">
+              <span className="font-mono text-[10px] uppercase text-brand-muted block">Paid / Settled</span>
+              <div className="mt-1 flex items-baseline gap-1.5">
+                <span className="text-2xl font-heading font-extrabold text-teal-600">
+                  {metrics.studentPaid}
+                </span>
+                <span className="text-[11px] font-mono text-brand-muted">records</span>
+              </div>
+              <span className="text-[10px] font-sans text-brand-muted mt-1 block">Successfully verified</span>
             </div>
-            <div className="p-3 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs">
-              <span className="text-[10px] font-mono uppercase text-brand-muted block">Student Overdue</span>
-              <span className="text-xl font-heading font-extrabold text-red-600">{summaryCounts.studentOverdue}</span>
+
+            <div className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs">
+              <span className="font-mono text-[10px] uppercase text-brand-muted block">Mentor Payouts</span>
+              <div className="mt-1 flex items-baseline gap-1.5">
+                <span className="text-2xl font-heading font-extrabold text-brand-navy">
+                  {metrics.mentorPaid}/{metrics.totalMentorRecords}
+                </span>
+                <span className="text-[11px] font-mono text-brand-muted">settled</span>
+              </div>
+              <span className="text-[10px] font-sans text-brand-muted mt-1 block">{metrics.mentorPending} pending payout</span>
             </div>
-            <div className="p-3 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs">
-              <span className="text-[10px] font-mono uppercase text-brand-muted block">Mentor Pending</span>
-              <span className="text-xl font-heading font-extrabold text-amber-600">{summaryCounts.mentorPending}</span>
-            </div>
-            <div className="p-3 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs">
-              <span className="text-[10px] font-mono uppercase text-brand-muted block">Mentor Paid</span>
-              <span className="text-xl font-heading font-extrabold text-teal-600">{summaryCounts.mentorPaid}</span>
+
+            <div className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs col-span-2 sm:col-span-1">
+              <span className="font-mono text-[10px] uppercase text-brand-muted block">Active Scholars</span>
+              <div className="mt-1 flex items-baseline gap-1.5">
+                <span className="text-2xl font-heading font-extrabold text-brand-teal">
+                  {metrics.activeEnrollmentsCount}
+                </span>
+                <span className="text-[11px] font-mono text-brand-muted">enrolled</span>
+              </div>
+              <span className="text-[10px] font-sans text-brand-muted mt-1 block">Tracked across programs</span>
             </div>
           </div>
 
-          {/* Two-Column Grid: Upcoming Renewals & Operational Controls */}
+          {/* Needs Attention Panel (Duplicates & Overdue) */}
+          {duplicateReferencesList.length > 0 && (
+            <div className="p-4 bg-amber-50 border-2 border-amber-500 shadow-brutal-sm space-y-2">
+              <div className="flex items-center gap-2 text-amber-900 font-heading font-extrabold text-xs sm:text-sm">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Attention Required: Duplicate Transaction References Detected</span>
+              </div>
+              <p className="text-xs font-sans text-amber-800">
+                The following transaction references appear multiple times across student payments or payouts. Verify records to ensure no duplicate disbursements or split payments have occurred:
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {duplicateReferencesList.map((d) => (
+                  <button
+                    key={d.ref}
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery(d.ref);
+                      setActiveTab('student_payments');
+                    }}
+                    className="px-2.5 py-1 bg-white border border-amber-600 font-mono text-xs font-bold text-amber-900 hover:bg-amber-100 flex items-center gap-1.5 shadow-brutal-xs"
+                    title={`Click to filter Student Payments for ${d.ref}`}
+                  >
+                    <Hash className="w-3 h-3 text-amber-600" />
+                    <span>{d.ref}</span>
+                    <span className="px-1.5 py-0.2 bg-amber-600 text-white text-[10px] font-bold rounded-full">{d.count}×</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 2-Column Overview Layout: Upcoming Renewals & Recent Operations */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Upcoming Student Billing Renewals (7 cols) */}
-            <div className="lg:col-span-7 space-y-3">
+            {/* Left Column: Upcoming Renewals Monitor (7 Cols) */}
+            <div className="lg:col-span-7 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-heading font-bold text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+                <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-2">
                   <Clock className="w-4 h-4 text-brand-teal" />
-                  Upcoming Student Billing Renewals
+                  Upcoming Renewals (Next 14 Days)
                 </h3>
-                <span className="text-xs font-mono text-brand-muted">Calculated via Billing Anchors</span>
+                <span className="font-mono text-xs text-brand-muted">
+                  {metrics.upcomingRenewals.length} scheduled
+                </span>
               </div>
 
-              {upcomingStudentRenewals.length === 0 ? (
-                <div className="p-6 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs text-center text-xs text-brand-muted">
-                  No upcoming billing renewals detected for active enrollments.
+              {metrics.upcomingRenewals.length === 0 ? (
+                <div className="p-8 bg-brand-paper border-2 border-brand-dark shadow-brutal-sm text-center text-xs text-brand-muted">
+                  No student renewals due within the next 14 calendar days.
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {upcomingStudentRenewals.map((r) => (
+                <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm divide-y divide-brand-dark/15">
+                  {metrics.upcomingRenewals.map((item) => (
                     <div
-                      key={r.enrollmentId}
-                      className="p-3 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs flex items-center justify-between gap-3"
+                      key={item.enrollment.id}
+                      className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-brand-paper-tint/60 transition-colors"
                     >
-                      <div className="space-y-0.5">
-                        <div className="text-xs sm:text-sm font-heading font-bold text-brand-navy">
-                          {r.studentName} {r.poraplanId ? `(${r.poraplanId})` : ''}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-xs sm:text-sm text-brand-navy">
+                            {item.student?.full_name || 'Scholar'}
+                          </span>
+                          <span className="font-mono text-[11px] text-brand-muted">
+                            {item.student?.poraplan_id || ''}
+                          </span>
+                          {item.daysUntilDue <= 3 && (
+                            <span className="px-1.5 py-0.5 bg-amber-100 text-amber-900 border border-amber-400 font-mono text-[10px] font-bold">
+                              Reminder Due
+                            </span>
+                          )}
                         </div>
-                        <div className="text-[11px] font-mono text-brand-muted">
-                          {r.programName} • Next Due: {formatCalendarDate(r.nextDueDate)}
+                        <div className="text-[11px] font-mono text-brand-muted flex flex-wrap gap-2">
+                          <span>{item.program?.name || 'Program'}</span>
+                          <span>•</span>
+                          <span>Renewal Due: <strong>{formatCalendarDate(item.nextDueDate)}</strong></span>
+                          <span>•</span>
+                          <span>Anchor: {formatCalendarDate(item.enrollment.billing_start_date || item.cycleStartDate)}</span>
                         </div>
                       </div>
-                      <div className="text-right shrink-0">
-                        <Badge
-                          variant={r.daysRemaining <= 3 ? 'danger' : r.daysRemaining <= 7 ? 'gold' : 'teal'}
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`px-2 py-0.5 text-xs font-mono font-bold ${
+                          item.daysUntilDue === 0
+                            ? 'bg-rose-100 text-rose-800 border border-rose-400'
+                            : item.daysUntilDue <= 3
+                            ? 'bg-amber-100 text-amber-800 border border-amber-400'
+                            : 'bg-brand-bg text-brand-muted border border-brand-dark/20'
+                        }`}>
+                          {item.daysUntilDue === 0 ? 'Due Today' : `In ${item.daysUntilDue} days`}
+                        </span>
+
+                        <Button
+                          variant="outline"
                           size="sm"
+                          onClick={() => openBillingAnchorModal(item.enrollment)}
+                          leftIcon={<Edit2 className="w-3 h-3" />}
                         >
-                          {r.daysRemaining < 0
-                            ? `${Math.abs(r.daysRemaining)}d Overdue`
-                            : r.daysRemaining === 0
-                            ? 'Due Today'
-                            : `In ${r.daysRemaining} days`}
-                        </Badge>
+                          Anchor
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -676,35 +1041,51 @@ export const AdminBillingPage: React.FC = () => {
               )}
             </div>
 
-            {/* Recent Billing Date Audit Activity (5 cols) */}
-            <div className="lg:col-span-5 space-y-3">
+            {/* Right Column: Recent Operations & Audit Log (5 Cols) */}
+            <div className="lg:col-span-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-heading font-bold text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+                <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase tracking-wider flex items-center gap-2">
                   <History className="w-4 h-4 text-brand-teal" />
                   Recent Billing Date Adjustments
                 </h3>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('audit_notes')}
+                  className="font-mono text-xs text-brand-teal hover:underline flex items-center gap-1"
+                >
+                  View All ({auditLogs.length}) <ChevronRight className="w-3 h-3" />
+                </button>
               </div>
 
               {auditLogs.length === 0 ? (
-                <div className="p-6 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs text-center text-xs text-brand-muted">
-                  No billing start date adjustments recorded.
+                <div className="p-8 bg-brand-paper border-2 border-brand-dark shadow-brutal-sm text-center text-xs text-brand-muted">
+                  No billing start date adjustments logged yet.
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {auditLogs.slice(0, 4).map((log) => (
-                    <div
-                      key={log.id}
-                      className="p-3 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-1 text-xs"
-                    >
-                      <div className="flex justify-between items-center text-[11px] font-mono text-brand-muted">
-                        <span>{formatCalendarDate(log.old_billing_start_date)} → {formatCalendarDate(log.new_billing_start_date)}</span>
-                        <span>{log.created_at ? formatLocalDate(new Date(log.created_at)) : '—'}</span>
+                <div className="space-y-3">
+                  {auditLogs.slice(0, 4).map((log) => {
+                    const enrollment = enrollmentsMap.get(log.enrollment_id);
+                    const student = enrollment ? studentsMap.get(enrollment.student_id) : null;
+                    return (
+                      <div
+                        key={log.id}
+                        className="p-3 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-1.5 text-xs"
+                      >
+                        <div className="flex justify-between items-center text-[11px] font-mono text-brand-muted">
+                          <span className="font-bold text-brand-navy">{student?.full_name || 'Scholar'}</span>
+                          <span>{log.created_at ? formatLocalDate(new Date(log.created_at)) : '—'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 font-mono text-[11px]">
+                          <span className="text-rose-700 line-through">{formatCalendarDate(log.old_billing_start_date)}</span>
+                          <ArrowRight className="w-3 h-3 text-brand-muted" />
+                          <span className="text-teal-700 font-bold">{formatCalendarDate(log.new_billing_start_date)}</span>
+                        </div>
+                        <p className="font-sans text-brand-dark text-[11px] line-clamp-2 bg-brand-bg p-1.5 border border-brand-dark/15">
+                          <strong>Reason: </strong>{log.reason}
+                        </p>
                       </div>
-                      <p className="font-sans text-brand-dark text-[11px] line-clamp-2">
-                        <strong>Reason: </strong>{log.reason}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -712,27 +1093,50 @@ export const AdminBillingPage: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: STUDENT PAYMENTS */}
+      {/* ===================================================================== */}
+      {/* TAB 2: STUDENT PAYMENTS WORKSPACE                                     */}
+      {/* ===================================================================== */}
       {activeTab === 'student_payments' && (
         <div className="space-y-4">
-          {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex flex-1 items-center gap-2">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-brand-muted" />
+          {/* Filters Toolbar */}
+          <div className="p-4 bg-brand-paper border-2 border-brand-dark shadow-brutal-sm space-y-3">
+            <div className="flex flex-col md:flex-row gap-2.5 items-stretch md:items-center justify-between">
+              {/* Search Bar */}
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-brand-muted absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search student, ID, or reference..."
+                  placeholder="Search by scholar name, email, PoraPlan ID, or transaction reference..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 text-xs font-sans border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none"
+                  className="w-full pl-9 pr-3 py-1.5 text-xs font-sans border-2 border-brand-dark bg-white focus:outline-none"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-dark"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
 
-              {/* Status Filter */}
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsCreateStudentModalOpen(true)}
+                leftIcon={<Plus className="w-3.5 h-3.5" />}
+              >
+                Record Payment Cycle
+              </Button>
+            </div>
+
+            {/* Filter Dropdowns */}
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-brand-dark/15 text-xs font-sans">
               <select
-                value={programFilter}
-                onChange={(e) => setProgramFilter(e.target.value)}
+                value={studentProgramFilter}
+                onChange={(e) => setStudentProgramFilter(e.target.value)}
                 aria-label="Filter by program"
                 className="px-2.5 py-1.5 text-xs font-heading font-bold uppercase border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none"
               >
@@ -755,19 +1159,52 @@ export const AdminBillingPage: React.FC = () => {
                 <option value="overdue">Overdue</option>
                 <option value="waived">Waived</option>
               </select>
-            </div>
 
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setIsCreateStudentModalOpen(true)}
-              leftIcon={<Plus className="w-3.5 h-3.5" />}
-            >
-              Record Payment Cycle
-            </Button>
+              <select
+                value={studentDueFilter}
+                onChange={(e) => setStudentDueFilter(e.target.value as any)}
+                aria-label="Filter by due date"
+                className="px-2.5 py-1.5 text-xs font-heading font-bold uppercase border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none"
+              >
+                <option value="all">All Due Dates</option>
+                <option value="overdue">Overdue Only</option>
+                <option value="reminder_due">Due in ≤ 3 Days</option>
+                <option value="due_this_month">Due This Month</option>
+              </select>
+
+              <select
+                value={studentMethodFilter}
+                onChange={(e) => setStudentMethodFilter(e.target.value)}
+                aria-label="Filter by payment method"
+                className="px-2.5 py-1.5 text-xs font-heading font-bold uppercase border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none"
+              >
+                <option value="all">All Methods</option>
+                <option value="bkash">bKash</option>
+                <option value="nagad">Nagad</option>
+                <option value="upay">Upay</option>
+                <option value="bank">Bank Transfer</option>
+                <option value="cash">Cash</option>
+              </select>
+
+              {(searchQuery || studentStatusFilter !== 'all' || studentProgramFilter !== 'all' || studentDueFilter !== 'all' || studentMethodFilter !== 'all') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setStudentStatusFilter('all');
+                    setStudentProgramFilter('all');
+                    setStudentDueFilter('all');
+                    setStudentMethodFilter('all');
+                  }}
+                  className="px-2 py-1 text-xs font-mono font-bold text-rose-700 hover:underline ml-auto"
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Student Records Table / Cards */}
+          {/* Student Records Table */}
           {filteredStudentRecords.length === 0 ? (
             <div className="p-8 bg-brand-paper border-2 border-brand-dark shadow-brutal-sm text-center text-xs text-brand-muted">
               No student payment records match the current filters.
@@ -791,9 +1228,14 @@ export const AdminBillingPage: React.FC = () => {
                     const student = studentsMap.get(rec.student_id);
                     const enrollment = enrollmentsMap.get(rec.enrollment_id);
                     const program = enrollment ? programsMap.get(enrollment.program_id) : null;
+                    const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
 
                     return (
-                      <tr key={rec.id} className="hover:bg-brand-paper-tint/60 transition-colors">
+                      <tr
+                        key={rec.id}
+                        className="hover:bg-brand-paper-tint/60 transition-colors cursor-pointer"
+                        onClick={() => setSelectedStudentRecordForDrawer(rec)}
+                      >
                         <td className="p-3 font-medium">
                           <div className="font-bold text-brand-navy">
                             {student?.full_name || 'Scholar'}
@@ -806,67 +1248,71 @@ export const AdminBillingPage: React.FC = () => {
                           {formatCalendarDate(rec.cycle_start_date)} – {formatCalendarDate(rec.cycle_end_date)}
                         </td>
                         <td className="p-3 font-mono text-[11px]">
-                          {formatCalendarDate(rec.next_due_date)}
+                          <div className="font-bold text-brand-dark">{formatCalendarDate(rec.next_due_date)}</div>
+                          {isCycleOverdue(rec.next_due_date, todayBD) && rec.status !== 'paid' && rec.status !== 'waived' && (
+                            <span className="text-[10px] text-rose-600 font-bold block">Overdue</span>
+                          )}
                         </td>
                         <td className="p-3">
                           {getStudentStatusBadge(rec.status)}
                         </td>
                         <td className="p-3 font-mono text-[11px]">
                           <div>{formatPaymentMethod(rec.payment_method)}</div>
-                          <div className="text-brand-muted truncate max-w-[140px]" title={rec.transaction_reference || 'Not applicable'}>
-                            {rec.transaction_reference || 'Not applicable'}
-                          </div>
+                          {rec.transaction_reference && (
+                            <div className="text-[10px] text-brand-muted truncate max-w-[130px] flex items-center gap-1">
+                              <span>{rec.transaction_reference}</span>
+                              {isDuplicate && (
+                                <span className="text-amber-600 font-bold" title="Duplicate reference warning">⚠️</span>
+                              )}
+                            </div>
+                          )}
                         </td>
-                        <td className="p-3 font-mono text-[11px]">
-                          {rec.payment_date ? formatCalendarDate(rec.payment_date) : 'Pending'}
+                        <td className="p-3 font-mono text-[11px] text-brand-muted">
+                          {rec.payment_date ? formatCalendarDate(rec.payment_date) : '—'}
                         </td>
-                        <td className="p-3 text-right">
+                        <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1">
-                            <button
-                              type="button"
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-2 py-1 text-[11px]"
+                              onClick={() => setSelectedStudentRecordForDrawer(rec)}
+                              leftIcon={<Eye className="w-3 h-3" />}
+                            >
+                              Details
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-2 py-1 text-[11px]"
                               onClick={() => {
                                 setEditingStudentRecord(rec);
                                 setIsEditStudentModalOpen(true);
                               }}
-                              title="Update record status & details"
-                              className="p-1 hover:bg-brand-navy/10 border border-brand-dark/20 text-brand-navy"
+                              leftIcon={<Edit2 className="w-3 h-3" />}
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openEventsModal('student', rec.id, `Payment Events: ${student?.full_name || 'Scholar'}`)}
-                              title="Manage payment events & installments"
-                              className="p-1 hover:bg-brand-navy/10 border border-brand-dark/20 text-brand-teal"
+                              Edit
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-2 py-1 text-[11px]"
+                              onClick={() => openEventsModal('student', rec.id, `${student?.full_name || 'Scholar'} - ${rec.cycle_start_date || 'Cycle'}`)}
+                              leftIcon={<History className="w-3 h-3" />}
+                              title="Event Log"
                             >
-                              <Layers className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openNotesModal('student_payment', rec.id, `Private Notes: ${student?.full_name || 'Scholar'}`)}
-                              title="Private admin notes"
-                              className="p-1 hover:bg-brand-navy/10 border border-brand-dark/20 text-amber-600"
+                              Events
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-2 py-1 text-[11px]"
+                              onClick={() => openNotesModal('student_payment', rec.id, `${student?.full_name || 'Scholar'} - ${rec.cycle_start_date || 'Cycle'}`)}
+                              leftIcon={<Lock className="w-3 h-3" />}
+                              title="Internal Admin Notes"
                             >
-                              <MessageSquare className="w-3.5 h-3.5" />
-                            </button>
-                            {enrollment && (
-                              <button
-                                type="button"
-                                onClick={() => openBillingAnchorModal(enrollment)}
-                                title="Manage enrollment billing anchor"
-                                className="p-1 hover:bg-brand-navy/10 border border-brand-dark/20 text-brand-navy"
-                              >
-                                <Calendar className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteStudentPayment(rec.id)}
-                              title="Soft delete record"
-                              className="p-1 hover:bg-red-500/10 border border-brand-dark/20 text-red-600"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                              Notes
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -879,24 +1325,34 @@ export const AdminBillingPage: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 3: MENTOR PAYOUTS */}
+      {/* ===================================================================== */}
+      {/* TAB 3: MENTOR PAYOUTS WORKSPACE                                       */}
+      {/* ===================================================================== */}
       {activeTab === 'mentor_payouts' && (
         <div className="space-y-4">
-          {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex flex-1 items-center gap-2">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-brand-muted" />
-                <input
-                  type="text"
-                  placeholder="Search mentor, reference, or month..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 text-xs font-sans border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none"
-                />
-              </div>
+          {/* Filters Toolbar */}
+          <div className="p-4 bg-brand-paper border-2 border-brand-dark shadow-brutal-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-brand-muted absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search mentor by name, email, month, or transaction reference..."
+                value={mentorSearchQuery}
+                onChange={(e) => setMentorSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 text-xs font-sans border-2 border-brand-dark bg-white focus:outline-none"
+              />
+              {mentorSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setMentorSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-dark"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
 
-              {/* Status Filter */}
+            <div className="flex flex-wrap items-center gap-2">
               <select
                 value={mentorStatusFilter}
                 onChange={(e) => setMentorStatusFilter(e.target.value as 'all' | MentorPaymentStatus)}
@@ -908,19 +1364,33 @@ export const AdminBillingPage: React.FC = () => {
                 <option value="partial">Partial</option>
                 <option value="paid">Paid</option>
               </select>
-            </div>
 
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setIsCreateMentorModalOpen(true)}
-              leftIcon={<Plus className="w-3.5 h-3.5" />}
-            >
-              Record Mentor Payout
-            </Button>
+              <select
+                value={mentorMethodFilter}
+                onChange={(e) => setMentorMethodFilter(e.target.value)}
+                aria-label="Filter by payout method"
+                className="px-2.5 py-1.5 text-xs font-heading font-bold uppercase border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none"
+              >
+                <option value="all">All Methods</option>
+                <option value="bank">Bank Transfer</option>
+                <option value="bkash">bKash</option>
+                <option value="nagad">Nagad</option>
+                <option value="upay">Upay</option>
+                <option value="cash">Cash</option>
+              </select>
+
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsCreateMentorModalOpen(true)}
+                leftIcon={<Plus className="w-3.5 h-3.5" />}
+              >
+                Record Mentor Payout
+              </Button>
+            </div>
           </div>
 
-          {/* Mentor Records Table */}
+          {/* Mentor Payouts Table */}
           {filteredMentorRecords.length === 0 ? (
             <div className="p-8 bg-brand-paper border-2 border-brand-dark shadow-brutal-sm text-center text-xs text-brand-muted">
               No mentor payout records match the current filters.
@@ -932,87 +1402,99 @@ export const AdminBillingPage: React.FC = () => {
                   <tr>
                     <th className="p-3">Mentor</th>
                     <th className="p-3">Billing Month</th>
+                    <th className="p-3">Related Context</th>
                     <th className="p-3">Status</th>
                     <th className="p-3">Method & Reference</th>
                     <th className="p-3">Payout Date</th>
-                    <th className="p-3">Linked Scholar</th>
                     <th className="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-dark/15">
                   {filteredMentorRecords.map((rec) => {
                     const mentor = mentorsMap.get(rec.mentor_id);
-                    const relatedStudent = rec.related_student_id ? studentsMap.get(rec.related_student_id) : null;
+                    const relStudent = rec.related_student_id ? studentsMap.get(rec.related_student_id) : null;
+                    const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
 
                     return (
-                      <tr key={rec.id} className="hover:bg-brand-paper-tint/60 transition-colors">
+                      <tr
+                        key={rec.id}
+                        className="hover:bg-brand-paper-tint/60 transition-colors cursor-pointer"
+                        onClick={() => setSelectedMentorRecordForDrawer(rec)}
+                      >
                         <td className="p-3 font-medium">
                           <div className="font-bold text-brand-navy">
                             {mentor?.full_name || 'Mentor'}
                           </div>
                           <div className="text-[10px] font-mono text-brand-muted">
-                            {mentor?.poraplan_id || ''}
+                            {mentor?.email || ''}
                           </div>
                         </td>
-                        <td className="p-3 font-heading font-bold text-brand-navy">
+                        <td className="p-3 font-heading font-bold text-brand-dark">
                           {formatBillingMonth(rec.billing_month)}
+                        </td>
+                        <td className="p-3 text-brand-muted text-[11px]">
+                          {relStudent ? `Scholar: ${relStudent.full_name}` : 'Platform Pool'}
                         </td>
                         <td className="p-3">
                           {getMentorStatusBadge(rec.status)}
                         </td>
                         <td className="p-3 font-mono text-[11px]">
                           <div>{formatPaymentMethod(rec.payment_method)}</div>
-                          <div className="text-brand-muted truncate max-w-[140px]" title={rec.transaction_reference || 'Not applicable'}>
-                            {rec.transaction_reference || 'Not applicable'}
-                          </div>
-                        </td>
-                        <td className="p-3 font-mono text-[11px]">
-                          {rec.payout_date ? formatCalendarDate(rec.payout_date.split('T')[0]) : 'Pending'}
-                        </td>
-                        <td className="p-3 font-sans text-[11px]">
-                          {relatedStudent ? (
-                            <span className="font-bold text-brand-navy">{relatedStudent.full_name}</span>
-                          ) : (
-                            <span className="text-brand-muted">Cohort Mentorship</span>
+                          {rec.transaction_reference && (
+                            <div className="text-[10px] text-brand-muted truncate max-w-[130px] flex items-center gap-1">
+                              <span>{rec.transaction_reference}</span>
+                              {isDuplicate && (
+                                <span className="text-amber-600 font-bold" title="Duplicate reference warning">⚠️</span>
+                              )}
+                            </div>
                           )}
                         </td>
-                        <td className="p-3 text-right">
+                        <td className="p-3 font-mono text-[11px] text-brand-muted">
+                          {rec.payout_date ? formatCalendarDate(rec.payout_date) : 'Pending'}
+                        </td>
+                        <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1">
-                            <button
-                              type="button"
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-2 py-1 text-[11px]"
+                              onClick={() => setSelectedMentorRecordForDrawer(rec)}
+                              leftIcon={<Eye className="w-3 h-3" />}
+                            >
+                              Details
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-2 py-1 text-[11px]"
                               onClick={() => {
                                 setEditingMentorRecord(rec);
                                 setIsEditMentorModalOpen(true);
                               }}
-                              title="Update payout details"
-                              className="p-1 hover:bg-brand-navy/10 border border-brand-dark/20 text-brand-navy"
+                              leftIcon={<Edit2 className="w-3 h-3" />}
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openEventsModal('mentor', rec.id, `Payout Events: ${mentor?.full_name || 'Mentor'}`)}
-                              title="Manage payout events"
-                              className="p-1 hover:bg-brand-navy/10 border border-brand-dark/20 text-brand-teal"
+                              Edit
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-2 py-1 text-[11px]"
+                              onClick={() => openEventsModal('mentor', rec.id, `${mentor?.full_name || 'Mentor'} - ${formatBillingMonth(rec.billing_month)}`)}
+                              leftIcon={<History className="w-3 h-3" />}
+                              title="Event Log"
                             >
-                              <Layers className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openNotesModal('mentor_payment', rec.id, `Private Notes: ${mentor?.full_name || 'Mentor'}`)}
-                              title="Private admin notes"
-                              className="p-1 hover:bg-brand-navy/10 border border-brand-dark/20 text-amber-600"
+                              Events
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-2 py-1 text-[11px]"
+                              onClick={() => openNotesModal('mentor_payment', rec.id, `${mentor?.full_name || 'Mentor'} - ${formatBillingMonth(rec.billing_month)}`)}
+                              leftIcon={<Lock className="w-3 h-3" />}
+                              title="Internal Admin Notes"
                             >
-                              <MessageSquare className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteMentorPayout(rec.id)}
-                              title="Soft delete record"
-                              className="p-1 hover:bg-red-500/10 border border-brand-dark/20 text-red-600"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                              Notes
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -1025,67 +1507,335 @@ export const AdminBillingPage: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 4: AUDIT & NOTES */}
-      {activeTab === 'audit_notes' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-heading font-extrabold text-brand-navy uppercase tracking-wider flex items-center gap-2">
-              <History className="w-4 h-4 text-brand-teal" />
-              Immutable Billing Date Adjustment Audit Logs
-            </h3>
-            <span className="text-xs font-mono text-brand-muted">Total Logs: {auditLogs.length}</span>
+      {/* ===================================================================== */}
+      {/* TAB 4: BILLING CALENDAR & RENEWAL SCHEDULE                            */}
+      {/* ===================================================================== */}
+      {activeTab === 'calendar' && (
+        <div className="space-y-6">
+          <div className="p-4 bg-brand-paper border-2 border-brand-dark shadow-brutal-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="font-heading font-extrabold text-base text-brand-navy uppercase flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4 text-brand-teal" />
+                {calendarMonthLabel} (Asia/Dhaka)
+              </h3>
+              <p className="text-xs font-sans text-brand-muted">
+                Calendar view of renewal dates, billing anniversaries, and overdue schedules.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handlePrevMonth} leftIcon={<ChevronLeft className="w-3.5 h-3.5" />}>
+                Prev
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleTodayCalendar}>
+                Today
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleNextMonth} rightIcon={<ChevronRight className="w-3.5 h-3.5" />}>
+                Next
+              </Button>
+            </div>
           </div>
 
-          {auditLogs.length === 0 ? (
-            <div className="p-8 bg-brand-paper border-2 border-brand-dark shadow-brutal-sm text-center text-xs text-brand-muted">
-              No billing date overrides have been performed yet.
+          {/* Calendar Grid & Day Agenda Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Calendar Grid (8 Cols) */}
+            <div className="lg:col-span-8 border-2 border-brand-dark bg-brand-paper shadow-brutal p-4">
+              <div className="grid grid-cols-7 gap-1 text-center font-heading text-[11px] font-bold uppercase text-brand-navy pb-2 border-b-2 border-brand-dark">
+                <span>Sun</span>
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 pt-2">
+                {/* Empty cells for leading days */}
+                {Array.from({ length: monthFirstDayWeekday }).map((_, idx) => (
+                  <div key={`empty-${idx}`} className="h-16 bg-brand-paper-tint/30 border border-brand-dark/10" />
+                ))}
+
+                {/* Day Cells */}
+                {Array.from({ length: daysInMonth }).map((_, idx) => {
+                  const dayNum = idx + 1;
+                  const dateStr = `${calendarYear}-${String(calendarMonth).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+                  const dayData = calendarEventsByDay.get(dateStr);
+                  const isSelected = selectedCalendarDate === dateStr;
+                  const isToday = dateStr === todayBD;
+
+                  const hasRenewals = (dayData?.renewals.length || 0) > 0;
+                  const hasRecords = (dayData?.records.length || 0) > 0;
+
+                  return (
+                    <div
+                      key={dateStr}
+                      onClick={() => setSelectedCalendarDate(dateStr)}
+                      className={`h-16 p-1 border transition-all cursor-pointer flex flex-col justify-between ${
+                        isSelected
+                          ? 'border-2 border-brand-dark bg-brand-teal/20 shadow-brutal-xs font-bold'
+                          : isToday
+                          ? 'border-2 border-teal-600 bg-teal-50'
+                          : 'border-brand-dark/20 bg-brand-bg hover:bg-brand-paper-tint/60'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[11px] font-mono ${isToday ? 'font-bold text-teal-700 underline' : 'text-brand-dark'}`}>
+                          {dayNum}
+                        </span>
+                        {isToday && <span className="text-[9px] font-bold text-teal-700">Today</span>}
+                      </div>
+
+                      <div className="flex flex-col gap-0.5">
+                        {hasRenewals && (
+                          <span className="px-1 py-0.2 bg-amber-100 border border-amber-400 text-amber-900 text-[9px] font-mono leading-none truncate">
+                            {dayData?.renewals.length} Renew
+                          </span>
+                        )}
+                        {hasRecords && (
+                          <span className="px-1 py-0.2 bg-teal-100 border border-teal-400 text-teal-900 text-[9px] font-mono leading-none truncate">
+                            {dayData?.records.length} Cycle
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          ) : (
-            <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm overflow-x-auto">
-              <table className="w-full text-left text-xs font-sans">
-                <thead className="bg-brand-navy text-brand-paper border-b-2 border-brand-dark font-heading uppercase text-[11px]">
-                  <tr>
-                    <th className="p-3">Timestamp</th>
-                    <th className="p-3">Enrollment</th>
-                    <th className="p-3">Previous Date</th>
-                    <th className="p-3">New Date</th>
-                    <th className="p-3">Adjustment Reason</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-brand-dark/15">
-                  {auditLogs.map((log) => {
-                    const enrollment = enrollmentsMap.get(log.enrollment_id);
-                    const student = enrollment ? studentsMap.get(enrollment.student_id) : null;
-                    return (
-                      <tr key={log.id} className="hover:bg-brand-paper-tint/60 transition-colors">
-                        <td className="p-3 font-mono text-[11px]">
-                          {log.created_at ? formatLocalDate(new Date(log.created_at)) : '—'}
-                        </td>
-                        <td className="p-3 font-medium">
-                          {student ? `${student.full_name} (${student.poraplan_id || ''})` : log.enrollment_id.slice(0, 8)}
-                        </td>
-                        <td className="p-3 font-mono text-[11px] text-red-700">
-                          {formatCalendarDate(log.old_billing_start_date)}
-                        </td>
-                        <td className="p-3 font-mono text-[11px] font-bold text-teal-700">
-                          {formatCalendarDate(log.new_billing_start_date)}
-                        </td>
-                        <td className="p-3 text-[11px]">
-                          {log.reason}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+
+            {/* Day Agenda Panel (4 Cols) */}
+            <div className="lg:col-span-4 border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 space-y-4">
+              <div>
+                <span className="font-mono text-[10px] uppercase text-brand-muted block">Selected Date Agenda</span>
+                <h4 className="font-heading font-extrabold text-brand-navy text-sm sm:text-base">
+                  {formatCalendarDate(selectedCalendarDate)}
+                </h4>
+              </div>
+
+              {(() => {
+                const dayData = calendarEventsByDay.get(selectedCalendarDate);
+                const renewals = dayData?.renewals || [];
+                const records = dayData?.records || [];
+
+                if (renewals.length === 0 && records.length === 0) {
+                  return (
+                    <div className="p-6 text-center text-xs text-brand-muted bg-brand-bg border border-brand-dark/15">
+                      No cycles or renewals scheduled on this date.
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
+                    {renewals.length > 0 && (
+                      <div className="space-y-2">
+                        <span className="text-[11px] font-mono font-bold text-brand-muted uppercase">
+                          Scheduled Renewals ({renewals.length})
+                        </span>
+                        {renewals.map((enr) => {
+                          const stu = studentsMap.get(enr.student_id);
+                          const prg = programsMap.get(enr.program_id);
+                          return (
+                            <div key={enr.id} className="p-2.5 bg-brand-bg border border-brand-dark/20 text-xs space-y-1">
+                              <div className="font-bold text-brand-navy">{stu?.full_name || 'Scholar'}</div>
+                              <div className="text-[10px] font-mono text-brand-muted">{prg?.name || 'Program'}</div>
+                              <div className="flex justify-end pt-1">
+                                <Button variant="outline" size="sm" className="text-[10px] py-0.5 px-2" onClick={() => openBillingAnchorModal(enr)}>
+                                  Manage Anchor
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {records.length > 0 && (
+                      <div className="space-y-2 pt-2 border-t border-brand-dark/15">
+                        <span className="text-[11px] font-mono font-bold text-brand-muted uppercase">
+                          Payment Cycles Due ({records.length})
+                        </span>
+                        {records.map((rec) => {
+                          const stu = studentsMap.get(rec.student_id);
+                          return (
+                            <div key={rec.id} className="p-2.5 bg-brand-bg border border-brand-dark/20 text-xs space-y-1">
+                              <div className="flex justify-between items-center">
+                                <span className="font-bold text-brand-navy">{stu?.full_name || 'Scholar'}</span>
+                                {getStudentStatusBadge(rec.status)}
+                              </div>
+                              <div className="text-[10px] font-mono text-brand-muted">
+                                Period: {formatCalendarDate(rec.cycle_start_date)} – {formatCalendarDate(rec.cycle_end_date)}
+                              </div>
+                              <div className="flex justify-end pt-1">
+                                <Button variant="outline" size="sm" className="text-[10px] py-0.5 px-2" onClick={() => setSelectedStudentRecordForDrawer(rec)}>
+                                  View Record
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
-          )}
+          </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* MODAL 1: CREATE STUDENT PAYMENT RECORD                                     */}
-      {/* ========================================================================= */}
+      {/* ===================================================================== */}
+      {/* TAB 5: ACTIVITY & AUDIT LOG WORKSPACE                                 */}
+      {/* ===================================================================== */}
+      {activeTab === 'audit_notes' && (
+        <div className="space-y-4">
+          <div className="p-4 bg-brand-paper border-2 border-brand-dark shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy uppercase flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-brand-teal" />
+                Immutable System Activity & Audit Trail
+              </h3>
+              <p className="text-xs font-sans text-brand-muted">
+                Append-only operational logs recording billing start date overrides and status waiver justifications.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <select
+                value={activityTypeFilter}
+                onChange={(e) => setActivityTypeFilter(e.target.value as any)}
+                aria-label="Filter activity type"
+                className="px-2.5 py-1.5 text-xs font-heading font-bold uppercase border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none"
+              >
+                <option value="all">All Audit Events</option>
+                <option value="overrides">Billing Date Overrides</option>
+                <option value="waivers">Payment Waivers</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Audit Logs Table */}
+          <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm overflow-x-auto">
+            <table className="w-full text-left text-xs font-sans">
+              <thead className="bg-brand-navy text-brand-paper border-b-2 border-brand-dark font-heading uppercase text-[11px]">
+                <tr>
+                  <th className="p-3">Timestamp</th>
+                  <th className="p-3">Event Type</th>
+                  <th className="p-3">Context / Scholar</th>
+                  <th className="p-3">Audit Details</th>
+                  <th className="p-3">Operational Reason</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-brand-dark/15">
+                {auditLogs.map((log) => {
+                  const enrollment = enrollmentsMap.get(log.enrollment_id);
+                  const student = enrollment ? studentsMap.get(enrollment.student_id) : null;
+                  return (
+                    <tr key={log.id} className="hover:bg-brand-paper-tint/60 transition-colors">
+                      <td className="p-3 font-mono text-[11px] whitespace-nowrap">
+                        {log.created_at ? formatLocalDate(new Date(log.created_at)) : '—'}
+                      </td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-800 border border-blue-400 font-mono text-[10px] font-bold">
+                          Date Override
+                        </span>
+                      </td>
+                      <td className="p-3 font-medium">
+                        {student ? `${student.full_name} (${student.poraplan_id || ''})` : log.enrollment_id.slice(0, 8)}
+                      </td>
+                      <td className="p-3 font-mono text-[11px]">
+                        <span className="text-rose-700">{formatCalendarDate(log.old_billing_start_date)}</span>
+                        {' → '}
+                        <span className="text-teal-700 font-bold">{formatCalendarDate(log.new_billing_start_date)}</span>
+                      </td>
+                      <td className="p-3 text-[11px] text-brand-dark">
+                        {log.reason}
+                      </td>
+                    </tr>
+                  );
+                })}
+
+                {/* Waived Cycles Rows */}
+                {activityTypeFilter !== 'overrides' &&
+                  studentRecords
+                    .filter((r) => r.status === 'waived' && r.waived_reason)
+                    .map((rec) => {
+                      const student = studentsMap.get(rec.student_id);
+                      return (
+                        <tr key={`waived-${rec.id}`} className="hover:bg-brand-paper-tint/60 transition-colors bg-brand-bg/40">
+                          <td className="p-3 font-mono text-[11px] whitespace-nowrap">
+                            {rec.updated_at ? formatLocalDate(new Date(rec.updated_at)) : '—'}
+                          </td>
+                          <td className="p-3">
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-800 border border-slate-400 font-mono text-[10px] font-bold">
+                              Status Waived
+                            </span>
+                          </td>
+                          <td className="p-3 font-medium">
+                            {student ? `${student.full_name} (${student.poraplan_id || ''})` : rec.student_id.slice(0, 8)}
+                          </td>
+                          <td className="p-3 font-mono text-[11px]">
+                            Cycle: {formatCalendarDate(rec.cycle_start_date)} – {formatCalendarDate(rec.cycle_end_date)}
+                          </td>
+                          <td className="p-3 text-[11px] text-brand-dark font-medium">
+                            {rec.waived_reason}
+                          </td>
+                        </tr>
+                      );
+                    })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* DRAWER 1: DEDICATED STUDENT PAYMENT RECORD DETAILS                    */}
+      {/* ===================================================================== */}
+      {selectedStudentRecordForDrawer && (
+        <StudentPaymentDrawer
+          record={selectedStudentRecordForDrawer}
+          studentsMap={studentsMap}
+          enrollmentsMap={enrollmentsMap}
+          programsMap={programsMap}
+          allKnownReferences={allKnownReferences}
+          onClose={() => setSelectedStudentRecordForDrawer(null)}
+          onEdit={() => {
+            setEditingStudentRecord(selectedStudentRecordForDrawer);
+            setIsEditStudentModalOpen(true);
+          }}
+          onOpenAnchor={() => {
+            const enr = enrollmentsMap.get(selectedStudentRecordForDrawer.enrollment_id);
+            if (enr) openBillingAnchorModal(enr);
+          }}
+          onDelete={() => handleSoftDeleteStudent(selectedStudentRecordForDrawer.id)}
+          onRefresh={loadDeskData}
+        />
+      )}
+
+      {/* ===================================================================== */}
+      {/* DRAWER 2: DEDICATED MENTOR PAYOUT RECORD DETAILS                      */}
+      {/* ===================================================================== */}
+      {selectedMentorRecordForDrawer && (
+        <MentorPayoutDrawer
+          record={selectedMentorRecordForDrawer}
+          mentorsMap={mentorsMap}
+          studentsMap={studentsMap}
+          allKnownReferences={allKnownReferences}
+          onClose={() => setSelectedMentorRecordForDrawer(null)}
+          onEdit={() => {
+            setEditingMentorRecord(selectedMentorRecordForDrawer);
+            setIsEditMentorModalOpen(true);
+          }}
+          onDelete={() => handleSoftDeleteMentor(selectedMentorRecordForDrawer.id)}
+          onRefresh={loadDeskData}
+        />
+      )}
+
+      {/* ===================================================================== */}
+      {/* MODAL 1: CREATE STUDENT PAYMENT MODAL                                 */}
+      {/* ===================================================================== */}
       {isCreateStudentModalOpen && (
         <CreateStudentPaymentModal
           enrollments={enrollments}
@@ -1102,13 +1852,12 @@ export const AdminBillingPage: React.FC = () => {
         />
       )}
 
-      {/* ========================================================================= */}
-      {/* MODAL 2: EDIT STUDENT PAYMENT RECORD                                       */}
-      {/* ========================================================================= */}
+      {/* ===================================================================== */}
+      {/* MODAL 2: EDIT STUDENT PAYMENT MODAL                                   */}
+      {/* ===================================================================== */}
       {isEditStudentModalOpen && editingStudentRecord && (
         <EditStudentPaymentModal
           record={editingStudentRecord}
-          student={studentsMap.get(editingStudentRecord.student_id)}
           allKnownReferences={allKnownReferences}
           onClose={() => {
             setIsEditStudentModalOpen(false);
@@ -1124,9 +1873,9 @@ export const AdminBillingPage: React.FC = () => {
         />
       )}
 
-      {/* ========================================================================= */}
-      {/* MODAL 3: CREATE MENTOR PAYOUT RECORD                                       */}
-      {/* ========================================================================= */}
+      {/* ===================================================================== */}
+      {/* MODAL 3: CREATE MENTOR PAYOUT MODAL                                   */}
+      {/* ===================================================================== */}
       {isCreateMentorModalOpen && (
         <CreateMentorPayoutModal
           mentors={mentors}
@@ -1142,13 +1891,12 @@ export const AdminBillingPage: React.FC = () => {
         />
       )}
 
-      {/* ========================================================================= */}
-      {/* MODAL 4: EDIT MENTOR PAYOUT RECORD                                         */}
-      {/* ========================================================================= */}
+      {/* ===================================================================== */}
+      {/* MODAL 4: EDIT MENTOR PAYOUT MODAL                                     */}
+      {/* ===================================================================== */}
       {isEditMentorModalOpen && editingMentorRecord && (
         <EditMentorPayoutModal
           record={editingMentorRecord}
-          mentor={mentorsMap.get(editingMentorRecord.mentor_id)}
           allKnownReferences={allKnownReferences}
           onClose={() => {
             setIsEditMentorModalOpen(false);
@@ -1164,14 +1912,14 @@ export const AdminBillingPage: React.FC = () => {
         />
       )}
 
-      {/* ========================================================================= */}
-      {/* MODAL 5: PAYMENT EVENTS & ACTIVITY                                         */}
-      {/* ========================================================================= */}
+      {/* ===================================================================== */}
+      {/* MODAL 5: CHILD PAYMENT EVENTS                                         */}
+      {/* ===================================================================== */}
       {isEventsModalOpen && activeEventRecord && (
         <PaymentEventsModal
           recordType={activeEventRecord.type}
           recordId={activeEventRecord.id}
-          title={activeEventRecord.title}
+          recordTitle={activeEventRecord.title}
           events={recordEvents}
           loading={eventsLoading}
           allKnownReferences={allKnownReferences}
@@ -1184,30 +1932,30 @@ export const AdminBillingPage: React.FC = () => {
         />
       )}
 
-      {/* ========================================================================= */}
-      {/* MODAL 6: PRIVATE ADMIN NOTES                                               */}
-      {/* ========================================================================= */}
+      {/* ===================================================================== */}
+      {/* MODAL 6: PRIVATE ADMIN NOTES                                          */}
+      {/* ===================================================================== */}
       {isNotesModalOpen && activeNoteTarget && (
         <div className="fixed inset-0 z-50 bg-brand-dark/70 flex items-center justify-center p-4">
-          <div className="bg-brand-paper border-2 border-brand-dark shadow-brutal p-5 sm:p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-brand-paper border-2 border-brand-dark shadow-brutal p-5 sm:p-6 w-full max-w-md space-y-4 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
               <h3 className="font-heading font-extrabold text-brand-navy text-sm sm:text-base flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-amber-600" />
-                {activeNoteTarget.title}
+                <Lock className="w-4 h-4 text-brand-coral" />
+                Private Admin Notes
               </h3>
               <button type="button" onClick={() => setIsNotesModalOpen(false)} className="hover:opacity-75">
                 <X className="w-5 h-5 text-brand-dark" />
               </button>
             </div>
 
-            <div className="p-2 bg-amber-50 border border-amber-300 text-amber-900 text-xs font-sans">
-              🔒 <strong>Strict Admin Privacy:</strong> These notes are restricted solely to administrators. Students and mentors can never view them.
+            <div className="text-xs font-mono text-brand-muted">
+              {activeNoteTarget.title}
             </div>
 
             {/* Existing Notes List */}
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {notesLoading ? (
-                <div className="p-3 text-center text-xs text-brand-muted">Loading private notes...</div>
+                <div className="text-xs text-brand-muted p-2">Loading private notes...</div>
               ) : activeNotes.length === 0 ? (
                 <div className="p-3 text-center text-xs text-brand-muted">No private admin notes recorded yet.</div>
               ) : (
@@ -1234,11 +1982,11 @@ export const AdminBillingPage: React.FC = () => {
                 placeholder="Enter internal administrative notes (reconciliation notes, special terms, etc.)..."
                 className="w-full p-2.5 text-xs font-sans border-2 border-brand-dark bg-white focus:outline-none"
               />
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 pt-1">
                 <Button variant="outline" size="sm" onClick={() => setIsNotesModalOpen(false)}>
-                  Close
+                  Cancel
                 </Button>
-                <Button variant="primary" size="sm" onClick={handleAddAdminNote} disabled={!newNoteText.trim()}>
+                <Button variant="primary" size="sm" onClick={handleAddNote} disabled={!newNoteText.trim()}>
                   Save Note
                 </Button>
               </div>
@@ -1247,15 +1995,15 @@ export const AdminBillingPage: React.FC = () => {
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* MODAL 7: MANAGE STUDENT BILLING ANCHOR (START DATE OVERRIDE)               */}
-      {/* ========================================================================= */}
+      {/* ===================================================================== */}
+      {/* MODAL 7: MANAGE STUDENT BILLING START DATE ANCHOR                     */}
+      {/* ===================================================================== */}
       {isBillingAnchorModalOpen && activeAnchorEnrollment && (
         <div className="fixed inset-0 z-50 bg-brand-dark/70 flex items-center justify-center p-4">
-          <div className="bg-brand-paper border-2 border-brand-dark shadow-brutal p-5 sm:p-6 w-full max-w-lg space-y-4">
+          <div className="bg-brand-paper border-2 border-brand-dark shadow-brutal p-5 sm:p-6 w-full max-w-md space-y-4 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
               <h3 className="font-heading font-extrabold text-brand-navy text-sm sm:text-base flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-brand-teal" />
+                <CalendarIcon className="w-4 h-4 text-brand-teal" />
                 Manage Billing Start Anchor
               </h3>
               <button type="button" onClick={() => setIsBillingAnchorModalOpen(false)} className="hover:opacity-75">
@@ -1263,85 +2011,848 @@ export const AdminBillingPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-2 text-xs font-sans">
-              <div className="p-2 bg-brand-bg border border-brand-dark/20 space-y-1">
-                <div>
-                  <span className="text-brand-muted font-mono uppercase text-[10px]">Scholar: </span>
-                  <strong>{studentsMap.get(activeAnchorEnrollment.student_id)?.full_name || 'Scholar'}</strong>
-                </div>
-                <div>
-                  <span className="text-brand-muted font-mono uppercase text-[10px]">Enrolled At: </span>
-                  <span className="font-mono">{formatCalendarDate(activeAnchorEnrollment.enrolled_at.split('T')[0])}</span>
-                </div>
-                <div>
-                  <span className="text-brand-muted font-mono uppercase text-[10px]">Current Billing Start Date: </span>
-                  <strong className="font-mono text-teal-700">
-                    {activeAnchorEnrollment.billing_start_date
-                      ? formatCalendarDate(activeAnchorEnrollment.billing_start_date)
-                      : 'None'}
-                  </strong>
-                </div>
+            <div className="p-3 bg-brand-bg border border-brand-dark/20 text-xs space-y-1 font-sans">
+              <div className="font-bold text-brand-navy">
+                Scholar: {studentsMap.get(activeAnchorEnrollment.student_id)?.full_name || 'Scholar'}
               </div>
+              <div className="font-mono text-brand-muted text-[11px]">
+                Enrolled: {activeAnchorEnrollment.enrolled_at ? formatCalendarDate(activeAnchorEnrollment.enrolled_at.substring(0, 10)) : '—'}
+              </div>
+              <div className="font-mono text-brand-muted text-[11px]">
+                Current Anchor: {formatCalendarDate(activeAnchorEnrollment.billing_start_date || (activeAnchorEnrollment.enrolled_at?.substring(0, 10) || todayBD))}
+              </div>
+            </div>
 
-              <div className="space-y-1 pt-2">
-                <label className="font-heading font-bold text-brand-navy block uppercase text-[11px]">
-                  New Effective Billing Start Date (YYYY-MM-DD):
+            <form onSubmit={handleSaveBillingAnchor} className="space-y-3 text-xs font-sans">
+              <div>
+                <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+                  New Billing Start Date (YYYY-MM-DD):
                 </label>
                 <input
                   type="date"
+                  required
                   value={newAnchorDate}
                   onChange={(e) => setNewAnchorDate(e.target.value)}
-                  className="w-full p-2 text-xs font-mono border-2 border-brand-dark bg-white focus:outline-none"
+                  className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-heading font-bold text-brand-navy block uppercase text-[11px]">
-                  Mandatory Audit Reason:
+              <div>
+                <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+                  Operational Justification (Mandatory):
                 </label>
                 <textarea
-                  rows={2}
+                  rows={3}
+                  required
                   value={anchorOverrideReason}
                   onChange={(e) => setAnchorOverrideReason(e.target.value)}
-                  placeholder="e.g. Granted 1-month onboarding grace period or adjusted for late batch orientation..."
-                  className="w-full p-2 text-xs font-sans border-2 border-brand-dark bg-white focus:outline-none"
+                  placeholder="Explain why this scholar's anniversary anchor is being adjusted (e.g. extension, medical deferral, manual correction)..."
+                  className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
                 />
               </div>
 
-              <div className="p-2 bg-blue-50 border border-blue-200 text-blue-900 text-[11px]">
-                🛡️ <strong>Safety Guarantee:</strong> Changing the billing start date will anchor future cycle calculations. Historical payment records remain strictly preserved in the database.
+              <div className="p-2.5 bg-amber-50 border border-amber-300 text-amber-900 text-[11px]">
+                <strong>Audit Note: </strong>This modification will be permanently recorded in the immutable audit log and will set future monthly anniversary cycle boundaries. Past completed cycle records will not be altered.
               </div>
-            </div>
 
-            <div className="flex justify-between items-center pt-2 border-t border-brand-dark/20">
-              <button
-                type="button"
-                onClick={() => {
-                  setNewAnchorDate(activeAnchorEnrollment.enrolled_at.split('T')[0]);
-                  setAnchorOverrideReason('Reset billing start date to original enrollment date.');
-                }}
-                className="text-[11px] font-heading font-bold text-brand-muted hover:text-brand-dark underline"
-              >
-                Reset to Enrolled Date
-              </button>
-
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setIsBillingAnchorModalOpen(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={handleOverrideBillingAnchor}
-                  disabled={isOverridingAnchor}
+              <div className="flex justify-between items-center pt-2 border-t border-brand-dark/20">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const original = activeAnchorEnrollment.enrolled_at ? activeAnchorEnrollment.enrolled_at.substring(0, 10) : todayBD;
+                    setNewAnchorDate(original);
+                    setAnchorOverrideReason('Reset to initial enrollment calendar date.');
+                  }}
+                  className="text-brand-muted hover:text-brand-dark text-xs underline"
                 >
-                  {isOverridingAnchor ? 'Updating...' : 'Save & Audit'}
-                </Button>
+                  Reset to Enrolled Date
+                </button>
+
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" type="button" onClick={() => setIsBillingAnchorModalOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button variant="primary" size="sm" type="submit" disabled={isOverridingAnchor}>
+                    {isOverridingAnchor ? 'Saving...' : 'Save Anchor'}
+                  </Button>
+                </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// ==============================================================================
+// SUB-COMPONENT: DEDICATED STUDENT PAYMENT DETAILS DRAWER
+// ==============================================================================
+
+interface StudentPaymentDrawerProps {
+  record: StudentPaymentRecord;
+  studentsMap: Map<string, Profile>;
+  enrollmentsMap: Map<string, ProgramEnrollmentWithMeta>;
+  programsMap: Map<string, Program>;
+  allKnownReferences: Map<string, { type: string; id: string; date: string }>;
+  onClose: () => void;
+  onEdit: () => void;
+  onOpenAnchor: () => void;
+  onDelete: () => void;
+  onRefresh: () => void;
+}
+
+const StudentPaymentDrawer: React.FC<StudentPaymentDrawerProps> = ({
+  record,
+  studentsMap,
+  enrollmentsMap,
+  programsMap,
+  onClose,
+  onEdit,
+  onOpenAnchor,
+  onDelete,
+  onRefresh,
+}) => {
+  const student = studentsMap.get(record.student_id);
+  const enrollment = enrollmentsMap.get(record.enrollment_id);
+  const program = enrollment ? programsMap.get(enrollment.program_id) : null;
+
+  const [events, setEvents] = useState<PaymentEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [notes, setNotes] = useState<PaymentAdminNote[]>([]);
+  const [notesLoading, setNotesLoading] = useState(true);
+  const [newNote, setNewNote] = useState('');
+  const [isAddingNote, setIsAddingNote] = useState(false);
+
+  // New child event state inside drawer
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [eventMethod, setEventMethod] = useState<PaymentMethod>('bkash');
+  const [eventRef, setEventRef] = useState('');
+  const [eventDate, setEventDate] = useState(toBangladeshDateStr());
+  const [eventNote, setEventNote] = useState('');
+  const [isSubmittingEvent, setIsSubmittingEvent] = useState(false);
+
+  const loadDetails = useCallback(async () => {
+    setEventsLoading(true);
+    setNotesLoading(true);
+    try {
+      const [evtsRes, notesRes] = await Promise.all([
+        getPaymentEvents('student', record.id),
+        getPaymentAdminNotes('student_payment', record.id),
+      ]);
+      setEvents(evtsRes.events);
+      setNotes(notesRes.notes);
+    } catch {
+      // Non-fatal
+    } finally {
+      setEventsLoading(false);
+      setNotesLoading(false);
+    }
+  }, [record.id]);
+
+  useEffect(() => {
+    loadDetails();
+  }, [loadDetails]);
+
+  const handleSaveInlineNote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newNote.trim()) return;
+    setIsAddingNote(true);
+    try {
+      const res = await createPaymentAdminNote({
+        recordType: 'student_payment',
+        recordId: record.id,
+        note: newNote.trim(),
+      });
+      if (res.error) throw res.error;
+      if (res.note) {
+        setNotes((prev) => [res.note!, ...prev]);
+        setNewNote('');
+      }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to save note.');
+    } finally {
+      setIsAddingNote(false);
+    }
+  };
+
+  const handleSaveChildEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingEvent(true);
+    try {
+      const res = await createPaymentEvent({
+        record_type: 'student',
+        student_payment_id: record.id,
+        payment_method: eventMethod,
+        transaction_reference: eventRef.trim() || null,
+        payment_date: eventDate,
+        note: eventNote.trim() || null,
+      });
+      if (res.error) throw res.error;
+      if (res.event) {
+        setEvents((prev) => [res.event!, ...prev]);
+        setShowAddEvent(false);
+        setEventRef('');
+        setEventNote('');
+        onRefresh();
+      }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to create payment event.');
+    } finally {
+      setIsSubmittingEvent(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-brand-dark/60 flex justify-end">
+      <div className="bg-brand-paper border-l-2 border-brand-dark shadow-brutal w-full max-w-xl h-full flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
+        {/* Drawer Header */}
+        <div className="p-5 border-b-2 border-brand-dark bg-brand-navy text-white flex items-center justify-between sticky top-0 z-10">
+          <div className="space-y-0.5">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-brand-teal block">
+              Student Payment Record
+            </span>
+            <h2 className="font-heading font-extrabold text-base sm:text-lg">
+              {student?.full_name || 'Scholar'}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 border border-white/20 hover:bg-white/10 text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Drawer Body */}
+        <div className="p-5 space-y-6 flex-1 text-xs font-sans">
+          {/* Status Bar */}
+          <div className="p-3 bg-brand-bg border border-brand-dark/20 shadow-brutal-xs flex items-center justify-between">
+            <div>
+              <span className="font-mono text-[10px] uppercase text-brand-muted block">Current Status</span>
+              <div className="mt-0.5">{getStudentStatusBadge(record.status)}</div>
+            </div>
+
+            <div className="text-right">
+              <span className="font-mono text-[10px] uppercase text-brand-muted block">Renewal Due Date</span>
+              <span className="font-mono font-bold text-xs text-brand-navy">
+                {formatCalendarDate(record.next_due_date)}
+              </span>
+            </div>
+          </div>
+
+          {/* Section 1: Scholar & Academic Context */}
+          <div className="space-y-2">
+            <span className="font-heading font-bold text-brand-navy uppercase text-[11px] block border-b border-brand-dark/15 pb-1">
+              1. Scholar & Program Context
+            </span>
+            <div className="grid grid-cols-2 gap-3 p-3 bg-brand-bg border border-brand-dark/15">
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Scholar Name</span>
+                <span className="font-bold text-brand-navy">{student?.full_name || 'Scholar'}</span>
+              </div>
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">PoraPlan ID</span>
+                <span className="font-mono text-brand-dark">{student?.poraplan_id || '—'}</span>
+              </div>
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Program</span>
+                <span className="text-brand-dark">{program?.name || 'Program'}</span>
+              </div>
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Contact Email</span>
+                <span className="text-brand-muted truncate block">{student?.email || '—'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Cycle & Anniversary Information */}
+          <div className="space-y-2">
+            <span className="font-heading font-bold text-brand-navy uppercase text-[11px] block border-b border-brand-dark/15 pb-1">
+              2. Billing Cycle Schedule
+            </span>
+            <div className="grid grid-cols-2 gap-3 p-3 bg-brand-bg border border-brand-dark/15">
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Cycle Start Date</span>
+                <span className="font-mono font-bold text-brand-navy">{formatCalendarDate(record.cycle_start_date)}</span>
+              </div>
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Cycle End Date (Exclusive)</span>
+                <span className="font-mono text-brand-navy">{formatCalendarDate(record.cycle_end_date)}</span>
+              </div>
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Enrolled Date</span>
+                <span className="font-mono text-brand-muted">
+                  {enrollment?.enrolled_at ? formatCalendarDate(enrollment.enrolled_at.substring(0, 10)) : '—'}
+                </span>
+              </div>
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Billing Start Anchor</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono font-bold text-teal-700">
+                    {formatCalendarDate(enrollment?.billing_start_date || record.cycle_start_date)}
+                  </span>
+                  <button type="button" onClick={onOpenAnchor} className="text-[10px] text-brand-teal hover:underline font-bold">
+                    Edit
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Payment & Transaction Details */}
+          <div className="space-y-2">
+            <span className="font-heading font-bold text-brand-navy uppercase text-[11px] block border-b border-brand-dark/15 pb-1">
+              3. Payment Verification
+            </span>
+            <div className="grid grid-cols-2 gap-3 p-3 bg-brand-bg border border-brand-dark/15">
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Payment Method</span>
+                <span className="font-bold text-brand-navy">{formatPaymentMethod(record.payment_method)}</span>
+              </div>
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Payment Date</span>
+                <span className="font-mono text-brand-navy">{record.payment_date ? formatCalendarDate(record.payment_date) : 'Pending'}</span>
+              </div>
+              <div className="col-span-2">
+                <span className="font-mono text-[10px] text-brand-muted block">Transaction Reference</span>
+                <span className="font-mono text-xs font-bold text-brand-navy break-all">
+                  {record.transaction_reference || 'Not recorded'}
+                </span>
+              </div>
+              {record.waived_reason && (
+                <div className="col-span-2 p-2 bg-slate-100 border border-slate-300">
+                  <span className="font-bold text-slate-800 block text-[10px] uppercase">Waiver Justification:</span>
+                  <p className="text-slate-700 mt-0.5">{record.waived_reason}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Section 4: Child Events Timeline */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between border-b border-brand-dark/15 pb-1">
+              <span className="font-heading font-bold text-brand-navy uppercase text-[11px]">
+                4. Payment Events & Installments ({events.length})
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowAddEvent((prev) => !prev)}
+                className="text-brand-teal hover:underline text-[11px] font-bold flex items-center gap-1"
+              >
+                <Plus className="w-3 h-3" />
+                {showAddEvent ? 'Cancel' : 'Record Event'}
+              </button>
+            </div>
+
+            {/* Inline Event Form */}
+            {showAddEvent && (
+              <form onSubmit={handleSaveChildEvent} className="p-3 bg-brand-paper-tint border-2 border-brand-dark space-y-2">
+                <span className="font-bold text-brand-navy text-[11px] block">Record New Child Payment Event</span>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] font-mono uppercase text-brand-muted block">Method</label>
+                    <select
+                      value={eventMethod}
+                      onChange={(e) => setEventMethod(e.target.value as PaymentMethod)}
+                      className="w-full p-1 border border-brand-dark bg-white text-xs"
+                    >
+                      <option value="bkash">bKash</option>
+                      <option value="nagad">Nagad</option>
+                      <option value="upay">Upay</option>
+                      <option value="bank">Bank</option>
+                      <option value="cash">Cash</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-mono uppercase text-brand-muted block">Date</label>
+                    <input
+                      type="date"
+                      value={eventDate}
+                      onChange={(e) => setEventDate(e.target.value)}
+                      className="w-full p-1 border border-brand-dark bg-white text-xs font-mono"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-mono uppercase text-brand-muted block">Transaction Reference (Optional)</label>
+                  <input
+                    type="text"
+                    value={eventRef}
+                    onChange={(e) => setEventRef(e.target.value)}
+                    placeholder="e.g. TRX12345"
+                    className="w-full p-1 border border-brand-dark bg-white text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-mono uppercase text-brand-muted block">Event Note</label>
+                  <input
+                    type="text"
+                    value={eventNote}
+                    onChange={(e) => setEventNote(e.target.value)}
+                    placeholder="e.g. First partial payment received"
+                    className="w-full p-1 border border-brand-dark bg-white text-xs"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-1">
+                  <Button variant="outline" size="sm" type="button" onClick={() => setShowAddEvent(false)}>
+                    Cancel
+                  </Button>
+                  <Button variant="primary" size="sm" type="submit" disabled={isSubmittingEvent}>
+                    {isSubmittingEvent ? 'Saving...' : 'Save Event'}
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {eventsLoading ? (
+              <div className="p-3 text-brand-muted text-xs">Loading payment events...</div>
+            ) : events.length === 0 ? (
+              <div className="p-3 bg-brand-bg border border-brand-dark/15 text-brand-muted text-center text-xs">
+                No child payment events recorded for this cycle yet.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {events.map((evt) => (
+                  <div key={evt.id} className="p-2.5 bg-brand-bg border border-brand-dark/20 space-y-1">
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="font-bold text-brand-navy">{formatPaymentMethod(evt.payment_method)}</span>
+                      <span className="font-mono text-brand-muted">{formatCalendarDate(evt.payment_date)}</span>
+                    </div>
+                    {evt.transaction_reference && (
+                      <div className="font-mono text-[10px] text-brand-muted">
+                        Ref: {evt.transaction_reference}
+                      </div>
+                    )}
+                    {evt.note && (
+                      <p className="text-[11px] text-brand-dark italic bg-white/60 p-1 border border-brand-dark/10">
+                        "{evt.note}"
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 5: Private Admin Notes */}
+          <div className="space-y-2">
+            <span className="font-heading font-bold text-brand-navy uppercase text-[11px] block border-b border-brand-dark/15 pb-1">
+              5. Private Administrator Notes (Internal Only)
+            </span>
+
+            {notesLoading ? (
+              <div className="p-3 text-brand-muted text-xs">Loading notes...</div>
+            ) : notes.length === 0 ? (
+              <div className="p-3 bg-brand-bg border border-brand-dark/15 text-brand-muted text-center text-xs">
+                No private admin notes recorded yet.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {notes.map((n) => (
+                  <div key={n.id} className="p-2.5 bg-brand-bg border border-brand-dark/20 text-xs space-y-1">
+                    <p className="font-sans text-brand-dark">{n.note}</p>
+                    <span className="font-mono text-[10px] text-brand-muted block">
+                      {n.created_at ? formatLocalDate(new Date(n.created_at)) : '—'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add Note Form */}
+            <form onSubmit={handleSaveInlineNote} className="space-y-2 pt-2">
+              <input
+                type="text"
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                placeholder="Add private note (visible to admins only)..."
+                className="w-full p-2 border border-brand-dark bg-white text-xs"
+              />
+              <div className="flex justify-end">
+                <Button variant="outline" size="sm" type="submit" disabled={isAddingNote || !newNote.trim()}>
+                  {isAddingNote ? 'Saving...' : 'Add Note'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Drawer Action Footer */}
+        <div className="p-4 border-t-2 border-brand-dark bg-brand-paper flex items-center justify-between gap-2 sticky bottom-0">
+          <Button variant="outline" size="sm" onClick={onDelete} className="text-red-700 border-red-300 hover:bg-red-50" leftIcon={<Trash2 className="w-3.5 h-3.5" />}>
+            Delete
+          </Button>
+
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={onOpenAnchor}>
+              Anchor
+            </Button>
+            <Button variant="primary" size="sm" onClick={onEdit} leftIcon={<Edit2 className="w-3.5 h-3.5" />}>
+              Update Status
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==============================================================================
+// SUB-COMPONENT: DEDICATED MENTOR PAYOUT RECORD DETAILS DRAWER
+// ==============================================================================
+
+interface MentorPayoutDrawerProps {
+  record: MentorPaymentRecord;
+  mentorsMap: Map<string, Profile>;
+  studentsMap: Map<string, Profile>;
+  allKnownReferences: Map<string, { type: string; id: string; date: string }>;
+  onClose: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onRefresh: () => void;
+}
+
+const MentorPayoutDrawer: React.FC<MentorPayoutDrawerProps> = ({
+  record,
+  mentorsMap,
+  studentsMap,
+  onClose,
+  onEdit,
+  onDelete,
+  onRefresh,
+}) => {
+  const mentor = mentorsMap.get(record.mentor_id);
+  const student = record.related_student_id ? studentsMap.get(record.related_student_id) : null;
+
+  const [events, setEvents] = useState<PaymentEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [notes, setNotes] = useState<PaymentAdminNote[]>([]);
+  const [notesLoading, setNotesLoading] = useState(true);
+  const [newNote, setNewNote] = useState('');
+  const [isAddingNote, setIsAddingNote] = useState(false);
+
+  // New child event inside mentor drawer
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [eventMethod, setEventMethod] = useState<PaymentMethod>('bank');
+  const [eventRef, setEventRef] = useState('');
+  const [eventDate, setEventDate] = useState(toBangladeshDateStr());
+  const [eventNote, setEventNote] = useState('');
+  const [isSubmittingEvent, setIsSubmittingEvent] = useState(false);
+
+  const loadDetails = useCallback(async () => {
+    setEventsLoading(true);
+    setNotesLoading(true);
+    try {
+      const [evtsRes, notesRes] = await Promise.all([
+        getPaymentEvents('mentor', record.id),
+        getPaymentAdminNotes('mentor_payment', record.id),
+      ]);
+      setEvents(evtsRes.events);
+      setNotes(notesRes.notes);
+    } catch {
+      // Non-fatal
+    } finally {
+      setEventsLoading(false);
+      setNotesLoading(false);
+    }
+  }, [record.id]);
+
+  useEffect(() => {
+    loadDetails();
+  }, [loadDetails]);
+
+  const handleSaveInlineNote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newNote.trim()) return;
+    setIsAddingNote(true);
+    try {
+      const res = await createPaymentAdminNote({
+        recordType: 'mentor_payment',
+        recordId: record.id,
+        note: newNote.trim(),
+      });
+      if (res.error) throw res.error;
+      if (res.note) {
+        setNotes((prev) => [res.note!, ...prev]);
+        setNewNote('');
+      }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to save note.');
+    } finally {
+      setIsAddingNote(false);
+    }
+  };
+
+  const handleSaveChildEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingEvent(true);
+    try {
+      const res = await createPaymentEvent({
+        record_type: 'mentor',
+        mentor_payment_id: record.id,
+        payment_method: eventMethod,
+        transaction_reference: eventRef.trim() || null,
+        payment_date: eventDate,
+        note: eventNote.trim() || null,
+      });
+      if (res.error) throw res.error;
+      if (res.event) {
+        setEvents((prev) => [res.event!, ...prev]);
+        setShowAddEvent(false);
+        setEventRef('');
+        setEventNote('');
+        onRefresh();
+      }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to create payout event.');
+    } finally {
+      setIsSubmittingEvent(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-brand-dark/60 flex justify-end">
+      <div className="bg-brand-paper border-l-2 border-brand-dark shadow-brutal w-full max-w-xl h-full flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
+        {/* Drawer Header */}
+        <div className="p-5 border-b-2 border-brand-dark bg-brand-navy text-white flex items-center justify-between sticky top-0 z-10">
+          <div className="space-y-0.5">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-brand-teal block">
+              Mentor Payout Record
+            </span>
+            <h2 className="font-heading font-extrabold text-base sm:text-lg">
+              {mentor?.full_name || 'Mentor'}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 border border-white/20 hover:bg-white/10 text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Drawer Body */}
+        <div className="p-5 space-y-6 flex-1 text-xs font-sans">
+          {/* Status Bar */}
+          <div className="p-3 bg-brand-bg border border-brand-dark/20 shadow-brutal-xs flex items-center justify-between">
+            <div>
+              <span className="font-mono text-[10px] uppercase text-brand-muted block">Payout Status</span>
+              <div className="mt-0.5">{getMentorStatusBadge(record.status)}</div>
+            </div>
+
+            <div className="text-right">
+              <span className="font-mono text-[10px] uppercase text-brand-muted block">Billing Month</span>
+              <span className="font-heading font-extrabold text-sm text-brand-navy">
+                {formatBillingMonth(record.billing_month)}
+              </span>
+            </div>
+          </div>
+
+          {/* Section 1: Mentor Context */}
+          <div className="space-y-2">
+            <span className="font-heading font-bold text-brand-navy uppercase text-[11px] block border-b border-brand-dark/15 pb-1">
+              1. Mentor & Allocation Context
+            </span>
+            <div className="grid grid-cols-2 gap-3 p-3 bg-brand-bg border border-brand-dark/15">
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Mentor Name</span>
+                <span className="font-bold text-brand-navy">{mentor?.full_name || 'Mentor'}</span>
+              </div>
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Email Address</span>
+                <span className="text-brand-muted truncate block">{mentor?.email || '—'}</span>
+              </div>
+              <div className="col-span-2">
+                <span className="font-mono text-[10px] text-brand-muted block">Related Scholar Context</span>
+                <span className="text-brand-dark">{student ? `Dedicated: ${student.full_name}` : 'Cohort / Platform Mentorship Pool'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Disbursement Information */}
+          <div className="space-y-2">
+            <span className="font-heading font-bold text-brand-navy uppercase text-[11px] block border-b border-brand-dark/15 pb-1">
+              2. Disbursement Details
+            </span>
+            <div className="grid grid-cols-2 gap-3 p-3 bg-brand-bg border border-brand-dark/15">
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Payment Method</span>
+                <span className="font-bold text-brand-navy">{formatPaymentMethod(record.payment_method)}</span>
+              </div>
+              <div>
+                <span className="font-mono text-[10px] text-brand-muted block">Disbursement Date</span>
+                <span className="font-mono text-brand-navy">{record.payout_date ? formatCalendarDate(record.payout_date) : 'Pending'}</span>
+              </div>
+              <div className="col-span-2">
+                <span className="font-mono text-[10px] text-brand-muted block">Transaction Reference</span>
+                <span className="font-mono text-xs font-bold text-brand-navy break-all">
+                  {record.transaction_reference || 'Not recorded'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Child Payout Events */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between border-b border-brand-dark/15 pb-1">
+              <span className="font-heading font-bold text-brand-navy uppercase text-[11px]">
+                3. Child Payout Events ({events.length})
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowAddEvent((prev) => !prev)}
+                className="text-brand-teal hover:underline text-[11px] font-bold flex items-center gap-1"
+              >
+                <Plus className="w-3 h-3" />
+                {showAddEvent ? 'Cancel' : 'Record Event'}
+              </button>
+            </div>
+
+            {showAddEvent && (
+              <form onSubmit={handleSaveChildEvent} className="p-3 bg-brand-paper-tint border-2 border-brand-dark space-y-2">
+                <span className="font-bold text-brand-navy text-[11px] block">Record Child Payout Event</span>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] font-mono uppercase text-brand-muted block">Method</label>
+                    <select
+                      value={eventMethod}
+                      onChange={(e) => setEventMethod(e.target.value as PaymentMethod)}
+                      className="w-full p-1 border border-brand-dark bg-white text-xs"
+                    >
+                      <option value="bank">Bank Transfer</option>
+                      <option value="bkash">bKash</option>
+                      <option value="nagad">Nagad</option>
+                      <option value="upay">Upay</option>
+                      <option value="cash">Cash</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-mono uppercase text-brand-muted block">Date</label>
+                    <input
+                      type="date"
+                      value={eventDate}
+                      onChange={(e) => setEventDate(e.target.value)}
+                      className="w-full p-1 border border-brand-dark bg-white text-xs font-mono"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-mono uppercase text-brand-muted block">Transaction Reference (Optional)</label>
+                  <input
+                    type="text"
+                    value={eventRef}
+                    onChange={(e) => setEventRef(e.target.value)}
+                    placeholder="e.g. MNTR-TRX-101"
+                    className="w-full p-1 border border-brand-dark bg-white text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-mono uppercase text-brand-muted block">Event Note</label>
+                  <input
+                    type="text"
+                    value={eventNote}
+                    onChange={(e) => setEventNote(e.target.value)}
+                    placeholder="e.g. Disbursement processed via bank wire"
+                    className="w-full p-1 border border-brand-dark bg-white text-xs"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-1">
+                  <Button variant="outline" size="sm" type="button" onClick={() => setShowAddEvent(false)}>
+                    Cancel
+                  </Button>
+                  <Button variant="primary" size="sm" type="submit" disabled={isSubmittingEvent}>
+                    {isSubmittingEvent ? 'Saving...' : 'Save Event'}
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {eventsLoading ? (
+              <div className="p-3 text-brand-muted text-xs">Loading payout events...</div>
+            ) : events.length === 0 ? (
+              <div className="p-3 bg-brand-bg border border-brand-dark/15 text-brand-muted text-center text-xs">
+                No child payout events recorded for this month yet.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {events.map((evt) => (
+                  <div key={evt.id} className="p-2.5 bg-brand-bg border border-brand-dark/20 space-y-1">
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="font-bold text-brand-navy">{formatPaymentMethod(evt.payment_method)}</span>
+                      <span className="font-mono text-brand-muted">{formatCalendarDate(evt.payment_date)}</span>
+                    </div>
+                    {evt.transaction_reference && (
+                      <div className="font-mono text-[10px] text-brand-muted">
+                        Ref: {evt.transaction_reference}
+                      </div>
+                    )}
+                    {evt.note && (
+                      <p className="text-[11px] text-brand-dark italic bg-white/60 p-1 border border-brand-dark/10">
+                        "{evt.note}"
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 4: Private Admin Notes */}
+          <div className="space-y-2">
+            <span className="font-heading font-bold text-brand-navy uppercase text-[11px] block border-b border-brand-dark/15 pb-1">
+              4. Private Administrator Notes
+            </span>
+
+            {notesLoading ? (
+              <div className="p-3 text-brand-muted text-xs">Loading notes...</div>
+            ) : notes.length === 0 ? (
+              <div className="p-3 bg-brand-bg border border-brand-dark/15 text-brand-muted text-center text-xs">
+                No private admin notes recorded yet.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {notes.map((n) => (
+                  <div key={n.id} className="p-2.5 bg-brand-bg border border-brand-dark/20 text-xs space-y-1">
+                    <p className="font-sans text-brand-dark">{n.note}</p>
+                    <span className="font-mono text-[10px] text-brand-muted block">
+                      {n.created_at ? formatLocalDate(new Date(n.created_at)) : '—'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <form onSubmit={handleSaveInlineNote} className="space-y-2 pt-2">
+              <input
+                type="text"
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                placeholder="Add private note (visible to admins only)..."
+                className="w-full p-2 border border-brand-dark bg-white text-xs"
+              />
+              <div className="flex justify-end">
+                <Button variant="outline" size="sm" type="submit" disabled={isAddingNote || !newNote.trim()}>
+                  {isAddingNote ? 'Saving...' : 'Add Note'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Drawer Action Footer */}
+        <div className="p-4 border-t-2 border-brand-dark bg-brand-paper flex items-center justify-between gap-2 sticky bottom-0">
+          <Button variant="outline" size="sm" onClick={onDelete} className="text-red-700 border-red-300 hover:bg-red-50" leftIcon={<Trash2 className="w-3.5 h-3.5" />}>
+            Delete
+          </Button>
+
+          <Button variant="primary" size="sm" onClick={onEdit} leftIcon={<Edit2 className="w-3.5 h-3.5" />}>
+            Update Status
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
@@ -1380,11 +2891,10 @@ const CreateStudentPaymentModal: React.FC<CreateStudentModalProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('');
   const [transactionRef, setTransactionRef] = useState('');
   const [paymentDate, setPaymentDate] = useState('');
-  const [waivedReason, setWaivedReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-recalculate cycle end & due date when start date changes
+  // Recalculate end/due date when start date changes
   const handleStartDateChange = (newStart: string) => {
     setCycleStartDate(newStart);
     if (isValidCalendarDate(newStart)) {
@@ -1403,17 +2913,13 @@ const CreateStudentPaymentModal: React.FC<CreateStudentModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEnrollmentId) {
-      setError('Please select an active scholar enrollment.');
-      return;
-    }
-    const enrollment = enrollments.find((en) => en.id === selectedEnrollmentId);
-    if (!enrollment) {
-      setError('Selected enrollment not found.');
+      setError('Please select an active program enrollment.');
       return;
     }
 
-    if (status === 'waived' && !waivedReason.trim()) {
-      setError('A waiver reason is required when status is set to Waived.');
+    const enrollment = enrollments.find((enr) => enr.id === selectedEnrollmentId);
+    if (!enrollment) {
+      setError('Invalid enrollment selected.');
       return;
     }
 
@@ -1430,14 +2936,13 @@ const CreateStudentPaymentModal: React.FC<CreateStudentModalProps> = ({
         status,
         payment_method: paymentMethod ? (paymentMethod as PaymentMethod) : null,
         transaction_reference: transactionRef.trim() || null,
-        payment_date: paymentDate ? paymentDate : status === 'paid' ? toBangladeshDateStr() : null,
-        waived_reason: status === 'waived' ? waivedReason.trim() : null,
+        payment_date: paymentDate || null,
       });
 
       if (res.error) throw res.error;
       onSuccess();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to record student payment.');
+      setError(err instanceof Error ? err.message : 'Failed to create student payment cycle.');
     } finally {
       setIsSubmitting(false);
     }
@@ -1457,26 +2962,29 @@ const CreateStudentPaymentModal: React.FC<CreateStudentModalProps> = ({
         </div>
 
         {error && (
-          <div className="p-2.5 bg-red-100 border border-red-400 text-red-900 text-xs">
+          <div className="p-3 bg-red-50 border border-red-500 text-red-900 text-xs font-bold">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs font-sans">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
+          {/* Step 1: Select Enrollment */}
           <div>
-            <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-              Select Scholar Enrollment:
+            <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+              Select Enrolled Scholar:
             </label>
             <select
+              required
               value={selectedEnrollmentId}
               onChange={(e) => setSelectedEnrollmentId(e.target.value)}
-              className="w-full p-2 border-2 border-brand-dark bg-white text-xs font-sans focus:outline-none"
+              className="w-full p-2 border-2 border-brand-dark bg-white font-sans text-xs focus:outline-none"
             >
-              {enrollments.map((en) => {
-                const s = studentsMap.get(en.student_id);
-                const p = programsMap.get(en.program_id);
+              <option value="">-- Choose active enrollment --</option>
+              {enrollments.map((enr) => {
+                const s = studentsMap.get(enr.student_id);
+                const p = programsMap.get(enr.program_id);
                 return (
-                  <option key={en.id} value={en.id}>
+                  <option key={enr.id} value={enr.id}>
                     {s?.full_name || 'Scholar'} ({s?.poraplan_id || ''}) — {p?.name || 'Program'}
                   </option>
                 );
@@ -1484,9 +2992,10 @@ const CreateStudentPaymentModal: React.FC<CreateStudentModalProps> = ({
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          {/* Step 2: Cycle Dates */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
                 Cycle Start Date:
               </label>
               <input
@@ -1497,8 +3006,9 @@ const CreateStudentPaymentModal: React.FC<CreateStudentModalProps> = ({
                 className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
               />
             </div>
+
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
                 Cycle End Date:
               </label>
               <input
@@ -1509,11 +3019,9 @@ const CreateStudentPaymentModal: React.FC<CreateStudentModalProps> = ({
                 className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
                 Next Due Date:
               </label>
               <input
@@ -1524,14 +3032,18 @@ const CreateStudentPaymentModal: React.FC<CreateStudentModalProps> = ({
                 className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
               />
             </div>
+          </div>
+
+          {/* Step 3: Status & Method */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
                 Payment Status:
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as StudentPaymentStatus)}
-                className="w-full p-2 border-2 border-brand-dark bg-white text-xs font-sans focus:outline-none"
+                className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
               >
                 <option value="pending">Pending</option>
                 <option value="partial">Partial</option>
@@ -1540,28 +3052,43 @@ const CreateStudentPaymentModal: React.FC<CreateStudentModalProps> = ({
                 <option value="waived">Waived</option>
               </select>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
                 Payment Method:
               </label>
               <select
                 value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod | '')}
-                className="w-full p-2 border-2 border-brand-dark bg-white text-xs font-sans focus:outline-none"
+                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
               >
-                <option value="">None / Not recorded</option>
+                <option value="">None / Pending</option>
                 <option value="bkash">bKash</option>
                 <option value="nagad">Nagad</option>
                 <option value="upay">Upay</option>
-                <option value="cash">Cash</option>
                 <option value="bank">Bank Transfer</option>
+                <option value="cash">Cash</option>
               </select>
             </div>
+          </div>
+
+          {/* Step 4: Transaction Reference & Payment Date */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+                Transaction Reference:
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. TRX1029384"
+                value={transactionRef}
+                onChange={(e) => setTransactionRef(e.target.value)}
+                className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
                 Payment Date:
               </label>
               <input
@@ -1573,40 +3100,13 @@ const CreateStudentPaymentModal: React.FC<CreateStudentModalProps> = ({
             </div>
           </div>
 
-          <div>
-            <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-              Transaction Reference:
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. TRX101928"
-              value={transactionRef}
-              onChange={(e) => setTransactionRef(e.target.value)}
-              className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
-            />
-            {duplicateWarning && (
-              <div className="mt-1 p-2 bg-amber-50 border border-amber-300 text-amber-900 text-[11px] flex items-start gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                <span>
-                  <strong>Duplicate Warning:</strong> Reference matches existing {duplicateWarning.type} recorded on {duplicateWarning.date}. Please verify to prevent duplicate ledger entries.
-                </span>
-              </div>
-            )}
-          </div>
-
-          {status === 'waived' && (
-            <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-                Waived Reason (Mandatory):
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Merit scholarship waiver or foundation aid"
-                value={waivedReason}
-                onChange={(e) => setWaivedReason(e.target.value)}
-                className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
-              />
+          {/* Duplicate Reference Warning Callout */}
+          {duplicateWarning && (
+            <div className="p-2.5 bg-amber-50 border border-amber-300 text-amber-900 text-[11px] flex items-start gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>Duplicate Warning:</strong> Reference matches existing {duplicateWarning.type} recorded on {duplicateWarning.date}.
+              </span>
             </div>
           )}
 
@@ -1629,7 +3129,6 @@ const CreateStudentPaymentModal: React.FC<CreateStudentModalProps> = ({
 // ==============================================================================
 interface EditStudentModalProps {
   record: StudentPaymentRecord;
-  student?: Profile;
   allKnownReferences: Map<string, { type: string; id: string; date: string }>;
   onClose: () => void;
   onSuccess: () => void;
@@ -1637,7 +3136,6 @@ interface EditStudentModalProps {
 
 const EditStudentPaymentModal: React.FC<EditStudentModalProps> = ({
   record,
-  student,
   allKnownReferences,
   onClose,
   onSuccess,
@@ -1646,7 +3144,7 @@ const EditStudentPaymentModal: React.FC<EditStudentModalProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>(record.payment_method || '');
   const [transactionRef, setTransactionRef] = useState(record.transaction_reference || '');
   const [paymentDate, setPaymentDate] = useState(record.payment_date || '');
-  const [nextDueDate, setNextDueDate] = useState(record.next_due_date || '');
+  const [nextDueDate, setNextDueDate] = useState(record.next_due_date);
   const [waivedReason, setWaivedReason] = useState(record.waived_reason || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1701,27 +3199,29 @@ const EditStudentPaymentModal: React.FC<EditStudentModalProps> = ({
           </button>
         </div>
 
-        <div className="p-2 bg-brand-bg border border-brand-dark/20 text-xs">
-          <strong>Scholar: </strong>{student?.full_name || 'Scholar'} ({student?.poraplan_id || ''}) •
-          Cycle: {formatCalendarDate(record.cycle_start_date)} – {formatCalendarDate(record.cycle_end_date)}
-        </div>
-
         {error && (
-          <div className="p-2.5 bg-red-100 border border-red-400 text-red-900 text-xs">
+          <div className="p-3 bg-red-50 border border-red-500 text-red-900 text-xs font-bold">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs font-sans">
-          <div className="grid grid-cols-2 gap-3">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
+          <div className="p-3 bg-brand-bg border border-brand-dark/20 text-xs">
+            <span className="font-mono text-brand-muted text-[10px] block">Billing Cycle:</span>
+            <span className="font-mono font-bold text-brand-navy">
+              {formatCalendarDate(record.cycle_start_date)} – {formatCalendarDate(record.cycle_end_date)}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-                Status:
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+                Payment Status:
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as StudentPaymentStatus)}
-                className="w-full p-2 border-2 border-brand-dark bg-white text-xs font-sans focus:outline-none"
+                className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
               >
                 <option value="pending">Pending</option>
                 <option value="partial">Partial</option>
@@ -1730,40 +3230,41 @@ const EditStudentPaymentModal: React.FC<EditStudentModalProps> = ({
                 <option value="waived">Waived</option>
               </select>
             </div>
-            <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-                Next Due Date:
-              </label>
-              <input
-                type="date"
-                required
-                value={nextDueDate}
-                onChange={(e) => setNextDueDate(e.target.value)}
-                className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
-              />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
                 Payment Method:
               </label>
               <select
                 value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod | '')}
-                className="w-full p-2 border-2 border-brand-dark bg-white text-xs font-sans focus:outline-none"
+                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
               >
-                <option value="">None / Not recorded</option>
+                <option value="">None / Pending</option>
                 <option value="bkash">bKash</option>
                 <option value="nagad">Nagad</option>
                 <option value="upay">Upay</option>
-                <option value="cash">Cash</option>
                 <option value="bank">Bank Transfer</option>
+                <option value="cash">Cash</option>
               </select>
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+                Transaction Reference:
+              </label>
+              <input
+                type="text"
+                value={transactionRef}
+                onChange={(e) => setTransactionRef(e.target.value)}
+                className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
                 Payment Date:
               </label>
               <input
@@ -1776,39 +3277,39 @@ const EditStudentPaymentModal: React.FC<EditStudentModalProps> = ({
           </div>
 
           <div>
-            <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-              Transaction Reference:
+            <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+              Next Due Date:
             </label>
             <input
-              type="text"
-              placeholder="e.g. TRX101928"
-              value={transactionRef}
-              onChange={(e) => setTransactionRef(e.target.value)}
+              type="date"
+              value={nextDueDate}
+              onChange={(e) => setNextDueDate(e.target.value)}
               className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
             />
-            {duplicateWarning && (
-              <div className="mt-1 p-2 bg-amber-50 border border-amber-300 text-amber-900 text-[11px] flex items-start gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                <span>
-                  <strong>Duplicate Warning:</strong> Reference matches existing {duplicateWarning.type} recorded on {duplicateWarning.date}. Please verify to prevent duplicate entries.
-                </span>
-              </div>
-            )}
           </div>
 
           {status === 'waived' && (
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-                Waived Reason (Mandatory):
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+                Waiver Reason (Mandatory):
               </label>
-              <input
-                type="text"
+              <textarea
+                rows={2}
                 required
-                placeholder="e.g. Special scholarship waiver or family hardship"
                 value={waivedReason}
                 onChange={(e) => setWaivedReason(e.target.value)}
+                placeholder="Explain why this scholar cycle is waived (scholarship, administrative override)..."
                 className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
               />
+            </div>
+          )}
+
+          {duplicateWarning && (
+            <div className="p-2.5 bg-amber-50 border border-amber-300 text-amber-900 text-[11px] flex items-start gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>Duplicate Warning:</strong> Reference matches existing {duplicateWarning.type} recorded on {duplicateWarning.date}.
+              </span>
             </div>
           )}
 
@@ -1817,7 +3318,7 @@ const EditStudentPaymentModal: React.FC<EditStudentModalProps> = ({
               Cancel
             </Button>
             <Button variant="primary" size="sm" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Updates'}
+              {isSubmitting ? 'Updating...' : 'Save Updates'}
             </Button>
           </div>
         </form>
@@ -1845,12 +3346,10 @@ const CreateMentorPayoutModal: React.FC<CreateMentorModalProps> = ({
   onSuccess,
 }) => {
   const [selectedMentorId, setSelectedMentorId] = useState(mentors[0]?.id || '');
-  const [relatedStudentId, setRelatedStudentId] = useState<string>('');
+  const [relatedStudentId, setRelatedStudentId] = useState('');
   const [billingMonth, setBillingMonth] = useState(() => {
-    const today = new Date();
-    const y = today.getFullYear();
-    const m = String(today.getMonth() + 1).padStart(2, '0');
-    return `${y}-${m}`;
+    const today = toBangladeshDateStr();
+    return today.substring(0, 7);
   });
   const [status, setStatus] = useState<MentorPaymentStatus>('pending');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('');
@@ -1883,13 +3382,13 @@ const CreateMentorPayoutModal: React.FC<CreateMentorModalProps> = ({
         status,
         payment_method: paymentMethod ? (paymentMethod as PaymentMethod) : null,
         transaction_reference: transactionRef.trim() || null,
-        payout_date: payoutDate ? payoutDate : status === 'paid' ? toBangladeshDateStr() : null,
+        payout_date: payoutDate || null,
       });
 
       if (res.error) throw res.error;
       onSuccess();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to record mentor payout.');
+      setError(err instanceof Error ? err.message : 'Failed to create mentor payout record.');
     } finally {
       setIsSubmitting(false);
     }
@@ -1909,51 +3408,53 @@ const CreateMentorPayoutModal: React.FC<CreateMentorModalProps> = ({
         </div>
 
         {error && (
-          <div className="p-2.5 bg-red-100 border border-red-400 text-red-900 text-xs">
+          <div className="p-3 bg-red-50 border border-red-500 text-red-900 text-xs font-bold">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs font-sans">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
           <div>
-            <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+            <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
               Select Mentor:
             </label>
             <select
+              required
               value={selectedMentorId}
               onChange={(e) => setSelectedMentorId(e.target.value)}
-              className="w-full p-2 border-2 border-brand-dark bg-white text-xs font-sans focus:outline-none"
+              className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
             >
+              <option value="">-- Choose mentor --</option>
               {mentors.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.full_name || 'Mentor'} ({m.poraplan_id || ''})
+                  {m.full_name} ({m.email})
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
                 Billing Month (YYYY-MM):
               </label>
               <input
-                type="text"
+                type="month"
                 required
-                placeholder="2026-11"
                 value={billingMonth}
                 onChange={(e) => setBillingMonth(e.target.value)}
                 className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
               />
             </div>
+
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
                 Payout Status:
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as MentorPaymentStatus)}
-                className="w-full p-2 border-2 border-brand-dark bg-white text-xs font-sans focus:outline-none"
+                className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
               >
                 <option value="pending">Pending</option>
                 <option value="partial">Partial</option>
@@ -1962,27 +3463,46 @@ const CreateMentorPayoutModal: React.FC<CreateMentorModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+              Related Scholar Context (Optional):
+            </label>
+            <select
+              value={relatedStudentId}
+              onChange={(e) => setRelatedStudentId(e.target.value)}
+              className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
+            >
+              <option value="">-- General / Cohort Pool Payout --</option>
+              {students.map((s) => (
+                <option key={s.id} value={s.id}>
+                  Scholar: {s.full_name} ({s.poraplan_id || ''})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
                 Payment Method:
               </label>
               <select
                 value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod | '')}
-                className="w-full p-2 border-2 border-brand-dark bg-white text-xs font-sans focus:outline-none"
+                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
               >
-                <option value="">None / Not recorded</option>
+                <option value="">None / Pending</option>
+                <option value="bank">Bank Transfer</option>
                 <option value="bkash">bKash</option>
                 <option value="nagad">Nagad</option>
                 <option value="upay">Upay</option>
                 <option value="cash">Cash</option>
-                <option value="bank">Bank Transfer</option>
               </select>
             </div>
+
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-                Payout Date:
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+                Disbursement Date:
               </label>
               <input
                 type="date"
@@ -1994,50 +3514,33 @@ const CreateMentorPayoutModal: React.FC<CreateMentorModalProps> = ({
           </div>
 
           <div>
-            <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-              Transaction Reference:
+            <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+              Transaction Reference (Optional):
             </label>
             <input
               type="text"
-              placeholder="e.g. MPR-EBL-1026"
+              placeholder="e.g. MTRX-202611-01"
               value={transactionRef}
               onChange={(e) => setTransactionRef(e.target.value)}
               className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
             />
-            {duplicateWarning && (
-              <div className="mt-1 p-2 bg-amber-50 border border-amber-300 text-amber-900 text-[11px] flex items-start gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                <span>
-                  <strong>Duplicate Warning:</strong> Reference matches existing {duplicateWarning.type} recorded on {duplicateWarning.date}.
-                </span>
-              </div>
-            )}
           </div>
 
-          <div>
-            <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-              Linked Scholar Context (Optional):
-            </label>
-            <select
-              value={relatedStudentId}
-              onChange={(e) => setRelatedStudentId(e.target.value)}
-              className="w-full p-2 border-2 border-brand-dark bg-white text-xs font-sans focus:outline-none"
-            >
-              <option value="">General Cohort Mentorship (None)</option>
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.full_name} ({s.poraplan_id || ''})
-                </option>
-              ))}
-            </select>
-          </div>
+          {duplicateWarning && (
+            <div className="p-2.5 bg-amber-50 border border-amber-300 text-amber-900 text-[11px] flex items-start gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>Duplicate Warning:</strong> Reference matches existing {duplicateWarning.type} recorded on {duplicateWarning.date}.
+              </span>
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 pt-3 border-t border-brand-dark/20">
             <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Cancel
             </Button>
             <Button variant="primary" size="sm" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Recording...' : 'Record Mentor Payout'}
+              {isSubmitting ? 'Recording...' : 'Record Payout'}
             </Button>
           </div>
         </form>
@@ -2051,7 +3554,6 @@ const CreateMentorPayoutModal: React.FC<CreateMentorModalProps> = ({
 // ==============================================================================
 interface EditMentorModalProps {
   record: MentorPaymentRecord;
-  mentor?: Profile;
   allKnownReferences: Map<string, { type: string; id: string; date: string }>;
   onClose: () => void;
   onSuccess: () => void;
@@ -2059,7 +3561,6 @@ interface EditMentorModalProps {
 
 const EditMentorPayoutModal: React.FC<EditMentorModalProps> = ({
   record,
-  mentor,
   allKnownReferences,
   onClose,
   onSuccess,
@@ -2114,36 +3615,71 @@ const EditMentorPayoutModal: React.FC<EditMentorModalProps> = ({
           </button>
         </div>
 
-        <div className="p-2 bg-brand-bg border border-brand-dark/20 text-xs">
-          <strong>Mentor: </strong>{mentor?.full_name || 'Mentor'} ({mentor?.poraplan_id || ''}) •
-          Month: {formatBillingMonth(record.billing_month)}
-        </div>
-
         {error && (
-          <div className="p-2.5 bg-red-100 border border-red-400 text-red-900 text-xs">
+          <div className="p-3 bg-red-50 border border-red-500 text-red-900 text-xs font-bold">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs font-sans">
-          <div className="grid grid-cols-2 gap-3">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
+          <div className="p-3 bg-brand-bg border border-brand-dark/20 text-xs">
+            <span className="font-mono text-brand-muted text-[10px] block">Billing Month:</span>
+            <span className="font-heading font-bold text-brand-navy">
+              {formatBillingMonth(record.billing_month)}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-                Status:
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+                Payout Status:
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as MentorPaymentStatus)}
-                className="w-full p-2 border-2 border-brand-dark bg-white text-xs font-sans focus:outline-none"
+                className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
               >
                 <option value="pending">Pending</option>
                 <option value="partial">Partial</option>
                 <option value="paid">Paid</option>
               </select>
             </div>
+
             <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-                Payout Date:
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+                Payment Method:
+              </label>
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                className="w-full p-2 border-2 border-brand-dark bg-white text-xs focus:outline-none"
+              >
+                <option value="">None / Pending</option>
+                <option value="bank">Bank Transfer</option>
+                <option value="bkash">bKash</option>
+                <option value="nagad">Nagad</option>
+                <option value="upay">Upay</option>
+                <option value="cash">Cash</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+                Transaction Reference:
+              </label>
+              <input
+                type="text"
+                value={transactionRef}
+                onChange={(e) => setTransactionRef(e.target.value)}
+                className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="font-heading font-bold uppercase text-brand-navy block mb-1">
+                Disbursement Date:
               </label>
               <input
                 type="date"
@@ -2154,40 +3690,8 @@ const EditMentorPayoutModal: React.FC<EditMentorModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-                Payment Method:
-              </label>
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod | '')}
-                className="w-full p-2 border-2 border-brand-dark bg-white text-xs font-sans focus:outline-none"
-              >
-                <option value="">None / Not recorded</option>
-                <option value="bkash">bKash</option>
-                <option value="nagad">Nagad</option>
-                <option value="upay">Upay</option>
-                <option value="cash">Cash</option>
-                <option value="bank">Bank Transfer</option>
-              </select>
-            </div>
-            <div>
-              <label className="font-heading font-bold text-brand-navy block uppercase text-[11px] mb-1">
-                Transaction Reference:
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. MPR-EBL-1026"
-                value={transactionRef}
-                onChange={(e) => setTransactionRef(e.target.value)}
-                className="w-full p-2 border-2 border-brand-dark bg-white font-mono text-xs focus:outline-none"
-              />
-            </div>
-          </div>
-
           {duplicateWarning && (
-            <div className="mt-1 p-2 bg-amber-50 border border-amber-300 text-amber-900 text-[11px] flex items-start gap-1.5">
+            <div className="p-2.5 bg-amber-50 border border-amber-300 text-amber-900 text-[11px] flex items-start gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
               <span>
                 <strong>Duplicate Warning:</strong> Reference matches existing {duplicateWarning.type} recorded on {duplicateWarning.date}.
@@ -2200,7 +3704,7 @@ const EditMentorPayoutModal: React.FC<EditMentorModalProps> = ({
               Cancel
             </Button>
             <Button variant="primary" size="sm" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Updates'}
+              {isSubmitting ? 'Updating...' : 'Save Updates'}
             </Button>
           </div>
         </form>
@@ -2215,7 +3719,7 @@ const EditMentorPayoutModal: React.FC<EditMentorModalProps> = ({
 interface PaymentEventsModalProps {
   recordType: 'student' | 'mentor';
   recordId: string;
-  title: string;
+  recordTitle: string;
   events: PaymentEvent[];
   loading: boolean;
   allKnownReferences: Map<string, { type: string; id: string; date: string }>;
@@ -2226,7 +3730,7 @@ interface PaymentEventsModalProps {
 const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
   recordType,
   recordId,
-  title,
+  recordTitle,
   events,
   loading,
   allKnownReferences,
@@ -2278,70 +3782,66 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-brand-dark/70 flex items-center justify-center p-4">
-      <div className="bg-brand-paper border-2 border-brand-dark shadow-brutal p-5 sm:p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-brand-paper border-2 border-brand-dark shadow-brutal p-5 sm:p-6 w-full max-w-lg space-y-4 max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
-          <h3 className="font-heading font-extrabold text-brand-navy text-sm sm:text-base flex items-center gap-2">
-            <Layers className="w-4 h-4 text-brand-teal" />
-            {title}
-          </h3>
+          <div>
+            <h3 className="font-heading font-extrabold text-brand-navy text-sm sm:text-base flex items-center gap-2">
+              <History className="w-4 h-4 text-brand-teal" />
+              Payment Events & Installment History
+            </h3>
+            <span className="font-mono text-[10px] text-brand-muted">{recordTitle}</span>
+          </div>
           <button type="button" onClick={onClose} className="hover:opacity-75">
             <X className="w-5 h-5 text-brand-dark" />
           </button>
         </div>
 
-        {/* Existing Events List */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-[11px] font-heading font-bold text-brand-muted uppercase">
-              Recorded Events ({events.length})
-            </span>
-            {!isAdding && (
-              <Button variant="outline" size="sm" onClick={() => setIsAdding(true)} leftIcon={<Plus className="w-3 h-3" />}>
-                Add Event
-              </Button>
-            )}
+        {error && (
+          <div className="p-2.5 bg-red-50 border border-red-500 text-red-900 text-xs">
+            {error}
           </div>
+        )}
 
+        {/* Existing Events List */}
+        <div className="space-y-2 max-h-56 overflow-y-auto">
           {loading ? (
-            <div className="p-4 text-center text-xs text-brand-muted">Loading events...</div>
+            <div className="text-xs text-brand-muted p-2">Loading events...</div>
           ) : events.length === 0 ? (
-            <div className="p-4 bg-brand-bg border border-brand-dark/20 text-center text-xs text-brand-muted">
-              No child payment events recorded for this record yet.
-            </div>
+            <div className="p-3 text-center text-xs text-brand-muted">No child payment events recorded yet.</div>
           ) : (
-            <div className="space-y-1.5 max-h-48 overflow-y-auto">
-              {events.map((evt) => (
-                <div key={evt.id} className="p-2.5 bg-brand-bg border border-brand-dark/20 text-xs space-y-1">
-                  <div className="flex justify-between items-center">
-                    <span className="font-heading font-bold text-brand-navy">{formatPaymentMethod(evt.payment_method)}</span>
-                    <span className="font-mono text-[11px] text-brand-muted">{formatCalendarDate(evt.payment_date.split('T')[0])}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[11px] font-mono">
-                    <span className="text-brand-muted">Ref: {evt.transaction_reference || 'None'}</span>
-                  </div>
-                  {evt.note && (
-                    <div className="p-1 bg-white border border-brand-dark/10 text-[11px] font-sans text-brand-dark">
-                      <strong>Admin Note: </strong>{evt.note}
-                    </div>
-                  )}
+            events.map((evt) => (
+              <div key={evt.id} className="p-2.5 bg-brand-bg border border-brand-dark/20 text-xs space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-brand-navy">{formatPaymentMethod(evt.payment_method)}</span>
+                  <span className="font-mono text-[11px] text-brand-muted">{formatCalendarDate(evt.payment_date)}</span>
                 </div>
-              ))}
-            </div>
+                {evt.transaction_reference && (
+                  <div className="font-mono text-[11px] text-brand-muted">
+                    Reference: {evt.transaction_reference}
+                  </div>
+                )}
+                {evt.note && (
+                  <div className="text-brand-dark italic bg-white p-1 border border-brand-dark/10">
+                    "{evt.note}"
+                  </div>
+                )}
+              </div>
+            ))
           )}
         </div>
 
-        {/* Add Event Form */}
-        {isAdding && (
-          <form onSubmit={handleCreateEvent} className="p-3 bg-brand-bg border border-brand-dark/30 space-y-2.5 text-xs">
-            <h4 className="font-heading font-bold text-brand-navy uppercase text-[11px]">
-              Record New Installment / Activity Event
-            </h4>
-
-            {error && (
-              <div className="p-2 bg-red-100 border border-red-300 text-red-900 text-xs">
-                {error}
-              </div>
-            )}
+        {/* Add Event Form Toggle */}
+        {!isAdding ? (
+          <div className="pt-2 border-t border-brand-dark/20">
+            <Button variant="outline" size="sm" onClick={() => setIsAdding(true)} leftIcon={<Plus className="w-3.5 h-3.5" />}>
+              Record New Event
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleCreateEvent} className="p-3 bg-brand-bg border border-brand-dark/30 space-y-2 text-xs">
+            <span className="font-heading font-bold uppercase text-brand-navy block text-[11px]">
+              Record Child Payment Event
+            </span>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -2354,10 +3854,11 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
                   <option value="bkash">bKash</option>
                   <option value="nagad">Nagad</option>
                   <option value="upay">Upay</option>
+                  <option value="bank">Bank Transfer</option>
                   <option value="cash">Cash</option>
-                  <option value="bank">Bank</option>
                 </select>
               </div>
+
               <div>
                 <label className="font-mono text-[10px] uppercase text-brand-muted block">Date:</label>
                 <input
@@ -2371,10 +3872,10 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
             </div>
 
             <div>
-              <label className="font-mono text-[10px] uppercase text-brand-muted block">Transaction Ref:</label>
+              <label className="font-mono text-[10px] uppercase text-brand-muted block">Transaction Reference (Optional):</label>
               <input
                 type="text"
-                placeholder="e.g. TRX991823"
+                placeholder="e.g. TRX999"
                 value={ref}
                 onChange={(e) => setRef(e.target.value)}
                 className="w-full p-1.5 border border-brand-dark bg-white font-mono text-xs"
