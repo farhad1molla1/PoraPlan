@@ -21,6 +21,8 @@ import {
   generateSlug,
   uploadProgramThumbnail,
   deleteProgramThumbnail,
+  uploadCohortThumbnail,
+  deleteCohortThumbnail,
 } from '../../lib/programs';
 import type {
   Program,
@@ -123,6 +125,12 @@ export const AdminProgramsPage: React.FC = () => {
     status: 'planned',
   });
 
+  // Form State: Cohort Thumbnail
+  const [cohortThumbnailFile, setCohortThumbnailFile] = useState<File | null>(null);
+  const [cohortThumbnailPreview, setCohortThumbnailPreview] = useState<string | null>(null);
+  const [cohortThumbnailError, setCohortThumbnailError] = useState<string | null>(null);
+  const cohortFileInputRef = useRef<HTMLInputElement | null>(null);
+
   // Form State: Section
   const [sectionForm, setSectionForm] = useState({
     title: '',
@@ -140,7 +148,7 @@ export const AdminProgramsPage: React.FC = () => {
     try {
       const [progRes, cohRes] = await Promise.all([
         getPrograms({ includeUnpublished: true }),
-        getCohorts(),
+        getCohorts(undefined, { includeArchived: true }),
       ]);
 
       if (progRes.error) {
@@ -162,7 +170,7 @@ export const AdminProgramsPage: React.FC = () => {
       try {
         const [progRes, cohRes] = await Promise.all([
           getPrograms({ includeUnpublished: true }),
-          getCohorts(),
+          getCohorts(undefined, { includeArchived: true }),
         ]);
         if (!isMounted) return;
         if (progRes.error) {
@@ -392,14 +400,44 @@ export const AdminProgramsPage: React.FC = () => {
   // --- Cohort Handlers ---
   const handleOpenCohorts = (prog: Program) => {
     setSelectedProgramForCohorts(prog);
+    handleOpenCreateCohort();
     setCohortModalOpen(true);
   };
 
+  const handleCohortThumbnailFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setCohortThumbnailError('Invalid file format. Only PNG, JPEG, and WebP are allowed.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setCohortThumbnailError('File exceeds 5MB maximum size limit.');
+      return;
+    }
+
+    setCohortThumbnailError(null);
+    setCohortThumbnailFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setCohortThumbnailPreview(objectUrl);
+  };
+
+  const handleRemoveCohortThumbnail = () => {
+    setCohortThumbnailFile(null);
+    setCohortThumbnailPreview(null);
+    setCohortThumbnailError(null);
+    if (cohortFileInputRef.current) {
+      cohortFileInputRef.current.value = '';
+    }
+  };
+
   const handleOpenCreateCohort = () => {
-    if (!selectedProgramForCohorts) return;
     setEditingCohort(null);
     setCohortForm({
-      program_id: selectedProgramForCohorts.id,
+      program_id: selectedProgramForCohorts ? selectedProgramForCohorts.id : '',
       name: '',
       code: '',
       description: '',
@@ -408,6 +446,28 @@ export const AdminProgramsPage: React.FC = () => {
       capacity: 30,
       status: 'planned',
     });
+    setCohortThumbnailFile(null);
+    setCohortThumbnailPreview(null);
+    setCohortThumbnailError(null);
+    if (cohortFileInputRef.current) cohortFileInputRef.current.value = '';
+  };
+
+  const handleOpenEditCohort = (cohort: Cohort) => {
+    setEditingCohort(cohort);
+    setCohortForm({
+      program_id: cohort.program_id,
+      name: cohort.name,
+      code: cohort.code,
+      description: cohort.description || '',
+      start_date: cohort.start_date || '',
+      end_date: cohort.end_date || '',
+      capacity: cohort.capacity || 30,
+      status: cohort.status,
+    });
+    setCohortThumbnailFile(null);
+    setCohortThumbnailPreview(cohort.cover_image_url || null);
+    setCohortThumbnailError(null);
+    if (cohortFileInputRef.current) cohortFileInputRef.current.value = '';
   };
 
   const handleSaveCohort = async (e: React.FormEvent) => {
@@ -422,8 +482,16 @@ export const AdminProgramsPage: React.FC = () => {
       if (res.error) {
         setError(res.error.message);
       } else {
+        if (cohortThumbnailFile) {
+          const thumbRes = await uploadCohortThumbnail(editingCohort.id, cohortThumbnailFile);
+          if (thumbRes.error) {
+            setError(`Cohort updated, but thumbnail upload failed: ${thumbRes.error.message}`);
+          }
+        } else if (editingCohort.cover_image_url && !cohortThumbnailPreview) {
+          await deleteCohortThumbnail(editingCohort.id, editingCohort.cover_image_url);
+        }
         setSuccessMessage('Cohort updated successfully.');
-        setEditingCohort(null);
+        handleOpenCreateCohort();
         loadData();
       }
     } else {
@@ -435,6 +503,12 @@ export const AdminProgramsPage: React.FC = () => {
       if (res.error) {
         setError(res.error.message);
       } else {
+        if (cohortThumbnailFile && res.cohort) {
+          const thumbRes = await uploadCohortThumbnail(res.cohort.id, cohortThumbnailFile);
+          if (thumbRes.error) {
+            setError(`Cohort created, but thumbnail upload failed: ${thumbRes.error.message}`);
+          }
+        }
         setSuccessMessage('Cohort created successfully.');
         handleOpenCreateCohort();
         loadData();
@@ -442,13 +516,34 @@ export const AdminProgramsPage: React.FC = () => {
     }
   };
 
-  const handleDeleteCohort = async (cohortId: string) => {
-    if (!window.confirm('Are you sure you want to delete this cohort?')) return;
-    const res = await deleteCohort(cohortId);
+  const handleToggleCohortPublication = async (cohort: Cohort) => {
+    const nextStatus: CohortStatus = cohort.status === 'archived' ? 'active' : 'archived';
+    const res = await updateCohort(cohort.id, { status: nextStatus });
+    if (res.error) {
+      setError(res.error.message);
+    } else {
+      setSuccessMessage(
+        nextStatus === 'archived'
+          ? `Cohort '${cohort.name}' unpublished (archived).`
+          : `Cohort '${cohort.name}' published (active).`
+      );
+      loadData();
+    }
+  };
+
+  const handleDeleteCohort = async (cohort: Cohort) => {
+    if (!window.confirm(`Are you sure you want to delete cohort '${cohort.name}'?`)) return;
+    if (cohort.cover_image_url) {
+      await deleteCohortThumbnail(cohort.id, cohort.cover_image_url);
+    }
+    const res = await deleteCohort(cohort.id);
     if (res.error) {
       setError(res.error.message);
     } else {
       setSuccessMessage('Cohort deleted.');
+      if (editingCohort?.id === cohort.id) {
+        handleOpenCreateCohort();
+      }
       loadData();
     }
   };
@@ -1155,40 +1250,56 @@ export const AdminProgramsPage: React.FC = () => {
                         key={cohort.id}
                         className="p-3 border-2 border-brand-dark bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                       >
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-brand-teal px-1.5 py-0.2 border border-brand-dark bg-brand-paper-tint">
-                              {cohort.code}
+                        <div className="flex items-center gap-3 min-w-0">
+                          {cohort.cover_image_url ? (
+                            <div className="w-16 h-10 border border-brand-dark/30 overflow-hidden shrink-0 bg-brand-paper-tint">
+                              <img src={cohort.cover_image_url} alt={cohort.name} className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className="w-16 h-10 border border-dashed border-brand-dark/30 flex items-center justify-center shrink-0 bg-brand-paper-tint text-brand-muted">
+                              <ImageIcon className="w-4 h-4 stroke-[1.5]" />
+                            </div>
+                          )}
+                          <div className="space-y-0.5 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-mono font-bold text-brand-teal px-1.5 py-0.2 border border-brand-dark bg-brand-paper-tint">
+                                {cohort.code}
+                              </span>
+                              <span className="font-bold text-brand-navy truncate">{cohort.name}</span>
+                              <Badge
+                                variant={cohort.status === 'active' ? 'teal' : cohort.status === 'planned' ? 'gold' : 'paper'}
+                                size="sm"
+                              >
+                                {cohort.status.toUpperCase()}
+                              </Badge>
+                            </div>
+                            <span className="font-mono text-[11px] text-brand-muted block truncate">
+                              Dates: {cohort.start_date || 'TBD'} to {cohort.end_date || 'TBD'} • Capacity: {cohort.capacity || 'Unlimited'}
                             </span>
-                            <span className="font-bold text-brand-navy">{cohort.name}</span>
-                            <Badge
-                              variant={cohort.status === 'active' ? 'teal' : cohort.status === 'planned' ? 'gold' : 'paper'}
-                              size="sm"
-                            >
-                              {cohort.status.toUpperCase()}
-                            </Badge>
                           </div>
-                          <span className="font-mono text-[11px] text-brand-muted block">
-                            Dates: {cohort.start_date || 'TBD'} to {cohort.end_date || 'TBD'} • Capacity: {cohort.capacity || 'Unlimited'}
-                          </span>
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
                           <button
                             type="button"
-                            onClick={() => {
-                              setEditingCohort(cohort);
-                              setCohortForm({ ...cohort });
-                            }}
-                            className="p-1 border border-brand-dark bg-brand-paper text-brand-dark hover:bg-brand-paper-tint"
+                            onClick={() => handleToggleCohortPublication(cohort)}
+                            className="px-2 py-1 border border-brand-dark bg-brand-paper-tint hover:bg-brand-paper text-[10px] font-mono shadow-brutal-xs"
+                            title={cohort.status === 'archived' ? 'Publish cohort' : 'Unpublish cohort'}
+                          >
+                            {cohort.status === 'archived' ? 'Publish' : 'Unpublish'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditCohort(cohort)}
+                            className="p-1 border border-brand-dark bg-brand-paper text-brand-dark hover:bg-brand-paper-tint shadow-brutal-xs"
                             title="Edit cohort"
                           >
                             <Edit className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDeleteCohort(cohort.id)}
-                            className="p-1 border border-brand-dark bg-brand-paper text-red-600 hover:bg-red-50"
+                            onClick={() => handleDeleteCohort(cohort)}
+                            className="p-1 border border-brand-dark bg-brand-paper text-red-600 hover:bg-red-50 shadow-brutal-xs"
                             title="Delete cohort"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1203,7 +1314,7 @@ export const AdminProgramsPage: React.FC = () => {
             {/* Cohort Form (Create / Edit) */}
             <form onSubmit={handleSaveCohort} className="p-4 border-2 border-brand-dark bg-brand-paper-tint space-y-3">
               <h4 className="font-heading font-extrabold text-xs uppercase tracking-wider text-brand-navy">
-                {editingCohort ? 'Edit Cohort' : 'Add New Cohort'}
+                {editingCohort ? `Edit Cohort: ${editingCohort.name}` : 'Add New Cohort'}
               </h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1234,6 +1345,87 @@ export const AdminProgramsPage: React.FC = () => {
                     className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-white font-mono uppercase"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="font-mono text-[11px] font-bold block mb-1">
+                  Short Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={cohortForm.description || ''}
+                  onChange={(e) => setCohortForm((prev) => ({ ...prev, description: e.target.value }))}
+                  placeholder="Brief description of this cohort or course run..."
+                  className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-white font-sans"
+                />
+              </div>
+
+              {/* Cohort Independent Thumbnail */}
+              <div className="space-y-2 border border-brand-dark bg-white p-3">
+                <div className="flex items-center justify-between">
+                  <label className="font-mono text-[11px] uppercase font-bold text-brand-navy flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-brand-teal" />
+                    Cohort Thumbnail
+                  </label>
+                  <span className="font-mono text-[10px] text-brand-muted">Max 5MB (PNG, JPG, WebP)</span>
+                </div>
+
+                <input
+                  type="file"
+                  ref={cohortFileInputRef}
+                  onChange={handleCohortThumbnailFileSelect}
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  aria-label="Upload cohort thumbnail"
+                />
+
+                {cohortThumbnailPreview ? (
+                  <div className="space-y-2">
+                    <div className="relative aspect-[16/9] w-full max-h-36 overflow-hidden border border-brand-dark bg-brand-dark/5">
+                      <img
+                        src={cohortThumbnailPreview}
+                        alt="Cohort thumbnail preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => cohortFileInputRef.current?.click()}
+                        leftIcon={<Upload className="w-3.5 h-3.5" />}
+                      >
+                        Replace Image
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRemoveCohortThumbnail}
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                        leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => cohortFileInputRef.current?.click()}
+                    className="border border-dashed border-brand-dark/40 bg-brand-paper-tint p-3 text-center cursor-pointer hover:border-brand-dark transition-colors space-y-1"
+                  >
+                    <ImageIcon className="w-5 h-5 text-brand-muted mx-auto stroke-[1.5]" />
+                    <p className="font-mono text-[11px] font-bold text-brand-dark">Click to upload cohort thumbnail</p>
+                    <p className="font-sans text-[10px] text-brand-muted">Independent from Program thumbnail (16:9 ratio)</p>
+                  </div>
+                )}
+
+                {cohortThumbnailError && (
+                  <div className="p-2 border border-red-600 bg-red-50 text-red-900 font-mono text-[11px]">
+                    {cohortThumbnailError}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

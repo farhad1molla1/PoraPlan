@@ -7,6 +7,11 @@ import { Badge } from '../components/common/Badge';
 export const ContactPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const programContext = searchParams.get('program');
+  const cohortContext = searchParams.get('cohort');
+
+  const inquiryTarget = cohortContext
+    ? `${cohortContext}${programContext ? ` (${programContext})` : ''}`
+    : programContext;
 
   return (
     <div className="w-full pb-16 sm:pb-20">
@@ -32,21 +37,21 @@ export const ContactPage: React.FC = () => {
             Personal study assistance and mentorship support. Reach out with questions about onboarding, mentor pairings, or your study plan.
           </p>
 
-          {programContext && (
+          {inquiryTarget && (
             <div className="mt-4 p-3.5 border-2 border-brand-teal bg-white flex items-center justify-between gap-3 text-xs sm:text-sm font-sans shadow-brutal-xs">
               <div>
                 <span className="font-mono text-[10px] uppercase font-bold text-brand-teal block">
-                  PROGRAM ENROLLMENT INQUIRY
+                  ENROLLMENT INQUIRY
                 </span>
                 <span className="font-bold text-brand-navy">
-                  Inquiring about: {programContext}
+                  Inquiring about: {inquiryTarget}
                 </span>
               </div>
               <Link
                 to="/programs"
                 className="font-mono text-xs text-brand-teal hover:underline font-bold shrink-0"
               >
-                Change Program
+                Explore Programs
               </Link>
             </div>
           )}
@@ -90,9 +95,9 @@ export const ContactPage: React.FC = () => {
               <div className="pt-4 border-t border-brand-dark/20 mt-4">
                 <a
                   href={
-                    programContext
+                    inquiryTarget
                       ? `mailto:poraplan.bd@gmail.com?subject=${encodeURIComponent(
-                          `Enrollment Inquiry: ${programContext}`
+                          `Enrollment Inquiry: ${inquiryTarget}`
                         )}`
                       : 'mailto:poraplan.bd@gmail.com'
                   }

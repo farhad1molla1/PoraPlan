@@ -146,6 +146,7 @@ export type Cohort = {
   name: string;
   code: string;
   description?: string | null;
+  cover_image_url?: string | null;
   start_date?: string | null;
   end_date?: string | null;
   capacity?: number | null;
@@ -161,6 +162,7 @@ export type CohortInsert = {
   name: string;
   code: string;
   description?: string | null;
+  cover_image_url?: string | null;
   start_date?: string | null;
   end_date?: string | null;
   capacity?: number | null;

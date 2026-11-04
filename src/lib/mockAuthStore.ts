@@ -4147,6 +4147,7 @@ const mockCohorts: Cohort[] = [
     start_date: '2026-10-01',
     end_date: '2027-02-15',
     capacity: 30,
+    cover_image_url: null,
     status: 'active',
     created_by: 'mock-admin-ppa001',
     created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
@@ -4161,7 +4162,8 @@ const mockCohorts: Cohort[] = [
     start_date: '2026-11-15',
     end_date: '2026-12-06',
     capacity: 25,
-    status: 'planned',
+    cover_image_url: null,
+    status: 'active',
     created_by: 'mock-admin-ppa001',
     created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
     updated_at: new Date().toISOString(),
@@ -4433,6 +4435,10 @@ export function deleteMockProgram(id: string): { success: boolean; error: Error 
 
 // --- Mock Cohort CRUD Functions ---
 
+export function getMockCohortById(idOrCode: string): Cohort | null {
+  return mockCohorts.find((c) => c.id === idOrCode || c.code.toUpperCase() === idOrCode.toUpperCase()) || null;
+}
+
 export function getMockCohorts(programId?: string): Cohort[] {
   let list = [...mockCohorts];
   if (programId) {
@@ -4457,6 +4463,7 @@ export function createMockCohort(cohort: CohortInsert): { cohort: Cohort | null;
     start_date: cohort.start_date || null,
     end_date: cohort.end_date || null,
     capacity: cohort.capacity ?? null,
+    cover_image_url: cohort.cover_image_url || null,
     status: cohort.status || 'planned',
     created_by: cohort.created_by || 'mock-admin-ppa001',
     created_at: now,

@@ -5,6 +5,7 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import { LandingPage } from '../pages/LandingPage';
 import { ProgramsPage } from '../pages/ProgramsPage';
 import { ProgramDetailPage } from '../pages/ProgramDetailPage';
+import { CohortDetailPage } from '../pages/CohortDetailPage';
 import { HowItWorksPage } from '../pages/HowItWorksPage';
 import { AboutPage } from '../pages/AboutPage';
 import { ContactPage } from '../pages/ContactPage';
@@ -114,6 +115,8 @@ export const AppRoutes: React.FC = () => {
         <Route index element={<LandingPage />} />
         <Route path="programs" element={<ProgramsPage />} />
         <Route path="programs/:slug" element={<ProgramDetailPage />} />
+        <Route path="programs/:programSlug/cohorts/:cohortId" element={<CohortDetailPage />} />
+        <Route path="cohorts/:cohortId" element={<CohortDetailPage />} />
         <Route path="how-it-works" element={<HowItWorksPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />

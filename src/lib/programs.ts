@@ -26,6 +26,7 @@ import {
   updateMockProgram,
   deleteMockProgram,
   getMockCohorts,
+  getMockCohortById,
   createMockCohort,
   updateMockCohort,
   deleteMockCohort,
@@ -373,21 +374,129 @@ export async function deleteProgramThumbnail(
   }
 }
 
+export async function uploadCohortThumbnail(
+  cohortId: string,
+  file: File
+): Promise<{ coverImageUrl: string | null; error: Error | null }> {
+  // Validate file type
+  const validTypes = ['image/png', 'image/jpeg', 'image/webp'];
+  if (!validTypes.includes(file.type)) {
+    return {
+      coverImageUrl: null,
+      error: new Error('Invalid image format. Allowed formats: PNG, JPEG, WebP.'),
+    };
+  }
+
+  // Validate file size (max 5MB)
+  const maxSize = 5 * 1024 * 1024;
+  if (file.size > maxSize) {
+    return {
+      coverImageUrl: null,
+      error: new Error('Image size exceeds 5MB limit.'),
+    };
+  }
+
+  if (!isSupabaseConfigured()) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        updateMockCohort(cohortId, { cover_image_url: dataUrl });
+        resolve({ coverImageUrl: dataUrl, error: null });
+      };
+      reader.onerror = () => {
+        resolve({ coverImageUrl: null, error: new Error('Failed to read image file.') });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  try {
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const cleanExt = ['jpg', 'jpeg', 'png', 'webp'].includes(fileExt) ? fileExt : 'jpg';
+    const filePath = `cohorts/${cohortId}/${Date.now()}.${cleanExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('program-thumbnails')
+      .upload(filePath, file, {
+        upsert: true,
+        contentType: file.type,
+      });
+
+    if (uploadError) {
+      return { coverImageUrl: null, error: uploadError };
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from('program-thumbnails')
+      .getPublicUrl(filePath);
+
+    const coverImageUrl = publicUrlData.publicUrl;
+
+    await supabase
+      .from('cohorts')
+      .update({ cover_image_url: coverImageUrl })
+      .eq('id', cohortId);
+
+    return { coverImageUrl, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { coverImageUrl: null, error };
+  }
+}
+
+export async function deleteCohortThumbnail(
+  cohortId: string,
+  coverImageUrl?: string | null
+): Promise<{ success: boolean; error: Error | null }> {
+  if (!isSupabaseConfigured()) {
+    updateMockCohort(cohortId, { cover_image_url: null });
+    return { success: true, error: null };
+  }
+
+  try {
+    if (coverImageUrl) {
+      const parts = coverImageUrl.split('/program-thumbnails/');
+      if (parts.length > 1) {
+        await supabase.storage.from('program-thumbnails').remove([parts[1]]);
+      }
+    }
+
+    await supabase
+      .from('cohorts')
+      .update({ cover_image_url: null })
+      .eq('id', cohortId);
+
+    return { success: true, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { success: false, error };
+  }
+}
+
 // ==============================================================================
 // Cohort Service Operations
 // ==============================================================================
 
 export async function getCohorts(
-  programId?: string
+  programId?: string,
+  options?: { includeArchived?: boolean }
 ): Promise<{ cohorts: Cohort[]; error: Error | null }> {
   if (!isSupabaseConfigured()) {
-    return { cohorts: getMockCohorts(programId), error: null };
+    let list = getMockCohorts(programId);
+    if (!options?.includeArchived) {
+      list = list.filter((c) => c.status !== 'archived');
+    }
+    return { cohorts: list, error: null };
   }
 
   try {
     let query = supabase.from('cohorts').select('*');
     if (programId) {
       query = query.eq('program_id', programId);
+    }
+    if (!options?.includeArchived) {
+      query = query.neq('status', 'archived');
     }
     query = query.order('start_date', { ascending: false });
 
@@ -397,6 +506,31 @@ export async function getCohorts(
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { cohorts: [], error };
+  }
+}
+
+export async function getCohortById(
+  idOrCode: string
+): Promise<{ cohort: Cohort | null; error: Error | null }> {
+  if (!isSupabaseConfigured()) {
+    return { cohort: getMockCohortById(idOrCode), error: null };
+  }
+
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrCode);
+    let query = supabase.from('cohorts').select('*');
+    if (isUuid) {
+      query = query.eq('id', idOrCode);
+    } else {
+      query = query.eq('code', idOrCode.toUpperCase());
+    }
+
+    const { data, error } = await query.maybeSingle();
+    if (error) return { cohort: null, error };
+    return { cohort: (data as Cohort) || null, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { cohort: null, error };
   }
 }
 

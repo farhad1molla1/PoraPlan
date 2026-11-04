@@ -56,8 +56,6 @@ export const ProgramsPage: React.FC = () => {
     const programCohorts = cohorts.filter(
       (c) => c.program_id === program.id && c.status !== 'archived'
     );
-    const activeCohort =
-      programCohorts.find((c) => c.status === 'active') || programCohorts[0];
 
     return (
       <div
@@ -98,35 +96,30 @@ export const ProgramsPage: React.FC = () => {
               {program.short_description}
             </p>
 
-            {/* 4. Relevant batch/cohort/course information */}
-            {activeCohort && (
-              <div className="pt-2 text-xs font-sans text-brand-dark/80 flex flex-wrap items-center gap-2">
-                <span className="font-mono text-[11px] font-bold text-brand-navy">
-                  {isAcademic ? 'Batch / Cohort:' : 'Course Session:'}
+            {/* Cohorts count summary if available */}
+            {programCohorts.length > 0 && (
+              <div className="pt-1 text-xs font-sans text-brand-dark/70 flex items-center gap-1.5">
+                <span className="font-mono text-[11px] font-semibold text-brand-navy">
+                  Available:
                 </span>
-                <span className="font-medium text-brand-dark">
-                  {activeCohort.name}
+                <span className="font-medium text-brand-teal">
+                  {programCohorts.length} {programCohorts.length === 1 ? 'Cohort' : 'Cohorts'}
                 </span>
-                {activeCohort.code && (
-                  <span className="font-mono text-[10px] px-1.5 py-0.5 border border-brand-dark/20 bg-brand-paper font-semibold text-brand-teal">
-                    {activeCohort.code}
-                  </span>
-                )}
               </div>
             )}
           </div>
 
-          {/* 5. One clear CTA: Contact to Enroll */}
+          {/* 4. One simple action to view its cohorts */}
           <div className="pt-2">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/contact?program=${encodeURIComponent(program.name)}`);
+                navigate(`/programs/${program.slug}`);
               }}
-              className="w-full py-2.5 px-4 bg-brand-teal hover:bg-brand-teal-hover text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors text-center shadow-sm"
+              className="w-full py-2.5 px-4 bg-brand-navy hover:bg-brand-teal text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors text-center shadow-sm"
             >
-              Contact to Enroll
+              View Cohorts
             </button>
           </div>
         </div>
