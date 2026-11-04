@@ -54,7 +54,7 @@ export const ProgramsPage: React.FC = () => {
   const renderProgramCard = (program: Program) => {
     const isAcademic = program.category === 'academic_mentorship';
     const programCohorts = cohorts.filter(
-      (c) => c.program_id === program.id && c.status !== 'archived'
+      (c) => c.program_id === program.id && c.publication_status === 'published'
     );
 
     return (

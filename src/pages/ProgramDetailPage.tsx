@@ -80,7 +80,7 @@ export const ProgramDetailPage: React.FC = () => {
   }
 
   const isAcademic = program.category === 'academic_mentorship';
-  const publishedCohorts = (program.cohorts || []).filter((c) => c.status !== 'archived');
+  const publishedCohorts = (program.cohorts || []).filter((c) => c.publication_status === 'published');
 
   const renderCohortCard = (cohort: Cohort) => {
     return (

@@ -31,7 +31,7 @@ export const CohortDetailPage: React.FC = () => {
           setError(cohortRes.error?.message || 'Cohort not found.');
         } else {
           // Verify cohort is published
-          if (cohortRes.cohort.status === 'archived') {
+          if (cohortRes.cohort.publication_status !== 'published') {
             setError('This cohort is not currently available for public view.');
             return;
           }

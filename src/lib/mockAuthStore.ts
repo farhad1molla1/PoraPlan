@@ -4149,6 +4149,7 @@ const mockCohorts: Cohort[] = [
     capacity: 30,
     cover_image_url: null,
     status: 'active',
+    publication_status: 'published',
     created_by: 'mock-admin-ppa001',
     created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
     updated_at: new Date().toISOString(),
@@ -4164,6 +4165,7 @@ const mockCohorts: Cohort[] = [
     capacity: 25,
     cover_image_url: null,
     status: 'active',
+    publication_status: 'published',
     created_by: 'mock-admin-ppa001',
     created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
     updated_at: new Date().toISOString(),
@@ -4465,6 +4467,7 @@ export function createMockCohort(cohort: CohortInsert): { cohort: Cohort | null;
     capacity: cohort.capacity ?? null,
     cover_image_url: cohort.cover_image_url || null,
     status: cohort.status || 'planned',
+    publication_status: cohort.publication_status || 'draft',
     created_by: cohort.created_by || 'mock-admin-ppa001',
     created_at: now,
     updated_at: now,
@@ -5457,8 +5460,8 @@ export function adminAssignMockCohortMentor(
   if (!cohort) {
     return { success: false, message: 'Cohort not found.' };
   }
-  if (cohort.status === 'completed' || cohort.status === 'archived') {
-    return { success: false, message: 'Cannot assign a mentor to an archived or completed cohort.' };
+  if (cohort.status === 'completed') {
+    return { success: false, message: 'Cannot assign a mentor to a completed cohort.' };
   }
 
   const mentor = mockStore.find((m) => m.id === mentorId);
@@ -5774,7 +5777,7 @@ export function adminManualEnrollMockStudent(
   if (!cohort) {
     return { success: false, message: 'Cohort not found or does not belong to the selected program.', error: new Error('Cohort not found.') };
   }
-  if (cohort.status === 'completed' || cohort.status === 'archived') {
+  if (cohort.status === 'completed') {
     return { success: false, message: `Cannot enroll student: Cohort status is ${cohort.status}.`, error: new Error(`Cohort status is ${cohort.status}.`) };
   }
 

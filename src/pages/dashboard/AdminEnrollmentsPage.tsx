@@ -833,7 +833,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
                       (c) =>
                         c.program_id === selectedProgramId &&
                         c.status !== 'completed' &&
-                        c.status !== 'archived'
+                        c.publication_status !== 'archived'
                     )
                     .map((c) => {
                       const activeInCohort = enrollments.filter(

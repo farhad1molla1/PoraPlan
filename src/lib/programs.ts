@@ -17,6 +17,7 @@ import type {
   ProgramCategory,
   ProgramPublicationStatus,
   CohortStatus,
+  CohortPublicationStatus,
 } from '../types/database';
 import {
   getMockPrograms,
@@ -81,10 +82,23 @@ export function getCohortStatusBadgeVariant(
       return 'gold';
     case 'completed':
       return 'navy';
+    default:
+      return 'gold';
+  }
+}
+
+export function getCohortPublicationStatusBadgeVariant(
+  status: CohortPublicationStatus
+): 'teal' | 'gold' | 'muted' {
+  switch (status) {
+    case 'published':
+      return 'teal';
+    case 'draft':
+      return 'gold';
     case 'archived':
       return 'muted';
     default:
-      return 'gold';
+      return 'muted';
   }
 }
 
@@ -480,12 +494,12 @@ export async function deleteCohortThumbnail(
 
 export async function getCohorts(
   programId?: string,
-  options?: { includeArchived?: boolean }
+  options?: { includeUnpublished?: boolean; includeArchived?: boolean }
 ): Promise<{ cohorts: Cohort[]; error: Error | null }> {
   if (!isSupabaseConfigured()) {
     let list = getMockCohorts(programId);
-    if (!options?.includeArchived) {
-      list = list.filter((c) => c.status !== 'archived');
+    if (!options?.includeUnpublished && !options?.includeArchived) {
+      list = list.filter((c) => c.publication_status === 'published');
     }
     return { cohorts: list, error: null };
   }
@@ -495,8 +509,8 @@ export async function getCohorts(
     if (programId) {
       query = query.eq('program_id', programId);
     }
-    if (!options?.includeArchived) {
-      query = query.neq('status', 'archived');
+    if (!options?.includeUnpublished && !options?.includeArchived) {
+      query = query.eq('publication_status', 'published');
     }
     query = query.order('start_date', { ascending: false });
 

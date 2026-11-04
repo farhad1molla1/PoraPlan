@@ -94,7 +94,8 @@ export type ProfileUpdate = {
 export type ProgramCategory = 'academic_mentorship' | 'skillsprint';
 export type ProgramPublicationStatus = 'draft' | 'published' | 'archived';
 export type ProgramEnrollmentStatus = 'open' | 'closed';
-export type CohortStatus = 'planned' | 'active' | 'completed' | 'archived';
+export type CohortPublicationStatus = 'draft' | 'published' | 'archived';
+export type CohortStatus = 'planned' | 'active' | 'completed';
 
 export type Program = {
   id: string;
@@ -151,6 +152,7 @@ export type Cohort = {
   end_date?: string | null;
   capacity?: number | null;
   status: CohortStatus;
+  publication_status: CohortPublicationStatus;
   created_by?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -167,6 +169,7 @@ export type CohortInsert = {
   end_date?: string | null;
   capacity?: number | null;
   status?: CohortStatus;
+  publication_status?: CohortPublicationStatus;
   created_by?: string | null;
   created_at?: string;
   updated_at?: string;

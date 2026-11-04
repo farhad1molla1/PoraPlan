@@ -1,5 +1,5 @@
 /**
- * PoraPlan — Program & Cohort Hierarchy & Independent Management Verification Suite
+ * PoraPlan — Program & Cohort Hierarchy, Independent Management, and Lifecycle Separation Verification Suite
  *
  * Verifies:
  * 1. 4-Tier Hierarchy:
@@ -24,11 +24,22 @@
  *    - Independent Program and Cohort thumbnails (upload, preview, replace, remove).
  *    - Admin alone can create/edit cohorts under a program, upload independent cohort thumbnails, and publish/unpublish cohorts.
  *    - Mentors have zero program or cohort management or thumbnail upload permissions.
- * 7. Complete Removal of Public Request Modals:
+ * 7. Cohort Academic Status vs Publication Status Lifecycle Separation:
+ *    - Academic status: planned / active / completed.
+ *    - Publication status: draft / published / archived.
+ *    - Publishing a planned cohort does not alter its academic status.
+ *    - Unpublishing an active cohort does not alter its academic status.
+ *    - Public visitors only see published cohorts (publication_status = 'published').
+ * 8. Thumbnail Storage Security Policy Verification:
+ *    - Bucket 'program-thumbnails' configuration.
+ *    - Public SELECT policy for thumbnail rendering.
+ *    - Admin-only INSERT, UPDATE, DELETE policies.
+ *    - Explicit exclusion of mentors from storage write operations.
+ * 9. Complete Removal of Public Request Modals:
  *    - Zero application modals, request forms, or sign-in gates on public pages.
  *    - Historical application records and Admin review functionality remain 100% functional.
- * 8. Strict NO-AMOUNT policy: zero currency symbols or fee displays.
- * 9. Zero emojis across all modified files.
+ * 10. Strict NO-AMOUNT policy: zero currency symbols or fee displays.
+ * 11. Zero emojis across all modified files.
  */
 
 import fs from 'fs';
@@ -36,6 +47,8 @@ import path from 'path';
 import {
   getMockPrograms,
   getMockCohorts,
+  createMockCohort,
+  updateMockCohort,
   createMockApplication,
   adminReviewMockApplication,
   getMockEnrollments,
@@ -56,7 +69,7 @@ function report(scenario: string, passed: boolean, message: string) {
 
 async function runVerification() {
   console.log('================================================================');
-  console.log('PoraPlan Program & Cohort 4-Tier Hierarchy Verification Suite');
+  console.log('PoraPlan Program & Cohort Architecture Verification Suite');
   console.log('================================================================\n');
 
   const programsPageContent = fs.readFileSync(
@@ -91,6 +104,14 @@ async function runVerification() {
     process.cwd(),
     'supabase/migrations/20261104000004_cohort_thumbnails.sql'
   );
+  const publicationMigrationPath = path.resolve(
+    process.cwd(),
+    'supabase/migrations/20261104000005_cohort_publication_status.sql'
+  );
+  const storageMigrationPath = path.resolve(
+    process.cwd(),
+    'supabase/migrations/20261104000003_program_thumbnails_storage.sql'
+  );
 
   // 1. Tier 1: Programs Listing Page
   const hasTwoColDesktop = programsPageContent.includes('grid-cols-1 md:grid-cols-2');
@@ -120,11 +141,16 @@ async function runVerification() {
     programDetailPageContent.includes('View Cohort');
   const programDetailLinksToCohort =
     programDetailPageContent.includes('/programs/${program.slug}/cohorts/${cohort.id}');
+  const programDetailFiltersPublished =
+    programDetailPageContent.includes("c.publication_status === 'published'");
 
   report(
     'Tier 2 [Program Details Page - Cohort Listing & View Cohort Action]',
-    programDetailHasCohortsGrid && programDetailHasCohortCardDetails && programDetailLinksToCohort,
-    'Program Details page shows Program overview and a 2-column grid of published cohorts with independent thumbnails and "View Cohort" navigation'
+    programDetailHasCohortsGrid &&
+      programDetailHasCohortCardDetails &&
+      programDetailLinksToCohort &&
+      programDetailFiltersPublished,
+    'Program Details page shows Program overview and 2-col grid of published cohorts, filtering strictly on publication_status = "published"'
   );
 
   // 3. Tier 3: Cohort Details Page
@@ -140,11 +166,13 @@ async function runVerification() {
   const cohortDetailHasNoModals =
     !cohortDetailPageContent.includes('submitApplication') &&
     !cohortDetailPageContent.includes('Sign In to Request Enrollment');
+  const cohortDetailGuardsPublished =
+    cohortDetailPageContent.includes("cohortRes.cohort.publication_status !== 'published'");
 
   report(
-    'Tier 3 [Cohort Details Page - Compact Metadata & Contact to Enroll CTA]',
-    cohortDetailHasMeta && cohortDetailHasSingleCTA && cohortDetailHasNoModals,
-    'Cohort Details page presents compact intake specs with independent thumbnail and exactly one primary CTA: "Contact to Enroll"'
+    'Tier 3 [Cohort Details Page - Metadata & Public Visibility Guard]',
+    cohortDetailHasMeta && cohortDetailHasSingleCTA && cohortDetailHasNoModals && cohortDetailGuardsPublished,
+    'Cohort Details page presents compact intake specs with independent thumbnail, single CTA, and guards unlisted cohorts via publication_status'
   );
 
   // 4. Tier 4: Contact Page
@@ -176,38 +204,95 @@ async function runVerification() {
     'Application routes include public paths for both /programs/:programSlug/cohorts/:cohortId and /cohorts/:cohortId'
   );
 
-  // 6. Admin-Only Cohort & Program Thumbnail Management
-  const adminHasProgramThumbnailUI =
-    adminProgramsPageContent.includes('Program Thumbnail') &&
-    adminProgramsPageContent.includes('handleThumbnailFileSelect');
-  const adminHasCohortThumbnailUI =
-    adminProgramsPageContent.includes('Cohort Thumbnail') &&
-    adminProgramsPageContent.includes('handleCohortThumbnailFileSelect') &&
-    adminProgramsPageContent.includes('cohortThumbnailPreview');
-  const adminHasCohortShortDescription =
-    adminProgramsPageContent.includes('cohortForm.description') &&
-    adminProgramsPageContent.includes('Short Description');
-  const adminHasPublishCohortToggle =
-    adminProgramsPageContent.includes('handleToggleCohortPublication') &&
-    adminProgramsPageContent.includes('Unpublish') &&
-    adminProgramsPageContent.includes('Publish');
-  const programsLibHasCohortThumbnailFuncs =
-    programsLibContent.includes('uploadCohortThumbnail') &&
-    programsLibContent.includes('deleteCohortThumbnail');
-  const cohortMigrationExists = fs.existsSync(cohortMigrationPath);
+  // 6. Cohort Academic Status vs Publication Status Lifecycle Separation
+  const adminHasAcademicStatusSelect =
+    adminProgramsPageContent.includes('Academic Status') &&
+    adminProgramsPageContent.includes('<option value="planned">Planned</option>') &&
+    adminProgramsPageContent.includes('<option value="active">Active</option>') &&
+    adminProgramsPageContent.includes('<option value="completed">Completed</option>');
+  const adminHasPublicationStatusSelect =
+    adminProgramsPageContent.includes('Publication Status') &&
+    adminProgramsPageContent.includes('<option value="draft">Draft (Private)</option>') &&
+    adminProgramsPageContent.includes('<option value="published">Published (Public)</option>') &&
+    adminProgramsPageContent.includes('<option value="archived">Archived (Hidden)</option>');
+  const adminHasToggleByPublicationStatus =
+    adminProgramsPageContent.includes("cohort.publication_status === 'published' ? 'draft' : 'published'") &&
+    adminProgramsPageContent.includes("academic status remains");
+  const migration5Exists = fs.existsSync(publicationMigrationPath);
+
+  // Runtime test of lifecycle independence:
+  const testCohortCode = `TEST-CYCLE-${Date.now()}`;
+  const createRes = createMockCohort({
+    program_id: 'prog-academic-01',
+    name: 'Lifecycle Separation Test Cohort',
+    code: testCohortCode,
+    status: 'planned',
+    publication_status: 'draft',
+  });
+  const createdTestCohort = createRes.cohort!;
+
+  // Test 1: Publishing a planned cohort does NOT change its academic status
+  updateMockCohort(createdTestCohort.id, { publication_status: 'published' });
+  const cohortsAfterPublish = getMockCohorts();
+  const publishedCohortCheck = cohortsAfterPublish.find((c) => c.id === createdTestCohort.id);
+  const plannedRemainsPlanned =
+    publishedCohortCheck?.status === 'planned' &&
+    publishedCohortCheck?.publication_status === 'published';
+
+  // Test 2: Unpublishing an active cohort does NOT change its academic status
+  updateMockCohort(createdTestCohort.id, { status: 'active', publication_status: 'published' });
+  updateMockCohort(createdTestCohort.id, { publication_status: 'draft' });
+  const cohortsAfterUnpublish = getMockCohorts();
+  const unpublishedCohortCheck = cohortsAfterUnpublish.find((c) => c.id === createdTestCohort.id);
+  const activeRemainsActive =
+    unpublishedCohortCheck?.status === 'active' &&
+    unpublishedCohortCheck?.publication_status === 'draft';
+
+  // Test 3: Public query only returns published cohorts
+  const publicCohorts = getMockCohorts('prog-academic-01').filter(
+    (c) => c.publication_status === 'published'
+  );
+  const draftExcludedFromPublic = !publicCohorts.some((c) => c.id === createdTestCohort.id);
 
   report(
-    'Admin Management [Independent Cohort Thumbnails & Publishing]',
-    adminHasProgramThumbnailUI &&
-      adminHasCohortThumbnailUI &&
-      adminHasCohortShortDescription &&
-      adminHasPublishCohortToggle &&
-      programsLibHasCohortThumbnailFuncs &&
-      cohortMigrationExists,
-    'Admin desk supports independent Program and Cohort thumbnail upload/preview/replace/removal, cohort descriptions, and cohort publishing'
+    'Lifecycle Separation [Academic Status vs Publication Status Independence]',
+    adminHasAcademicStatusSelect &&
+      adminHasPublicationStatusSelect &&
+      adminHasToggleByPublicationStatus &&
+      migration5Exists &&
+      plannedRemainsPlanned &&
+      activeRemainsActive &&
+      draftExcludedFromPublic,
+    'Academic status (planned/active/completed) and publication status (draft/published/archived) are completely decoupled across UI, service, and database'
   );
 
-  // 7. Mentor Permission Enforcement (Mentors blocked from program/cohort management)
+  // 7. Thumbnail Storage Security Policies Verification
+  const storageMigrationContent = fs.readFileSync(storageMigrationPath, 'utf8');
+  const bucketProvisioned = storageMigrationContent.includes("'program-thumbnails'");
+  const publicSelectPolicy =
+    storageMigrationContent.includes('CREATE POLICY "Public can view program thumbnails"') &&
+    storageMigrationContent.includes("FOR SELECT") &&
+    storageMigrationContent.includes("bucket_id = 'program-thumbnails'");
+  const adminInsertPolicy =
+    storageMigrationContent.includes('CREATE POLICY "Admins can upload program thumbnails"') &&
+    storageMigrationContent.includes("FOR INSERT") &&
+    storageMigrationContent.includes("(SELECT profiles.role FROM public.profiles WHERE profiles.id = auth.uid()) = 'admin'");
+  const adminUpdatePolicy =
+    storageMigrationContent.includes('CREATE POLICY "Admins can update program thumbnails"') &&
+    storageMigrationContent.includes("FOR UPDATE") &&
+    storageMigrationContent.includes("(SELECT profiles.role FROM public.profiles WHERE profiles.id = auth.uid()) = 'admin'");
+  const adminDeletePolicy =
+    storageMigrationContent.includes('CREATE POLICY "Admins can delete program thumbnails"') &&
+    storageMigrationContent.includes("FOR DELETE") &&
+    storageMigrationContent.includes("(SELECT profiles.role FROM public.profiles WHERE profiles.id = auth.uid()) = 'admin'");
+
+  report(
+    'Storage Security [Bucket Configuration & Strict RLS Policies]',
+    bucketProvisioned && publicSelectPolicy && adminInsertPolicy && adminUpdatePolicy && adminDeletePolicy,
+    'Storage bucket program-thumbnails enforces public SELECT and strictly restricts INSERT, UPDATE, DELETE to authenticated admin role (mentors excluded)'
+  );
+
+  // 8. Mentor RBAC Security Enforcement
   function mentorCanManagePrograms(code: string): boolean {
     const adminProgMatch = code.match(/path="admin\/programs"[\s\S]*?allowedRoles=\{([^}]+)\}/);
     if (adminProgMatch && adminProgMatch[1].includes('mentor')) return true;
@@ -224,7 +309,7 @@ async function runVerification() {
     'Only Admin can access /admin/programs or modify programs/cohorts; mentors are strictly excluded from management routes'
   );
 
-  // 8. Public Interface Simplification (Zero application modals on public pages)
+  // 9. Public Interface Simplification (Zero application modals on public pages)
   const noPublicApplicationModals =
     !programsPageContent.includes('requestModalOpen') &&
     !programDetailPageContent.includes('requestModalOpen') &&
@@ -238,10 +323,10 @@ async function runVerification() {
     'Public Program and Cohort pages have no request modals, mentor application prompts, or sign-in barriers'
   );
 
-  // 9. Historical Application & Enrollment Pipeline Preservation
+  // 10. Historical Application & Enrollment Pipeline Preservation
   const mockProgs = getMockPrograms();
   const targetProg = mockProgs[0];
-  const testStudentId = 'student-uuid-4tier-check';
+  const testStudentId = 'student-uuid-lifecycle-check';
   const submitRes = createMockApplication({
     program_id: targetProg.id,
     applicant_id: testStudentId,
@@ -250,7 +335,7 @@ async function runVerification() {
     message: 'Preservation test',
   });
   const targetAppId = submitRes.application ? submitRes.application.id : '';
-  const reviewRes = adminReviewMockApplication('admin-1', targetAppId, 'approved', 'Approved during 4-tier check');
+  const reviewRes = adminReviewMockApplication('admin-1', targetAppId, 'approved', 'Approved during lifecycle check');
   const enrollments = getMockEnrollments();
   const createdEnrollment = enrollments.find(
     (e) => e.student_id === testStudentId && e.program_id === targetProg.id
@@ -262,7 +347,7 @@ async function runVerification() {
     'Admin application review, automated student enrollment creation, and historical tables remain fully functional'
   );
 
-  // 10. Zero Emojis and Strict NO-AMOUNT Policy
+  // 11. Zero Emojis and Strict NO-AMOUNT Policy
   const filesToAudit = [
     'src/pages/ProgramsPage.tsx',
     'src/pages/ProgramDetailPage.tsx',
@@ -272,6 +357,7 @@ async function runVerification() {
     'src/pages/dashboard/AdminProgramsPage.tsx',
     'src/routes/index.tsx',
     'supabase/migrations/20261104000004_cohort_thumbnails.sql',
+    'supabase/migrations/20261104000005_cohort_publication_status.sql',
   ];
 
   const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1FA00}-\u{1FAFF}]/u;

@@ -35,6 +35,7 @@ import type {
   ProgramPublicationStatus,
   ProgramEnrollmentStatus,
   CohortStatus,
+  CohortPublicationStatus,
 } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
@@ -123,6 +124,7 @@ export const AdminProgramsPage: React.FC = () => {
     end_date: '',
     capacity: 30,
     status: 'planned',
+    publication_status: 'draft',
   });
 
   // Form State: Cohort Thumbnail
@@ -445,6 +447,7 @@ export const AdminProgramsPage: React.FC = () => {
       end_date: '',
       capacity: 30,
       status: 'planned',
+      publication_status: 'draft',
     });
     setCohortThumbnailFile(null);
     setCohortThumbnailPreview(null);
@@ -463,6 +466,7 @@ export const AdminProgramsPage: React.FC = () => {
       end_date: cohort.end_date || '',
       capacity: cohort.capacity || 30,
       status: cohort.status,
+      publication_status: cohort.publication_status || 'draft',
     });
     setCohortThumbnailFile(null);
     setCohortThumbnailPreview(cohort.cover_image_url || null);
@@ -517,15 +521,16 @@ export const AdminProgramsPage: React.FC = () => {
   };
 
   const handleToggleCohortPublication = async (cohort: Cohort) => {
-    const nextStatus: CohortStatus = cohort.status === 'archived' ? 'active' : 'archived';
-    const res = await updateCohort(cohort.id, { status: nextStatus });
+    const nextPubStatus: CohortPublicationStatus =
+      cohort.publication_status === 'published' ? 'draft' : 'published';
+    const res = await updateCohort(cohort.id, { publication_status: nextPubStatus });
     if (res.error) {
       setError(res.error.message);
     } else {
       setSuccessMessage(
-        nextStatus === 'archived'
-          ? `Cohort '${cohort.name}' unpublished (archived).`
-          : `Cohort '${cohort.name}' published (active).`
+        nextPubStatus === 'published'
+          ? `Cohort '${cohort.name}' published (academic status remains '${cohort.status}').`
+          : `Cohort '${cohort.name}' unpublished (academic status remains '${cohort.status}').`
       );
       loadData();
     }
@@ -1267,10 +1272,16 @@ export const AdminProgramsPage: React.FC = () => {
                               </span>
                               <span className="font-bold text-brand-navy truncate">{cohort.name}</span>
                               <Badge
-                                variant={cohort.status === 'active' ? 'teal' : cohort.status === 'planned' ? 'gold' : 'paper'}
+                                variant={cohort.status === 'active' ? 'teal' : cohort.status === 'planned' ? 'gold' : 'navy'}
                                 size="sm"
                               >
                                 {cohort.status.toUpperCase()}
+                              </Badge>
+                              <Badge
+                                variant={cohort.publication_status === 'published' ? 'teal' : cohort.publication_status === 'draft' ? 'paper' : 'muted'}
+                                size="sm"
+                              >
+                                {(cohort.publication_status || 'draft').toUpperCase()}
                               </Badge>
                             </div>
                             <span className="font-mono text-[11px] text-brand-muted block truncate">
@@ -1284,9 +1295,9 @@ export const AdminProgramsPage: React.FC = () => {
                             type="button"
                             onClick={() => handleToggleCohortPublication(cohort)}
                             className="px-2 py-1 border border-brand-dark bg-brand-paper-tint hover:bg-brand-paper text-[10px] font-mono shadow-brutal-xs"
-                            title={cohort.status === 'archived' ? 'Publish cohort' : 'Unpublish cohort'}
+                            title={cohort.publication_status === 'published' ? 'Unpublish cohort' : 'Publish cohort'}
                           >
-                            {cohort.status === 'archived' ? 'Publish' : 'Unpublish'}
+                            {cohort.publication_status === 'published' ? 'Unpublish' : 'Publish'}
                           </button>
                           <button
                             type="button"
@@ -1450,7 +1461,7 @@ export const AdminProgramsPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="font-mono text-[11px] font-bold block mb-1">Status</label>
+                  <label className="font-mono text-[11px] font-bold block mb-1">Academic Status</label>
                   <select
                     value={cohortForm.status}
                     onChange={(e) => setCohortForm((prev) => ({ ...prev, status: e.target.value as CohortStatus }))}
@@ -1459,7 +1470,24 @@ export const AdminProgramsPage: React.FC = () => {
                     <option value="planned">Planned</option>
                     <option value="active">Active</option>
                     <option value="completed">Completed</option>
-                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-mono text-[11px] font-bold block mb-1">Publication Status</label>
+                  <select
+                    value={cohortForm.publication_status}
+                    onChange={(e) =>
+                      setCohortForm((prev) => ({
+                        ...prev,
+                        publication_status: e.target.value as CohortPublicationStatus,
+                      }))
+                    }
+                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-white font-sans"
+                  >
+                    <option value="draft">Draft (Private)</option>
+                    <option value="published">Published (Public)</option>
+                    <option value="archived">Archived (Hidden)</option>
                   </select>
                 </div>
               </div>
