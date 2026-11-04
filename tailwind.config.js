@@ -32,8 +32,8 @@ export default {
         'brutal-teal': '4px 4px 0px 0px #0BA7B4',
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'sans-serif'],
-        heading: ['Space Grotesk', 'Plus Jakarta Sans', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Noto Sans Bengali', 'sans-serif'],
+        heading: ['Space Grotesk', 'Plus Jakarta Sans', 'Noto Sans Bengali', 'sans-serif'],
         mono: ['Space Mono', 'ui-monospace', 'monospace'],
       },
       borderWidth: {
