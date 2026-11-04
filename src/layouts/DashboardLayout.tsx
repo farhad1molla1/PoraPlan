@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Badge } from '../components/common/Badge';
@@ -27,6 +27,7 @@ import {
   Users,
   BarChart3,
   CreditCard,
+  ChevronDown,
 } from 'lucide-react';
 import { getUnreadNotificationCount } from '../lib/notifications';
 
@@ -35,10 +36,39 @@ export const DashboardLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   const [emailToLink, setEmailToLink] = useState('');
   const [isLinkingEmail, setIsLinkingEmail] = useState(false);
   const [emailLinkMessage, setEmailLinkMessage] = useState<string | null>(null);
   const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);
+
+  // Close profile dropdown on outside click or Escape key
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setProfileDropdownOpen(false);
+      }
+    };
+    if (profileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [profileDropdownOpen]);
+
+  // Close profile dropdown when route changes
+  useEffect(() => {
+    setProfileDropdownOpen(false);
+  }, [location.pathname]);
 
   // Poll/fetch unread notification count for active user (Student, Mentor, Admin)
   React.useEffect(() => {
@@ -99,76 +129,68 @@ export const DashboardLayout: React.FC = () => {
   // Desktop sidebar navigation links
   const studentNavItems = [
     { label: 'Overview', shortLabel: 'Home', to: '/student/dashboard', icon: LayoutDashboard },
-    { label: 'Study Plans', shortLabel: 'Plans', to: '/student/plans', icon: Compass },
     { label: "Today's Tasks", shortLabel: 'Tasks', to: '/student/tasks', icon: ListTodo },
+    { label: 'Doubts Desk', shortLabel: 'Doubts', to: '/student/doubts', icon: HelpCircle },
     { label: 'Assignments', shortLabel: 'Practice', to: '/student/assignments', icon: FileText },
-    { label: 'Evaluations', shortLabel: 'Eval', to: '/student/evaluations', icon: Calendar },
-    { label: 'Progress', shortLabel: 'Progress', to: '/student/progress', icon: TrendingUp },
-    { label: 'Academic Reports', shortLabel: 'Reports', to: '/student/reports', icon: BarChart3 },
+    { label: 'Study Plans', shortLabel: 'Plans', to: '/student/plans', icon: Compass },
     { label: 'Academic Library', shortLabel: 'Library', to: '/student/library', icon: BookMarked },
-    { label: 'Billing & Payments', shortLabel: 'Billing', to: '/student/billing', icon: CreditCard },
-    { label: 'Doubts', shortLabel: 'Doubts', to: '/student/doubts', icon: HelpCircle },
+    { label: 'Academic Progress', shortLabel: 'Progress', to: '/student/progress', icon: TrendingUp },
+    { label: 'Academic Reports', shortLabel: 'Reports', to: '/student/reports', icon: BarChart3 },
     { label: 'Announcements', shortLabel: 'Notices', to: '/student/announcements', icon: Megaphone },
-    { label: 'Notifications', shortLabel: 'Alerts', to: '/student/notifications', icon: Bell, badgeCount: unreadNotifCount },
-    { label: 'My Applications', shortLabel: 'Apps', to: '/student/applications', icon: ClipboardList },
+    { label: 'Billing & Payments', shortLabel: 'Billing', to: '/student/billing', icon: CreditCard },
     { label: 'Subjects', shortLabel: 'Subjects', to: '/student/subjects', icon: BookOpen },
-    { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
 
   const mentorNavItems = [
     { label: 'Overview', shortLabel: 'Home', to: '/mentor/dashboard', icon: LayoutDashboard },
-    { label: 'Study Plans', shortLabel: 'Plans', to: '/mentor/plans', icon: Compass },
-    { label: 'Tasks', shortLabel: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
+    { label: 'Review Queue', shortLabel: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
+    { label: 'Doubts Desk', shortLabel: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
+    { label: 'Tasks Management', shortLabel: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
     { label: 'Assignments', shortLabel: 'Practice', to: '/mentor/assignments', icon: FileText },
-    { label: 'Review Submissions', shortLabel: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
+    { label: 'Study Plans', shortLabel: 'Plans', to: '/mentor/plans', icon: Compass },
     { label: 'Evaluations', shortLabel: 'Eval', to: '/mentor/evaluations', icon: Calendar },
     { label: 'Student Progress', shortLabel: 'Progress', to: '/mentor/progress', icon: TrendingUp },
     { label: 'Scholar Reports', shortLabel: 'Reports', to: '/mentor/reports', icon: BarChart3 },
     { label: 'Resources', shortLabel: 'Resources', to: '/mentor/resources', icon: BookMarked },
-    { label: 'Payout History', shortLabel: 'Payouts', to: '/mentor/payouts', icon: CreditCard },
-    { label: 'Doubts', shortLabel: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
     { label: 'Announcements', shortLabel: 'Notices', to: '/mentor/announcements', icon: Megaphone },
-    { label: 'Notifications', shortLabel: 'Alerts', to: '/mentor/notifications', icon: Bell, badgeCount: unreadNotifCount },
-    { label: 'My Applications', shortLabel: 'Apps', to: '/mentor/applications', icon: ClipboardList },
+    { label: 'Payout History', shortLabel: 'Payouts', to: '/mentor/payouts', icon: CreditCard },
     { label: 'Subjects', shortLabel: 'Subjects', to: '/mentor/subjects', icon: BookOpen },
-    { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
 
   const adminNavItems = [
     { label: 'Admin Console', shortLabel: 'Admin', to: '/admin/dashboard', icon: ShieldCheck },
     { label: 'Programs & Cohorts', shortLabel: 'Programs', to: '/admin/programs', icon: GraduationCap },
-    { label: 'Applications Desk', shortLabel: 'Apps', to: '/admin/applications', icon: ClipboardList },
     { label: 'Enrollments Desk', shortLabel: 'Enrollments', to: '/admin/enrollments', icon: UserCheck },
     { label: 'Mentor Allocations', shortLabel: 'Mentors', to: '/admin/mentor-assignments', icon: Users },
     { label: 'Billing Management', shortLabel: 'Billing', to: '/admin/billing', icon: CreditCard },
     { label: 'User Directory', shortLabel: 'Users', to: '/admin/users', icon: Users },
     { label: 'Academic Reports', shortLabel: 'Reports', to: '/admin/reports', icon: BarChart3 },
+    { label: 'Applications Desk', shortLabel: 'Apps', to: '/admin/applications', icon: ClipboardList },
     { label: 'System Alerts', shortLabel: 'Alerts', to: '/admin/notifications', icon: Bell, badgeCount: unreadNotifCount },
-    { label: 'My Profile', shortLabel: 'Profile', to: '/profile', icon: UserIcon },
   ];
 
   // Mobile navigation: top essential daily actions
   const mobileStudentNavItems = [
     { label: 'Home', to: '/student/dashboard', icon: LayoutDashboard },
     { label: 'Tasks', to: '/student/tasks', icon: ListTodo },
-    { label: 'Plans', to: '/student/plans', icon: Compass },
     { label: 'Doubts', to: '/student/doubts', icon: HelpCircle },
+    { label: 'Plans', to: '/student/plans', icon: Compass },
     { label: 'Alerts', to: '/student/notifications', icon: Bell, badgeCount: unreadNotifCount },
   ];
 
   const mobileMentorNavItems = [
     { label: 'Home', to: '/mentor/dashboard', icon: LayoutDashboard },
     { label: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
-    { label: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
     { label: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
+    { label: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
     { label: 'Alerts', to: '/mentor/notifications', icon: Bell, badgeCount: unreadNotifCount },
   ];
 
   const mobileAdminNavItems = [
     { label: 'Admin', to: '/admin/dashboard', icon: ShieldCheck },
-    { label: 'Reports', to: '/admin/reports', icon: BarChart3 },
     { label: 'Enroll', to: '/admin/enrollments', icon: UserCheck },
-    { label: 'Users', to: '/admin/users', icon: Users },
+    { label: 'Mentors', to: '/admin/mentor-assignments', icon: Users },
+    { label: 'Billing', to: '/admin/billing', icon: CreditCard },
     { label: 'Alerts', to: '/admin/notifications', icon: Bell, badgeCount: unreadNotifCount },
   ];
 
@@ -214,7 +236,7 @@ export const DashboardLayout: React.FC = () => {
           </Badge>
         </div>
 
-        {/* User profile controls & Sign Out */}
+        {/* User profile controls & Dropdown Menu */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Notifications Center Bell */}
           <Link
@@ -231,50 +253,149 @@ export const DashboardLayout: React.FC = () => {
             )}
           </Link>
 
-          {/* Profile Trigger Button */}
-          <button
-            type="button"
-            onClick={() => setProfileModalOpen(true)}
-            className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform text-left"
-            title="View Profile Details"
-          >
-            <div className="w-6 h-6 sm:w-7 sm:h-7 bg-brand-navy text-brand-bg font-heading font-extrabold text-xs flex items-center justify-center border border-brand-dark overflow-hidden">
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-              ) : (
-                userInitials
-              )}
-            </div>
-            <div className="hidden sm:flex flex-col pr-1">
-              <span className="text-xs font-bold font-sans text-brand-dark leading-none truncate max-w-[120px]">
-                {userDisplayName}
-              </span>
-              <span className="text-[10px] font-mono text-brand-teal font-bold leading-tight mt-0.5 truncate max-w-[120px]">
-                {poraplanId || user?.email}
-              </span>
-            </div>
-          </button>
+          {/* Profile & Account Dropdown */}
+          <div className="relative" ref={profileMenuRef}>
+            <button
+              type="button"
+              onClick={() => setProfileDropdownOpen((prev) => !prev)}
+              className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+              aria-expanded={profileDropdownOpen}
+              aria-haspopup="menu"
+              aria-label="User account and profile menu"
+            >
+              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-brand-navy text-brand-bg font-heading font-extrabold text-xs flex items-center justify-center border border-brand-dark overflow-hidden shrink-0">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  userInitials
+                )}
+              </div>
+              <div className="hidden sm:flex flex-col pr-1">
+                <span className="text-xs font-bold font-sans text-brand-dark leading-none truncate max-w-[120px]">
+                  {userDisplayName}
+                </span>
+                <span className="text-[10px] font-mono text-brand-teal font-bold leading-tight mt-0.5 truncate max-w-[120px]">
+                  {poraplanId || user?.email}
+                </span>
+              </div>
+              <ChevronDown
+                className={`w-3.5 h-3.5 text-brand-dark/70 transition-transform ${
+                  profileDropdownOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
 
-          {/* Sign Out Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleSignOut}
-            leftIcon={<LogOut className="w-3.5 h-3.5" />}
-            className="hidden sm:inline-flex text-xs font-mono"
-          >
-            Sign Out
-          </Button>
+            {/* Dropdown Menu */}
+            {profileDropdownOpen && (
+              <div
+                role="menu"
+                aria-orientation="vertical"
+                className="absolute right-0 mt-2 w-64 sm:w-72 bg-brand-paper border-2 border-brand-dark shadow-brutal-md py-2 z-50 animate-in fade-in zoom-in-95 duration-100"
+              >
+                {/* Account Details Header */}
+                <div className="px-3.5 py-2 border-b-2 border-brand-dark/15 mb-1.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 bg-brand-navy text-brand-bg font-heading font-extrabold text-sm flex items-center justify-center border border-brand-dark overflow-hidden shrink-0">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        userInitials
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-heading font-extrabold text-brand-navy truncate">
+                        {userDisplayName}
+                      </p>
+                      <p className="text-[10px] font-mono text-brand-teal font-bold truncate">
+                        {poraplanId || user?.email}
+                      </p>
+                      <div className="mt-1">
+                        <Badge variant={roleBadgeVariant} size="sm">
+                          {roleLabel}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="sm:hidden p-1.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:bg-brand-paper-tint"
-            aria-label="Sign out"
-            title="Sign out"
-          >
-            <LogOut className="w-4 h-4 text-brand-dark" />
-          </button>
+                {/* Primary Destination: Academic Profile */}
+                <Link
+                  to="/profile"
+                  role="menuitem"
+                  onClick={() => setProfileDropdownOpen(false)}
+                  className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-brand-paper-tint transition-colors"
+                >
+                  <UserIcon className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.2]" />
+                  <span className="flex-1">My Academic Profile</span>
+                </Link>
+
+                {/* Role Specific Destination */}
+                {isStudent && (
+                  <Link
+                    to="/student/billing"
+                    role="menuitem"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-brand-paper-tint transition-colors"
+                  >
+                    <CreditCard className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.2]" />
+                    <span className="flex-1">Billing & Payments</span>
+                  </Link>
+                )}
+                {isMentor && (
+                  <Link
+                    to="/mentor/payouts"
+                    role="menuitem"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-brand-paper-tint transition-colors"
+                  >
+                    <CreditCard className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.2]" />
+                    <span className="flex-1">Payout History</span>
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link
+                    to="/admin/billing"
+                    role="menuitem"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-brand-paper-tint transition-colors"
+                  >
+                    <CreditCard className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.2]" />
+                    <span className="flex-1">Billing Management</span>
+                  </Link>
+                )}
+
+                {/* Quick Dossier Modal Trigger */}
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setProfileDropdownOpen(false);
+                    setProfileModalOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-brand-paper-tint transition-colors text-left"
+                >
+                  <Sparkles className="w-4 h-4 text-brand-gold shrink-0 stroke-[2.2]" />
+                  <span className="flex-1">Identity & Email Details</span>
+                </button>
+
+                <div className="border-t-2 border-brand-dark/15 my-1.5" />
+
+                {/* Sign Out Action inside Dropdown */}
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setProfileDropdownOpen(false);
+                    handleSignOut();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-red-700 hover:bg-red-50 hover:text-red-800 transition-colors text-left"
+                >
+                  <LogOut className="w-4 h-4 text-red-600 shrink-0 stroke-[2.2]" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
