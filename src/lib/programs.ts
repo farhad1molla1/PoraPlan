@@ -47,9 +47,9 @@ import {
 export function getProgramCategoryLabel(category: ProgramCategory): string {
   switch (category) {
     case 'academic_mentorship':
-      return 'Academic Mentorship';
+      return 'Academic Program';
     case 'skillsprint':
-      return 'SkillSprint';
+      return 'Upskilling Program';
     default:
       return category;
   }
@@ -266,6 +266,106 @@ export async function deleteProgram(
   try {
     const { error } = await supabase.from('programs').delete().eq('id', id);
     if (error) return { success: false, error };
+    return { success: true, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { success: false, error };
+  }
+}
+
+export async function uploadProgramThumbnail(
+  programId: string,
+  file: File
+): Promise<{ coverImageUrl: string | null; error: Error | null }> {
+  // Validate file type
+  const validTypes = ['image/png', 'image/jpeg', 'image/webp'];
+  if (!validTypes.includes(file.type)) {
+    return {
+      coverImageUrl: null,
+      error: new Error('Invalid image format. Allowed formats: PNG, JPEG, WebP.'),
+    };
+  }
+
+  // Validate file size (max 5MB)
+  const maxSize = 5 * 1024 * 1024;
+  if (file.size > maxSize) {
+    return {
+      coverImageUrl: null,
+      error: new Error('Image size exceeds 5MB limit.'),
+    };
+  }
+
+  if (!isSupabaseConfigured()) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        updateMockProgram(programId, { cover_image_url: dataUrl });
+        resolve({ coverImageUrl: dataUrl, error: null });
+      };
+      reader.onerror = () => {
+        resolve({ coverImageUrl: null, error: new Error('Failed to read image file.') });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  try {
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const cleanExt = ['jpg', 'jpeg', 'png', 'webp'].includes(fileExt) ? fileExt : 'jpg';
+    const filePath = `${programId}/${Date.now()}.${cleanExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('program-thumbnails')
+      .upload(filePath, file, {
+        upsert: true,
+        contentType: file.type,
+      });
+
+    if (uploadError) {
+      return { coverImageUrl: null, error: uploadError };
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from('program-thumbnails')
+      .getPublicUrl(filePath);
+
+    const coverImageUrl = publicUrlData.publicUrl;
+
+    await supabase
+      .from('programs')
+      .update({ cover_image_url: coverImageUrl })
+      .eq('id', programId);
+
+    return { coverImageUrl, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { coverImageUrl: null, error };
+  }
+}
+
+export async function deleteProgramThumbnail(
+  programId: string,
+  coverImageUrl?: string | null
+): Promise<{ success: boolean; error: Error | null }> {
+  if (!isSupabaseConfigured()) {
+    updateMockProgram(programId, { cover_image_url: null });
+    return { success: true, error: null };
+  }
+
+  try {
+    if (coverImageUrl) {
+      const parts = coverImageUrl.split('/program-thumbnails/');
+      if (parts.length > 1) {
+        await supabase.storage.from('program-thumbnails').remove([parts[1]]);
+      }
+    }
+
+    await supabase
+      .from('programs')
+      .update({ cover_image_url: null })
+      .eq('id', programId);
+
     return { success: true, error: null };
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));

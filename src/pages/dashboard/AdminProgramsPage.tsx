@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import {
   getPrograms,
@@ -19,6 +19,8 @@ import {
   deleteCurriculumTopic,
   getProgramCategoryLabel,
   generateSlug,
+  uploadProgramThumbnail,
+  deleteProgramThumbnail,
 } from '../../lib/programs';
 import type {
   Program,
@@ -50,6 +52,9 @@ import {
   Loader2,
   Clock,
   Laptop,
+  Image as ImageIcon,
+  Upload,
+  FileText,
 } from 'lucide-react';
 
 export const AdminProgramsPage: React.FC = () => {
@@ -99,6 +104,12 @@ export const AdminProgramsPage: React.FC = () => {
     display_order: 1,
   });
   const [objectivesInput, setObjectivesInput] = useState('');
+
+  // Form State: Thumbnail
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [thumbnailError, setThumbnailError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Form State: Cohort
   const [cohortForm, setCohortForm] = useState<CohortInsert>({
@@ -207,6 +218,10 @@ export const AdminProgramsPage: React.FC = () => {
       display_order: programs.length + 1,
     });
     setObjectivesInput('');
+    setThumbnailFile(null);
+    setThumbnailPreview(null);
+    setThumbnailError(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
     setProgramModalOpen(true);
   };
 
@@ -228,7 +243,41 @@ export const AdminProgramsPage: React.FC = () => {
       display_order: prog.display_order,
     });
     setObjectivesInput((prog.learning_objectives || []).join('\n'));
+    setThumbnailFile(null);
+    setThumbnailPreview(prog.cover_image_url || null);
+    setThumbnailError(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
     setProgramModalOpen(true);
+  };
+
+  const handleThumbnailFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setThumbnailError('Invalid file format. Only PNG, JPEG, and WebP are allowed.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setThumbnailError('File exceeds 5MB maximum size limit.');
+      return;
+    }
+
+    setThumbnailError(null);
+    setThumbnailFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setThumbnailPreview(objectUrl);
+  };
+
+  const handleRemoveThumbnail = () => {
+    setThumbnailFile(null);
+    setThumbnailPreview(null);
+    setThumbnailError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleProgramNameChange = (name: string) => {
@@ -266,6 +315,14 @@ export const AdminProgramsPage: React.FC = () => {
       if (res.error) {
         setError(res.error.message);
       } else {
+        if (thumbnailFile) {
+          const thumbRes = await uploadProgramThumbnail(editingProgram.id, thumbnailFile);
+          if (thumbRes.error) {
+            setError(`Program updated, but thumbnail upload failed: ${thumbRes.error.message}`);
+          }
+        } else if (editingProgram.cover_image_url && !thumbnailPreview) {
+          await deleteProgramThumbnail(editingProgram.id, editingProgram.cover_image_url);
+        }
         setSuccessMessage(`Program '${payload.name}' updated successfully.`);
         setProgramModalOpen(false);
         loadData();
@@ -275,6 +332,12 @@ export const AdminProgramsPage: React.FC = () => {
       if (res.error) {
         setError(res.error.message);
       } else {
+        if (thumbnailFile && res.program) {
+          const thumbRes = await uploadProgramThumbnail(res.program.id, thumbnailFile);
+          if (thumbRes.error) {
+            setError(`Program created, but thumbnail upload failed: ${thumbRes.error.message}`);
+          }
+        }
         setSuccessMessage(`Program '${payload.name}' created successfully.`);
         setProgramModalOpen(false);
         loadData();
@@ -285,6 +348,10 @@ export const AdminProgramsPage: React.FC = () => {
   const handleDeleteProgram = async (prog: Program) => {
     if (!window.confirm(`Are you sure you want to delete program '${prog.name}'? This will also remove associated cohorts and curriculum.`)) {
       return;
+    }
+
+    if (prog.cover_image_url) {
+      await deleteProgramThumbnail(prog.id, prog.cover_image_url);
     }
 
     const res = await deleteProgram(prog.id);
@@ -577,7 +644,7 @@ export const AdminProgramsPage: React.FC = () => {
                   : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
               }`}
             >
-              Academic Mentorship
+              Academic Programs
             </button>
             <button
               type="button"
@@ -588,7 +655,7 @@ export const AdminProgramsPage: React.FC = () => {
                   : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
               }`}
             >
-              SkillSprint
+              Upskilling Programs
             </button>
           </div>
 
@@ -688,13 +755,29 @@ export const AdminProgramsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <h2 className="font-heading font-extrabold text-xl text-brand-navy">
-                      {prog.name}
-                    </h2>
-                    <p className="font-sans text-xs sm:text-sm text-brand-dark/80">
-                      {prog.short_description}
-                    </p>
+                  <div className="flex flex-col sm:flex-row gap-4 items-start">
+                    {prog.cover_image_url ? (
+                      <div className="w-full sm:w-44 h-28 shrink-0 overflow-hidden border-2 border-brand-dark bg-brand-paper-tint">
+                        <img
+                          src={prog.cover_image_url}
+                          alt={prog.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full sm:w-44 h-28 shrink-0 border-2 border-dashed border-brand-dark/30 bg-brand-paper-tint flex flex-col items-center justify-center gap-1 text-brand-muted">
+                        <ImageIcon className="w-5 h-5 stroke-[1.5]" />
+                        <span className="font-mono text-[10px]">No Thumbnail</span>
+                      </div>
+                    )}
+                    <div className="space-y-1.5 flex-1 min-w-0">
+                      <h2 className="font-heading font-extrabold text-xl text-brand-navy">
+                        {prog.name}
+                      </h2>
+                      <p className="font-sans text-xs sm:text-sm text-brand-dark/80 line-clamp-3">
+                        {prog.short_description}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-xs text-brand-muted border-t border-brand-dark/20 pt-3">
@@ -712,7 +795,7 @@ export const AdminProgramsPage: React.FC = () => {
                     )}
                     <span className="flex items-center gap-1.5 font-bold text-brand-dark">
                       <Users className="w-3.5 h-3.5 text-brand-gold" />
-                      {progCohorts.length} Cohorts
+                      {progCohorts.length} {prog.category === 'skillsprint' ? 'Courses / Cohorts' : 'Cohorts'}
                     </span>
                   </div>
 
@@ -725,7 +808,7 @@ export const AdminProgramsPage: React.FC = () => {
                         onClick={() => handleOpenCohorts(prog)}
                         leftIcon={<Users className="w-3.5 h-3.5 text-brand-navy" />}
                       >
-                        Manage Cohorts ({progCohorts.length})
+                        {prog.category === 'skillsprint' ? 'Manage Courses / Runs' : 'Manage Cohorts'} ({progCohorts.length})
                       </Button>
 
                       <Button
@@ -735,6 +818,15 @@ export const AdminProgramsPage: React.FC = () => {
                         leftIcon={<Layers className="w-3.5 h-3.5 text-brand-teal" />}
                       >
                         Curriculum Builder
+                      </Button>
+
+                      <Button
+                        to={`/admin/applications?programId=${prog.id}`}
+                        variant="outline"
+                        size="sm"
+                        leftIcon={<FileText className="w-3.5 h-3.5 text-brand-navy" />}
+                      >
+                        View Applications
                       </Button>
 
                       {isPublished && (
@@ -829,7 +921,7 @@ export const AdminProgramsPage: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <label className="font-mono text-xs uppercase font-bold block">Category</label>
+                  <label className="font-mono text-xs uppercase font-bold block">Parent Category</label>
                   <select
                     value={programForm.category}
                     onChange={(e) =>
@@ -837,8 +929,8 @@ export const AdminProgramsPage: React.FC = () => {
                     }
                     className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-white font-sans"
                   >
-                    <option value="academic_mentorship">Academic Mentorship</option>
-                    <option value="skillsprint">SkillSprint</option>
+                    <option value="academic_mentorship">Academic Program (Academic Mentorship Cohorts)</option>
+                    <option value="skillsprint">Upskilling Program (SkillSprint Courses)</option>
                   </select>
                 </div>
 
@@ -876,6 +968,75 @@ export const AdminProgramsPage: React.FC = () => {
                     <option value="closed">Closed</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Thumbnail Management */}
+              <div className="space-y-2 border-2 border-brand-dark bg-brand-paper-tint p-4">
+                <div className="flex items-center justify-between">
+                  <label className="font-mono text-xs uppercase font-bold text-brand-navy flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-brand-teal" />
+                    Program Thumbnail
+                  </label>
+                  <span className="font-mono text-[10px] text-brand-muted">Max 5MB (PNG, JPG, WebP)</span>
+                </div>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleThumbnailFileSelect}
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  aria-label="Upload program thumbnail"
+                />
+
+                {thumbnailPreview ? (
+                  <div className="space-y-2">
+                    <div className="relative aspect-[16/9] w-full max-h-48 overflow-hidden border-2 border-brand-dark bg-brand-dark/5">
+                      <img
+                        src={thumbnailPreview}
+                        alt="Program thumbnail preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        leftIcon={<Upload className="w-3.5 h-3.5" />}
+                      >
+                        Replace Image
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRemoveThumbnail}
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                        leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-brand-dark/40 bg-white p-6 text-center cursor-pointer hover:border-brand-dark hover:bg-brand-paper transition-colors space-y-1.5"
+                  >
+                    <ImageIcon className="w-8 h-8 text-brand-muted mx-auto stroke-[1.5]" />
+                    <p className="font-mono text-xs font-bold text-brand-dark">Click to upload thumbnail</p>
+                    <p className="font-sans text-[11px] text-brand-muted">Recommended aspect ratio: 16:9 for clean catalog card rendering</p>
+                  </div>
+                )}
+
+                {thumbnailError && (
+                  <div className="p-2 border border-red-600 bg-red-50 text-red-900 font-mono text-xs flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                    <span>{thumbnailError}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1">

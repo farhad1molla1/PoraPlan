@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
   getApplications,
@@ -31,6 +32,7 @@ import {
 
 export const AdminApplicationsPage: React.FC = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
 
   const [applications, setApplications] = useState<ProgramApplicationWithMeta[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -42,7 +44,16 @@ export const AdminApplicationsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | ApplicationType>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | ApplicationStatus>('all');
-  const [programFilter, setProgramFilter] = useState<string>('all');
+  const [programFilter, setProgramFilter] = useState<string>(
+    () => searchParams.get('programId') || searchParams.get('program') || 'all'
+  );
+
+  useEffect(() => {
+    const pId = searchParams.get('programId') || searchParams.get('program');
+    if (pId) {
+      setProgramFilter(pId);
+    }
+  }, [searchParams]);
 
   // Review Modal State
   const [reviewModalOpen, setReviewModalOpen] = useState(false);

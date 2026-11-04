@@ -218,77 +218,70 @@ export const ProgramsPage: React.FC = () => {
 
         {!loading && !error && (
           <div className="space-y-14">
-            {/* Section 1: Academic Programs */}
-            <section className="space-y-6">
-              <div className="border-b-3 border-brand-dark pb-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-                <div>
-                  <div className="flex items-center gap-2 text-brand-navy">
-                    <GraduationCap className="w-5 h-5 text-brand-gold stroke-[2.5]" />
-                    <h2 className="font-heading font-black text-xl sm:text-2xl tracking-tight">
-                      Academic Programs
-                    </h2>
+            {/* Section 1: Academic Programs (Hidden if no published offerings) */}
+            {academicPrograms.length > 0 && (
+              <section className="space-y-6">
+                <div className="border-b-3 border-brand-dark pb-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-2 text-brand-navy">
+                      <GraduationCap className="w-5 h-5 text-brand-gold stroke-[2.5]" />
+                      <h2 className="font-heading font-black text-xl sm:text-2xl tracking-tight">
+                        Academic Programs
+                      </h2>
+                    </div>
+                    <p className="font-sans text-xs sm:text-sm text-brand-dark/75 mt-1">
+                      Structured semester syllabus planning, daily routine organization, and dedicated mentor supervision.
+                    </p>
                   </div>
-                  <p className="font-sans text-xs sm:text-sm text-brand-dark/75 mt-1">
-                    Structured semester syllabus planning, daily routine organization, and dedicated mentor supervision.
-                  </p>
+                  <span className="font-mono text-xs text-brand-muted">
+                    {academicPrograms.length} {academicPrograms.length === 1 ? 'Cohort Track' : 'Cohort Tracks'}
+                  </span>
                 </div>
-                <span className="font-mono text-xs text-brand-muted">
-                  {academicPrograms.length} {academicPrograms.length === 1 ? 'Program' : 'Programs'} Available
-                </span>
-              </div>
 
-              {academicPrograms.length === 0 ? (
-                <div className="p-8 border-2 border-dashed border-brand-dark/40 bg-brand-paper text-center space-y-1">
-                  <BookOpen className="w-8 h-8 text-brand-muted mx-auto stroke-[1.5]" />
-                  <p className="font-heading font-bold text-sm text-brand-navy">
-                    No Academic Programs Available
-                  </p>
-                  <p className="font-sans text-xs text-brand-muted">
-                    No academic programs are currently open for public viewing.
-                  </p>
-                </div>
-              ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                   {academicPrograms.map(renderProgramCard)}
                 </div>
-              )}
-            </section>
+              </section>
+            )}
 
-            {/* Section 2: Upskilling Programs */}
-            <section className="space-y-6">
-              <div className="border-b-3 border-brand-dark pb-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-                <div>
-                  <div className="flex items-center gap-2 text-brand-navy">
-                    <Zap className="w-5 h-5 text-brand-teal stroke-[2.5]" />
-                    <h2 className="font-heading font-black text-xl sm:text-2xl tracking-tight">
-                      Upskilling Programs
-                    </h2>
+            {/* Section 2: Upskilling Programs (Hidden if no published offerings) */}
+            {upskillingPrograms.length > 0 && (
+              <section className="space-y-6">
+                <div className="border-b-3 border-brand-dark pb-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-2 text-brand-navy">
+                      <Zap className="w-5 h-5 text-brand-teal stroke-[2.5]" />
+                      <h2 className="font-heading font-black text-xl sm:text-2xl tracking-tight">
+                        Upskilling Programs
+                      </h2>
+                    </div>
+                    <p className="font-sans text-xs sm:text-sm text-brand-dark/75 mt-1">
+                      Hands-on skill sprints focused on practical developer workflows and industry readiness.
+                    </p>
                   </div>
-                  <p className="font-sans text-xs sm:text-sm text-brand-dark/75 mt-1">
-                    Hands-on skill sprints focused on practical developer workflows and industry readiness.
-                  </p>
+                  <span className="font-mono text-xs text-brand-muted">
+                    {upskillingPrograms.length} {upskillingPrograms.length === 1 ? 'Course' : 'Courses'}
+                  </span>
                 </div>
-                <span className="font-mono text-xs text-brand-muted">
-                  {upskillingPrograms.length} {upskillingPrograms.length === 1 ? 'Program' : 'Programs'} Available
-                </span>
-              </div>
 
-              {upskillingPrograms.length === 0 ? (
-                <div className="p-8 border-2 border-dashed border-brand-dark/40 bg-brand-paper text-center space-y-1">
-                  <Zap className="w-8 h-8 text-brand-muted mx-auto stroke-[1.5]" />
-                  <p className="font-heading font-bold text-sm text-brand-navy">
-                    No Upskilling Programs Available
-                  </p>
-                  <p className="font-sans text-xs text-brand-muted">
-                    No upskilling programs are currently open for public viewing.
-                  </p>
-                </div>
-              ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                   {upskillingPrograms.map(renderProgramCard)}
                 </div>
-              )}
-            </section>
+              </section>
+            )}
+
+            {/* Empty State when no offerings exist in either category */}
+            {academicPrograms.length === 0 && upskillingPrograms.length === 0 && (
+              <div className="p-12 text-center border-2 border-brand-dark bg-brand-paper shadow-brutal max-w-lg mx-auto space-y-3">
+                <BookOpen className="w-10 h-10 text-brand-muted mx-auto stroke-[1.5]" />
+                <h3 className="font-heading font-extrabold text-base text-brand-navy">
+                  No Programs Available
+                </h3>
+                <p className="font-sans text-xs text-brand-muted">
+                  There are currently no published programs available for public enrollment.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
