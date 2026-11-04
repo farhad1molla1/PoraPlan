@@ -860,7 +860,9 @@ export const AdminBillingPage: React.FC = () => {
                             <div className="text-[10px] font-mono text-brand-muted flex items-center gap-1">
                               <span>{rec.transaction_reference}</span>
                               {isDuplicate && (
-                                <span className="text-amber-600 font-bold" title="Duplicate reference warning">⚠️</span>
+                                <span title="Duplicate reference warning">
+                                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 inline-block" />
+                                </span>
                               )}
                             </div>
                           )}
@@ -1055,7 +1057,9 @@ export const AdminBillingPage: React.FC = () => {
                             <div className="text-[10px] font-mono text-brand-muted flex items-center gap-1">
                               <span>{rec.transaction_reference}</span>
                               {isDuplicate && (
-                                <span className="text-amber-600 font-bold" title="Duplicate reference warning">⚠️</span>
+                                <span title="Duplicate reference warning">
+                                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 inline-block" />
+                                </span>
                               )}
                             </div>
                           )}

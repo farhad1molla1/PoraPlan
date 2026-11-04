@@ -463,7 +463,7 @@ export const StudentEvaluationsPage: React.FC = () => {
                 {/* Footer Linkage */}
                 <div className="pt-2 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono text-brand-muted">
                   <span>
-                    {isCompleted ? '✓ Milestone completed' : '⏱ Session scheduled'}
+                    {isCompleted ? '✓ Milestone completed' : 'Session scheduled'}
                   </span>
                   <Link
                     to="/student/plans"
