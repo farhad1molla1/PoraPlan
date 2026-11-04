@@ -520,12 +520,9 @@ export const ProfilePage: React.FC = () => {
                     <span>Loading enrollment records...</span>
                   </div>
                 ) : enrollments.length === 0 ? (
-                  <div className="p-4 border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center space-y-1">
-                    <p className="font-sans font-semibold text-xs sm:text-sm text-brand-dark">
-                      No active or historical program enrollments recorded.
-                    </p>
-                    <p className="font-sans text-xs text-brand-muted">
-                      Your programs and assigned cohorts will appear here once an application is accepted or an administrator directly enrolls you.
+                  <div className="p-4 border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center">
+                    <p className="font-sans text-xs sm:text-sm text-brand-muted">
+                      No program or cohort enrollments are currently recorded for your account.
                     </p>
                   </div>
                 ) : (

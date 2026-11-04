@@ -101,12 +101,12 @@ async function runVerification() {
 
   // Scenario 6: Clean empty state
   const hasEmptyState =
-    profilePageContent.includes("No active or historical program enrollments recorded.") &&
-    profilePageContent.includes("Your programs and assigned cohorts will appear here once an application is accepted");
+    profilePageContent.includes("No program or cohort enrollments are currently recorded for your account.") &&
+    !profilePageContent.includes("application is accepted");
   report(
     'Scenario 6 [Static/EmptyState]',
     hasEmptyState,
-    'Clear, minimal empty state rendered when a student has no enrollments'
+    'Clear, minimal empty state rendered without implying an application workflow is required'
   );
 
   // Scenario 7: Strict NO-AMOUNT rule
