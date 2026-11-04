@@ -2006,6 +2006,13 @@ export type Database = {
           message: string;
         }[];
       };
+      get_admin_payment_events: {
+        Args: {
+          p_record_type: string;
+          p_record_id: string;
+        };
+        Returns: PaymentEvent[];
+      };
     };
     Enums: {
       user_role: UserRole;

@@ -273,7 +273,7 @@ export async function getMyStudentPaymentRecordById(
 
   try {
     const selectFields = options?.withMeta
-      ? '*, student:profiles!student_id(*), enrollment:program_enrollments(*), events:payment_events(*), recorder:profiles!recorded_by(*)'
+      ? '*, student:profiles!student_id(*), enrollment:program_enrollments(*), events:payment_events(id, record_type, student_payment_id, mentor_payment_id, payment_method, transaction_reference, payment_date, recorded_by, created_at), recorder:profiles!recorded_by(*)'
       : '*';
 
     const { data, error } = await sb.supabase
@@ -405,7 +405,7 @@ export async function getMyMentorPaymentRecordById(
 
   try {
     const selectFields = options?.withMeta
-      ? '*, mentor:profiles!mentor_id(*), related_student:profiles!related_student_id(*), related_enrollment:program_enrollments(*), events:payment_events(*), recorder:profiles!recorded_by(*)'
+      ? '*, mentor:profiles!mentor_id(*), related_student:profiles!related_student_id(*), related_enrollment:program_enrollments(*), events:payment_events(id, record_type, student_payment_id, mentor_payment_id, payment_method, transaction_reference, payment_date, recorded_by, created_at), recorder:profiles!recorded_by(*)'
       : '*';
 
     const { data, error } = await sb.supabase
@@ -832,7 +832,21 @@ export async function getPaymentEvents(
   }
 
   try {
-    let query = sb.supabase.from('payment_events').select('*').eq('record_type', recordType);
+    if (auth.role === 'admin') {
+      // Legitimate admin retrieval of full event history including internal notes via verified RPC
+      const { data, error } = await sb.supabase.rpc('get_admin_payment_events', {
+        p_record_type: recordType,
+        p_record_id: recordId,
+      });
+      if (error) throw error;
+      return { events: (data as PaymentEvent[]) || [], error: null };
+    }
+
+    // Student and mentor callers query permitted non-sensitive columns strictly
+    let query = sb.supabase
+      .from('payment_events')
+      .select('id, record_type, student_payment_id, mentor_payment_id, payment_method, transaction_reference, payment_date, recorded_by, created_at')
+      .eq('record_type', recordType);
 
     if (recordType === 'student') {
       query = query.eq('student_payment_id', recordId);
@@ -876,11 +890,11 @@ export async function createPaymentEvent(
         ...input,
         recorded_by: auth.userId,
       })
-      .select()
+      .select('id, record_type, student_payment_id, mentor_payment_id, payment_method, transaction_reference, payment_date, recorded_by, created_at')
       .single();
 
     if (error) throw error;
-    return { event: data as PaymentEvent, error: null };
+    return { event: { ...data, note: input.note || null } as PaymentEvent, error: null };
   } catch (err: unknown) {
     return {
       event: null,
