@@ -186,6 +186,7 @@ export const StudentNotificationsPage: React.FC = () => {
           actionText: 'View Task',
         };
       case 'assignment_created':
+      case 'assignment_updated':
         return {
           label: 'Assignment',
           icon: FileText,

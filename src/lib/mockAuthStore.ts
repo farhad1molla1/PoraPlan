@@ -1600,7 +1600,8 @@ export function createMockAssignment(params: {
 
 export function updateMockAssignment(
   assignmentId: string,
-  updates: Partial<Pick<Assignment, 'title' | 'instructions' | 'subject_id' | 'plan_id' | 'due_date' | 'total_points' | 'status'>>
+  updates: Partial<Pick<Assignment, 'title' | 'instructions' | 'subject_id' | 'plan_id' | 'due_date' | 'total_points' | 'status'>>,
+  updaterId?: string
 ): { assignment: Assignment | null; error: Error | null } {
   const index = mockAssignments.findIndex((a) => a.id === assignmentId);
   if (index === -1) {
@@ -1614,27 +1615,61 @@ export function updateMockAssignment(
     if (!cleanTitle) {
       return { assignment: null, error: new Error('Assignment title cannot be empty.') };
     }
-    current.title = cleanTitle;
+  }
+  if (updates.subject_id !== undefined && updates.subject_id) {
+    const subject = mockSubjects.find((s) => s.id === updates.subject_id);
+    if (!subject || (subject.student_id !== current.student_id && subject.student_id !== 'mock-student-pp001')) {
+      return { assignment: null, error: new Error('Selected study area does not belong to this student.') };
+    }
+  }
+  if (updates.plan_id !== undefined && updates.plan_id) {
+    const plan = mockStudyPlans.find((p) => p.id === updates.plan_id);
+    if (!plan || (plan.student_id !== current.student_id && plan.student_id !== 'mock-student-pp001')) {
+      return { assignment: null, error: new Error('Selected study plan does not belong to this student.') };
+    }
+  }
+
+  // Pre-mutation lifecycle and change detection
+  const nextStatus = updates.status !== undefined ? updates.status : current.status;
+  const isPublishingDraft = current.status === 'draft' && nextStatus === 'published';
+  const isPublishedUpdate = current.status === 'published' && nextStatus === 'published';
+
+  let hasMeaningfulChange = false;
+
+  // 1. title
+  if (updates.title !== undefined && updates.title.trim() !== current.title) {
+    hasMeaningfulChange = true;
+  }
+
+  // 2. due_date
+  if (updates.due_date !== undefined) {
+    const newDue = updates.due_date ? (updates.due_date.includes('T') ? updates.due_date.split('T')[0] : updates.due_date.trim()) : null;
+    const oldDue = current.due_date ? (current.due_date.includes('T') ? current.due_date.split('T')[0] : current.due_date.trim()) : null;
+    if (newDue !== oldDue) {
+      hasMeaningfulChange = true;
+    }
+  }
+
+  // 3. instructions
+  if (updates.instructions !== undefined) {
+    const newInst = updates.instructions?.trim() || null;
+    const oldInst = current.instructions ? current.instructions.trim() || null : null;
+    if (newInst !== oldInst) {
+      hasMeaningfulChange = true;
+    }
+  }
+
+  // Apply updates
+  if (updates.title !== undefined) {
+    current.title = updates.title.trim();
   }
   if (updates.instructions !== undefined) {
     current.instructions = updates.instructions ? updates.instructions.trim() : null;
   }
   if (updates.subject_id !== undefined) {
-    if (updates.subject_id) {
-      const subject = mockSubjects.find((s) => s.id === updates.subject_id);
-      if (!subject || (subject.student_id !== current.student_id && subject.student_id !== 'mock-student-pp001')) {
-        return { assignment: null, error: new Error('Selected study area does not belong to this student.') };
-      }
-    }
     current.subject_id = updates.subject_id || null;
   }
   if (updates.plan_id !== undefined) {
-    if (updates.plan_id) {
-      const plan = mockStudyPlans.find((p) => p.id === updates.plan_id);
-      if (!plan || (plan.student_id !== current.student_id && plan.student_id !== 'mock-student-pp001')) {
-        return { assignment: null, error: new Error('Selected study plan does not belong to this student.') };
-      }
-    }
     current.plan_id = updates.plan_id || null;
   }
   if (updates.due_date !== undefined) {
@@ -1647,8 +1682,37 @@ export function updateMockAssignment(
     current.status = updates.status;
   }
 
-  current.updated_at = new Date().toISOString();
+  const now = new Date().toISOString();
+  current.updated_at = now;
   mockAssignments[index] = { ...current };
+
+  // Dispatch notifications
+  const effectiveActorId = updaterId || current.mentor_id;
+  if (effectiveActorId && effectiveActorId !== current.student_id) {
+    if (isPublishingDraft) {
+      // Trigger A: Draft published
+      createMockNotification({
+        recipientId: current.student_id,
+        actorId: effectiveActorId,
+        type: 'assignment_created',
+        title: 'New Assignment Published',
+        message: `A new assignment has been published: "${current.title}".`,
+        link: '/student/assignments',
+        idempotencyKey: `assignment:${assignmentId}`,
+      });
+    } else if (isPublishedUpdate && hasMeaningfulChange) {
+      // Trigger B: Published assignment metadata update
+      createMockNotification({
+        recipientId: current.student_id,
+        actorId: effectiveActorId,
+        type: 'assignment_updated',
+        title: 'Assignment Updated',
+        message: `Mentor updated assignment "${current.title}".`,
+        link: '/student/assignments',
+        idempotencyKey: `assignment_update:${assignmentId}:${current.updated_at}`,
+      });
+    }
+  }
 
   return { assignment: { ...current }, error: null };
 }

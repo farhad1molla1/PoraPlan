@@ -1212,6 +1212,7 @@ export type NotificationType =
   | 'task_created'
   | 'task_updated'
   | 'assignment_created'
+  | 'assignment_updated'
   | 'resource_published'
   | 'evaluation_published'
   | 'submission_reviewed'

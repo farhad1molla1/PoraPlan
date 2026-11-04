@@ -230,15 +230,19 @@ export const MentorAssignmentsPage: React.FC = () => {
     const pointsNumber = formTotalPoints ? parseInt(formTotalPoints, 10) : 100;
 
     if (editingAssignmentId) {
-      const { assignment, error } = await updateAssignment(editingAssignmentId, {
-        title: formTitle,
-        subject_id: formSubjectId || null,
-        plan_id: formPlanId || null,
-        instructions: formInstructions,
-        due_date: formDueDate || null,
-        total_points: isNaN(pointsNumber) ? 100 : pointsNumber,
-        status: formStatus,
-      });
+      const { assignment, error } = await updateAssignment(
+        editingAssignmentId,
+        {
+          title: formTitle,
+          subject_id: formSubjectId || null,
+          plan_id: formPlanId || null,
+          instructions: formInstructions,
+          due_date: formDueDate || null,
+          total_points: isNaN(pointsNumber) ? 100 : pointsNumber,
+          status: formStatus,
+        },
+        user?.id || mentorId
+      );
 
       setIsSubmitting(false);
 

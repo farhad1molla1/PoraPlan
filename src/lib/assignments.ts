@@ -291,7 +291,8 @@ export async function createAssignment(params: {
  */
 export async function updateAssignment(
   assignmentId: string,
-  updates: Partial<Pick<Assignment, 'title' | 'instructions' | 'subject_id' | 'plan_id' | 'due_date' | 'total_points' | 'status'>>
+  updates: Partial<Pick<Assignment, 'title' | 'instructions' | 'subject_id' | 'plan_id' | 'due_date' | 'total_points' | 'status'>>,
+  updaterId?: string
 ): Promise<{ assignment: Assignment | null; error: Error | null }> {
   if (!assignmentId) {
     return { assignment: null, error: new Error('Assignment ID is required.') };
@@ -302,28 +303,103 @@ export async function updateAssignment(
   }
 
   if (!isSupabaseConfigured()) {
-    return updateMockAssignment(assignmentId, updates);
+    return updateMockAssignment(assignmentId, updates, updaterId);
   }
 
   try {
+    // 1. Fetch current assignment to check existing state and student ownership
+    const { data: currentAssignment, error: fetchError } = await supabase
+      .from('assignments')
+      .select('*')
+      .eq('id', assignmentId)
+      .single();
+
+    if (fetchError || !currentAssignment) {
+      return { assignment: null, error: fetchError || new Error('Assignment not found.') };
+    }
+
+    // 2. Pre-mutation lifecycle and change detection
+    const nextStatus = updates.status !== undefined ? updates.status : currentAssignment.status;
+    const isPublishingDraft = currentAssignment.status === 'draft' && nextStatus === 'published';
+    const isPublishedUpdate = currentAssignment.status === 'published' && nextStatus === 'published';
+
+    let hasMeaningfulChange = false;
+
+    // 1. title
+    if (updates.title !== undefined && updates.title.trim() !== currentAssignment.title) {
+      hasMeaningfulChange = true;
+    }
+
+    // 2. due_date
+    if (updates.due_date !== undefined) {
+      const newDue = updates.due_date ? (updates.due_date.includes('T') ? updates.due_date.split('T')[0] : updates.due_date.trim()) : null;
+      const oldDue = currentAssignment.due_date ? (currentAssignment.due_date.includes('T') ? currentAssignment.due_date.split('T')[0] : currentAssignment.due_date.trim()) : null;
+      if (newDue !== oldDue) {
+        hasMeaningfulChange = true;
+      }
+    }
+
+    // 3. instructions
+    if (updates.instructions !== undefined) {
+      const newInst = updates.instructions?.trim() || null;
+      const oldInst = currentAssignment.instructions ? currentAssignment.instructions.trim() || null : null;
+      if (newInst !== oldInst) {
+        hasMeaningfulChange = true;
+      }
+    }
+
     const updatePayload: AssignmentUpdate = {
       ...updates,
       title: updates.title !== undefined ? updates.title.trim() : undefined,
       instructions: updates.instructions !== undefined ? (updates.instructions ? updates.instructions.trim() : null) : undefined,
+      updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await supabase
+    const { data: updatedAssignment, error: updateError } = await supabase
       .from('assignments')
       .update(updatePayload)
       .eq('id', assignmentId)
       .select()
       .single();
 
-    if (error) {
-      return { assignment: null, error };
+    if (updateError || !updatedAssignment) {
+      return { assignment: null, error: updateError || new Error('Failed to update assignment.') };
     }
 
-    return { assignment: data, error: null };
+    // 3. Resolve actor and dispatch notifications
+    let effectiveActorId = updaterId;
+    if (!effectiveActorId) {
+      const { data: authData } = await supabase.auth.getUser();
+      effectiveActorId = authData.user?.id || currentAssignment.mentor_id || undefined;
+    }
+
+    if (effectiveActorId && effectiveActorId !== currentAssignment.student_id) {
+      if (isPublishingDraft) {
+        // Trigger A: Draft published
+        createNotification({
+          recipientId: currentAssignment.student_id,
+          actorId: effectiveActorId,
+          type: 'assignment_created',
+          title: 'New Assignment Published',
+          message: `A new assignment has been published: "${updatedAssignment.title}".`,
+          link: '/student/assignments',
+          idempotencyKey: `assignment:${assignmentId}`,
+        }).catch(() => {});
+      } else if (isPublishedUpdate && hasMeaningfulChange) {
+        // Trigger B: Published assignment metadata update
+        createNotification({
+          recipientId: currentAssignment.student_id,
+          actorId: effectiveActorId,
+          type: 'assignment_updated',
+          title: 'Assignment Updated',
+          message: `Mentor updated assignment "${updatedAssignment.title}".`,
+          link: '/student/assignments',
+          idempotencyKey: `assignment_update:${assignmentId}:${updatedAssignment.updated_at}`,
+        }).catch(() => {});
+      }
+    }
+
+    return { assignment: updatedAssignment, error: null };
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { assignment: null, error };

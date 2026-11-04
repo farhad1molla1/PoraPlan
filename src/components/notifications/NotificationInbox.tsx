@@ -189,6 +189,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
           actionText: 'View Feedback',
         };
       case 'assignment_created':
+      case 'assignment_updated':
         return {
           label: 'Assignment',
           icon: FileText,
