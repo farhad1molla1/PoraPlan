@@ -224,6 +224,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
           actionText: 'View Cohorts',
         };
       case 'task_created':
+      case 'task_updated':
         return {
           label: 'Target Task',
           icon: ListTodo,

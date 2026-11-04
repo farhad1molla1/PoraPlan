@@ -332,7 +332,8 @@ export async function createTask(params: {
  */
 export async function updateTask(
   taskId: string,
-  updates: Partial<Pick<Task, 'title' | 'description' | 'subject_id' | 'plan_id' | 'priority' | 'status' | 'due_date' | 'estimated_minutes' | 'completed_at' | 'attachment_path' | 'attachment_name' | 'attachment_size'>>
+  updates: Partial<Pick<Task, 'title' | 'description' | 'subject_id' | 'plan_id' | 'priority' | 'status' | 'due_date' | 'estimated_minutes' | 'completed_at' | 'attachment_path' | 'attachment_name' | 'attachment_size'>>,
+  updaterId?: string
 ): Promise<{
   task: Task | null;
   error: Error | null;
@@ -342,17 +343,61 @@ export async function updateTask(
   }
 
   if (!isSupabaseConfigured()) {
-    return updateMockTask(taskId, updates);
+    return updateMockTask(taskId, updates, updaterId);
   }
 
   try {
-    const payload: TaskUpdate = {};
+    // 1. Fetch current task to check previous state and student ownership
+    const { data: currentTask, error: fetchError } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('id', taskId)
+      .single();
+
+    if (fetchError || !currentTask) {
+      return { task: null, error: fetchError || new Error('Task not found.') };
+    }
+
     if (updates.title !== undefined) {
       const cleanTitle = updates.title.trim();
       if (!cleanTitle) {
         return { task: null, error: new Error('Task title cannot be empty.') };
       }
-      payload.title = cleanTitle;
+    }
+
+    // 2. Meaningful change detection
+    // Approved fields: 1. Title, 2. Due date (deadline), 3. Instructions (description)
+    // Non-approved: priority, status, completed_at, attachment_*, subject_id, plan_id, estimated_minutes
+    let hasMeaningfulChange = false;
+
+    // 1. Title
+    if (updates.title !== undefined && updates.title.trim() !== currentTask.title) {
+      hasMeaningfulChange = true;
+    }
+
+    // 2. Deadline (due_date)
+    if (updates.due_date !== undefined) {
+      const newDue = updates.due_date ? (updates.due_date.includes('T') ? updates.due_date.split('T')[0] : updates.due_date.trim()) : null;
+      const oldDue = currentTask.due_date ? (currentTask.due_date.includes('T') ? currentTask.due_date.split('T')[0] : currentTask.due_date.trim()) : null;
+      if (newDue !== oldDue) {
+        hasMeaningfulChange = true;
+      }
+    }
+
+    // 3. Instructions (description)
+    if (updates.description !== undefined) {
+      const newDesc = updates.description?.trim() || null;
+      const oldDesc = currentTask.description ? currentTask.description.trim() || null : null;
+      if (newDesc !== oldDesc) {
+        hasMeaningfulChange = true;
+      }
+    }
+
+    const payload: TaskUpdate = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.title !== undefined) {
+      payload.title = updates.title.trim();
     }
     if (updates.description !== undefined) {
       payload.description = updates.description?.trim() || null;
@@ -393,18 +438,37 @@ export async function updateTask(
       payload.attachment_size = updates.attachment_size;
     }
 
-    const { data, error } = await supabase
+    const { data: updatedTask, error: updateError } = await supabase
       .from('tasks')
       .update(payload)
       .eq('id', taskId)
       .select()
       .single();
 
-    if (error) {
-      return { task: null, error };
+    if (updateError || !updatedTask) {
+      return { task: null, error: updateError || new Error('Failed to update task.') };
     }
 
-    return { task: data as Task, error: null };
+    // 3. Resolve actor and send notification if meaningful change occurred
+    let effectiveActorId = updaterId;
+    if (!effectiveActorId) {
+      const { data: authData } = await supabase.auth.getUser();
+      effectiveActorId = authData.user?.id || currentTask.created_by || undefined;
+    }
+
+    if (hasMeaningfulChange && effectiveActorId && effectiveActorId !== currentTask.student_id) {
+      createNotification({
+        recipientId: currentTask.student_id,
+        actorId: effectiveActorId,
+        type: 'task_updated',
+        title: 'Task Updated',
+        message: `Mentor updated task "${updatedTask.title}"`,
+        link: '/student/library?tab=tasks',
+        idempotencyKey: `task_update:${taskId}:${updatedTask.updated_at}`,
+      }).catch(() => {});
+    }
+
+    return { task: updatedTask as Task, error: null };
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { task: null, error };

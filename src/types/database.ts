@@ -1210,6 +1210,7 @@ export type AnnouncementAcknowledgmentInsert = {
 
 export type NotificationType =
   | 'task_created'
+  | 'task_updated'
   | 'assignment_created'
   | 'resource_published'
   | 'evaluation_published'

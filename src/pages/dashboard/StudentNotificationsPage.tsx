@@ -178,6 +178,7 @@ export const StudentNotificationsPage: React.FC = () => {
   const getTypeMeta = (type: NotificationType) => {
     switch (type) {
       case 'task_created':
+      case 'task_updated':
         return {
           label: 'Task',
           icon: ListTodo,

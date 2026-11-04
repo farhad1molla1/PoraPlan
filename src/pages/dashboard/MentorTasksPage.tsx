@@ -401,16 +401,20 @@ export const MentorTasksPage: React.FC = () => {
     try {
       if (editingTaskId) {
         // 1. Update task general attributes
-        const { task: updatedTask, error } = await updateTask(editingTaskId, {
-          title: formTitle.trim(),
-          description: formDescription.trim() || undefined,
-          subject_id: formSubjectId || null,
-          plan_id: formPlanId || null,
-          priority: formPriority,
-          status: formStatus,
-          due_date: formDueDate || null,
-          estimated_minutes: estMins,
-        });
+        const { task: updatedTask, error } = await updateTask(
+          editingTaskId,
+          {
+            title: formTitle.trim(),
+            description: formDescription.trim() || undefined,
+            subject_id: formSubjectId || null,
+            plan_id: formPlanId || null,
+            priority: formPriority,
+            status: formStatus,
+            due_date: formDueDate || null,
+            estimated_minutes: estMins,
+          },
+          user?.id
+        );
 
         if (error || !updatedTask) {
           setFormError(error?.message || 'Failed to update task.');

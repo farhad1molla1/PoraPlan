@@ -1290,7 +1290,8 @@ export function createMockTask(params: {
 
 export function updateMockTask(
   taskId: string,
-  updates: Partial<Pick<Task, 'title' | 'description' | 'subject_id' | 'plan_id' | 'priority' | 'status' | 'due_date' | 'estimated_minutes' | 'completed_at' | 'attachment_path' | 'attachment_name' | 'attachment_size'>>
+  updates: Partial<Pick<Task, 'title' | 'description' | 'subject_id' | 'plan_id' | 'priority' | 'status' | 'due_date' | 'estimated_minutes' | 'completed_at' | 'attachment_path' | 'attachment_name' | 'attachment_size'>>,
+  updaterId?: string
 ): { task: Task | null; error: Error | null } {
   const index = mockTasks.findIndex((t) => t.id === taskId);
   if (index === -1) {
@@ -1304,27 +1305,58 @@ export function updateMockTask(
     if (!cleanTitle) {
       return { task: null, error: new Error('Task title cannot be empty.') };
     }
-    current.title = cleanTitle;
+  }
+  if (updates.subject_id !== undefined && updates.subject_id) {
+    const subject = mockSubjects.find((s) => s.id === updates.subject_id);
+    if (!subject || subject.student_id !== current.student_id) {
+      return { task: null, error: new Error('Selected study area does not belong to this student.') };
+    }
+  }
+  if (updates.plan_id !== undefined && updates.plan_id) {
+    const plan = mockStudyPlans.find((p) => p.id === updates.plan_id);
+    if (!plan || plan.student_id !== current.student_id) {
+      return { task: null, error: new Error('Selected study plan does not belong to this student.') };
+    }
+  }
+
+  // Detect whether meaningful changes exist before applying mutations
+  // Approved fields: 1. Title, 2. Due date (deadline), 3. Instructions (description)
+  // Non-approved: priority, status, completed_at, attachment_*, subject_id, plan_id, estimated_minutes
+  let hasMeaningfulChange = false;
+
+  // 1. Title change
+  if (updates.title !== undefined && updates.title.trim() !== current.title) {
+    hasMeaningfulChange = true;
+  }
+
+  // 2. Deadline (due_date) change
+  if (updates.due_date !== undefined) {
+    const newDue = updates.due_date ? (updates.due_date.includes('T') ? updates.due_date.split('T')[0] : updates.due_date.trim()) : null;
+    const oldDue = current.due_date ? (current.due_date.includes('T') ? current.due_date.split('T')[0] : current.due_date.trim()) : null;
+    if (newDue !== oldDue) {
+      hasMeaningfulChange = true;
+    }
+  }
+
+  // 3. Instructions/description change
+  if (updates.description !== undefined) {
+    const newDesc = updates.description?.trim() || null;
+    const oldDesc = current.description ? current.description.trim() || null : null;
+    if (newDesc !== oldDesc) {
+      hasMeaningfulChange = true;
+    }
+  }
+
+  if (updates.title !== undefined) {
+    current.title = updates.title.trim();
   }
   if (updates.description !== undefined) {
     current.description = updates.description ? updates.description.trim() : null;
   }
   if (updates.subject_id !== undefined) {
-    if (updates.subject_id) {
-      const subject = mockSubjects.find((s) => s.id === updates.subject_id);
-      if (!subject || subject.student_id !== current.student_id) {
-        return { task: null, error: new Error('Selected study area does not belong to this student.') };
-      }
-    }
     current.subject_id = updates.subject_id || null;
   }
   if (updates.plan_id !== undefined) {
-    if (updates.plan_id) {
-      const plan = mockStudyPlans.find((p) => p.id === updates.plan_id);
-      if (!plan || plan.student_id !== current.student_id) {
-        return { task: null, error: new Error('Selected study plan does not belong to this student.') };
-      }
-    }
     current.plan_id = updates.plan_id || null;
   }
   if (updates.priority !== undefined) {
@@ -1359,6 +1391,20 @@ export function updateMockTask(
 
   current.updated_at = new Date().toISOString();
   mockTasks[index] = { ...current };
+
+  // Trigger notification if meaningful change occurred and updater is an authorized mentor (not the student)
+  const effectiveActorId = updaterId || current.created_by;
+  if (hasMeaningfulChange && effectiveActorId && effectiveActorId !== current.student_id) {
+    createMockNotification({
+      recipientId: current.student_id,
+      actorId: effectiveActorId,
+      type: 'task_updated',
+      title: 'Task Updated',
+      message: `Mentor updated task "${current.title}"`,
+      link: '/student/library?tab=tasks',
+      idempotencyKey: `task_update:${taskId}:${current.updated_at}`,
+    });
+  }
 
   return { task: { ...current }, error: null };
 }
