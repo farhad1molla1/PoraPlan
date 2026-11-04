@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
-import { ShieldCheck, LogOut, CheckCircle, Database, UserPlus, AlertCircle, CheckCircle2, Loader2, GraduationCap, ArrowRight, ClipboardList, UserCheck, Users } from 'lucide-react';
+import { ShieldCheck, CheckCircle, Database, UserPlus, AlertCircle, CheckCircle2, Loader2, GraduationCap, ArrowRight, ClipboardList, UserCheck, Users } from 'lucide-react';
 import { adminRegisterMember } from '../../lib/profiles';
 import type { UserRole } from '../../types/database';
 
 export const AdminDashboardPage: React.FC = () => {
-  const { user, profile, role, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { user, profile, role } = useAuth();
 
   const [newId, setNewId] = useState('');
   const [newName, setNewName] = useState('');
@@ -17,11 +15,6 @@ export const AdminDashboardPage: React.FC = () => {
   const [newRole, setNewRole] = useState<UserRole>('student');
   const [provisionLoading, setProvisionLoading] = useState(false);
   const [provisionMessage, setProvisionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/login');
-  };
 
   const handleProvisionMember = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,18 +66,6 @@ export const AdminDashboardPage: React.FC = () => {
             <p className="font-mono text-xs text-brand-bg/75">
               Account: {user?.email} | Role: {role?.toUpperCase()}
             </p>
-          </div>
-
-          <div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSignOut}
-              leftIcon={<LogOut className="w-3.5 h-3.5" />}
-              className="bg-brand-paper text-brand-dark hover:bg-brand-gold-light"
-            >
-              Sign Out
-            </Button>
           </div>
         </div>
 
