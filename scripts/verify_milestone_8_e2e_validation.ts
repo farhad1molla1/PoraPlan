@@ -243,8 +243,8 @@ async function runMilestone8Validation() {
   const assignNotifs = studentNotifs.filter((n) => n.type === 'assignment_created' || n.type === 'submission_reviewed');
   if (assignNotifs.length > 0) {
     assert(
-      assignNotifs.every((n) => n.link === '/student/library?tab=assignments'),
-      'All assignment notifications route to /student/library?tab=assignments'
+      assignNotifs.every((n) => n.link === '/student/assignments'),
+      'All assignment notifications route to /student/assignments'
     );
   }
 
@@ -393,8 +393,12 @@ async function runMilestone8Validation() {
     libraryPage.includes('p-4 sm:p-5'),
     'Task and assignment cards scale padding across mobile and desktop breakpoints'
   );
+  const assignmentsPage = fs.readFileSync(
+    path.resolve('src/pages/dashboard/StudentAssignmentsPage.tsx'),
+    'utf-8'
+  );
   assert(
-    libraryPage.includes('mt-4 p-4 sm:p-5 border-2 border-brand-dark bg-brand-bg shadow-brutal'),
+    assignmentsPage.includes('border-t-3 border-brand-dark bg-brand-bg p-5 sm:p-6'),
     'Assignment submission container seamlessly integrates into assignment card layout with responsive padding'
   );
   assert(

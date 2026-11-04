@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -15,7 +15,6 @@ import {
 } from '../../lib/tasks';
 import {
   getStudentAssignments,
-  submitAssignment,
   getStudentAssignmentsCount,
   type AssignmentWithMeta,
 } from '../../lib/assignments';
@@ -25,10 +24,7 @@ import {
   type EvaluationWithMeta,
 } from '../../lib/evaluations';
 import {
-  validateAcademicFile,
-  uploadAcademicFile,
   getAcademicFileSignedUrl,
-  deleteAcademicFile,
 } from '../../lib/storage';
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
 import {
@@ -41,7 +37,7 @@ import {
 import type {
   Subject,
   TaskStatus,
-  SubmissionType,
+
   EvaluationFormat,
 } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
@@ -70,9 +66,9 @@ import {
   Eye,
   Info,
   CheckCircle,
-  Send,
+
   FileCheck,
-  FileUp,
+
   Award,
   Sparkles,
 } from 'lucide-react';
@@ -180,22 +176,6 @@ export const StudentLibraryPage: React.FC = () => {
   >('all');
   const [assignmentDateFilter, setAssignmentDateFilter] = useState<'all' | 'upcoming' | 'past_due'>('all');
 
-  // Active Assignment Submission Form State
-  const [activeAssignmentId, setActiveAssignmentId] = useState<string | null>(null);
-  const [submissionType, setSubmissionType] = useState<SubmissionType>('text');
-  const [textContent, setTextContent] = useState('');
-  const [linkUrl, setLinkUrl] = useState('');
-  const [fileName, setFileName] = useState('');
-  const [fileSize, setFileSize] = useState<number | undefined>(undefined);
-  const [existingFilePath, setExistingFilePath] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedFileObjectUrl, setSelectedFileObjectUrl] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [formSuccess, setFormSuccess] = useState<string | null>(null);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   // Unified Attachment Viewer Modal State (Shared for Tasks & Submissions)
   const [viewerModal, setViewerModal] = useState<{
     isOpen: boolean;
@@ -215,29 +195,6 @@ export const StudentLibraryPage: React.FC = () => {
     error: null,
   });
 
-  // Clean up Object URL for selected assignment file upload
-  useEffect(() => {
-    if (selectedFile && typeof window !== 'undefined' && typeof window.URL?.createObjectURL === 'function') {
-      let url: string | null = null;
-      try {
-        url = URL.createObjectURL(selectedFile);
-        setSelectedFileObjectUrl(url);
-      } catch {
-        // Fallback for headless environments
-      }
-      return () => {
-        if (url) {
-          try {
-            URL.revokeObjectURL(url);
-          } catch {
-            // ignore
-          }
-        }
-      };
-    } else {
-      setSelectedFileObjectUrl(null);
-    }
-  }, [selectedFile]);
 
   // Load Subjects once
   useEffect(() => {
@@ -446,226 +403,6 @@ export const StudentLibraryPage: React.FC = () => {
       isMounted = false;
     };
   }, [studentId, activeTab, tabCounts.tasks, tabCounts.assignments, tabCounts.evaluations]);
-
-  // ---------------------------------------------------------------------------
-  // SUBMISSION FORM HANDLERS (TAB 3)
-  // ---------------------------------------------------------------------------
-  const handleOpenSubmission = (assignment: AssignmentWithMeta) => {
-    const isLocked =
-      assignment.status === 'closed' ||
-      assignment.status === 'archived' ||
-      (assignment.submission &&
-        (assignment.submission.status === 'under_review' ||
-          assignment.submission.status === 'reviewed'));
-
-    if (isLocked) return;
-
-    if (activeAssignmentId === assignment.id) {
-      // Toggle drawer closed
-      setActiveAssignmentId(null);
-      return;
-    }
-
-    setActiveAssignmentId(assignment.id);
-    setFormError(null);
-    setFormSuccess(null);
-    setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-
-    if (assignment.submission) {
-      setSubmissionType(assignment.submission.submission_type);
-      setTextContent(assignment.submission.content || '');
-      setLinkUrl(assignment.submission.link_url || '');
-      setFileName(assignment.submission.file_name || '');
-      setFileSize(assignment.submission.file_size || undefined);
-      setExistingFilePath(assignment.submission.file_path || null);
-    } else {
-      setSubmissionType('text');
-      setTextContent('');
-      setLinkUrl('');
-      setFileName('');
-      setFileSize(undefined);
-      setExistingFilePath(null);
-    }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const validation = validateAcademicFile(file);
-    if (!validation.valid) {
-      setFormError(validation.error || 'Invalid file selected.');
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-      return;
-    }
-
-    setSelectedFile(file);
-    setFileName(file.name);
-    setFileSize(file.size);
-    setFormError(null);
-
-    if (!textContent.trim()) {
-      const formattedSize =
-        file.size < 1024 * 1024
-          ? `${Math.round(file.size / 1024)} KB`
-          : `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
-      setTextContent(`Attached file: ${file.name} (${formattedSize})`);
-    }
-  };
-
-  const handleRemoveSelectedFile = () => {
-    setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-
-    const currentAssignment = assignments.find((a) => a.id === activeAssignmentId);
-    if (
-      currentAssignment?.submission?.file_name &&
-      currentAssignment.submission.submission_type === 'file'
-    ) {
-      setFileName(currentAssignment.submission.file_name);
-      setFileSize(currentAssignment.submission.file_size || undefined);
-      setExistingFilePath(currentAssignment.submission.file_path || null);
-    } else {
-      setFileName('');
-      setFileSize(undefined);
-      setExistingFilePath(null);
-    }
-  };
-
-  const handleSubmitWork = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeAssignmentId || !studentId) return;
-
-    const currentAssignment = assignments.find((a) => a.id === activeAssignmentId);
-    if (!currentAssignment) return;
-
-    if (
-      currentAssignment.submission &&
-      (currentAssignment.submission.status === 'under_review' ||
-        currentAssignment.submission.status === 'reviewed')
-    ) {
-      setFormError(
-        'This submission is currently under mentor review or has already been graded. Modifications are locked.'
-      );
-      return;
-    }
-
-    let finalContent = textContent.trim();
-    if (submissionType === 'link') {
-      const cleanUrl = linkUrl.trim();
-      if (!cleanUrl) {
-        setFormError('Please enter an external link URL.');
-        return;
-      }
-      if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
-        setFormError('External link must begin with http:// or https://');
-        return;
-      }
-      if (!finalContent) {
-        finalContent = cleanUrl;
-      }
-    } else if (submissionType === 'file') {
-      if (!selectedFile && !existingFilePath && !fileName) {
-        setFormError('Please attach a document (PDF, PNG, JPG, WebP, or DOCX).');
-        return;
-      }
-      if (!finalContent) {
-        finalContent = selectedFile
-          ? `Attached file: ${selectedFile.name}`
-          : `Attached document: ${fileName}`;
-      }
-    } else {
-      if (!finalContent) {
-        setFormError('Submission text cannot be empty.');
-        return;
-      }
-    }
-
-    setSubmitting(true);
-    setFormError(null);
-    setFormSuccess(null);
-
-    let resolvedFilePath: string | undefined = existingFilePath || undefined;
-    let resolvedFileName: string | undefined = fileName || undefined;
-    let resolvedFileSize: number | undefined = fileSize || undefined;
-    let newUploadPath: string | null = null;
-
-    if (submissionType === 'file' && selectedFile) {
-      const { path: uploadedPath, error: uploadErr } = await uploadAcademicFile({
-        category: 'submissions',
-        entityId: activeAssignmentId,
-        studentId,
-        file: selectedFile,
-      });
-
-      if (uploadErr || !uploadedPath) {
-        setFormError(uploadErr?.message || 'Failed to upload attachment file. Please try again.');
-        setSubmitting(false);
-        return;
-      }
-
-      newUploadPath = uploadedPath;
-      resolvedFilePath = uploadedPath;
-      resolvedFileName = selectedFile.name;
-      resolvedFileSize = selectedFile.size;
-    }
-
-    const { submission, error: submitErr } = await submitAssignment({
-      assignmentId: activeAssignmentId,
-      studentId,
-      submissionType,
-      content: finalContent,
-      linkUrl: submissionType === 'link' ? linkUrl.trim() : undefined,
-      fileName: submissionType === 'file' ? resolvedFileName : undefined,
-      fileSize: submissionType === 'file' ? resolvedFileSize : undefined,
-      filePath: submissionType === 'file' ? resolvedFilePath : undefined,
-    });
-
-    if (submitErr) {
-      if (newUploadPath) {
-        await deleteAcademicFile(newUploadPath).catch((err) => {
-          console.error('Failed to clean up newly uploaded file after submission failure:', err);
-        });
-      }
-      setSubmitting(false);
-      setFormError(`Failed to save submission: ${submitErr.message}`);
-      return;
-    }
-
-    // Attachment lifecycle cleanup (PL-AUD-002):
-    // Only after successful database persistence, clean up previous file if it was replaced or superseded.
-    const previousFilePath = currentAssignment.submission?.file_path;
-    const isFileReplaced = Boolean(newUploadPath && previousFilePath && previousFilePath !== newUploadPath);
-    const isFileCleared = Boolean(submissionType !== 'file' && previousFilePath);
-
-    if (isFileReplaced || isFileCleared) {
-      if (previousFilePath) {
-        try {
-          const { error: delErr } = await deleteAcademicFile(previousFilePath);
-          if (delErr) {
-            console.error('Failed to clean up superseded submission attachment:', delErr);
-          }
-        } catch (cleanupErr) {
-          console.error('Error during superseded submission attachment cleanup:', cleanupErr);
-        }
-      }
-    }
-
-    setSubmitting(false);
-    setSelectedFile(null);
-    setFormSuccess('Your assignment work has been submitted successfully!');
-
-    setAssignments((prev) =>
-      prev.map((a) => (a.id === activeAssignmentId ? { ...a, submission } : a))
-    );
-  };
 
   // ---------------------------------------------------------------------------
   // ATTACHMENT PREVIEW & DOWNLOAD HANDLERS
@@ -1850,7 +1587,7 @@ export const StudentLibraryPage: React.FC = () => {
                 Assignments &amp; Submissions Portfolio
               </h2>
               <p className="font-sans text-xs sm:text-sm text-brand-muted max-w-2xl">
-                Review distributed practice problem sets, submit text, link, or document solutions, and track mentor grading feedback.
+                Reference archive of distributed problem sets, submitted solution records, uploaded documents, and mentor grading feedback.
               </p>
             </div>
 
@@ -2046,13 +1783,8 @@ export const StudentLibraryPage: React.FC = () => {
             <div className="space-y-4">
               {filteredAssignments.map((assignment) => {
                 const hasSubmission = Boolean(assignment.submission);
-                const isSelected = activeAssignmentId === assignment.id;
                 const isClosed = assignment.status === 'closed' || assignment.status === 'archived';
                 const submissionStatus = assignment.submission?.status;
-                const isLocked =
-                  isClosed ||
-                  (hasSubmission &&
-                    (submissionStatus === 'under_review' || submissionStatus === 'reviewed'));
                 const todayStr = formatLocalDate(new Date());
                 const isPastDue =
                   assignment.due_date && assignment.due_date < todayStr && !hasSubmission;
@@ -2060,11 +1792,7 @@ export const StudentLibraryPage: React.FC = () => {
                 return (
                   <div
                     key={assignment.id}
-                    className={`border-2 border-brand-dark bg-brand-paper transition-all ${
-                      isSelected
-                        ? 'shadow-brutal ring-2 ring-brand-navy'
-                        : 'shadow-brutal hover:shadow-brutal-md'
-                    }`}
+                    className="border-2 border-brand-dark bg-brand-paper shadow-brutal hover:shadow-brutal-md transition-all"
                   >
                     <div className="p-5 sm:p-6 space-y-4">
                       {/* Top Badges & Meta */}
@@ -2299,278 +2027,38 @@ export const StudentLibraryPage: React.FC = () => {
                           Assigned: {formatDate(assignment.created_at)}
                         </span>
 
-                        <div>
-                          {isLocked ? (
+                        <div className="flex items-center gap-3">
+                          {isClosed ? (
                             <span className="font-mono text-xs font-bold text-brand-muted flex items-center gap-1.5">
-                              {isClosed ? (
-                                'Assignment Closed'
-                              ) : submissionStatus === 'under_review' ? (
-                                <span className="text-brand-coral flex items-center gap-1">
-                                  <Clock className="w-3.5 h-3.5" />
-                                  Under Mentor Review (Locked)
-                                </span>
-                              ) : (
-                                <span className="text-green-700 flex items-center gap-1">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  Graded &amp; Evaluated
-                                </span>
-                              )}
+                              Assignment Closed
                             </span>
-                          ) : (
+                          ) : submissionStatus === 'under_review' ? (
+                            <span className="font-mono text-xs font-bold text-brand-coral flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5" />
+                              Under Mentor Review
+                            </span>
+                          ) : submissionStatus === 'reviewed' ? (
+                            <span className="font-mono text-xs font-bold text-green-700 flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              Graded &amp; Evaluated
+                            </span>
+                          ) : null}
+
+                          <Link to="/student/assignments">
                             <Button
-                              variant={hasSubmission ? 'outline' : 'primary'}
+                              variant="outline"
                               size="sm"
-                              onClick={() => handleOpenSubmission(assignment)}
-                              leftIcon={
-                                isSelected ? (
-                                  <X className="w-3.5 h-3.5" />
-                                ) : (
-                                  <Send className="w-3.5 h-3.5" />
-                                )
-                              }
+                              rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
                             >
-                              {isSelected
-                                ? 'Close Drawer'
-                                : submissionStatus === 'needs_revision'
-                                ? 'Submit Revision'
+                              {submissionStatus === 'needs_revision'
+                                ? 'Revise in Assignments'
                                 : hasSubmission
-                                ? 'Edit Submission'
-                                : 'Submit Work'}
+                                ? 'View in Assignments'
+                                : 'Submit in Assignments'}
                             </Button>
-                          )}
+                          </Link>
                         </div>
                       </div>
-
-                      {/* Expandable Submission Drawer */}
-                      {isSelected && !isLocked && (
-                        <div className="mt-4 p-4 sm:p-5 border-2 border-brand-dark bg-brand-bg shadow-brutal space-y-4 animate-fadeIn">
-                          <div className="border-b-2 border-brand-dark/15 pb-3 flex items-center justify-between">
-                            <h4 className="font-heading font-extrabold text-base text-brand-navy flex items-center gap-2">
-                              <Send className="w-4 h-4 text-brand-teal" />
-                              {hasSubmission ? 'Update Your Submission' : 'Submit Assignment Work'}
-                            </h4>
-                            <button
-                              type="button"
-                              onClick={() => setActiveAssignmentId(null)}
-                              className="p-1 border border-brand-dark bg-brand-paper hover:bg-brand-bg shadow-brutal-xs"
-                              title="Cancel"
-                            >
-                              <X className="w-4 h-4 text-brand-dark" />
-                            </button>
-                          </div>
-
-                          {formError && (
-                            <div className="p-3 border-2 border-red-500 bg-red-50 text-red-700 text-xs font-mono flex items-center gap-2 shadow-brutal-xs">
-                              <AlertCircle className="w-4 h-4 shrink-0" />
-                              <span>{formError}</span>
-                            </div>
-                          )}
-
-                          {formSuccess && (
-                            <div className="p-3 border-2 border-green-600 bg-green-50 text-green-800 text-xs font-mono flex items-center gap-2 shadow-brutal-xs">
-                              <CheckCircle className="w-4 h-4 shrink-0" />
-                              <span>{formSuccess}</span>
-                            </div>
-                          )}
-
-                          <form onSubmit={handleSubmitWork} className="space-y-4">
-                            {/* Submission Type Switcher */}
-                            <div className="space-y-1">
-                              <label className="font-mono text-xs font-bold text-brand-navy uppercase block">
-                                Solution Type
-                              </label>
-                              <div className="flex flex-wrap gap-2">
-                                {(
-                                  [
-                                    { type: 'text', label: 'Written Derivation / Text' },
-                                    { type: 'link', label: 'External Resource Link' },
-                                    { type: 'file', label: 'Upload Document / Scan' },
-                                  ] as { type: SubmissionType; label: string }[]
-                                ).map((st) => (
-                                  <button
-                                    key={st.type}
-                                    type="button"
-                                    onClick={() => setSubmissionType(st.type)}
-                                    className={`px-3 py-1.5 border-2 border-brand-dark font-mono text-xs font-bold transition-all ${
-                                      submissionType === st.type
-                                        ? 'bg-brand-teal text-white shadow-brutal-xs -translate-y-0.5'
-                                        : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
-                                    }`}
-                                  >
-                                    {st.label}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Submission Type 1: Link */}
-                            {submissionType === 'link' && (
-                              <div className="space-y-1 animate-fadeIn">
-                                <label className="font-mono text-xs font-bold text-brand-navy block">
-                                  Resource or Repository URL (must start with https://)
-                                </label>
-                                <input
-                                  type="url"
-                                  placeholder="https://github.com/... or https://docs.google.com/..."
-                                  value={linkUrl}
-                                  onChange={(e) => setLinkUrl(e.target.value)}
-                                  className="w-full px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
-                                  required
-                                />
-                              </div>
-                            )}
-
-                            {/* Submission Type 2: File Attachment */}
-                            {submissionType === 'file' && (
-                              <div className="space-y-2 animate-fadeIn">
-                                <label className="font-mono text-xs font-bold text-brand-navy block">
-                                  Attach Document (PDF, PNG, JPG, WebP, or DOCX — max 10MB)
-                                </label>
-
-                                <input
-                                  ref={fileInputRef}
-                                  type="file"
-                                  accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
-                                  onChange={handleFileSelect}
-                                  className="hidden"
-                                  id={`library-file-input-${assignment.id}`}
-                                />
-
-                                {selectedFile ? (
-                                  <div className="p-3 border-2 border-brand-dark bg-brand-paper flex flex-wrap items-center justify-between gap-3 shadow-brutal-xs">
-                                    <div className="flex items-center gap-2 min-w-0">
-                                      <FileUp className="w-4 h-4 text-brand-teal shrink-0" />
-                                      <div className="min-w-0">
-                                        <span className="font-mono text-xs font-bold text-brand-navy truncate block">
-                                          {selectedFile.name}
-                                        </span>
-                                        <span className="font-mono text-[10px] text-brand-muted">
-                                          {formatFileSize(selectedFile.size)} (Ready to upload)
-                                        </span>
-                                      </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 shrink-0">
-                                      {selectedFileObjectUrl && (
-                                        <Button
-                                          type="button"
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() =>
-                                            setViewerModal({
-                                              isOpen: true,
-                                              fileName: selectedFile.name,
-                                              filePath: null,
-                                              fileUrl: selectedFileObjectUrl,
-                                              fileSize: selectedFile.size,
-                                              loading: false,
-                                              error: null,
-                                            })
-                                          }
-                                        >
-                                          Preview
-                                        </Button>
-                                      )}
-                                      <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={handleRemoveSelectedFile}
-                                      >
-                                        Remove
-                                      </Button>
-                                    </div>
-                                  </div>
-                                ) : fileName ? (
-                                  <div className="p-3 border-2 border-brand-dark bg-brand-paper flex flex-wrap items-center justify-between gap-3 shadow-brutal-xs">
-                                    <div className="flex items-center gap-2 min-w-0">
-                                      <Paperclip className="w-4 h-4 text-brand-teal shrink-0" />
-                                      <div className="min-w-0">
-                                        <span className="font-mono text-xs font-bold text-brand-navy truncate block">
-                                          Current: {fileName}
-                                        </span>
-                                        {fileSize && (
-                                          <span className="font-mono text-[10px] text-brand-muted">
-                                            {formatFileSize(fileSize)}
-                                          </span>
-                                        )}
-                                      </div>
-                                    </div>
-
-                                    <label
-                                      htmlFor={`library-file-input-${assignment.id}`}
-                                      className="px-3 py-1.5 border-2 border-brand-dark font-mono text-xs font-bold bg-brand-paper hover:bg-brand-bg shadow-brutal-xs cursor-pointer inline-flex items-center gap-1.5"
-                                    >
-                                      <span>Replace File</span>
-                                    </label>
-                                  </div>
-                                ) : (
-                                  <label
-                                    htmlFor={`library-file-input-${assignment.id}`}
-                                    className="p-4 border-2 border-dashed border-brand-dark bg-brand-paper hover:bg-brand-paper-tint text-center block cursor-pointer transition-colors shadow-brutal-xs"
-                                  >
-                                    <FileUp className="w-6 h-6 text-brand-muted mx-auto mb-1" />
-                                    <span className="font-mono text-xs font-bold text-brand-navy block">
-                                      Click to choose an academic solution file
-                                    </span>
-                                    <span className="font-mono text-[10px] text-brand-muted block mt-0.5">
-                                      PDF, PNG, JPG, WebP, DOCX up to 10MB
-                                    </span>
-                                  </label>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Notes / Written Explanation Textarea */}
-                            <div className="space-y-1">
-                              <label className="font-mono text-xs font-bold text-brand-navy block">
-                                {submissionType === 'text'
-                                  ? 'Solution Derivation & Answers'
-                                  : 'Submission Notes & Observations (Optional)'}
-                              </label>
-                              <textarea
-                                rows={4}
-                                placeholder={
-                                  submissionType === 'text'
-                                    ? 'Enter your complete mathematical derivation, answer steps, or code solution here...'
-                                    : 'Add any notes, assumptions, or questions for your mentor regarding this submission...'
-                                }
-                                value={textContent}
-                                onChange={(e) => setTextContent(e.target.value)}
-                                className="w-full p-3 border-2 border-brand-dark font-mono text-xs bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs leading-relaxed"
-                              />
-                            </div>
-
-                            {/* Form Action Buttons */}
-                            <div className="pt-2 flex items-center justify-end gap-3">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setActiveAssignmentId(null)}
-                                disabled={submitting}
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                type="submit"
-                                variant="primary"
-                                size="sm"
-                                disabled={submitting}
-                                leftIcon={
-                                  submitting ? (
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                  ) : (
-                                    <Send className="w-3.5 h-3.5" />
-                                  )
-                                }
-                              >
-                                {submitting ? 'Submitting...' : 'Turn in Assignment'}
-                              </Button>
-                            </div>
-                          </form>
-                        </div>
-                      )}
                     </div>
                   </div>
                 );

@@ -1470,7 +1470,7 @@ export function createMockAssignment(params: {
       type: 'assignment_created',
       title: 'New Assignment Published',
       message: `Mentor assigned "${cleanTitle}" (${newAssignment.total_points || 100} pts)`,
-      link: '/student/library?tab=assignments',
+      link: '/student/assignments',
       idempotencyKey: `assignment:${assignmentId}`,
     });
   }
@@ -1738,7 +1738,7 @@ export function reviewMockSubmission(params: {
     type: 'submission_reviewed',
     title: 'Submission Reviewed',
     message: `Mentor reviewed your submission for "${assignmentTitle}"${params.score !== undefined && params.score !== null ? ` — Score: ${params.score}` : ''}`,
-    link: '/student/library?tab=assignments',
+    link: '/student/assignments',
     idempotencyKey: `submission_review:${params.submissionId}`,
   });
 

@@ -350,8 +350,8 @@ async function runHardeningVerification() {
     'StudentAssignmentsPage.tsx implements isFileCleared cleanup condition'
   );
   assert(
-    libraryPageContent.includes('const isFileCleared = Boolean(submissionType !== \'file\' && previousFilePath);'),
-    'StudentLibraryPage.tsx implements isFileCleared cleanup condition'
+    libraryPageContent.includes('to="/student/assignments"'),
+    'StudentLibraryPage.tsx links to canonical assignments workflow'
   );
 
   // ===========================================================================
@@ -464,8 +464,8 @@ async function runHardeningVerification() {
   );
   assert(Boolean(assignNotif), 'Assignment published notification generated for student');
   assert(
-    assignNotif?.link === '/student/library?tab=assignments',
-    `Assignment notification routes to Academic Library assignments tab: "${assignNotif?.link}"`
+    assignNotif?.link === '/student/assignments',
+    `Assignment notification routes to active assignments page: "${assignNotif?.link}"`
   );
 
   // 4.3 Assignment Submission Reviewed Notification Route Check
@@ -492,18 +492,18 @@ async function runHardeningVerification() {
   );
   assert(Boolean(reviewNotif), 'Submission reviewed notification generated for student');
   assert(
-    reviewNotif?.link === '/student/library?tab=assignments',
-    `Review notification routes to Academic Library assignments tab: "${reviewNotif?.link}"`
+    reviewNotif?.link === '/student/assignments',
+    `Review notification routes to active assignments page: "${reviewNotif?.link}"`
   );
 
-  // 4.4 Static verification: Real services also use /student/library?tab=...
+  // 4.4 Static verification: Real services also use configured routes
   assert(
     tasksServiceContent.includes("link: '/student/library?tab=tasks'"),
     'src/lib/tasks.ts uses link: "/student/library?tab=tasks"'
   );
   assert(
-    assignsServiceContent.includes("link: '/student/library?tab=assignments'"),
-    'src/lib/assignments.ts uses link: "/student/library?tab=assignments"'
+    assignsServiceContent.includes("link: '/student/assignments'"),
+    'src/lib/assignments.ts uses link: "/student/assignments"'
   );
 
   // 4.5 URL Tab Routing Helper Verification

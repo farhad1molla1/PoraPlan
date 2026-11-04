@@ -274,7 +274,7 @@ export async function createAssignment(params: {
         type: 'assignment_created',
         title: 'New Assignment Published',
         message: `Mentor assigned "${cleanTitle}" (${insertPayload.total_points || 100} pts)`,
-        link: '/student/library?tab=assignments',
+        link: '/student/assignments',
         idempotencyKey: `assignment:${data.id}`,
       }).catch(() => {});
     }
@@ -533,7 +533,7 @@ export async function reviewSubmission(params: {
         type: 'submission_reviewed',
         title: 'Submission Reviewed',
         message: `Mentor reviewed your assignment submission${params.score !== undefined && params.score !== null ? ` — Score: ${params.score}` : ''}`,
-        link: '/student/library?tab=assignments',
+        link: '/student/assignments',
         idempotencyKey: `submission_review:${params.submissionId}`,
       }).catch(() => {});
     }
