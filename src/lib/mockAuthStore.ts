@@ -893,7 +893,8 @@ export function updateMockStudyPlan(
     estimated_minutes?: number;
     target_date?: string;
     status?: StudyPlanItemStatus;
-  }[]
+  }[],
+  updaterId?: string
 ): {
   plan: StudyPlan | null;
   items: StudyPlanItem[];
@@ -911,33 +912,96 @@ export function updateMockStudyPlan(
     if (!cleanTitle) {
       return { plan: null, items: [], error: new Error('Plan title cannot be empty.') };
     }
-    current.title = cleanTitle;
+  }
+  if (updates.subject_id !== undefined && updates.subject_id) {
+    const sub = mockSubjects.find((s) => s.id === updates.subject_id);
+    if (!sub || sub.student_id !== current.student_id) {
+      return { plan: null, items: [], error: new Error('Selected study area does not belong to this student.') };
+    }
+  }
+
+  // Detect whether meaningful changes exist before applying mutations
+  let hasMeaningfulChange = false;
+
+  if (updates.title !== undefined && updates.title.trim() !== current.title) {
+    hasMeaningfulChange = true;
+  }
+  if (updates.description !== undefined) {
+    const newDesc = updates.description?.trim() || null;
+    const oldDesc = current.description ? current.description.trim() || null : null;
+    if (newDesc !== oldDesc) {
+      hasMeaningfulChange = true;
+    }
+  }
+  if (updates.subject_id !== undefined) {
+    const newSub = updates.subject_id || null;
+    const oldSub = current.subject_id || null;
+    if (newSub !== oldSub) {
+      hasMeaningfulChange = true;
+    }
+  }
+  if (updates.status !== undefined && updates.status !== current.status) {
+    hasMeaningfulChange = true;
+  }
+
+  const existingItems = mockStudyPlanItems
+    .filter((i) => i.plan_id === planId)
+    .sort((a, b) => a.item_order - b.item_order);
+
+  if (items !== undefined) {
+    const validNewItems = items
+      .filter((i) => i.title.trim().length > 0)
+      .map((i, idx) => ({
+        title: i.title.trim(),
+        instructions: i.instructions?.trim() || null,
+        estimated_minutes: i.estimated_minutes && i.estimated_minutes > 0 ? i.estimated_minutes : null,
+        target_date: i.target_date || null,
+        status: i.status || 'pending',
+        item_order: idx + 1,
+      }));
+
+    if (validNewItems.length !== existingItems.length) {
+      hasMeaningfulChange = true;
+    } else {
+      for (let i = 0; i < validNewItems.length; i++) {
+        const n = validNewItems[i];
+        const e = existingItems[i];
+        if (
+          n.title !== e.title ||
+          n.instructions !== (e.instructions || null) ||
+          n.estimated_minutes !== (e.estimated_minutes || null) ||
+          n.target_date !== (e.target_date || null) ||
+          n.status !== e.status
+        ) {
+          hasMeaningfulChange = true;
+          break;
+        }
+      }
+    }
+  }
+
+  if (updates.title !== undefined) {
+    current.title = updates.title.trim();
   }
   if (updates.description !== undefined) {
     current.description = updates.description ? updates.description.trim() : null;
   }
   if (updates.subject_id !== undefined) {
-    if (updates.subject_id) {
-      const sub = mockSubjects.find((s) => s.id === updates.subject_id);
-      if (!sub || sub.student_id !== current.student_id) {
-        return { plan: null, items: [], error: new Error('Selected study area does not belong to this student.') };
-      }
-    }
     current.subject_id = updates.subject_id || null;
   }
   if (updates.status !== undefined) {
     current.status = updates.status;
   }
-  current.updated_at = new Date().toISOString();
+  const now = new Date().toISOString();
+  current.updated_at = now;
   mockStudyPlans[index] = { ...current };
 
+  let finalItems: StudyPlanItem[] = [];
   // Replace or update items if provided
   if (items !== undefined) {
     // Remove old items for this plan
     mockStudyPlanItems = mockStudyPlanItems.filter((i) => i.plan_id !== planId);
-    const now = new Date().toISOString();
 
-    const newItems: StudyPlanItem[] = [];
     items.forEach((item, idx) => {
       const itemTitle = item.title.trim();
       if (!itemTitle) return;
@@ -955,17 +1019,27 @@ export function updateMockStudyPlan(
         updated_at: now,
       };
       mockStudyPlanItems.push(newItem);
-      newItems.push(newItem);
+      finalItems.push(newItem);
     });
-
-    return { plan: { ...current }, items: newItems, error: null };
+  } else {
+    finalItems = existingItems;
   }
 
-  const existingItems = mockStudyPlanItems
-    .filter((i) => i.plan_id === planId)
-    .sort((a, b) => a.item_order - b.item_order);
+  // Trigger notification if meaningful changes occurred and updater is a mentor (not the student)
+  const effectiveActorId = updaterId || current.created_by;
+  if (hasMeaningfulChange && effectiveActorId && effectiveActorId !== current.student_id) {
+    createMockNotification({
+      recipientId: current.student_id,
+      actorId: effectiveActorId,
+      type: 'plan_updated',
+      title: 'Study Plan Updated',
+      message: `Mentor updated study plan "${current.title}"`,
+      link: '/student/plans',
+      idempotencyKey: `plan_update:${planId}:${current.updated_at}`,
+    });
+  }
 
-  return { plan: { ...current }, items: existingItems, error: null };
+  return { plan: { ...current }, items: finalItems, error: null };
 }
 
 export function deleteMockStudyPlan(planId: string): { success: boolean; error: Error | null } {

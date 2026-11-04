@@ -277,7 +277,8 @@ export async function updateStudyPlan(
     estimated_minutes?: number;
     target_date?: string;
     status?: 'pending' | 'in_progress' | 'completed';
-  }[]
+  }[],
+  updaterId?: string
 ): Promise<{
   plan: StudyPlan | null;
   items: StudyPlanItem[];
@@ -288,17 +289,98 @@ export async function updateStudyPlan(
   }
 
   if (!isSupabaseConfigured()) {
-    return updateMockStudyPlan(planId, updates, items);
+    return updateMockStudyPlan(planId, updates, items, updaterId);
   }
 
   try {
-    const planUpdatePayload: StudyPlanUpdate = {};
+    // 1. Fetch current plan to check ownership and meaningful changes
+    const { data: currentPlan, error: fetchPlanError } = await supabase
+      .from('study_plans')
+      .select('*')
+      .eq('id', planId)
+      .single();
+
+    if (fetchPlanError || !currentPlan) {
+      return { plan: null, items: [], error: fetchPlanError || new Error('Study plan not found.') };
+    }
+
     if (updates.title !== undefined) {
       const cleanTitle = updates.title.trim();
       if (!cleanTitle) {
         return { plan: null, items: [], error: new Error('Plan title cannot be empty.') };
       }
-      planUpdatePayload.title = cleanTitle;
+    }
+
+    let existingItems: StudyPlanItem[] = [];
+    if (items !== undefined) {
+      const { data: currentItemsData } = await supabase
+        .from('study_plan_items')
+        .select('*')
+        .eq('plan_id', planId)
+        .order('item_order', { ascending: true });
+      existingItems = (currentItemsData as StudyPlanItem[]) || [];
+    }
+
+    let hasMeaningfulChange = false;
+
+    if (updates.title !== undefined && updates.title.trim() !== currentPlan.title) {
+      hasMeaningfulChange = true;
+    }
+    if (updates.description !== undefined) {
+      const newDesc = updates.description?.trim() || null;
+      const oldDesc = currentPlan.description ? currentPlan.description.trim() || null : null;
+      if (newDesc !== oldDesc) {
+        hasMeaningfulChange = true;
+      }
+    }
+    if (updates.subject_id !== undefined) {
+      const newSub = updates.subject_id || null;
+      const oldSub = currentPlan.subject_id || null;
+      if (newSub !== oldSub) {
+        hasMeaningfulChange = true;
+      }
+    }
+    if (updates.status !== undefined && updates.status !== currentPlan.status) {
+      hasMeaningfulChange = true;
+    }
+
+    if (items !== undefined) {
+      const validNewItems = items
+        .filter((item) => item.title.trim().length > 0)
+        .map((item, idx) => ({
+          title: item.title.trim(),
+          instructions: item.instructions?.trim() || null,
+          estimated_minutes: item.estimated_minutes && item.estimated_minutes > 0 ? item.estimated_minutes : null,
+          target_date: item.target_date || null,
+          status: item.status || 'pending',
+          item_order: idx + 1,
+        }));
+
+      if (validNewItems.length !== existingItems.length) {
+        hasMeaningfulChange = true;
+      } else {
+        for (let i = 0; i < validNewItems.length; i++) {
+          const n = validNewItems[i];
+          const e = existingItems[i];
+          if (
+            n.title !== e.title ||
+            n.instructions !== (e.instructions || null) ||
+            n.estimated_minutes !== (e.estimated_minutes || null) ||
+            n.target_date !== (e.target_date || null) ||
+            n.status !== e.status
+          ) {
+            hasMeaningfulChange = true;
+            break;
+          }
+        }
+      }
+    }
+
+    const planUpdatePayload: StudyPlanUpdate = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.title !== undefined) {
+      planUpdatePayload.title = updates.title.trim();
     }
     if (updates.description !== undefined) {
       planUpdatePayload.description = updates.description?.trim() || null;
@@ -310,7 +392,7 @@ export async function updateStudyPlan(
       planUpdatePayload.status = updates.status;
     }
 
-    // 1. Update parent plan
+    // 2. Update parent plan
     const { data: updatedPlan, error: planError } = await supabase
       .from('study_plans')
       .update(planUpdatePayload)
@@ -322,7 +404,7 @@ export async function updateStudyPlan(
       return { plan: null, items: [], error: planError || new Error('Failed to update study plan.') };
     }
 
-    // 2. If items were passed, replace items in order
+    // 3. If items were passed, replace items in order
     let finalItems: StudyPlanItem[] = [];
     if (items !== undefined) {
       // Delete existing
@@ -359,6 +441,25 @@ export async function updateStudyPlan(
         .eq('plan_id', planId)
         .order('item_order', { ascending: true });
       finalItems = (currentItems as StudyPlanItem[]) || [];
+    }
+
+    // 4. Resolve actor and send notification if meaningful change occurred
+    let effectiveActorId = updaterId;
+    if (!effectiveActorId) {
+      const { data: authData } = await supabase.auth.getUser();
+      effectiveActorId = authData.user?.id || currentPlan.created_by || undefined;
+    }
+
+    if (hasMeaningfulChange && effectiveActorId && effectiveActorId !== currentPlan.student_id) {
+      createNotification({
+        recipientId: currentPlan.student_id,
+        actorId: effectiveActorId,
+        type: 'plan_updated',
+        title: 'Study Plan Updated',
+        message: `Mentor updated study plan "${updatedPlan.title}"`,
+        link: '/student/plans',
+        idempotencyKey: `plan_update:${planId}:${updatedPlan.updated_at}`,
+      }).catch(() => {});
     }
 
     return { plan: updatedPlan as StudyPlan, items: finalItems, error: null };

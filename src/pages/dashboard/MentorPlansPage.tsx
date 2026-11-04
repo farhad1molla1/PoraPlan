@@ -302,7 +302,8 @@ export const MentorPlansPage: React.FC = () => {
             subject_id: formSubjectId || null,
             status: formStatus,
           },
-          validItems
+          validItems,
+          user?.id
         );
 
         if (error) {
