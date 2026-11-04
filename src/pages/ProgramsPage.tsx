@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getPrograms, getCohorts } from '../lib/programs';
 import type { Program, Cohort } from '../types/database';
-import { Badge } from '../components/common/Badge';
-import { Button } from '../components/common/Button';
-import {
-  GraduationCap,
-  Zap,
-  ArrowRight,
-  BookOpen,
-  AlertCircle,
-  Loader2,
-  Calendar,
-} from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 export const ProgramsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [programs, setPrograms] = useState<Program[]>([]);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +53,6 @@ export const ProgramsPage: React.FC = () => {
 
   const renderProgramCard = (program: Program) => {
     const isAcademic = program.category === 'academic_mentorship';
-    const isOpen = program.enrollment_status === 'open';
     const programCohorts = cohorts.filter(
       (c) => c.program_id === program.id && c.status !== 'archived'
     );
@@ -71,11 +62,12 @@ export const ProgramsPage: React.FC = () => {
     return (
       <div
         key={program.id}
-        className="border-3 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between hover:-translate-x-1 hover:-translate-y-1 transition-transform"
+        onClick={() => navigate(`/programs/${program.slug}`)}
+        className="border border-brand-dark/20 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col justify-between overflow-hidden"
       >
-        {/* Program Thumbnail or Restrained Placeholder */}
-        {program.cover_image_url ? (
-          <div className="w-full h-44 sm:h-48 border-b-2 border-brand-dark bg-brand-paper-tint overflow-hidden">
+        {/* 1. Admin-uploaded thumbnail (16:9 ratio, object-cover) */}
+        <div className="w-full aspect-video bg-brand-paper-tint overflow-hidden border-b border-brand-dark/15">
+          {program.cover_image_url ? (
             <img
               src={program.cover_image_url}
               alt={program.name}
@@ -84,95 +76,58 @@ export const ProgramsPage: React.FC = () => {
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
-          </div>
-        ) : (
-          <div className="w-full h-36 border-b-2 border-brand-dark bg-brand-paper-tint flex flex-col items-center justify-center p-4 text-center space-y-2">
-            <div className="p-2.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs">
-              {isAcademic ? (
-                <GraduationCap className="w-5 h-5 text-brand-gold stroke-[2.5]" />
-              ) : (
-                <Zap className="w-5 h-5 text-brand-teal stroke-[2.5]" />
-              )}
-            </div>
-            <span className="font-mono text-[10px] uppercase font-bold text-brand-muted tracking-wider">
-              {isAcademic ? 'Academic Program' : 'Upskilling Program'}
-            </span>
-          </div>
-        )}
-
-        <div className="p-5 sm:p-6 space-y-4 flex-1 flex flex-col justify-between">
-          <div className="space-y-3">
-            {/* Status & Category Badges */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-dark/20 pb-2.5">
-              <Badge variant={isAcademic ? 'gold' : 'teal'} size="sm">
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center text-brand-muted bg-brand-paper">
+              <span className="font-mono text-xs uppercase font-bold tracking-wider">
                 {isAcademic ? 'Academic Program' : 'Upskilling Program'}
-              </Badge>
-
-              {isOpen ? (
-                <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase font-bold text-emerald-800 px-2 py-0.5 border border-emerald-700 bg-emerald-50 shadow-brutal-xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block animate-pulse" />
-                  Enrollment Open
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase font-bold text-brand-muted px-2 py-0.5 border border-brand-dark/30 bg-brand-paper-tint">
-                  Enrollment Closed
-                </span>
-              )}
+              </span>
             </div>
+          )}
+        </div>
 
-            {/* Program Title */}
-            <h3 className="font-heading font-black text-lg sm:text-xl text-brand-navy leading-snug">
+        {/* Card Body */}
+        <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+          <div className="space-y-2">
+            {/* 2. Program/offering title */}
+            <h3 className="font-heading font-extrabold text-lg text-brand-navy leading-snug">
               {program.name}
             </h3>
 
-            {/* Short Description */}
-            <p className="font-sans text-xs sm:text-sm text-brand-dark/80 leading-relaxed">
+            {/* 3. Short description, ideally one or two lines */}
+            <p className="font-sans text-xs sm:text-sm text-brand-dark/75 line-clamp-2 leading-relaxed">
               {program.short_description}
             </p>
 
-            {/* Relevant Cohort / Batch / Semester info */}
+            {/* 4. Relevant batch/cohort/course information */}
             {activeCohort && (
-              <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted block">
-                  {isAcademic ? 'Target Academic Batch' : 'Active Cohort'}
+              <div className="pt-2 text-xs font-sans text-brand-dark/80 flex flex-wrap items-center gap-2">
+                <span className="font-mono text-[11px] font-bold text-brand-navy">
+                  {isAcademic ? 'Batch / Cohort:' : 'Course Session:'}
                 </span>
-                <div className="flex flex-wrap items-center justify-between gap-1">
-                  <span className="font-sans text-xs font-bold text-brand-navy">
-                    {activeCohort.name}
-                  </span>
-                  {activeCohort.code && (
-                    <span className="font-mono text-[10px] font-bold text-brand-teal px-1.5 py-0.2 bg-white border border-brand-dark/30">
-                      {activeCohort.code}
-                    </span>
-                  )}
-                </div>
-                {activeCohort.start_date && (
-                  <span className="font-mono text-[10px] text-brand-muted flex items-center gap-1 pt-0.5">
-                    <Calendar className="w-3 h-3 text-brand-muted" />
-                    Term: {activeCohort.start_date}
-                    {activeCohort.end_date ? ` – ${activeCohort.end_date}` : ''}
+                <span className="font-medium text-brand-dark">
+                  {activeCohort.name}
+                </span>
+                {activeCohort.code && (
+                  <span className="font-mono text-[10px] px-1.5 py-0.5 border border-brand-dark/20 bg-brand-paper font-semibold text-brand-teal">
+                    {activeCohort.code}
                   </span>
                 )}
               </div>
             )}
           </div>
 
-          {/* Card Action Footer */}
-          <div className="pt-4 border-t-2 border-brand-dark flex items-center justify-between gap-3 mt-4">
-            <span className="font-mono text-[11px] text-brand-muted">
-              {program.duration ||
-                (programCohorts.length > 0
-                  ? `${programCohorts.length} Cohort${programCohorts.length > 1 ? 's' : ''}`
-                  : 'Term Mentorship')}
-            </span>
-            <Button
-              to={`/programs/${program.slug}`}
-              variant="primary"
-              size="sm"
-              rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+          {/* 5. One clear CTA: Contact to Enroll */}
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/contact?program=${encodeURIComponent(program.name)}`);
+              }}
+              className="w-full py-2.5 px-4 bg-brand-teal hover:bg-brand-teal-hover text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors text-center shadow-sm"
             >
-              View Details
-            </Button>
+              Contact to Enroll
+            </button>
           </div>
         </div>
       </div>
@@ -180,65 +135,44 @@ export const ProgramsPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full py-10 sm:py-16 px-4 sm:px-6 lg:px-8 academic-grid-pattern min-h-[85vh]">
-      <div className="max-w-6xl mx-auto space-y-12">
-        {/* Page Header */}
-        <div className="text-center space-y-3 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs font-mono text-xs uppercase font-bold text-brand-navy">
-            <GraduationCap className="w-4 h-4 text-brand-gold stroke-[2.5]" />
-            Program Catalog
-          </div>
-          <h1 className="font-heading font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight">
-            Academic &amp; Upskilling Programs
+    <div className="w-full py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-brand-bg min-h-[85vh]">
+      <div className="max-w-5xl mx-auto space-y-10">
+        {/* Simple Page Header */}
+        <div>
+          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy tracking-tight">
+            Programs
           </h1>
-          <p className="font-sans text-sm sm:text-base text-brand-dark/80 leading-relaxed">
-            Explore structured academic semester mentorship and practical developer skill sprints.
+          <p className="font-sans text-xs sm:text-sm text-brand-dark/75 mt-1">
+            Academic study assistance and skill development offerings.
           </p>
         </div>
 
         {/* Loading & Error States */}
         {loading && (
-          <div className="p-12 text-center border-2 border-brand-dark bg-brand-paper shadow-brutal max-w-md mx-auto space-y-3">
-            <Loader2 className="w-8 h-8 animate-spin text-brand-teal mx-auto" />
-            <p className="font-heading font-extrabold text-sm text-brand-navy">
-              LOADING PROGRAMS
-            </p>
-            <p className="font-mono text-xs text-brand-muted">
-              Fetching available learning programs and cohorts...
+          <div className="p-12 text-center bg-white border border-brand-dark/15 max-w-sm mx-auto space-y-3 shadow-sm">
+            <Loader2 className="w-6 h-6 animate-spin text-brand-teal mx-auto" />
+            <p className="font-heading font-bold text-xs uppercase tracking-wider text-brand-navy">
+              Loading Programs
             </p>
           </div>
         )}
 
         {error && (
-          <div className="p-4 border-2 border-brand-dark bg-red-50 text-red-950 flex items-center gap-3 shadow-brutal max-w-2xl mx-auto">
-            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 stroke-[2.5]" />
-            <span className="font-sans text-xs sm:text-sm font-semibold">{error}</span>
+          <div className="p-4 border border-red-300 bg-red-50 text-red-950 flex items-center gap-3 max-w-xl mx-auto text-xs">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
         {!loading && !error && (
-          <div className="space-y-14">
+          <div className="space-y-10">
             {/* Section 1: Academic Programs (Hidden if no published offerings) */}
             {academicPrograms.length > 0 && (
-              <section className="space-y-6">
-                <div className="border-b-3 border-brand-dark pb-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-2 text-brand-navy">
-                      <GraduationCap className="w-5 h-5 text-brand-gold stroke-[2.5]" />
-                      <h2 className="font-heading font-black text-xl sm:text-2xl tracking-tight">
-                        Academic Programs
-                      </h2>
-                    </div>
-                    <p className="font-sans text-xs sm:text-sm text-brand-dark/75 mt-1">
-                      Structured semester syllabus planning, daily routine organization, and dedicated mentor supervision.
-                    </p>
-                  </div>
-                  <span className="font-mono text-xs text-brand-muted">
-                    {academicPrograms.length} {academicPrograms.length === 1 ? 'Cohort Track' : 'Cohort Tracks'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+              <section className="space-y-4">
+                <h2 className="font-heading font-bold text-lg sm:text-xl text-brand-navy border-b border-brand-dark/15 pb-2">
+                  Academic Programs
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {academicPrograms.map(renderProgramCard)}
                 </div>
               </section>
@@ -246,25 +180,11 @@ export const ProgramsPage: React.FC = () => {
 
             {/* Section 2: Upskilling Programs (Hidden if no published offerings) */}
             {upskillingPrograms.length > 0 && (
-              <section className="space-y-6">
-                <div className="border-b-3 border-brand-dark pb-3 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-2 text-brand-navy">
-                      <Zap className="w-5 h-5 text-brand-teal stroke-[2.5]" />
-                      <h2 className="font-heading font-black text-xl sm:text-2xl tracking-tight">
-                        Upskilling Programs
-                      </h2>
-                    </div>
-                    <p className="font-sans text-xs sm:text-sm text-brand-dark/75 mt-1">
-                      Hands-on skill sprints focused on practical developer workflows and industry readiness.
-                    </p>
-                  </div>
-                  <span className="font-mono text-xs text-brand-muted">
-                    {upskillingPrograms.length} {upskillingPrograms.length === 1 ? 'Course' : 'Courses'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+              <section className="space-y-4">
+                <h2 className="font-heading font-bold text-lg sm:text-xl text-brand-navy border-b border-brand-dark/15 pb-2">
+                  Upskilling Programs
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {upskillingPrograms.map(renderProgramCard)}
                 </div>
               </section>
@@ -272,38 +192,17 @@ export const ProgramsPage: React.FC = () => {
 
             {/* Empty State when no offerings exist in either category */}
             {academicPrograms.length === 0 && upskillingPrograms.length === 0 && (
-              <div className="p-12 text-center border-2 border-brand-dark bg-brand-paper shadow-brutal max-w-lg mx-auto space-y-3">
-                <BookOpen className="w-10 h-10 text-brand-muted mx-auto stroke-[1.5]" />
-                <h3 className="font-heading font-extrabold text-base text-brand-navy">
+              <div className="p-10 text-center bg-white border border-brand-dark/15 max-w-md mx-auto space-y-2 shadow-sm">
+                <h3 className="font-heading font-bold text-sm text-brand-navy">
                   No Programs Available
                 </h3>
-                <p className="font-sans text-xs text-brand-muted">
+                <p className="font-sans text-xs text-brand-dark/70">
                   There are currently no published programs available for public enrollment.
                 </p>
               </div>
             )}
           </div>
         )}
-
-        {/* Bottom Contact to Enroll Assistance Banner */}
-        <div className="p-6 sm:p-8 border-3 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <h3 className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy">
-              Ready to enroll or have questions about cohort placement?
-            </h3>
-            <p className="font-sans text-xs sm:text-sm text-brand-dark/80 leading-relaxed">
-              PoraPlan coordinators review your university syllabus, department schedule, and learning goals to assign you to the right cohort.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <Button to="/how-it-works" variant="outline" size="md">
-              How It Works
-            </Button>
-            <Button to="/contact" variant="primary" size="md" rightIcon={<ArrowRight className="w-4 h-4" />}>
-              Contact to Enroll
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );

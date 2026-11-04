@@ -1,10 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Mail, MessageSquare, ExternalLink, ArrowRight, ShieldCheck } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
 
 export const ContactPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const programContext = searchParams.get('program');
+
   return (
     <div className="w-full pb-16 sm:pb-20">
       {/* Top Banner / Breadcrumb */}
@@ -28,6 +31,25 @@ export const ContactPage: React.FC = () => {
           <p className="mt-2 text-base sm:text-lg text-brand-dark/85 font-sans max-w-2xl leading-relaxed">
             Personal study assistance and mentorship support. Reach out with questions about onboarding, mentor pairings, or your study plan.
           </p>
+
+          {programContext && (
+            <div className="mt-4 p-3.5 border-2 border-brand-teal bg-white flex items-center justify-between gap-3 text-xs sm:text-sm font-sans shadow-brutal-xs">
+              <div>
+                <span className="font-mono text-[10px] uppercase font-bold text-brand-teal block">
+                  PROGRAM ENROLLMENT INQUIRY
+                </span>
+                <span className="font-bold text-brand-navy">
+                  Inquiring about: {programContext}
+                </span>
+              </div>
+              <Link
+                to="/programs"
+                className="font-mono text-xs text-brand-teal hover:underline font-bold shrink-0"
+              >
+                Change Program
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
@@ -67,7 +89,13 @@ export const ContactPage: React.FC = () => {
               </div>
               <div className="pt-4 border-t border-brand-dark/20 mt-4">
                 <a
-                  href="mailto:poraplan.bd@gmail.com"
+                  href={
+                    programContext
+                      ? `mailto:poraplan.bd@gmail.com?subject=${encodeURIComponent(
+                          `Enrollment Inquiry: ${programContext}`
+                        )}`
+                      : 'mailto:poraplan.bd@gmail.com'
+                  }
                   className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-brand-teal hover:underline break-all"
                 >
                   <span>poraplan.bd@gmail.com</span>
