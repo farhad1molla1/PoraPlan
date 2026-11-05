@@ -26,6 +26,8 @@ import {
   createMockAssignment,
   updateMockAssignment,
   getMockUserNotifications,
+  getMockProfile,
+  setMockAccountStatus,
 } from '../src/lib/mockAuthStore';
 
 let totalTests = 0;
@@ -126,7 +128,6 @@ async function runSuite() {
     Boolean(createdDirect.assignment?.published_at),
     'Directly published assignment has published_at populated immediately'
   );
-  const directPubAt = createdDirect.assignment!.published_at!;
 
   // Scenario 2.2: Draft assignment created without published_at
   const createdDraft = createMockAssignment({
@@ -299,8 +300,34 @@ async function runSuite() {
     updated_at: '2026-11-04T10:00:00.000Z',
   });
 
+  // Assignment for 'not_activated' student (mock-student-pp002) -> must be suppressed
+  const assignNotActivated = createMockAssignment({
+    studentId: 'mock-student-pp002',
+    title: 'Not Activated Student Assignment',
+    dueDate: '2026-11-05',
+    status: 'published',
+  });
+  assignNotActivated.assignment!.published_at = '2026-11-01T12:00:00.000Z';
+  mockAssignments.find((a) => a.id === assignNotActivated.assignment!.id)!.published_at = '2026-11-01T12:00:00.000Z';
+
+  // Assignment for 'suspended' student (mock-student-pp003) -> must be suppressed
+  const student3 = getMockProfile('mock-student-pp003');
+  const originalStatus3 = student3?.status || 'active';
+  setMockAccountStatus('mock-student-pp003', 'suspended');
+  const assignSuspended = createMockAssignment({
+    studentId: 'mock-student-pp003',
+    title: 'Suspended Student Assignment',
+    dueDate: '2026-11-05',
+    status: 'published',
+  });
+  assignSuspended.assignment!.published_at = '2026-11-01T12:00:00.000Z';
+  mockAssignments.find((a) => a.id === assignSuspended.assignment!.id)!.published_at = '2026-11-01T12:00:00.000Z';
+
   // Run mock reminder scheduler at 2026-11-05T12:00:00.000Z (after reminder_at 11:59 UTC, before deadline 17:59 UTC)
   const resultEligibility = processMockAssignmentDeadlineReminders('2026-11-05T12:00:00.000Z');
+
+  // Restore student3 status
+  setMockAccountStatus('mock-student-pp003', originalStatus3 as any);
 
   assert(
     resultEligibility.deliveredAssignmentIds.includes(assignEligible.assignment!.id),
@@ -337,6 +364,14 @@ async function runSuite() {
   assert(
     resultEligibility.deliveredAssignmentIds.includes(assignNeedsRevision.assignment!.id),
     'Assignment with status: needs_revision remains eligible and receives deadline reminder'
+  );
+  assert(
+    !resultEligibility.deliveredAssignmentIds.includes(assignNotActivated.assignment!.id),
+    'Assignment for student with status: not_activated is suppressed from reminder delivery'
+  );
+  assert(
+    !resultEligibility.deliveredAssignmentIds.includes(assignSuspended.assignment!.id),
+    'Assignment for student with status: suspended is suppressed from reminder delivery'
   );
 
   // ---------------------------------------------------------------------------
@@ -524,6 +559,37 @@ async function runSuite() {
   assert(
     migrationSql.includes("pg_cron"),
     'Migration conditionally detects pg_cron and registers schedule safely'
+  );
+  assert(
+    migrationSql.includes('NEW.published_at := now();') && !migrationSql.includes("NEW.published_at := timezone('utc'"),
+    'published_at trigger assigns timezone-invariant now() instead of session-dependent timezone() conversion'
+  );
+  assert(
+    migrationSql.includes('sent_at TIMESTAMPTZ NOT NULL DEFAULT now(),') && !migrationSql.includes("DEFAULT timezone('utc'"),
+    'assignment_reminder_deliveries defaults sent_at to now() instead of timezone() conversion'
+  );
+  assert(
+    migrationSql.includes('v_now TIMESTAMPTZ := now();') && !migrationSql.includes("v_now TIMESTAMPTZ := timezone('utc'"),
+    'process_assignment_deadline_reminders initializes v_now to now() directly'
+  );
+  assert(
+    migrationSql.includes("AND p.status = 'active'") && !migrationSql.includes("p.status != 'suspended'"),
+    'Student eligibility query strictly requires p.status = active (excluding unactivated and suspended)'
+  );
+  assert(
+    migrationSql.includes('CREATE OR REPLACE FUNCTION public.register_assignment_deadline_reminder_cron()'),
+    'Dedicated idempotent register_assignment_deadline_reminder_cron procedure exists'
+  );
+  assert(
+    migrationSql.includes('FOR v_job_id IN (') && migrationSql.includes('PERFORM cron.unschedule(v_job_id);'),
+    'Registration procedure unschedules existing jobs by jobid to guarantee zero duplicates'
+  );
+
+  const snippetPath = resolve(__dirname, '../supabase/snippets/register_deadline_reminders_cron.sql');
+  const snippetSql = readFileSync(snippetPath, 'utf8');
+  assert(
+    snippetSql.includes('SELECT public.register_assignment_deadline_reminder_cron();'),
+    'Standalone snippet invokes register_assignment_deadline_reminder_cron cleanly'
   );
 
   // ---------------------------------------------------------------------------

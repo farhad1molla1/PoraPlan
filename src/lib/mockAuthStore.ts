@@ -443,6 +443,16 @@ export function getMockProfile(userId: string): Profile | null {
 }
 
 /**
+ * Update the status of a mock account (used for testing account lifecycle states).
+ */
+export function setMockAccountStatus(userId: string, status: AccountStatus): void {
+  const account = mockStore.find((acc) => acc.id === userId);
+  if (account) {
+    account.status = status;
+  }
+}
+
+/**
  * Retrieve sanitized public profile for a user by ID or PoraPlan ID.
  * Strictly omits private contact channels (email, phone/WhatsApp, linked_email) and status.
  */
@@ -1815,9 +1825,9 @@ export function processMockAssignmentDeadlineReminders(simulatedTime?: Date | st
       continue;
     }
 
-    // 2. Student account must exist and not be suspended
+    // 2. Student account must exist, be active, and not suspended
     const student = getMockProfile(a.student_id);
-    if (!student || student.status === 'suspended') {
+    if (!student || student.status !== 'active') {
       continue;
     }
 

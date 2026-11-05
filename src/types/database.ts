@@ -1953,6 +1953,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: number;
       };
+      register_assignment_deadline_reminder_cron: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
       is_authorized_mentor_for_student: {
         Args: {
           p_mentor_id?: string;

@@ -1,13 +1,16 @@
 -- ==============================================================================
 -- PoraPlan Milestone: Assignment Deadline Reminders Schema & Scheduling
 -- Phase 3.4: Server-Side Assignment Deadline Reminders
+-- Phase 3.4.1: Production-Safety Hardening (Timezone-safe & Idempotent pg_cron)
 --
 -- 1. Add published_at column to public.assignments
--- 2. Automatic trigger ensuring set-once semantics for published_at
+-- 2. Automatic trigger ensuring set-once semantics for published_at (now() invariant)
 -- 3. Extend check_notifications_type constraint with 'assignment_deadline_reminder'
--- 4. Create public.assignment_reminder_deliveries durable tracking table
+-- 4. Create public.assignment_reminder_deliveries durable tracking table (default now())
 -- 5. Create process_assignment_deadline_reminders() SECURITY DEFINER function
--- 6. Conditionally register pg_cron schedule (* * * * *)
+--    (Checks student status = 'active' and uses now() instead of session timezone)
+-- 6. Create register_assignment_deadline_reminder_cron() procedure
+-- 7. Conditionally register pg_cron schedule (* * * * *)
 -- ==============================================================================
 
 -- 1. ADD published_at TO public.assignments
@@ -18,18 +21,18 @@ UPDATE public.assignments
 SET published_at = created_at
 WHERE status = 'published' AND published_at IS NULL;
 
--- 2. AUTOMATIC published_at TRIGGER (Enforce set-once semantics)
+-- 2. AUTOMATIC published_at TRIGGER (Enforce set-once semantics, timezone-invariant now())
 CREATE OR REPLACE FUNCTION public.handle_assignment_published_at()
 RETURNS TRIGGER AS $$
 BEGIN
   IF TG_OP = 'INSERT' THEN
     IF NEW.status = 'published' AND NEW.published_at IS NULL THEN
-      NEW.published_at := timezone('utc'::text, now());
+      NEW.published_at := now();
     END IF;
   ELSIF TG_OP = 'UPDATE' THEN
     -- If transitioning to 'published' for the first time, set published_at
     IF OLD.status != 'published' AND NEW.status = 'published' AND OLD.published_at IS NULL THEN
-      NEW.published_at := timezone('utc'::text, now());
+      NEW.published_at := now();
     -- If published_at was already set, preserve original publication timestamp
     ELSIF OLD.published_at IS NOT NULL THEN
       NEW.published_at := OLD.published_at;
@@ -77,7 +80,7 @@ CREATE TABLE IF NOT EXISTS public.assignment_reminder_deliveries (
   student_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   due_date DATE NOT NULL,
   scheduled_reminder_at TIMESTAMPTZ NOT NULL,
-  sent_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+  sent_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   CONSTRAINT uq_assignment_reminder UNIQUE (assignment_id)
 );
 
@@ -110,7 +113,7 @@ SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
 DECLARE
-  v_now TIMESTAMPTZ := timezone('utc'::text, now());
+  v_now TIMESTAMPTZ := now();
   v_processed_count INTEGER := 0;
   v_rec RECORD;
 BEGIN
@@ -132,7 +135,7 @@ BEGIN
     WHERE a.status = 'published'
       AND a.due_date IS NOT NULL
       AND a.published_at IS NOT NULL
-      AND (p.status IS NULL OR p.status != 'suspended')
+      AND p.status = 'active'
       AND NOT EXISTS (
         SELECT 1 FROM public.assignment_reminder_deliveries ard
         WHERE ard.assignment_id = a.id
@@ -208,34 +211,58 @@ REVOKE ALL ON FUNCTION public.process_assignment_deadline_reminders() FROM anon;
 GRANT EXECUTE ON FUNCTION public.process_assignment_deadline_reminders() TO postgres;
 GRANT EXECUTE ON FUNCTION public.process_assignment_deadline_reminders() TO service_role;
 
--- 6. PG_CRON SCHEDULER REGISTRATION (Idempotent check)
-DO $$
+-- 6. PG_CRON SCHEDULER REGISTRATION PROCEDURE (Idempotent job registration)
+CREATE OR REPLACE FUNCTION public.register_assignment_deadline_reminder_cron()
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  v_job_id BIGINT;
 BEGIN
-  IF EXISTS (
-    SELECT 1 FROM pg_extension WHERE extname = 'pg_cron'
-  ) OR EXISTS (
-    SELECT 1 FROM pg_available_extensions WHERE name = 'pg_cron'
-  ) THEN
-    BEGIN
-      CREATE EXTENSION IF NOT EXISTS pg_cron;
-
-      PERFORM cron.unschedule('process-assignment-deadline-reminders')
-      WHERE EXISTS (
-        SELECT 1 FROM cron.job WHERE jobname = 'process-assignment-deadline-reminders'
-      );
-
-      PERFORM cron.schedule(
-        'process-assignment-deadline-reminders',
-        '* * * * *',
-        'SELECT public.process_assignment_deadline_reminders()'
-      );
-      RAISE NOTICE 'pg_cron scheduled job registered successfully for assignment deadline reminders.';
-    EXCEPTION WHEN OTHERS THEN
-      RAISE WARNING 'pg_cron extension could not be configured automatically (%): Please enable pg_cron in Supabase Database Extensions and register the cron job manually.', SQLERRM;
-    END;
-  ELSE
-    RAISE WARNING 'pg_cron extension is not available in this environment. To enable automated 1-minute reminders on hosted Supabase, enable pg_cron in the Supabase Dashboard Extensions and register the cron job.';
+  -- 1. Ensure pg_cron extension is present
+  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
+    CREATE EXTENSION IF NOT EXISTS pg_cron;
   END IF;
+
+  -- 2. Idempotent unschedule: remove any existing jobs with this name by jobid
+  FOR v_job_id IN (
+    SELECT jobid FROM cron.job WHERE jobname = 'process-assignment-deadline-reminders'
+  ) LOOP
+    PERFORM cron.unschedule(v_job_id);
+  END LOOP;
+
+  -- 3. Register exactly one job scheduled once per minute
+  PERFORM cron.schedule(
+    'process-assignment-deadline-reminders',
+    '* * * * *',
+    'SELECT public.process_assignment_deadline_reminders()'
+  );
+
+  RETURN true;
 END;
 $$;
 
+-- Restrict permissions: only postgres and service_role can manage scheduled jobs
+REVOKE ALL ON FUNCTION public.register_assignment_deadline_reminder_cron() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.register_assignment_deadline_reminder_cron() FROM authenticated;
+REVOKE ALL ON FUNCTION public.register_assignment_deadline_reminder_cron() FROM anon;
+GRANT EXECUTE ON FUNCTION public.register_assignment_deadline_reminder_cron() TO postgres;
+GRANT EXECUTE ON FUNCTION public.register_assignment_deadline_reminder_cron() TO service_role;
+
+-- 7. CONDITIONAL INITIAL REGISTRATION
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
+    BEGIN
+      PERFORM public.register_assignment_deadline_reminder_cron();
+      RAISE NOTICE 'pg_cron scheduled job registered successfully for assignment deadline reminders.';
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'pg_cron registration encountered an issue (%): Run SELECT public.register_assignment_deadline_reminder_cron(); after verifying pg_cron extension status.', SQLERRM;
+    END;
+  ELSE
+    RAISE NOTICE 'pg_cron extension is not active yet. To activate automated reminders on hosted Supabase: Enable pg_cron in Database Extensions, then execute: SELECT public.register_assignment_deadline_reminder_cron();';
+  END IF;
+END;
+$$;
