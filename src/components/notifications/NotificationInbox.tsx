@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -8,8 +8,11 @@ import {
   deleteNotification,
   type NotificationWithActor,
 } from '../../lib/notifications';
-import type { NotificationType } from '../../types/database';
-import { Badge, type BadgeVariant } from '../common/Badge';
+import {
+  getNotificationTypeMeta,
+  type NotificationTypeMeta,
+} from '../../lib/notificationMeta';
+import { Badge } from '../common/Badge';
 import { Button } from '../common/Button';
 import {
   Bell,
@@ -17,22 +20,13 @@ import {
   CheckCheck,
   Trash2,
   ExternalLink,
-  ListTodo,
-  FileText,
-  FileCheck,
-  Calendar,
-  HelpCircle,
-  Megaphone,
-  BookMarked,
-  Compass,
   AlertCircle,
-  Clock,
-  AlertTriangle,
-  ClipboardList,
   Filter,
   RefreshCw,
   Loader2,
 } from 'lucide-react';
+
+export { getNotificationTypeMeta, type NotificationTypeMeta };
 
 export interface NotificationInboxProps {
   role: 'student' | 'mentor' | 'admin';
@@ -64,29 +58,44 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
 
   const userId = profile?.id || user?.id || '';
 
+  const isMountedRef = useRef(true);
+  const inFlightRef = useRef(false);
+
   const fetchNotifications = useCallback(
-    async (isRefresh = false) => {
-      if (!userId) return;
-      if (isRefresh) setLoading(true);
+    async (isManualRefresh = false) => {
+      if (!userId || !isMountedRef.current) return;
+      if (inFlightRef.current) return;
+
+      inFlightRef.current = true;
+      if (isManualRefresh) {
+        setLoading(true);
+      }
       setError(null);
+
       try {
         const { notifications: list, error: fetchErr } = await getUserNotifications(userId);
+        if (!isMountedRef.current) return;
         if (fetchErr) {
           setError(fetchErr.message || 'Unable to retrieve notifications.');
         } else {
           setNotifications(list);
         }
       } catch (err: unknown) {
+        if (!isMountedRef.current) return;
         const e = err instanceof Error ? err : new Error(String(err));
         setError(e.message || 'An unexpected error occurred while loading notifications.');
       } finally {
-        setLoading(false);
+        inFlightRef.current = false;
+        if (isMountedRef.current) {
+          setLoading(false);
+        }
       }
     },
     [userId]
   );
 
   useEffect(() => {
+    isMountedRef.current = true;
     fetchNotifications();
 
     const handleUpdate = () => {
@@ -96,7 +105,15 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
     if (typeof window !== 'undefined') {
       window.addEventListener('notifications-updated', handleUpdate);
     }
+
+    // 30-second fallback polling interval for active inbox
+    const intervalId = setInterval(() => {
+      fetchNotifications(false);
+    }, 30000);
+
     return () => {
+      isMountedRef.current = false;
+      clearInterval(intervalId);
       if (typeof window !== 'undefined') {
         window.removeEventListener('notifications-updated', handleUpdate);
       }
@@ -172,113 +189,6 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
     }
   };
 
-  // Type metadata resolver
-  const getTypeMeta = (type: NotificationType) => {
-    switch (type) {
-      case 'submission_created':
-        return {
-          label: 'Submission',
-          icon: FileCheck,
-          badgeVariant: 'teal' as BadgeVariant,
-          actionText: 'Review Submission',
-        };
-      case 'submission_reviewed':
-        return {
-          label: 'Review',
-          icon: CheckCircle2,
-          badgeVariant: 'gold' as BadgeVariant,
-          actionText: 'View Feedback',
-        };
-      case 'assignment_deadline_reminder':
-        return {
-          label: 'Deadline Reminder',
-          icon: Clock,
-          badgeVariant: 'danger' as BadgeVariant,
-          actionText: 'View Assignment',
-        };
-      case 'assignment_created':
-      case 'assignment_updated':
-        return {
-          label: 'Assignment',
-          icon: FileText,
-          badgeVariant: 'gold' as BadgeVariant,
-          actionText: 'View Assignment',
-        };
-      case 'doubt_created':
-        return {
-          label: 'New Doubt',
-          icon: HelpCircle,
-          badgeVariant: 'gold' as BadgeVariant,
-          actionText: 'Open Doubt',
-        };
-      case 'doubt_replied':
-        return {
-          label: 'Doubt Reply',
-          icon: HelpCircle,
-          badgeVariant: 'teal' as BadgeVariant,
-          actionText: 'View Response',
-        };
-      case 'application_submitted':
-        return {
-          label: 'Application',
-          icon: ClipboardList,
-          badgeVariant: 'navy' as BadgeVariant,
-          actionText: 'Review Application',
-        };
-      case 'capacity_alert':
-        return {
-          label: 'Capacity Alert',
-          icon: AlertTriangle,
-          badgeVariant: 'danger' as BadgeVariant,
-          actionText: 'View Cohorts',
-        };
-      case 'task_created':
-      case 'task_updated':
-        return {
-          label: 'Target Task',
-          icon: ListTodo,
-          badgeVariant: 'teal' as BadgeVariant,
-          actionText: 'View Tasks',
-        };
-      case 'evaluation_published':
-        return {
-          label: 'Evaluation',
-          icon: Calendar,
-          badgeVariant: 'gold' as BadgeVariant,
-          actionText: 'View Evaluation',
-        };
-      case 'announcement_published':
-        return {
-          label: 'Announcement',
-          icon: Megaphone,
-          badgeVariant: 'danger' as BadgeVariant,
-          actionText: 'Read Notice',
-        };
-      case 'plan_updated':
-        return {
-          label: 'Study Plan',
-          icon: Compass,
-          badgeVariant: 'teal' as BadgeVariant,
-          actionText: 'View Plan',
-        };
-      case 'resource_published':
-        return {
-          label: 'Resource',
-          icon: BookMarked,
-          badgeVariant: 'navy' as BadgeVariant,
-          actionText: 'View Resource',
-        };
-      case 'system':
-      default:
-        return {
-          label: 'System',
-          icon: Bell,
-          badgeVariant: 'muted' as BadgeVariant,
-          actionText: 'Open Link',
-        };
-    }
-  };
-
   const formatDate = (isoString?: string | null) => {
     if (!isoString) return 'Just now';
     try {
@@ -300,7 +210,19 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
     return notifications.filter((item) => {
       if (statusFilter === 'unread' && item.read) return false;
       if (statusFilter === 'read' && !item.read) return false;
-      if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+      if (typeFilter !== 'all') {
+        if (typeFilter === 'task_created') {
+          return item.type === 'task_created' || item.type === 'task_updated';
+        }
+        if (typeFilter === 'assignment_created') {
+          return (
+            item.type === 'assignment_created' ||
+            item.type === 'assignment_updated' ||
+            item.type === 'assignment_deadline_reminder'
+          );
+        }
+        return item.type === typeFilter;
+      }
       return true;
     });
   }, [notifications, statusFilter, typeFilter]);
@@ -441,6 +363,9 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
                 <option value="task_created">Daily Tasks</option>
                 <option value="submission_reviewed">Evaluations & Reviews</option>
                 <option value="doubt_replied">Doubt Replies</option>
+                <option value="plan_updated">Study Plans</option>
+                <option value="resource_published">Resources</option>
+                <option value="evaluation_published">Evaluations</option>
               </>
             )}
             <option value="announcement_published">Announcements</option>
@@ -485,7 +410,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
       ) : (
         <div className="space-y-3">
           {filteredNotifications.map((notif) => {
-            const meta = getTypeMeta(notif.type);
+            const meta = getNotificationTypeMeta(notif.type, role);
             const Icon = meta.icon;
             const hasLink = isSafeRoute(notif.link);
 
