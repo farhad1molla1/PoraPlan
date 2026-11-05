@@ -15,21 +15,14 @@ import {
   Calendar,
   ListTodo,
   TrendingUp,
-  Users,
-  Compass,
   Clock,
   HelpCircle,
-  Sparkles,
   ArrowRight,
-  ShieldCheck,
   Mail,
-  BookOpen,
   FileCheck,
   Award,
   ChevronRight,
   Check,
-  BookMarked,
-  Megaphone,
   Circle,
   Loader2,
   Phone,
@@ -38,7 +31,7 @@ import {
 } from 'lucide-react';
 
 export const StudentDashboardPage: React.FC = () => {
-  const { user, profile, role, poraplanId, connectEmail } = useAuth();
+  const { user, profile, poraplanId, connectEmail } = useAuth();
   const studentId = user?.id || '';
 
   const [mentors, setMentors] = useState<Profile[]>([]);
@@ -139,124 +132,92 @@ export const StudentDashboardPage: React.FC = () => {
 
   return (
     <div className="w-full py-5 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
 
-        {/* 1. GREETING & MENTOR CONNECTION HEADER */}
+        {/* 1. GREETING & MENTOR SECTION */}
         <section
           aria-labelledby="student-greeting"
-          className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-5 sm:p-7 shadow-brutal space-y-4"
+          className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-4"
         >
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-xs uppercase text-brand-gold font-bold tracking-wider">
-                  STUDY WORKSPACE
-                </span>
-                <Badge variant="teal" size="sm">ACTIVE</Badge>
-              </div>
-
-              <h1 id="student-greeting" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
+          {/* Top Row: Greeting & Meta */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-brand-dark pb-3">
+            <div>
+              <h1 id="student-greeting" className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
                 Welcome, {studentName}
               </h1>
-
-              <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-brand-bg/85 pt-0.5">
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-brand-gold shrink-0" />
+              <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-brand-muted mt-0.5">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-brand-teal" />
                   {currentDate}
                 </span>
                 {(poraplanId || profile?.poraplan_id) && (
                   <>
                     <span>•</span>
-                    <span className="font-bold text-brand-gold">
+                    <span className="font-bold text-brand-navy">
                       ID: {poraplanId || profile?.poraplan_id}
                     </span>
                   </>
                 )}
-                <span>•</span>
-                <span className="uppercase text-brand-teal font-bold">{role || 'Student'}</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0 self-start">
-              <div className="px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-brand-dark text-xs font-mono font-bold shadow-brutal-xs flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-brand-teal shrink-0" />
-                <span>Personal Study Assistance</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="teal" size="sm" className="font-mono uppercase font-bold">
+                Student
+              </Badge>
             </div>
           </div>
 
-          {/* Dedicated My Mentor Section */}
-          <div className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper text-brand-dark shadow-brutal-xs">
-            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-              <div className="space-y-2 flex-1">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 font-mono text-xs font-extrabold tracking-wide uppercase text-brand-navy">
-                    <Users className="w-4 h-4 text-brand-teal shrink-0 stroke-[2.5]" />
-                    <span>YOUR MENTOR</span>
-                  </div>
-                  {assignmentType === 'individual' ? (
-                    <Badge variant="teal" size="sm" className="font-bold">
-                      INDIVIDUAL MENTOR
-                    </Badge>
-                  ) : assignmentType === 'cohort' ? (
-                    <Badge variant="gold" size="sm" className="font-bold">
-                      COHORT MENTOR
-                    </Badge>
-                  ) : null}
-                </div>
-
-                {assignedMentor ? (
-                  <div className="space-y-1.5 pt-1">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        to={`/profile/${assignedMentor.id}`}
-                        className="text-base sm:text-lg font-black text-brand-navy hover:text-brand-teal transition-colors underline decoration-brand-dark/30 hover:decoration-brand-teal"
-                      >
-                        {assignedMentor.full_name}
-                      </Link>
-                      {assignedMentor.poraplan_id && (
-                        <span className="font-mono text-xs px-1.5 py-0.5 bg-brand-paper-tint border border-brand-dark/40 font-bold text-brand-navy">
-                          {assignedMentor.poraplan_id}
-                        </span>
-                      )}
-                    </div>
-
-                    {(assignedMentor.academic_background || assignedMentor.expertise) && (
-                      <p className="text-xs text-brand-dark/80 font-sans leading-relaxed">
-                        {assignedMentor.academic_background || assignedMentor.expertise}
-                      </p>
-                    )}
-
-                    <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-brand-muted pt-1">
-                      {effectiveResolution?.program && (
-                        <span>Program: {effectiveResolution.program.name}</span>
-                      )}
-                      {effectiveResolution?.cohort && (
-                        <>
-                          <span>•</span>
-                          <span>Cohort: {effectiveResolution.cohort.name} ({effectiveResolution.cohort.code})</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs font-sans text-brand-dark/80 leading-relaxed pt-1">
-                    No mentor has been assigned yet. PoraPlan will update this section when your mentorship allocation is ready.
-                  </p>
-                )}
+          {/* Mentor Information */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono font-bold text-brand-muted uppercase">Mentor</span>
+                {assignmentType === 'individual' ? (
+                  <Badge variant="teal" size="sm">Individual</Badge>
+                ) : assignmentType === 'cohort' ? (
+                  <Badge variant="gold" size="sm">Cohort</Badge>
+                ) : null}
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 shrink-0 self-start">
-                {assignedMentor && (
-                  <Link
-                    to={`/profile/${assignedMentor.id}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-brand-navy text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-paper-tint transition-colors"
-                  >
-                    <User className="w-3.5 h-3.5" />
-                    <span>Profile</span>
-                  </Link>
-                )}
-                {assignedMentor?.whatsapp_number && (
+              {assignedMentor ? (
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to={`/profile/${assignedMentor.id}`}
+                      className="text-base font-heading font-bold text-brand-navy hover:text-brand-teal transition-colors underline decoration-brand-dark/30 hover:decoration-brand-teal"
+                    >
+                      {assignedMentor.full_name}
+                    </Link>
+                    {assignedMentor.poraplan_id && (
+                      <span className="font-mono text-xs px-1.5 py-0.5 bg-brand-paper-tint border border-brand-dark/30 text-brand-navy font-bold">
+                        {assignedMentor.poraplan_id}
+                      </span>
+                    )}
+                  </div>
+                  {(assignedMentor.academic_background || assignedMentor.expertise) && (
+                    <p className="text-xs text-brand-dark/80 font-sans mt-0.5 line-clamp-1">
+                      {assignedMentor.academic_background || assignedMentor.expertise}
+                    </p>
+                  )}
+                  {(effectiveResolution?.program || effectiveResolution?.cohort) && (
+                    <p className="text-xs font-mono text-brand-muted mt-0.5">
+                      {effectiveResolution.program && effectiveResolution.program.name}
+                      {effectiveResolution.cohort && ` • ${effectiveResolution.cohort.name}`}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-brand-muted font-sans">
+                  No mentor assigned yet. You will be notified when your mentor is assigned.
+                </p>
+              )}
+            </div>
+
+            {/* Direct Mentor Actions */}
+            {assignedMentor && (
+              <div className="flex items-center gap-2 shrink-0">
+                {assignedMentor.whatsapp_number && (
                   <a
                     href={`https://wa.me/${assignedMentor.whatsapp_number.replace(/\D/g, '')}`}
                     target="_blank"
@@ -268,68 +229,56 @@ export const StudentDashboardPage: React.FC = () => {
                   </a>
                 )}
                 <Link
-                  to="/student/doubts"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-navy text-brand-bg text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-dark transition-colors"
+                  to={`/profile/${assignedMentor.id}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-brand-navy text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-paper-tint transition-colors"
                 >
-                  <HelpCircle className="w-3.5 h-3.5" />
-                  <span>Ask a Doubt</span>
-                </Link>
-                <Link
-                  to="/student/plans"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-gold text-brand-dark text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-gold-light transition-colors"
-                >
-                  <span>Study Plans</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <User className="w-3.5 h-3.5" />
+                  <span>Profile</span>
                 </Link>
               </div>
-            </div>
+            )}
           </div>
         </section>
 
-        {/* 2. TODAY'S STUDY & TASKS (THE CORE ANSWER: WHAT DO I STUDY TODAY?) */}
-        <section aria-labelledby="today-study-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-brand-dark pb-3">
+        {/* 2. TODAY'S STUDY & TASKS (PRIMARY FOCUS: "WHAT SHOULD I STUDY TODAY?") */}
+        <section
+          aria-labelledby="today-study-title"
+          className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-4"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-brand-dark pb-3">
             <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <Sparkles className="w-4 h-4 text-brand-teal" />
-                <span className="font-mono text-xs font-bold uppercase text-brand-teal">
-                  TODAY'S TARGETS
-                </span>
-              </div>
               <h2 id="today-study-title" className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy">
                 What to Study Today
               </h2>
+              {tasks.length > 0 && (
+                <p className="text-xs font-mono text-brand-muted mt-0.5">
+                  {pendingTasks.length} pending, {completedTasks.length} completed
+                </p>
+              )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <Link to="/student/tasks">
-                <Button variant="outline" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
-                  View All Tasks
-                </Button>
-              </Link>
-            </div>
+            <Link to="/student/tasks">
+              <Button variant="outline" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+                View All Tasks
+              </Button>
+            </Link>
           </div>
 
-          {/* Active Study Plan Overview */}
+          {/* Active Study Plan Banner */}
           {activePlan && (
-            <div className="p-3.5 border-2 border-brand-dark bg-brand-paper-tint flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2 text-[11px] font-mono font-bold text-brand-muted uppercase">
-                  <span>ACTIVE STUDY PLAN</span>
+            <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-mono font-bold text-brand-muted uppercase">
+                    Study Plan
+                  </span>
                   {activePlan.subject_name && (
-                    <span className="px-1.5 py-0.2 bg-brand-teal text-white">
-                      {activePlan.subject_name}
-                    </span>
+                    <Badge variant="teal" size="sm">{activePlan.subject_name}</Badge>
                   )}
                 </div>
-                <h3 className="font-heading font-bold text-base text-brand-navy">
+                <h3 className="font-heading font-bold text-sm sm:text-base text-brand-navy truncate">
                   {activePlan.title}
                 </h3>
-                {activePlan.description && (
-                  <p className="text-xs text-brand-dark/80 font-sans line-clamp-1">
-                    {activePlan.description}
-                  </p>
-                )}
               </div>
 
               <Link
@@ -346,7 +295,7 @@ export const StudentDashboardPage: React.FC = () => {
           {loading ? (
             <div className="p-6 text-center text-xs font-mono text-brand-muted flex items-center justify-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-brand-navy" />
-              <span>Loading today's study targets...</span>
+              <span>Loading tasks...</span>
             </div>
           ) : tasks.length === 0 ? (
             <div className="p-6 border-2 border-dashed border-brand-dark/30 bg-brand-paper-tint text-center space-y-2">
@@ -354,85 +303,78 @@ export const StudentDashboardPage: React.FC = () => {
                 <ListTodo className="w-5 h-5 text-brand-dark" />
               </div>
               <h3 className="font-heading font-bold text-sm text-brand-navy">
-                No Tasks Scheduled For Today
+                No Tasks for Today
               </h3>
-              <p className="text-xs text-brand-muted font-sans max-w-md mx-auto leading-relaxed">
-                Your mentor organizes your study targets based on your syllabus and upcoming exam deadlines. Check back soon or message your mentor if you're ready for new work.
+              <p className="text-xs text-brand-muted font-sans max-w-sm mx-auto">
+                You are all caught up! Check back later or reach out to your mentor if you need new study targets.
               </p>
             </div>
           ) : (
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between text-xs font-mono text-brand-muted">
-                <span>
-                  Showing {pendingTasks.length} pending, {completedTasks.length} completed
-                </span>
-                <span className="text-[11px]">Click checkbox to mark complete</span>
-              </div>
-
-              <div className="space-y-2">
-                {tasks.slice(0, 5).map((task) => {
-                  const isDone = task.status === 'completed';
-                  return (
-                    <div
-                      key={task.id}
-                      className={`p-3 border-2 border-brand-dark flex items-start gap-3 transition-colors ${
-                        isDone ? 'bg-brand-paper-tint/60 opacity-75' : 'bg-brand-paper shadow-brutal-xs hover:bg-brand-paper-tint'
+            <div className="space-y-2">
+              {tasks.slice(0, 5).map((task) => {
+                const isDone = task.status === 'completed';
+                return (
+                  <div
+                    key={task.id}
+                    className={`p-3 border-2 border-brand-dark flex items-start gap-3 transition-colors ${
+                      isDone
+                        ? 'bg-brand-paper-tint/60 opacity-75'
+                        : 'bg-brand-paper shadow-brutal-xs hover:bg-brand-paper-tint'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleToggleTaskStatus(task)}
+                      disabled={updatingTaskId === task.id}
+                      className={`mt-0.5 w-5 h-5 border-2 border-brand-dark flex items-center justify-center shrink-0 transition-colors ${
+                        isDone ? 'bg-brand-teal text-white' : 'bg-brand-paper hover:bg-brand-gold-light'
                       }`}
+                      title={isDone ? 'Mark as pending' : 'Mark as completed'}
+                      aria-label={`Toggle task completion for ${task.title}`}
                     >
-                      <button
-                        type="button"
-                        onClick={() => handleToggleTaskStatus(task)}
-                        disabled={updatingTaskId === task.id}
-                        className={`mt-0.5 w-5 h-5 border-2 border-brand-dark flex items-center justify-center shrink-0 transition-colors ${
-                          isDone ? 'bg-brand-teal text-white' : 'bg-brand-paper hover:bg-brand-gold-light'
-                        }`}
-                        title={isDone ? 'Mark as pending' : 'Mark as completed'}
-                        aria-label={`Toggle task completion for ${task.title}`}
-                      >
-                        {isDone ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Circle className="w-3 h-3 text-transparent" />}
-                      </button>
+                      {isDone ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Circle className="w-3 h-3 text-transparent" />}
+                    </button>
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                          <h4 className={`font-heading font-bold text-sm text-brand-navy ${isDone ? 'line-through text-brand-muted' : ''}`}>
-                            {task.title}
-                          </h4>
-                          {task.estimated_minutes && (
-                            <span className="text-[10px] font-mono px-1.5 py-0.2 bg-brand-gold-light border border-brand-dark flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {task.estimated_minutes} min
-                            </span>
-                          )}
-                          {task.attachment_path && (
-                            <span
-                              className="text-[10px] font-mono px-1.5 py-0.2 bg-brand-teal-light border border-brand-dark flex items-center gap-1 text-brand-navy"
-                              title={task.attachment_name || 'Attachment attached'}
-                            >
-                              <Paperclip className="w-3 h-3 text-brand-teal" />
-                              File
-                            </span>
-                          )}
-                          {task.priority === 'high' && (
-                            <Badge variant="danger" size="sm">High Priority</Badge>
-                          )}
-                        </div>
-
-                        {task.description && (
-                          <p className="text-xs text-brand-dark/80 font-sans line-clamp-2">
-                            {task.description}
-                          </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <h4 className={`font-heading font-bold text-sm text-brand-navy ${isDone ? 'line-through text-brand-muted' : ''}`}>
+                          {task.title}
+                        </h4>
+                        {task.estimated_minutes && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 bg-brand-gold-light border border-brand-dark flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {task.estimated_minutes} min
+                          </span>
+                        )}
+                        {task.attachment_path && (
+                          <span
+                            className="text-[10px] font-mono px-1.5 py-0.2 bg-brand-teal-light border border-brand-dark flex items-center gap-1 text-brand-navy"
+                            title={task.attachment_name || 'Attachment attached'}
+                          >
+                            <Paperclip className="w-3 h-3 text-brand-teal" />
+                            File
+                          </span>
+                        )}
+                        {task.priority === 'high' && (
+                          <Badge variant="danger" size="sm">High Priority</Badge>
                         )}
                       </div>
 
-                      {task.subject_name && (
-                        <span className="hidden sm:inline font-mono text-[10px] text-brand-muted border border-brand-dark/20 px-2 py-0.5 shrink-0">
-                          {task.subject_name}
-                        </span>
+                      {task.description && (
+                        <p className="text-xs text-brand-dark/80 font-sans line-clamp-2">
+                          {task.description}
+                        </p>
                       )}
                     </div>
-                  );
-                })}
-              </div>
+
+                    {task.subject_name && (
+                      <span className="hidden sm:inline font-mono text-[10px] text-brand-muted border border-brand-dark/20 px-2 py-0.5 shrink-0">
+                        {task.subject_name}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
 
               {tasks.length > 5 && (
                 <div className="text-center pt-1">
@@ -440,7 +382,7 @@ export const StudentDashboardPage: React.FC = () => {
                     to="/student/tasks"
                     className="font-mono text-xs font-bold text-brand-teal hover:underline inline-flex items-center gap-1"
                   >
-                    <span>View {tasks.length - 5} more tasks in queue</span>
+                    <span>View {tasks.length - 5} more tasks</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
@@ -449,7 +391,7 @@ export const StudentDashboardPage: React.FC = () => {
           )}
         </section>
 
-        {/* 3. FOUR CORE WORKSPACE CARDS (REAL STATUS AT A GLANCE) */}
+        {/* 3. STUDY STATUS (CURRENT REAL-TIME COUNTS) */}
         <section aria-labelledby="workspace-metrics-title" className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 id="workspace-metrics-title" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy flex items-center gap-2">
@@ -460,7 +402,7 @@ export const StudentDashboardPage: React.FC = () => {
               to="/student/progress"
               className="font-mono text-xs font-bold text-brand-navy hover:underline flex items-center gap-1"
             >
-              <span>Full Progress Report</span>
+              <span>Full Progress</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -472,16 +414,16 @@ export const StudentDashboardPage: React.FC = () => {
               className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                  TASKS
+                <span className="font-mono text-xs font-bold text-brand-muted">
+                  Tasks
                 </span>
                 <ListTodo className="w-4 h-4 text-brand-navy" />
               </div>
               <div className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
                 {pendingTasks.length} <span className="text-xs font-mono font-normal text-brand-muted">Pending</span>
               </div>
-              <span className="text-[10px] font-mono text-brand-teal font-bold mt-1">
-                {completedTasks.length} Completed
+              <span className="text-[11px] font-mono text-brand-teal font-bold mt-1">
+                {completedTasks.length} completed
               </span>
             </Link>
 
@@ -491,16 +433,16 @@ export const StudentDashboardPage: React.FC = () => {
               className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                  ASSIGNMENTS
+                <span className="font-mono text-xs font-bold text-brand-muted">
+                  Assignments
                 </span>
                 <FileCheck className="w-4 h-4 text-brand-gold" />
               </div>
               <div className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
                 {pendingAssignments.length} <span className="text-xs font-mono font-normal text-brand-muted">To Submit</span>
               </div>
-              <span className="text-[10px] font-mono text-brand-muted mt-1">
-                {assignments.length - pendingAssignments.length} Submitted
+              <span className="text-[11px] font-mono text-brand-muted mt-1">
+                {assignments.length - pendingAssignments.length} submitted
               </span>
             </Link>
 
@@ -510,16 +452,16 @@ export const StudentDashboardPage: React.FC = () => {
               className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                  DOUBTS
+                <span className="font-mono text-xs font-bold text-brand-muted">
+                  Doubts
                 </span>
                 <HelpCircle className="w-4 h-4 text-brand-teal" />
               </div>
               <div className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
                 {openDoubts.length} <span className="text-xs font-mono font-normal text-brand-muted">Open</span>
               </div>
-              <span className="text-[10px] font-mono text-brand-teal font-bold mt-1">
-                {doubts.filter((d) => d.status === 'answered' || d.status === 'resolved').length} Answered
+              <span className="text-[11px] font-mono text-brand-teal font-bold mt-1">
+                {doubts.filter((d) => d.status === 'answered' || d.status === 'resolved').length} answered
               </span>
             </Link>
 
@@ -529,193 +471,31 @@ export const StudentDashboardPage: React.FC = () => {
               className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                  EVALUATION
+                <span className="font-mono text-xs font-bold text-brand-muted">
+                  Evaluations
                 </span>
                 <Award className="w-4 h-4 text-brand-navy" />
               </div>
               <div className="font-heading font-extrabold text-sm sm:text-base text-brand-navy truncate">
                 {upcomingEval ? 'Scheduled' : 'None Scheduled'}
               </div>
-              <span className="text-[10px] font-mono text-brand-muted mt-1">
-                {evaluations.filter((e) => e.status === 'completed').length} Completed Reviews
+              <span className="text-[11px] font-mono text-brand-muted mt-1">
+                {evaluations.filter((e) => e.status === 'completed').length} completed
               </span>
             </Link>
           </div>
         </section>
 
-        {/* 4. PRIMARY MODULES QUICK HUB */}
-        <section aria-labelledby="modules-hub-title" className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 id="modules-hub-title" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy flex items-center gap-2">
-              <Compass className="w-4 h-4 text-brand-navy" />
-              Study Modules
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {/* Study Plans */}
-            <Link
-              to="/student/plans"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
-                    ROADMAPS
-                  </span>
-                  <Compass className="w-4 h-4 text-brand-dark group-hover:text-brand-teal" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-teal">
-                  Study Plans
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Weekly chapter roadmaps and milestone goals organized by your mentor.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-teal">
-                <span>View Plans ({plans.length})</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-
-            {/* Assignments */}
-            <Link
-              to="/student/assignments"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-gold">
-                    PRACTICE
-                  </span>
-                  <FileCheck className="w-4 h-4 text-brand-dark group-hover:text-brand-gold" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-gold">
-                  Assignments
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Practice problem sets and homework to submit for mentor review and feedback.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-gold">
-                <span>Open Assignments ({assignments.length})</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-
-            {/* Doubts */}
-            <Link
-              to="/student/doubts"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
-                    HELP
-                  </span>
-                  <HelpCircle className="w-4 h-4 text-brand-dark group-hover:text-brand-teal" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-teal">
-                  Doubts
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Stuck on a problem or formula? Ask your mentor directly and get clear answers.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-teal">
-                <span>Ask a Doubt</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-
-            {/* Resources */}
-            <Link
-              to="/student/resources"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-navy">
-                    LIBRARY
-                  </span>
-                  <BookMarked className="w-4 h-4 text-brand-dark group-hover:text-brand-navy" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-navy">
-                  Study Resources
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Curated formula sheets, lecture notes, and textbook problems shared by your mentor.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy">
-                <span>Open Resources</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-
-            {/* Announcements */}
-            <Link
-              to="/student/announcements"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-gold">
-                    NOTICES
-                  </span>
-                  <Megaphone className="w-4 h-4 text-brand-dark group-hover:text-brand-gold" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-gold">
-                  Announcements
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Schedule updates, exam guidance, and directives from your mentor.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-gold">
-                <span>View Notices</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-
-            {/* Subjects */}
-            <Link
-              to="/student/subjects"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
-                    COURSES
-                  </span>
-                  <BookOpen className="w-4 h-4 text-brand-dark group-hover:text-brand-teal" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-teal">
-                  Subjects
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Your university courses and syllabus outlines organized for your study plan.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-teal">
-                <span>View Subjects</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-          </div>
-        </section>
-
-        {/* 5. EMAIL CONNECTION (OPTIONAL BACKUP) */}
+        {/* 4. EMAIL CONNECTION (OPTIONAL BACKUP) */}
         {!profile?.linked_email && (
           <section className="p-4 border-2 border-brand-dark bg-brand-gold-light shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-0.5">
               <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-brand-navy">
                 <Mail className="w-4 h-4 text-brand-navy shrink-0" />
-                <span>LINK YOUR PERSONAL EMAIL</span>
+                <span>Link Personal Email</span>
               </div>
               <p className="text-xs text-brand-dark/85 font-sans">
-                Link your personal email address for self-service password recovery and Google sign-in.
+                Link your personal email address for password recovery and Google sign-in.
               </p>
               {linkMsg && (
                 <p className="text-[11px] font-sans font-bold text-emerald-800 pt-0.5">{linkMsg}</p>
