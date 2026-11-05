@@ -26,6 +26,7 @@ import {
   BookMarked,
   Compass,
   AlertCircle,
+  Clock,
   AlertTriangle,
   ClipboardList,
   Filter,
@@ -187,6 +188,13 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
           icon: CheckCircle2,
           badgeVariant: 'gold' as BadgeVariant,
           actionText: 'View Feedback',
+        };
+      case 'assignment_deadline_reminder':
+        return {
+          label: 'Deadline Reminder',
+          icon: Clock,
+          badgeVariant: 'danger' as BadgeVariant,
+          actionText: 'View Assignment',
         };
       case 'assignment_created':
       case 'assignment_updated':

@@ -812,6 +812,7 @@ export type Assignment = {
   due_date?: string | null;
   total_points?: number | null;
   status: AssignmentStatus;
+  published_at?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -829,6 +830,7 @@ export type AssignmentInsert = {
   due_date?: string | null;
   total_points?: number | null;
   status?: AssignmentStatus;
+  published_at?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -846,9 +848,30 @@ export type AssignmentUpdate = {
   due_date?: string | null;
   total_points?: number | null;
   status?: AssignmentStatus;
+  published_at?: string | null;
   created_at?: string;
   updated_at?: string;
 };
+
+export type AssignmentReminderDelivery = {
+  id: string;
+  assignment_id: string;
+  student_id: string;
+  due_date: string;
+  scheduled_reminder_at: string;
+  sent_at: string;
+};
+
+export type AssignmentReminderDeliveryInsert = {
+  id?: string;
+  assignment_id: string;
+  student_id: string;
+  due_date: string;
+  scheduled_reminder_at: string;
+  sent_at?: string;
+};
+
+export type AssignmentReminderDeliveryUpdate = Partial<AssignmentReminderDeliveryInsert>;
 
 export type Submission = {
   id: string;
@@ -1213,6 +1236,7 @@ export type NotificationType =
   | 'task_updated'
   | 'assignment_created'
   | 'assignment_updated'
+  | 'assignment_deadline_reminder'
   | 'resource_published'
   | 'evaluation_published'
   | 'submission_reviewed'
@@ -1438,6 +1462,27 @@ export type Database = {
             columns: ['plan_id'];
             isOneToOne: false;
             referencedRelation: 'study_plans';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      assignment_reminder_deliveries: {
+        Row: AssignmentReminderDelivery;
+        Insert: AssignmentReminderDeliveryInsert;
+        Update: AssignmentReminderDeliveryUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'assignment_reminder_deliveries_assignment_id_fkey';
+            columns: ['assignment_id'];
+            isOneToOne: true;
+            referencedRelation: 'assignments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'assignment_reminder_deliveries_student_id_fkey';
+            columns: ['student_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
             referencedColumns: ['id'];
           }
         ];
@@ -1904,6 +1949,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      process_assignment_deadline_reminders: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       is_authorized_mentor_for_student: {
         Args: {
           p_mentor_id?: string;

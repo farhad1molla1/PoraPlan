@@ -26,6 +26,7 @@ import {
   BookMarked,
   Compass,
   AlertCircle,
+  Clock,
   Filter,
   RefreshCw,
 } from 'lucide-react';
@@ -184,6 +185,13 @@ export const StudentNotificationsPage: React.FC = () => {
           icon: ListTodo,
           badgeVariant: 'teal' as const,
           actionText: 'View Task',
+        };
+      case 'assignment_deadline_reminder':
+        return {
+          label: 'Deadline Reminder',
+          icon: Clock,
+          badgeVariant: 'danger' as const,
+          actionText: 'View Assignment',
         };
       case 'assignment_created':
       case 'assignment_updated':

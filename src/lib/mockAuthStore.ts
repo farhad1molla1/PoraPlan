@@ -13,6 +13,7 @@ import type {
   TaskStatus,
   Assignment,
   AssignmentStatus,
+  AssignmentReminderDelivery,
   Submission,
   SubmissionType,
   SubmissionStatus,
@@ -1436,6 +1437,7 @@ export const mockAssignments: Assignment[] = [
     due_date: '2026-10-28',
     total_points: 100,
     status: 'published',
+    published_at: new Date('2026-10-04T12:00:00Z').toISOString(),
     created_at: new Date('2026-10-04T12:00:00Z').toISOString(),
     updated_at: new Date('2026-10-04T12:00:00Z').toISOString(),
   },
@@ -1452,6 +1454,7 @@ export const mockAssignments: Assignment[] = [
     due_date: '2026-10-31',
     total_points: 50,
     status: 'published',
+    published_at: new Date('2026-10-04T12:00:00Z').toISOString(),
     created_at: new Date('2026-10-05T09:00:00Z').toISOString(),
     updated_at: new Date('2026-10-05T09:00:00Z').toISOString(),
   },
@@ -1561,7 +1564,7 @@ export function createMockAssignment(params: {
     }
   }
 
-  const assignmentId = `mock-assign-${Date.now()}`;
+  const assignmentId = `mock-assign-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   const now = new Date().toISOString();
 
   const newAssignment: Assignment = {
@@ -1577,6 +1580,7 @@ export function createMockAssignment(params: {
     due_date: params.dueDate || null,
     total_points: params.totalPoints !== undefined ? params.totalPoints : 100,
     status: params.status || 'published',
+    published_at: (params.status || 'published') === 'published' ? now : null,
     created_at: now,
     updated_at: now,
   };
@@ -1684,6 +1688,9 @@ export function updateMockAssignment(
 
   const now = new Date().toISOString();
   current.updated_at = now;
+  if (isPublishingDraft && !current.published_at) {
+    current.published_at = now;
+  }
   mockAssignments[index] = { ...current };
 
   // Dispatch notifications
@@ -1715,6 +1722,157 @@ export function updateMockAssignment(
   }
 
   return { assignment: { ...current }, error: null };
+}
+
+export const mockAssignmentReminderDeliveries: AssignmentReminderDelivery[] = [];
+
+export function getMockAssignmentReminderDeliveries(): AssignmentReminderDelivery[] {
+  return [...mockAssignmentReminderDeliveries];
+}
+
+export function resetMockAssignmentReminderDeliveries(): void {
+  mockAssignmentReminderDeliveries.length = 0;
+}
+
+/**
+ * Interprets a calendar date string (YYYY-MM-DD) as 11:59 PM Bangladesh Standard Time (Asia/Dhaka, UTC+6).
+ * 23:59:00 in UTC+6 is 17:59:00 UTC on the same calendar date.
+ */
+export function parseDhakaDeadline(dueDate: string): Date {
+  const cleanDate = dueDate.includes('T') ? dueDate.split('T')[0] : dueDate.trim();
+  return new Date(`${cleanDate}T23:59:00+06:00`);
+}
+
+/**
+ * Calculates deadline_at, reminder_at, and eligibility timing for an assignment.
+ */
+export function calculateReminderSchedule(publishedAt: string | Date, dueDate: string): {
+  deadlineAt: Date;
+  reminderAt: Date;
+  durationMs: number;
+  isEligibleTiming: boolean;
+  reason?: string;
+} {
+  const deadlineAt = parseDhakaDeadline(dueDate);
+  const pubDate = typeof publishedAt === 'string' ? new Date(publishedAt) : publishedAt;
+  const durationMs = deadlineAt.getTime() - pubDate.getTime();
+
+  if (durationMs <= 0) {
+    return {
+      deadlineAt,
+      reminderAt: deadlineAt,
+      durationMs,
+      isEligibleTiming: false,
+      reason: 'Deadline is at or before publication time',
+    };
+  }
+
+  const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+  const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+
+  let reminderAt: Date;
+  if (durationMs <= TWENTY_FOUR_HOURS_MS) {
+    reminderAt = new Date(pubDate.getTime() + SIX_HOURS_MS);
+  } else {
+    reminderAt = new Date(deadlineAt.getTime() - SIX_HOURS_MS);
+  }
+
+  if (reminderAt.getTime() >= deadlineAt.getTime()) {
+    return {
+      deadlineAt,
+      reminderAt,
+      durationMs,
+      isEligibleTiming: false,
+      reason: 'Reminder time is at or after deadline',
+    };
+  }
+
+  return {
+    deadlineAt,
+    reminderAt,
+    durationMs,
+    isEligibleTiming: true,
+  };
+}
+
+/**
+ * Deterministic mock deadline reminder processor for testing and simulation.
+ */
+export function processMockAssignmentDeadlineReminders(simulatedTime?: Date | string): {
+  processedCount: number;
+  deliveredAssignmentIds: string[];
+} {
+  const now = simulatedTime
+    ? typeof simulatedTime === 'string'
+      ? new Date(simulatedTime)
+      : simulatedTime
+    : new Date();
+  const deliveredAssignmentIds: string[] = [];
+
+  for (const a of mockAssignments) {
+    // 1. Must be published with valid due_date and published_at
+    if (a.status !== 'published' || !a.due_date || !a.published_at) {
+      continue;
+    }
+
+    // 2. Student account must exist and not be suspended
+    const student = getMockProfile(a.student_id);
+    if (!student || student.status === 'suspended') {
+      continue;
+    }
+
+    // 3. Must not have been delivered already during assignment lifetime
+    if (mockAssignmentReminderDeliveries.some((d) => d.assignment_id === a.id)) {
+      continue;
+    }
+
+    // 4. Must not have completed/submitted assignment (submitted, under_review, reviewed)
+    // Submissions with needs_revision remain eligible
+    const hasActiveSubmission = mockSubmissions.some(
+      (s) =>
+        s.assignment_id === a.id &&
+        s.student_id === a.student_id &&
+        ['submitted', 'under_review', 'reviewed'].includes(s.status)
+    );
+    if (hasActiveSubmission) {
+      continue;
+    }
+
+    // 5. Evaluate timing
+    const schedule = calculateReminderSchedule(a.published_at, a.due_date);
+    if (!schedule.isEligibleTiming) {
+      continue;
+    }
+
+    // Must be at or past reminder_at, and strictly before deadline_at
+    if (now.getTime() >= schedule.reminderAt.getTime() && now.getTime() < schedule.deadlineAt.getTime()) {
+      mockAssignmentReminderDeliveries.push({
+        id: `rem-del-${Date.now()}-${a.id}`,
+        assignment_id: a.id,
+        student_id: a.student_id,
+        due_date: a.due_date,
+        scheduled_reminder_at: schedule.reminderAt.toISOString(),
+        sent_at: now.toISOString(),
+      });
+
+      createMockNotification({
+        recipientId: a.student_id,
+        actorId: null,
+        type: 'assignment_deadline_reminder',
+        title: 'Assignment Deadline Reminder',
+        message: `Your assignment "${a.title}" is approaching its deadline. Please complete and submit it on time.`,
+        link: '/student/assignments',
+        idempotencyKey: `assignment_reminder:${a.id}`,
+      });
+
+      deliveredAssignmentIds.push(a.id);
+    }
+  }
+
+  return {
+    processedCount: deliveredAssignmentIds.length,
+    deliveredAssignmentIds,
+  };
 }
 
 export function deleteMockAssignment(assignmentId: string): { success: boolean; error: Error | null } {

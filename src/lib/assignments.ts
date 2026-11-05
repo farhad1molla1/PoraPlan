@@ -20,6 +20,9 @@ import {
   updateMockSubmissionStatus,
   reviewMockSubmission,
   getMockMentorSubmissions,
+  processMockAssignmentDeadlineReminders,
+  parseDhakaDeadline,
+  calculateReminderSchedule,
 } from './mockAuthStore';
 import { createNotification } from './notifications';
 
@@ -255,6 +258,7 @@ export async function createAssignment(params: {
       due_date: params.dueDate || null,
       total_points: params.totalPoints !== undefined ? params.totalPoints : 100,
       status: params.status || 'published',
+      published_at: (params.status || 'published') === 'published' ? new Date().toISOString() : null,
     };
 
     const { data, error } = await supabase
@@ -353,6 +357,7 @@ export async function updateAssignment(
       title: updates.title !== undefined ? updates.title.trim() : undefined,
       instructions: updates.instructions !== undefined ? (updates.instructions ? updates.instructions.trim() : null) : undefined,
       updated_at: new Date().toISOString(),
+      published_at: isPublishingDraft && !currentAssignment.published_at ? new Date().toISOString() : undefined,
     };
 
     const { data: updatedAssignment, error: updateError } = await supabase
@@ -675,5 +680,34 @@ export async function getMentorReviewQueue(mentorId: string): Promise<{
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { submissions: [], error };
+  }
+}
+
+
+export { parseDhakaDeadline, calculateReminderSchedule };
+
+/**
+ * Server-side / Mock dispatcher for assignment deadline reminders.
+ * When Supabase is configured, invokes the secure database function `process_assignment_deadline_reminders`.
+ * In mock / demo mode, delegates to deterministic mock simulation.
+ */
+export async function processAssignmentDeadlineReminders(currentTime?: Date | string): Promise<{
+  processedCount: number;
+  error: Error | null;
+}> {
+  if (!isSupabaseConfigured()) {
+    const result = processMockAssignmentDeadlineReminders(currentTime);
+    return { processedCount: result.processedCount, error: null };
+  }
+
+  try {
+    const { data, error } = await supabase.rpc('process_assignment_deadline_reminders');
+    if (error) {
+      return { processedCount: 0, error };
+    }
+    return { processedCount: typeof data === 'number' ? data : 0, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { processedCount: 0, error };
   }
 }
