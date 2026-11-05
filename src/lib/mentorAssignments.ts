@@ -550,6 +550,7 @@ export async function assignCohortMentor(input: {
   if (!isSupabaseConfigured()) {
     const res = adminAssignMockCohortMentor(input.cohortId, input.mentorId, input.notes);
     if (res.success) {
+      const assignmentKey = res.assignmentId || `${input.cohortId}:${input.mentorId}`;
       // In-app notifications
       await createNotification({
         recipientId: input.mentorId,
@@ -557,6 +558,7 @@ export async function assignCohortMentor(input: {
         title: 'New Cohort Mentorship Allocation',
         message: `You have been allocated as lead mentor for ${input.cohortName || 'Cohort'} (${input.programName || 'Academic Program'}).`,
         link: '/mentor/dashboard',
+        idempotencyKey: `cohort_mentor_alloc:${assignmentKey}`,
       });
     }
     return { ...res, error: null };
@@ -573,6 +575,7 @@ export async function assignCohortMentor(input: {
       return { success: false, message: error.message, error };
     }
 
+    const assignmentKey = data?.assignment_id || `${input.cohortId}:${input.mentorId}`;
     // Trigger in-app notification
     await createNotification({
       recipientId: input.mentorId,
@@ -580,6 +583,7 @@ export async function assignCohortMentor(input: {
       title: 'New Cohort Mentorship Allocation',
       message: `You have been allocated as lead mentor for ${input.cohortName || 'Cohort'} (${input.programName || 'Academic Program'}).`,
       link: '/mentor/dashboard',
+      idempotencyKey: `cohort_mentor_alloc:${assignmentKey}`,
     });
 
     return {
@@ -609,6 +613,7 @@ export async function endCohortMentor(input: {
         title: 'Cohort Mentorship Concluded',
         message: `Your cohort mentor assignment for ${input.cohortName || 'Cohort'} has concluded.`,
         link: '/mentor/dashboard',
+        idempotencyKey: `cohort_mentor_ended:${input.cohortId}:${input.mentorId}`,
       });
     }
     return { ...res, error: null };
@@ -631,6 +636,7 @@ export async function endCohortMentor(input: {
         title: 'Cohort Mentorship Concluded',
         message: `Your cohort mentor assignment for ${input.cohortName || 'Cohort'} has concluded.`,
         link: '/mentor/dashboard',
+        idempotencyKey: `cohort_mentor_ended:${input.cohortId}:${input.mentorId}`,
       });
     }
 
@@ -665,6 +671,7 @@ export async function assignIndividualMentor(input: {
     );
 
     if (res.success) {
+      const assignmentKey = res.assignmentId || `${input.studentId}:${input.mentorId}:${input.programId}`;
       // Notify student
       await createNotification({
         recipientId: input.studentId,
@@ -672,6 +679,7 @@ export async function assignIndividualMentor(input: {
         title: 'Personal Academic Mentor Assigned',
         message: `${input.mentorName || 'A mentor'} has been specifically assigned as your dedicated mentor in ${input.programName || 'your program'}.`,
         link: '/student/dashboard',
+        idempotencyKey: `ind_mentor_student:${assignmentKey}`,
       });
 
       // Notify mentor
@@ -681,6 +689,7 @@ export async function assignIndividualMentor(input: {
         title: 'New Individual Mentee Assignment',
         message: `You have been individually assigned to mentor ${input.studentName || 'Student'} in ${input.programName || 'Program'}.`,
         link: '/mentor/dashboard',
+        idempotencyKey: `ind_mentor_assigned:${assignmentKey}`,
       });
     }
 
@@ -700,6 +709,7 @@ export async function assignIndividualMentor(input: {
       return { success: false, message: error.message, error };
     }
 
+    const assignmentKey = data?.assignment_id || `${input.studentId}:${input.mentorId}:${input.programId}`;
     // In-app notifications
     await Promise.all([
       createNotification({
@@ -708,6 +718,7 @@ export async function assignIndividualMentor(input: {
         title: 'Personal Academic Mentor Assigned',
         message: `${input.mentorName || 'A mentor'} has been specifically assigned as your dedicated mentor in ${input.programName || 'your program'}.`,
         link: '/student/dashboard',
+        idempotencyKey: `ind_mentor_student:${assignmentKey}`,
       }),
       createNotification({
         recipientId: input.mentorId,
@@ -715,6 +726,7 @@ export async function assignIndividualMentor(input: {
         title: 'New Individual Mentee Assignment',
         message: `You have been individually assigned to mentor ${input.studentName || 'Student'} in ${input.programName || 'Program'}.`,
         link: '/mentor/dashboard',
+        idempotencyKey: `ind_mentor_assigned:${assignmentKey}`,
       }),
     ]);
 
@@ -748,6 +760,7 @@ export async function endIndividualMentor(input: {
           message:
             'Your individual mentorship override has concluded. You have reverted to your cohort default mentor.',
           link: '/student/dashboard',
+          idempotencyKey: `ind_mentor_ended_student:${input.assignmentId}`,
         });
       }
       if (input.mentorId) {
@@ -757,6 +770,7 @@ export async function endIndividualMentor(input: {
           title: 'Individual Mentorship Concluded',
           message: `Your individual mentorship assignment with ${input.studentName || 'Student'} has concluded.`,
           link: '/mentor/dashboard',
+          idempotencyKey: `ind_mentor_ended_mentor:${input.assignmentId}`,
         });
       }
     }
@@ -781,6 +795,7 @@ export async function endIndividualMentor(input: {
         message:
           'Your individual mentorship override has concluded. You have reverted to your cohort default mentor.',
         link: '/student/dashboard',
+        idempotencyKey: `ind_mentor_ended_student:${input.assignmentId}`,
       });
     }
 
@@ -791,6 +806,7 @@ export async function endIndividualMentor(input: {
         title: 'Individual Mentorship Concluded',
         message: `Your individual mentorship assignment with ${input.studentName || 'Student'} has concluded.`,
         link: '/mentor/dashboard',
+        idempotencyKey: `ind_mentor_ended_mentor:${input.assignmentId}`,
       });
     }
 

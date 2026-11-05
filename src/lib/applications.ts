@@ -279,6 +279,7 @@ export async function submitApplication(
       title: 'Application Received',
       message: 'Your program application has been submitted and is pending administrative review.',
       link: params.application_type === 'student' ? '/student/applications' : '/mentor/applications',
+      idempotencyKey: `app_receipt:${createdApp.id}`,
     });
 
     // Notify administrators of incoming application
@@ -355,6 +356,7 @@ export async function adminReviewApplication(params: {
             ? 'Your application has been approved by the administration and your active enrollment has been created.'
             : 'Your mentor application has been approved! You are eligible to mentor in this program. Cohort assignment will follow.',
           link: appRow.application_type === 'student' ? '/student/applications' : '/mentor/applications',
+          idempotencyKey: `app_decision:${params.applicationId}:approved`,
         });
       } else if (params.decision === 'rejected') {
         await createNotification({
@@ -364,6 +366,7 @@ export async function adminReviewApplication(params: {
           title: 'Application Update',
           message: 'Your program application has been reviewed and was not accepted for this intake.',
           link: appRow.application_type === 'student' ? '/student/applications' : '/mentor/applications',
+          idempotencyKey: `app_decision:${params.applicationId}:rejected`,
         });
       }
     }
@@ -518,6 +521,7 @@ export async function adminManualEnrollStudent(input: {
     );
 
     if (res.success) {
+      const enrollmentKey = res.enrollmentId || `${input.studentId}:${input.cohortId}`;
       // 1. Notify Student
       await createNotification({
         recipientId: input.studentId,
@@ -526,6 +530,7 @@ export async function adminManualEnrollStudent(input: {
         title: 'Direct Program Admission',
         message: `You have been directly enrolled in ${input.programName || 'a program'}${input.cohortName ? ` (${input.cohortName})` : ''}. Welcome to your academic journey!`,
         link: '/student/dashboard',
+        idempotencyKey: `direct_admission:${enrollmentKey}`,
       });
 
       // 2. Notify Mentor if assigned
@@ -537,6 +542,7 @@ export async function adminManualEnrollStudent(input: {
           title: 'New Student Assignment',
           message: `Scholar ${input.studentName || 'Student'} has been assigned to your mentorship in ${input.programName || 'the program'}.`,
           link: '/mentor/dashboard',
+          idempotencyKey: `direct_admission_mentor:${enrollmentKey}:${input.mentorId}`,
         });
       }
     }
@@ -565,6 +571,7 @@ export async function adminManualEnrollStudent(input: {
     };
 
     if (res?.success) {
+      const enrollmentKey = res.enrollment_id || `${input.studentId}:${input.cohortId}`;
       // 1. Notify Student
       await createNotification({
         recipientId: input.studentId,
@@ -573,6 +580,7 @@ export async function adminManualEnrollStudent(input: {
         title: 'Direct Program Admission',
         message: `You have been directly enrolled in ${input.programName || 'a program'}${input.cohortName ? ` (${input.cohortName})` : ''}. Welcome to your academic journey!`,
         link: '/student/dashboard',
+        idempotencyKey: `direct_admission:${enrollmentKey}`,
       });
 
       // 2. Notify Mentor if assigned
@@ -584,6 +592,7 @@ export async function adminManualEnrollStudent(input: {
           title: 'New Student Assignment',
           message: `Scholar ${input.studentName || 'Student'} has been assigned to your mentorship in ${input.programName || 'the program'}.`,
           link: '/mentor/dashboard',
+          idempotencyKey: `direct_admission_mentor:${enrollmentKey}:${input.mentorId}`,
         });
       }
 

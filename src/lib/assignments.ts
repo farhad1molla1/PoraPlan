@@ -517,7 +517,7 @@ export async function submitAssignment(params: {
           title: 'New Student Submission',
           message: `Work submitted for "${asg.title}"`,
           link: '/mentor/reviews',
-          idempotencyKey: `submission:${data.id}`,
+          idempotencyKey: `submission:${data.id}:${data.submitted_at || now}`,
         }).catch(() => {});
       }
     } catch {}
@@ -615,7 +615,7 @@ export async function reviewSubmission(params: {
         title: 'Submission Reviewed',
         message: `Mentor reviewed your assignment submission${params.score !== undefined && params.score !== null ? ` — Score: ${params.score}` : ''}`,
         link: '/student/assignments',
-        idempotencyKey: `submission_review:${params.submissionId}`,
+        idempotencyKey: `submission_review:${data.id}:${data.submitted_at || params.submissionId}`,
       }).catch(() => {});
     }
 

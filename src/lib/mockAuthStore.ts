@@ -2091,7 +2091,7 @@ export function reviewMockSubmission(params: {
     title: 'Submission Reviewed',
     message: `Mentor reviewed your submission for "${assignmentTitle}"${params.score !== undefined && params.score !== null ? ` — Score: ${params.score}` : ''}`,
     link: '/student/assignments',
-    idempotencyKey: `submission_review:${params.submissionId}`,
+    idempotencyKey: `submission_review:${current.id}:${current.submitted_at || params.submissionId}`,
   });
 
   return { submission: { ...current }, error: null };
@@ -5192,6 +5192,7 @@ export function createMockApplication(
     title: 'Application Received',
     message: `Your application to participate in the program has been submitted and is pending administrative review.`,
     link: app.application_type === 'student' ? '/student/applications' : '/mentor/applications',
+    idempotencyKey: `app_receipt:${newApp.id}`,
   });
 
   // Notify administrators of incoming application
@@ -5297,6 +5298,7 @@ export function adminReviewMockApplication(
         title: 'Application Approved — You Are Enrolled!',
         message: 'Congratulations! Your program application has been approved by the administration and your active enrollment has been created.',
         link: '/student/applications',
+        idempotencyKey: `app_decision:${applicationId}:approved`,
       });
     } else {
       // Mentor approval notification
@@ -5307,6 +5309,7 @@ export function adminReviewMockApplication(
         title: 'Mentor Application Approved',
         message: 'Your mentor application has been approved! You are now eligible to mentor in this program. Cohort assignment will be coordinated by administration.',
         link: '/mentor/applications',
+        idempotencyKey: `app_decision:${applicationId}:approved`,
       });
     }
 
@@ -5346,6 +5349,7 @@ export function adminReviewMockApplication(
       title: 'Application Update',
       message: 'Your program application has been reviewed and was not accepted for this intake. Check back for upcoming cohorts.',
       link: app.application_type === 'student' ? '/student/applications' : '/mentor/applications',
+      idempotencyKey: `app_decision:${applicationId}:rejected`,
     });
 
     return { success: true, message: 'Application declined.', error: null };
