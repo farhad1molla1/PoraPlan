@@ -6,12 +6,12 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
-  type NotificationWithActor,
 } from '../../lib/notifications';
+import type { NotificationWithActor } from '../../lib/notifications';
 import {
   getNotificationTypeMeta,
-  type NotificationTypeMeta,
 } from '../../lib/notificationMeta';
+import type { NotificationTypeMeta } from '../../lib/notificationMeta';
 import { Badge } from '../common/Badge';
 import { Button } from '../common/Button';
 import {
@@ -60,11 +60,20 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
 
   const isMountedRef = useRef(true);
   const inFlightRef = useRef(false);
+  const pendingRefreshRef = useRef(false);
+  const pendingManualRefreshRef = useRef(false);
 
   const fetchNotifications = useCallback(
     async (isManualRefresh = false) => {
       if (!userId || !isMountedRef.current) return;
-      if (inFlightRef.current) return;
+      if (inFlightRef.current) {
+        pendingRefreshRef.current = true;
+        if (isManualRefresh) {
+          pendingManualRefreshRef.current = true;
+          setLoading(true);
+        }
+        if (inFlightRef.current) return;
+      }
 
       inFlightRef.current = true;
       if (isManualRefresh) {
@@ -87,7 +96,14 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
       } finally {
         inFlightRef.current = false;
         if (isMountedRef.current) {
-          setLoading(false);
+          if (pendingRefreshRef.current) {
+            pendingRefreshRef.current = false;
+            const nextIsManual = pendingManualRefreshRef.current;
+            pendingManualRefreshRef.current = false;
+            fetchNotifications(nextIsManual);
+          } else {
+            setLoading(false);
+          }
         }
       }
     },
@@ -113,6 +129,8 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
 
     return () => {
       isMountedRef.current = false;
+      pendingRefreshRef.current = false;
+      pendingManualRefreshRef.current = false;
       clearInterval(intervalId);
       if (typeof window !== 'undefined') {
         window.removeEventListener('notifications-updated', handleUpdate);
