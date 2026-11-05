@@ -581,8 +581,30 @@ async function runSuite() {
     'Dedicated idempotent register_assignment_deadline_reminder_cron procedure exists'
   );
   assert(
+    !migrationSql.includes('CREATE EXTENSION IF NOT EXISTS pg_cron;'),
+    'Registration function removes extension installation and does not attempt CREATE EXTENSION'
+  );
+  assert(
+    migrationSql.includes("RAISE EXCEPTION 'pg_cron extension is not active"),
+    'Registration function raises an actionable exception when pg_cron extension is missing'
+  );
+  assert(
+    migrationSql.includes("pg_advisory_xact_lock(hashtext('process-assignment-deadline-reminders')::bigint);"),
+    'Registration function acquires transaction-level advisory lock before job inspection or unscheduling'
+  );
+  assert(
     migrationSql.includes('FOR v_job_id IN (') && migrationSql.includes('PERFORM cron.unschedule(v_job_id);'),
     'Registration procedure unschedules existing jobs by jobid to guarantee zero duplicates'
+  );
+  assert(
+    migrationSql.includes("PERFORM cron.schedule(\n    'process-assignment-deadline-reminders',\n    '* * * * *',\n    'SELECT public.process_assignment_deadline_reminders()'\n  );"),
+    'Registration registers exactly one job with 1-minute ticker schedule and canonical command'
+  );
+  assert(
+    migrationSql.includes('REVOKE ALL ON FUNCTION public.register_assignment_deadline_reminder_cron() FROM PUBLIC;') &&
+      migrationSql.includes('GRANT EXECUTE ON FUNCTION public.register_assignment_deadline_reminder_cron() TO postgres;') &&
+      migrationSql.includes('GRANT EXECUTE ON FUNCTION public.register_assignment_deadline_reminder_cron() TO service_role;'),
+    'Registration procedure restricts execution to postgres/service_role and revokes from PUBLIC/authenticated/anon'
   );
 
   const snippetPath = resolve(__dirname, '../supabase/snippets/register_deadline_reminders_cron.sql');
@@ -590,6 +612,13 @@ async function runSuite() {
   assert(
     snippetSql.includes('SELECT public.register_assignment_deadline_reminder_cron();'),
     'Standalone snippet invokes register_assignment_deadline_reminder_cron cleanly'
+  );
+  assert(
+    snippetSql.includes('1. Apply the migration') &&
+      snippetSql.includes('2. Enable pg_cron from Supabase Dashboard') &&
+      snippetSql.includes('3. Execute this registration SQL snippet') &&
+      snippetSql.includes('4. Verify exactly one matching job exists in cron.job'),
+    'Standalone snippet documents the complete 4-step deployment and verification lifecycle'
   );
 
   // ---------------------------------------------------------------------------

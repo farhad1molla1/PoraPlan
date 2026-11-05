@@ -2,6 +2,7 @@
 -- PoraPlan Milestone: Assignment Deadline Reminders Schema & Scheduling
 -- Phase 3.4: Server-Side Assignment Deadline Reminders
 -- Phase 3.4.1: Production-Safety Hardening (Timezone-safe & Idempotent pg_cron)
+-- Phase 3.4.2: pg_cron Registration Concurrency & Lifecycle Fix (Advisory Lock & Strict Extension Check)
 --
 -- 1. Add published_at column to public.assignments
 -- 2. Automatic trigger ensuring set-once semantics for published_at (now() invariant)
@@ -211,7 +212,7 @@ REVOKE ALL ON FUNCTION public.process_assignment_deadline_reminders() FROM anon;
 GRANT EXECUTE ON FUNCTION public.process_assignment_deadline_reminders() TO postgres;
 GRANT EXECUTE ON FUNCTION public.process_assignment_deadline_reminders() TO service_role;
 
--- 6. PG_CRON SCHEDULER REGISTRATION PROCEDURE (Idempotent job registration)
+-- 6. PG_CRON SCHEDULER REGISTRATION PROCEDURE (Idempotent & serialized job registration)
 CREATE OR REPLACE FUNCTION public.register_assignment_deadline_reminder_cron()
 RETURNS boolean
 LANGUAGE plpgsql
@@ -221,19 +222,22 @@ AS $$
 DECLARE
   v_job_id BIGINT;
 BEGIN
-  -- 1. Ensure pg_cron extension is present
+  -- 1. Verify pg_cron extension is installed and active
   IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
-    CREATE EXTENSION IF NOT EXISTS pg_cron;
+    RAISE EXCEPTION 'pg_cron extension is not active. Please enable pg_cron in the Supabase Dashboard under Database -> Extensions before registering the deadline reminder cron job.';
   END IF;
 
-  -- 2. Idempotent unschedule: remove any existing jobs with this name by jobid
+  -- 2. Acquire transaction-level advisory lock to serialize concurrent registrations
+  PERFORM pg_advisory_xact_lock(hashtext('process-assignment-deadline-reminders')::bigint);
+
+  -- 3. Idempotent unschedule: remove any existing jobs with this exact name by jobid
   FOR v_job_id IN (
     SELECT jobid FROM cron.job WHERE jobname = 'process-assignment-deadline-reminders'
   ) LOOP
     PERFORM cron.unschedule(v_job_id);
   END LOOP;
 
-  -- 3. Register exactly one job scheduled once per minute
+  -- 4. Register exactly one job scheduled once per minute
   PERFORM cron.schedule(
     'process-assignment-deadline-reminders',
     '* * * * *',
