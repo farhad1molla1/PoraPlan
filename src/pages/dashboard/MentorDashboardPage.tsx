@@ -15,13 +15,9 @@ import {
   FileCheck,
   Award,
   Sparkles,
-  ShieldCheck,
   Clock,
   ArrowRight,
-  ListTodo,
-  FileText,
   HelpCircle,
-  Megaphone,
   X,
   ChevronRight,
   AlertCircle,
@@ -29,14 +25,12 @@ import {
   Mail,
   CheckCircle2,
   Compass,
-  TrendingUp,
-  FolderKanban,
   Loader2,
   Phone,
 } from 'lucide-react';
 
 export const MentorDashboardPage: React.FC = () => {
-  const { user, profile, role, poraplanId } = useAuth();
+  const { user, profile, poraplanId } = useAuth();
   const mentorId = user?.id || '';
 
   const [students, setStudents] = useState<Profile[]>([]);
@@ -127,83 +121,71 @@ export const MentorDashboardPage: React.FC = () => {
     <div className="w-full py-5 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
       <div className="max-w-5xl mx-auto space-y-6">
 
-        {/* 1. MENTOR IDENTITY & GREETING HEADER */}
+        {/* 1. MENTOR GREETING & PRIORITY ATTENTION */}
         <section
           aria-labelledby="mentor-greeting"
-          className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-5 sm:p-7 shadow-brutal space-y-4"
+          className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-4"
         >
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-xs uppercase text-brand-gold font-bold tracking-wider">
-                  MENTOR WORKSPACE
-                </span>
-                <Badge variant="gold" size="sm">ACTIVE</Badge>
-              </div>
-
-              <h1 id="mentor-greeting" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
+          {/* Top Row: Greeting & Meta */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-brand-dark pb-3">
+            <div>
+              <h1 id="mentor-greeting" className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
                 Welcome, {mentorName}
               </h1>
-
-              <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-brand-bg/85 pt-0.5">
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-brand-gold shrink-0" />
+              <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-brand-muted mt-0.5">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-brand-teal" />
                   {currentDate}
                 </span>
                 {mentorIdDisplay && (
                   <>
                     <span>•</span>
-                    <span className="font-bold text-brand-gold">
+                    <span className="font-bold text-brand-navy">
                       ID: {mentorIdDisplay}
                     </span>
                   </>
                 )}
-                <span>•</span>
-                <span className="uppercase text-brand-gold font-bold">{role || 'Mentor'}</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0 self-start">
-              <div className="px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-brand-dark text-xs font-mono font-bold shadow-brutal-xs flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-brand-teal shrink-0" />
-                <span>Mentor Workspace</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="gold" size="sm" className="font-mono uppercase font-bold">
+                Mentor
+              </Badge>
             </div>
           </div>
 
-          {/* "What Requires Attention?" Mentor Priority Callout */}
-          <div className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-gold text-brand-dark shadow-brutal-xs">
+          {/* Actionable Priority Banner */}
+          <div className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-gold-light text-brand-dark">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5 font-mono text-xs font-extrabold tracking-wide uppercase">
-                  <Sparkles className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.5]" />
-                  <span>WHAT REQUIRES ATTENTION TODAY?</span>
+                <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-brand-navy uppercase">
+                  <Sparkles className="w-4 h-4 text-brand-navy shrink-0" />
+                  <span>Action Needed Today</span>
                 </div>
-                <p className="text-xs font-sans font-medium text-brand-dark/90 leading-relaxed">
+                <p className="text-xs font-sans text-brand-dark/90 leading-relaxed">
                   {loading ? (
                     'Checking student submissions and doubt inquiries...'
                   ) : students.length === 0 ? (
                     'No students are currently assigned to your roster. Contact the administrator to assign students.'
                   ) : needsAttentionCount > 0 ? (
                     <>
-                      <span className="font-bold">Attention needed:</span> You have{' '}
+                      You have{' '}
                       {pendingReviews.length > 0 && (
-                        <span className="font-extrabold underline mr-1">
+                        <span className="font-bold">
                           {pendingReviews.length} submission{pendingReviews.length > 1 ? 's' : ''} to review
                         </span>
                       )}
                       {pendingReviews.length > 0 && openDoubts.length > 0 && ' and '}
                       {openDoubts.length > 0 && (
-                        <span className="font-extrabold underline">
+                        <span className="font-bold">
                           {openDoubts.length} student doubt{openDoubts.length > 1 ? 's' : ''} waiting for answers
                         </span>
                       )}
                       .
                     </>
                   ) : (
-                    <>
-                      <span className="font-bold">All caught up:</span> All submissions are reviewed and all student doubts are answered for your {students.length} assigned student{students.length > 1 ? 's' : ''}.
-                    </>
+                    <>All caught up. No pending reviews or open doubts for your {students.length} assigned student{students.length > 1 ? 's' : ''}.</>
                   )}
                 </p>
               </div>
@@ -214,7 +196,7 @@ export const MentorDashboardPage: React.FC = () => {
                     to="/mentor/reviews"
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-navy text-brand-bg text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-dark transition-colors"
                   >
-                    <span>Review Submissions ({pendingReviews.length})</span>
+                    <span>Review Queue ({pendingReviews.length})</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 )}
@@ -231,7 +213,7 @@ export const MentorDashboardPage: React.FC = () => {
           </div>
         </section>
 
-        {/* 2. MENTORSHIP SUMMARY METRICS */}
+        {/* 2. OVERVIEW STATUS METRICS */}
         <section aria-labelledby="mentor-metrics-title" className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 id="mentor-metrics-title" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy flex items-center gap-2">
@@ -244,16 +226,16 @@ export const MentorDashboardPage: React.FC = () => {
             {/* Metric 1: Assigned Students */}
             <div className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                  ASSIGNED STUDENTS
+                <span className="font-mono text-xs font-bold text-brand-muted">
+                  Assigned Students
                 </span>
                 <Users className="w-4 h-4 text-brand-teal" />
               </div>
               <div className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
                 {loading ? '--' : students.length} <span className="text-xs font-mono font-normal text-brand-muted">Active</span>
               </div>
-              <span className="text-[10px] font-mono text-brand-teal font-bold mt-1">
-                {students.length > 0 ? `${students.length} on roster` : 'Roster Empty'}
+              <span className="text-[11px] font-mono text-brand-teal font-bold mt-1">
+                {students.length > 0 ? `${students.length} on roster` : 'Roster empty'}
               </span>
             </div>
 
@@ -263,15 +245,15 @@ export const MentorDashboardPage: React.FC = () => {
               className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                  PENDING REVIEWS
+                <span className="font-mono text-xs font-bold text-brand-muted">
+                  Pending Reviews
                 </span>
                 <FileCheck className="w-4 h-4 text-brand-gold" />
               </div>
               <div className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
                 {pendingReviews.length} <span className="text-xs font-mono font-normal text-brand-muted">Queue</span>
               </div>
-              <span className="text-[10px] font-mono text-brand-muted mt-1">
+              <span className="text-[11px] font-mono text-brand-muted mt-1">
                 {pendingReviews.length > 0 ? 'Awaiting feedback' : 'Queue clear'}
               </span>
             </Link>
@@ -282,16 +264,16 @@ export const MentorDashboardPage: React.FC = () => {
               className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                  OPEN DOUBTS
+                <span className="font-mono text-xs font-bold text-brand-muted">
+                  Open Doubts
                 </span>
                 <HelpCircle className="w-4 h-4 text-brand-teal" />
               </div>
               <div className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
                 {openDoubts.length} <span className="text-xs font-mono font-normal text-brand-muted">Pending</span>
               </div>
-              <span className="text-[10px] font-mono text-brand-teal font-bold mt-1">
-                {doubts.length - openDoubts.length} Answered
+              <span className="text-[11px] font-mono text-brand-teal font-bold mt-1">
+                {doubts.length - openDoubts.length} answered
               </span>
             </Link>
 
@@ -301,172 +283,22 @@ export const MentorDashboardPage: React.FC = () => {
               className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                  EVALUATIONS
+                <span className="font-mono text-xs font-bold text-brand-muted">
+                  Evaluations
                 </span>
                 <Calendar className="w-4 h-4 text-brand-navy" />
               </div>
               <div className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
                 {scheduledEvaluations.length} <span className="text-xs font-mono font-normal text-brand-muted">Scheduled</span>
               </div>
-              <span className="text-[10px] font-mono text-brand-muted mt-1">
-                {evaluations.filter((e) => e.status === 'completed').length} Conducted
+              <span className="text-[11px] font-mono text-brand-muted mt-1">
+                {evaluations.filter((e) => e.status === 'completed').length} conducted
               </span>
             </Link>
           </div>
         </section>
 
-        {/* 3. ASSIGNED STUDENTS ROSTER */}
-        <section
-          id="roster"
-          aria-labelledby="roster-title"
-          className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-4"
-        >
-          <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
-            <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-brand-navy stroke-[2.5]" />
-              <h2 id="roster-title" className="font-heading font-extrabold text-base text-brand-navy">
-                Assigned Students
-              </h2>
-            </div>
-            <Badge variant={students.length > 0 ? 'teal' : 'muted'} size="sm">
-              {loading ? 'CHECKING...' : `${students.length} STUDENTS`}
-            </Badge>
-          </div>
-
-          {errorMessage && (
-            <div className="p-3 border-2 border-brand-dark bg-red-50 text-red-900 text-xs font-mono flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-red-700 shrink-0" />
-              <span>Failed to load assigned students: {errorMessage}</span>
-            </div>
-          )}
-
-          {loading ? (
-            <div className="p-6 text-center font-mono text-xs text-brand-muted flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-brand-navy" />
-              <span>Loading student roster...</span>
-            </div>
-          ) : students.length > 0 ? (
-            <div className="space-y-3">
-              <p className="text-xs text-brand-dark font-sans leading-relaxed">
-                You organize the study routine, assign tasks, review practice submissions, and solve doubts for these students:
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                {students.map((student) => {
-                  const record = assignedStudentRecords.find((r) => r.student.id === student.id);
-                  const isIndividual = record?.assignmentType === 'individual';
-
-                  return (
-                    <div
-                      key={student.id}
-                      className="p-4 border-2 border-brand-dark bg-brand-paper-tint flex flex-col justify-between gap-3 shadow-brutal-xs"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-1.5">
-                            <GraduationCap className="w-4 h-4 text-brand-teal shrink-0" />
-                            <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
-                              {student.full_name}
-                            </h3>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs font-mono text-brand-muted">
-                            {student.poraplan_id && (
-                              <>
-                                <span className="font-bold text-brand-gold">
-                                  ID: {student.poraplan_id}
-                                </span>
-                                <span>•</span>
-                              </>
-                            )}
-                            <span className="truncate max-w-[180px]">{student.email}</span>
-                          </div>
-                          {student.university && (
-                            <div className="text-[11px] text-brand-dark/70 font-sans">
-                              {student.university} {student.department ? `(${student.department})` : ''}
-                            </div>
-                          )}
-                          {record?.cohort && (
-                            <div className="text-[11px] font-mono text-brand-teal font-semibold pt-0.5">
-                              {record.program?.name || 'Program'} • {record.cohort.name}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex flex-col items-end gap-1">
-                          <Badge variant={isIndividual ? 'teal' : 'gold'} size="sm" className="font-bold text-[10px]">
-                            {isIndividual ? 'INDIVIDUAL' : 'COHORT'}
-                          </Badge>
-                          {student.whatsapp_number && (
-                            <a
-                              href={`https://wa.me/${student.whatsapp_number.replace(/\D/g, '')}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[11px] text-emerald-700 hover:underline flex items-center gap-1 font-mono font-bold"
-                            >
-                              <Phone className="w-3 h-3" />
-                              <span>WhatsApp</span>
-                            </a>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-brand-dark/20 flex items-center justify-between flex-wrap gap-2">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <Link
-                            to={`/mentor/plans?studentId=${student.id}`}
-                            className="font-mono text-[11px] font-bold text-brand-teal hover:underline"
-                          >
-                            Plans
-                          </Link>
-                          <span className="text-brand-muted">•</span>
-                          <Link
-                            to={`/mentor/tasks?studentId=${student.id}`}
-                            className="font-mono text-[11px] font-bold text-brand-navy hover:underline"
-                          >
-                            Tasks
-                          </Link>
-                          <span className="text-brand-muted">•</span>
-                          <Link
-                            to={`/mentor/assignments?studentId=${student.id}`}
-                            className="font-mono text-[11px] font-bold text-brand-navy hover:underline"
-                          >
-                            Practice
-                          </Link>
-                        </div>
-
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setSelectedStudent(student)}
-                          className="text-xs font-bold"
-                        >
-                          Student Details
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div className="p-6 border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center space-y-2.5">
-              <div className="w-10 h-10 border-2 border-brand-dark bg-brand-teal-light rounded-none mx-auto flex items-center justify-center">
-                <Users className="w-5 h-5 text-brand-teal stroke-[2.5]" />
-              </div>
-              <div className="max-w-md mx-auto">
-                <h3 className="font-heading font-bold text-sm text-brand-navy">
-                  No Students Assigned Yet
-                </h3>
-                <p className="text-xs text-brand-muted font-sans mt-1 leading-relaxed">
-                  When platform administrators assign students to your mentorship account, their profiles, study submissions, and evaluations will appear here.
-                </p>
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* 4. DUAL PANELS: REVIEW QUEUE & UPCOMING EVALUATIONS */}
+        {/* 3. DUAL ACTION PANELS: REVIEW QUEUE & UPCOMING EVALUATIONS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
           
           {/* Submission Review Queue Card */}
@@ -479,7 +311,7 @@ export const MentorDashboardPage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <FileCheck className="w-5 h-5 text-brand-gold stroke-[2.5]" />
                   <h2 id="reviews-title" className="font-heading font-extrabold text-base text-brand-navy">
-                    Submission Review Queue
+                    Review Queue
                   </h2>
                 </div>
                 <Badge variant={pendingReviews.length > 0 ? 'gold' : 'muted'} size="sm">
@@ -496,7 +328,7 @@ export const MentorDashboardPage: React.FC = () => {
                     Review Queue Clear
                   </h3>
                   <p className="text-xs text-brand-muted font-sans leading-relaxed">
-                    When assigned students submit practice assignments, their solutions will appear here for your review and feedback.
+                    No submissions awaiting review. Newly submitted student work will appear here.
                   </p>
                 </div>
               ) : (
@@ -564,7 +396,7 @@ export const MentorDashboardPage: React.FC = () => {
                     No Evaluations Scheduled
                   </h3>
                   <p className="text-xs text-brand-muted font-sans leading-relaxed">
-                    Evaluations are periodic check-ins (via Google Meet/Zoom or written review) to assess student understanding and calibrate the next study plan.
+                    Evaluations are periodic reviews to calibrate student retention and upcoming study plans.
                   </p>
                 </div>
               ) : (
@@ -607,241 +439,149 @@ export const MentorDashboardPage: React.FC = () => {
 
         </div>
 
-        {/* 5. QUICK ACTIONS: CORE MENTOR MODULES */}
-        <section aria-labelledby="mentor-actions-title" className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 id="mentor-actions-title" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-brand-gold stroke-[2.5]" />
-              Mentorship Modules
-            </h2>
+        {/* 4. ASSIGNED STUDENTS ROSTER */}
+        <section
+          id="roster"
+          aria-labelledby="roster-title"
+          className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-4"
+        >
+          <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-brand-navy stroke-[2.5]" />
+              <h2 id="roster-title" className="font-heading font-extrabold text-base text-brand-navy">
+                Assigned Students
+              </h2>
+            </div>
+            <Badge variant={students.length > 0 ? 'teal' : 'muted'} size="sm">
+              {loading ? 'CHECKING...' : `${students.length} STUDENTS`}
+            </Badge>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {/* Study Plans */}
-            <Link
-              to="/mentor/plans"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
-                    ROADMAPS
-                  </span>
-                  <Compass className="w-4 h-4 text-brand-dark group-hover:text-brand-teal" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-teal">
-                  Study Plans
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Organize weekly chapter targets, syllabus pacing, and study instructions.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-teal">
-                <span>Manage Study Plans</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
+          {errorMessage && (
+            <div className="p-3 border-2 border-brand-dark bg-red-50 text-red-900 text-xs font-mono flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-700 shrink-0" />
+              <span>Failed to load assigned students: {errorMessage}</span>
+            </div>
+          )}
 
-            {/* Tasks */}
-            <Link
-              to="/mentor/tasks"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-gold">
-                    DAILY TARGETS
-                  </span>
-                  <ListTodo className="w-4 h-4 text-brand-dark group-hover:text-brand-gold" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-gold">
-                  Tasks
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Assign prioritized study sessions and daily practice exercises to students.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-gold">
-                <span>Manage Tasks</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
+          {loading ? (
+            <div className="p-6 text-center font-mono text-xs text-brand-muted flex items-center justify-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin text-brand-navy" />
+              <span>Loading student roster...</span>
+            </div>
+          ) : students.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              {students.map((student) => {
+                const record = assignedStudentRecords.find((r) => r.student.id === student.id);
+                const isIndividual = record?.assignmentType === 'individual';
 
-            {/* Assignments */}
-            <Link
-              to="/mentor/assignments"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-navy">
-                    PRACTICE
-                  </span>
-                  <FileText className="w-4 h-4 text-brand-dark group-hover:text-brand-navy" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-navy">
-                  Assignments
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Distribute chapter problem sets and homework exercises for practice.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy">
-                <span>Manage Assignments</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
+                return (
+                  <div
+                    key={student.id}
+                    className="p-4 border-2 border-brand-dark bg-brand-paper-tint flex flex-col justify-between gap-3 shadow-brutal-xs"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <GraduationCap className="w-4 h-4 text-brand-teal shrink-0" />
+                          <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
+                            {student.full_name}
+                          </h3>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs font-mono text-brand-muted">
+                          {student.poraplan_id && (
+                            <>
+                              <span className="font-bold text-brand-gold">
+                                ID: {student.poraplan_id}
+                              </span>
+                              <span>•</span>
+                            </>
+                          )}
+                          <span className="truncate max-w-[180px]">{student.email}</span>
+                        </div>
+                        {student.university && (
+                          <div className="text-[11px] text-brand-dark/70 font-sans">
+                            {student.university} {student.department ? `(${student.department})` : ''}
+                          </div>
+                        )}
+                        {record?.cohort && (
+                          <div className="text-[11px] font-mono text-brand-teal font-semibold pt-0.5">
+                            {record.program?.name || 'Program'} • {record.cohort.name}
+                          </div>
+                        )}
+                      </div>
 
-            {/* Review Submissions */}
-            <Link
-              to="/mentor/reviews"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
-                    FEEDBACK
-                  </span>
-                  <FileCheck className="w-4 h-4 text-brand-dark group-hover:text-brand-teal" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-teal">
-                  Review Submissions
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Inspect student solutions, check step accuracy, and provide guidance.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-teal">
-                <span>Open Review Queue</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
+                      <div className="flex flex-col items-end gap-1">
+                        <Badge variant={isIndividual ? 'teal' : 'gold'} size="sm" className="font-bold text-[10px]">
+                          {isIndividual ? 'INDIVIDUAL' : 'COHORT'}
+                        </Badge>
+                        {student.whatsapp_number && (
+                          <a
+                            href={`https://wa.me/${student.whatsapp_number.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] text-emerald-700 hover:underline flex items-center gap-1 font-mono font-bold"
+                          >
+                            <Phone className="w-3 h-3" />
+                            <span>WhatsApp</span>
+                          </a>
+                        )}
+                      </div>
+                    </div>
 
-            {/* Evaluations */}
-            <Link
-              to="/mentor/evaluations"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-gold">
-                    ASSESSMENT
-                  </span>
-                  <Calendar className="w-4 h-4 text-brand-dark group-hover:text-brand-gold" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-gold">
-                  Evaluations
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Schedule oral assessments and verify retention before major exams.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-gold">
-                <span>Manage Evaluations</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
+                    <div className="pt-2 border-t border-brand-dark/20 flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <Link
+                          to={`/mentor/plans?studentId=${student.id}`}
+                          className="font-mono text-[11px] font-bold text-brand-teal hover:underline"
+                        >
+                          Plans
+                        </Link>
+                        <span className="text-brand-muted">•</span>
+                        <Link
+                          to={`/mentor/tasks?studentId=${student.id}`}
+                          className="font-mono text-[11px] font-bold text-brand-navy hover:underline"
+                        >
+                          Tasks
+                        </Link>
+                        <span className="text-brand-muted">•</span>
+                        <Link
+                          to={`/mentor/assignments?studentId=${student.id}`}
+                          className="font-mono text-[11px] font-bold text-brand-navy hover:underline"
+                        >
+                          Practice
+                        </Link>
+                      </div>
 
-            {/* Student Progress */}
-            <Link
-              to="/mentor/progress"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
-                    OVERVIEW
-                  </span>
-                  <TrendingUp className="w-4 h-4 text-brand-dark group-hover:text-brand-teal" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-teal">
-                  Student Progress
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelectedStudent(student)}
+                        className="text-xs font-bold"
+                      >
+                        Details
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-6 border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center space-y-2.5">
+              <div className="w-10 h-10 border-2 border-brand-dark bg-brand-teal-light rounded-none mx-auto flex items-center justify-center">
+                <Users className="w-5 h-5 text-brand-teal stroke-[2.5]" />
+              </div>
+              <div className="max-w-md mx-auto">
+                <h3 className="font-heading font-bold text-sm text-brand-navy">
+                  No Students Assigned Yet
                 </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Monitor task completion, assignment performance, and syllabus pace.
+                <p className="text-xs text-brand-muted font-sans mt-1 leading-relaxed">
+                  When administrators assign students to your mentorship account, their profiles, study submissions, and evaluations will appear here.
                 </p>
               </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-teal">
-                <span>View Progress</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-
-            {/* Doubts */}
-            <Link
-              to="/mentor/doubts"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-navy">
-                    INQUIRIES
-                  </span>
-                  <HelpCircle className="w-4 h-4 text-brand-dark group-hover:text-brand-navy" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-navy">
-                  Doubts
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Answer conceptual questions and problems submitted by your students.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy">
-                <span>Open Doubts Desk</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-
-            {/* Resources */}
-            <Link
-              to="/mentor/resources"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
-                    MATERIALS
-                  </span>
-                  <FolderKanban className="w-4 h-4 text-brand-dark group-hover:text-brand-teal" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-teal">
-                  Resources
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Share curated formulas, chapter notes, and textbook reference sheets.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy">
-                <span>Manage Resources</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-
-            {/* Announcements */}
-            <Link
-              to="/mentor/announcements"
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-gold">
-                    BROADCAST
-                  </span>
-                  <Megaphone className="w-4 h-4 text-brand-dark group-hover:text-brand-gold" />
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-brand-navy group-hover:text-brand-gold">
-                  Announcements
-                </h3>
-                <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                  Post schedule updates, study guidance, and notices for your students.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-brand-dark/20 flex items-center justify-between font-mono text-xs font-bold text-brand-navy group-hover:text-brand-gold">
-                <span>Manage Announcements</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-          </div>
+            </div>
+          )}
         </section>
 
       </div>
