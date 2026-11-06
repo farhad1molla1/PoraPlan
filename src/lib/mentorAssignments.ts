@@ -453,26 +453,23 @@ export async function getEffectiveStudentsForMentor(mentorId: string): Promise<{
 // ==============================================================================
 
 export async function getEligibleMentorsForProgram(
-  programId: string
+  _programId?: string
 ): Promise<{ mentors: Profile[]; error: Error | null }> {
   if (!isSupabaseConfigured()) {
-    const mentors = getMockEligibleMentorsForProgram(programId);
+    const mentors = getMockEligibleMentorsForProgram(_programId);
     return { mentors, error: null };
   }
 
   try {
-    const { data: apps, error } = await (supabase.from('program_applications') as any)
-      .select('applicant_id, profiles!applicant_id(*)')
-      .eq('program_id', programId)
-      .eq('application_type', 'mentor')
-      .eq('status', 'approved');
+    const { data: mentorsData, error } = await (supabase.from('profiles') as any)
+      .select('*')
+      .eq('role', 'mentor')
+      .neq('status', 'suspended')
+      .order('full_name', { ascending: true });
 
     if (error) return { mentors: [], error };
 
-    const mentors: Profile[] = (apps || [])
-      .map((a: any) => a.profiles)
-      .filter((p: any) => p && p.role === 'mentor' && p.status !== 'suspended');
-
+    const mentors: Profile[] = (mentorsData as Profile[]) || [];
     return { mentors, error: null };
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
@@ -524,7 +521,7 @@ export async function getMentorWorkloadSummary(): Promise<{
         individualOverridesCount: (overrides || []).length,
         totalEffectiveMenteesCount: students.length,
         cohorts: cohortsDetail,
-        isEligible: true,
+        isEligible: mentor.status !== 'suspended',
       });
     }
 

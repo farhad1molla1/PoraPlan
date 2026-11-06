@@ -5779,27 +5779,13 @@ export function isMockAuthorizedMentorForStudent(
 }
 
 /**
- * Filter mentors who have an approved application for the target program
- * and active mentor account status.
+ * Retrieve registered mentors eligible for allocation.
+ * Eligible: role === 'mentor' && status !== 'suspended'
+ * (Active and not_activated mentors are eligible; suspended are excluded).
  */
-export function getMockEligibleMentorsForProgram(programId: string): Profile[] {
-  // Find approved mentor applications for program
-  const approvedMentorApps = mockApplications.filter(
-    (app) =>
-      app.program_id === programId &&
-      app.application_type === 'mentor' &&
-      app.status === 'approved'
-  );
-
-  const eligibleMentorIds = new Set(approvedMentorApps.map((a) => a.applicant_id));
-
+export function getMockEligibleMentorsForProgram(_programId?: string): Profile[] {
   return mockStore
-    .filter(
-      (acc) =>
-        acc.role === 'mentor' &&
-        acc.status !== 'suspended' &&
-        eligibleMentorIds.has(acc.id)
-    )
+    .filter((acc) => acc.role === 'mentor' && acc.status !== 'suspended')
     .map((acc) => getMockProfile(acc.id)!)
     .filter(Boolean);
 }
@@ -5826,21 +5812,6 @@ export function adminAssignMockCohortMentor(
   }
   if (mentor.status === 'suspended') {
     return { success: false, message: 'Cannot assign a suspended mentor.' };
-  }
-
-  // Validate approved mentor application for target program
-  const hasApprovedApp = mockApplications.some(
-    (a) =>
-      a.applicant_id === mentorId &&
-      a.program_id === cohort.program_id &&
-      a.application_type === 'mentor' &&
-      a.status === 'approved'
-  );
-  if (!hasApprovedApp) {
-    return {
-      success: false,
-      message: 'Mentor does not have an approved application for this program.',
-    };
   }
 
   // Deactivate existing active assignment for this cohort
@@ -5947,21 +5918,6 @@ export function adminAssignMockIndividualMentor(
     return { success: false, message: 'Cannot assign a suspended mentor.' };
   }
 
-  // Validate approved application
-  const hasApprovedApp = mockApplications.some(
-    (a) =>
-      a.applicant_id === mentorId &&
-      a.program_id === programId &&
-      a.application_type === 'mentor' &&
-      a.status === 'approved'
-  );
-  if (!hasApprovedApp) {
-    return {
-      success: false,
-      message: 'Mentor does not have an approved application for this program.',
-    };
-  }
-
   // Deactivate any existing active individual override for this student in this program
   const existingOverride = mockStudentMentorAssignments.find(
     (sma) => sma.student_id === studentId && sma.program_id === programId && sma.is_active
@@ -6051,9 +6007,7 @@ export function getMockMentorWorkload(): MentorWorkloadSummary[] {
       };
     });
 
-    const isEligible = mockApplications.some(
-      (a) => a.applicant_id === acc.id && a.application_type === 'mentor' && a.status === 'approved'
-    );
+    const isEligible = acc.role === 'mentor' && acc.status !== 'suspended';
 
     return {
       mentor: mentorProfile,
@@ -6177,11 +6131,8 @@ export function adminManualEnrollMockStudent(
     if (!mentor || mentor.role !== 'mentor') {
       return { success: false, message: 'Selected mentor is invalid.', error: new Error('Selected mentor is invalid.') };
     }
-    const isEligible = mockApplications.some(
-      (a) => a.applicant_id === mentorId && a.program_id === programId && a.application_type === 'mentor' && a.status === 'approved'
-    );
-    if (!isEligible) {
-      return { success: false, message: 'Mentor is not eligible for this program.', error: new Error('Mentor is not eligible for this program.') };
+    if (mentor.status === 'suspended') {
+      return { success: false, message: 'Cannot assign a suspended mentor.', error: new Error('Cannot assign a suspended mentor.') };
     }
   }
 

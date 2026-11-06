@@ -901,7 +901,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                     <th className="py-3 px-4 text-center">Active Cohorts</th>
                     <th className="py-3 px-4 text-center">Individual Overrides</th>
                     <th className="py-3 px-4 text-center">Effective Mentees</th>
-                    <th className="py-3 px-4">Status &amp; Eligibility</th>
+                    <th className="py-3 px-4">Account Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y-2 divide-[#082B4C]/10 text-sm">
@@ -950,23 +950,12 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                       </td>
 
                       <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            variant={w.mentor.status === 'active' ? 'teal' : 'paper'}
-                            size="sm"
-                          >
-                            {w.mentor.status?.toUpperCase() || 'ACTIVE'}
-                          </Badge>
-                          {w.isEligible ? (
-                            <Badge variant="teal" size="sm">
-                              PROGRAM APPROVED
-                            </Badge>
-                          ) : (
-                            <Badge variant="paper" size="sm">
-                              NO APPROVED APP
-                            </Badge>
-                          )}
-                        </div>
+                        <Badge
+                          variant={w.mentor.status === 'active' ? 'teal' : 'paper'}
+                          size="sm"
+                        >
+                          {w.mentor.status?.toUpperCase() || 'ACTIVE'}
+                        </Badge>
                       </td>
                     </tr>
                   ))}
@@ -1024,8 +1013,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
               </label>
               {eligibleMentorsForCohort.length === 0 ? (
                 <div className="p-3 bg-red-50 border-2 border-red-300 text-xs font-bold text-red-800">
-                  No mentors have approved applications for this program. Review and approve mentor
-                  applications first.
+                  No active mentors found. Provision mentor accounts from the Admin Dashboard first.
                 </div>
               ) : (
                 <select
@@ -1133,7 +1121,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
               </label>
               {eligibleMentorsForStudent.length === 0 ? (
                 <div className="p-3 bg-red-50 border-2 border-red-300 text-xs font-bold text-red-800">
-                  No mentors have approved applications for this program.
+                  No active mentors found. Provision mentor accounts from the Admin Dashboard first.
                 </div>
               ) : (
                 <select
