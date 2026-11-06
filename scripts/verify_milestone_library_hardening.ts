@@ -444,8 +444,8 @@ async function runHardeningVerification() {
   );
   assert(Boolean(taskNotif), 'Task assigned notification generated for student');
   assert(
-    taskNotif?.link === '/student/library?tab=tasks',
-    `Task notification routes to Academic Library tasks tab: "${taskNotif?.link}"`
+    taskNotif?.link === '/student/tasks',
+    `Task notification routes to student tasks page: "${taskNotif?.link}"`
   );
 
   // 4.2 Assignment Published Notification Route Check
@@ -498,8 +498,8 @@ async function runHardeningVerification() {
 
   // 4.4 Static verification: Real services also use configured routes
   assert(
-    tasksServiceContent.includes("link: '/student/library?tab=tasks'"),
-    'src/lib/tasks.ts uses link: "/student/library?tab=tasks"'
+    tasksServiceContent.includes("link: '/student/tasks'"),
+    'src/lib/tasks.ts uses link: "/student/tasks"'
   );
   assert(
     assignsServiceContent.includes("link: '/student/assignments'"),

@@ -57,7 +57,6 @@ import {
   Laptop,
   Image as ImageIcon,
   Upload,
-  FileText,
 } from 'lucide-react';
 
 export const AdminProgramsPage: React.FC = () => {
@@ -918,15 +917,6 @@ export const AdminProgramsPage: React.FC = () => {
                         leftIcon={<Layers className="w-3.5 h-3.5 text-brand-teal" />}
                       >
                         Curriculum Builder
-                      </Button>
-
-                      <Button
-                        to={`/admin/applications?programId=${prog.id}`}
-                        variant="outline"
-                        size="sm"
-                        leftIcon={<FileText className="w-3.5 h-3.5 text-brand-navy" />}
-                      >
-                        View Applications
                       </Button>
 
                       {isPublished && (

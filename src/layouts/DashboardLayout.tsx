@@ -22,7 +22,6 @@ import {
   Megaphone,
   Bell,
   GraduationCap,
-  ClipboardList,
   UserCheck,
   Users,
   BarChart3,
@@ -165,7 +164,6 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Billing Management', shortLabel: 'Billing', to: '/admin/billing', icon: CreditCard },
     { label: 'User Directory', shortLabel: 'Users', to: '/admin/users', icon: Users },
     { label: 'Academic Reports', shortLabel: 'Reports', to: '/admin/reports', icon: BarChart3 },
-    { label: 'Applications Desk', shortLabel: 'Apps', to: '/admin/applications', icon: ClipboardList },
     { label: 'System Alerts', shortLabel: 'Alerts', to: '/admin/notifications', icon: Bell, badgeCount: unreadNotifCount },
   ];
 

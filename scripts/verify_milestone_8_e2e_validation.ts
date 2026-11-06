@@ -236,8 +236,8 @@ async function runMilestone8Validation() {
   const taskNotifs = studentNotifs.filter((n) => n.type === 'task_created');
   if (taskNotifs.length > 0) {
     assert(
-      taskNotifs.every((n) => n.link === '/student/library?tab=tasks'),
-      'All task notifications route to /student/library?tab=tasks'
+      taskNotifs.every((n) => n.link === '/student/tasks'),
+      'All task notifications route to /student/tasks'
     );
   }
   const assignNotifs = studentNotifs.filter((n) => n.type === 'assignment_created' || n.type === 'submission_reviewed');

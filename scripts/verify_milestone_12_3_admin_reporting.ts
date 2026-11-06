@@ -53,7 +53,8 @@ async function runMilestone12_3Verification() {
 
   const studentId = 'mock-student-pp001';
   const mentorId = 'mock-mentor-ppm001';
-  const strangerStudentId = 'mock-student-pp003';
+  // Dedicated test fixture: an unassigned student who is not enrolled in mentor PPM001's cohort (cohort-uu-cse-b67)
+  const strangerStudentId = 'mock-student-unassigned-001';
 
   // 1. Student Report Page 1 Intactness
   console.log('--- Check 1: Student Report Page 1 Intactness ---');

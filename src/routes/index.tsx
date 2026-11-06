@@ -47,8 +47,6 @@ import { MentorReportPage } from '../pages/dashboard/MentorReportPage';
 import { MentorPayoutsPage } from '../pages/dashboard/MentorPayoutsPage';
 import { ProfilePage } from '../pages/dashboard/ProfilePage';
 import { PublicProfilePage } from '../pages/dashboard/PublicProfilePage';
-import { MyApplicationsPage } from '../pages/dashboard/MyApplicationsPage';
-import { AdminApplicationsPage } from '../pages/dashboard/AdminApplicationsPage';
 import { AdminEnrollmentsPage } from '../pages/dashboard/AdminEnrollmentsPage';
 import { AdminMentorAssignmentsPage } from '../pages/dashboard/AdminMentorAssignmentsPage';
 import { AdminUsersPage } from '../pages/dashboard/AdminUsersPage';
@@ -225,11 +223,7 @@ export const AppRoutes: React.FC = () => {
         />
         <Route
           path="student/applications"
-          element={
-            <ProtectedRoute allowedRoles={['student', 'admin']}>
-              <MyApplicationsPage />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/student/dashboard" replace />}
         />
         <Route
           path="student/notifications"
@@ -363,11 +357,7 @@ export const AppRoutes: React.FC = () => {
         />
         <Route
           path="mentor/applications"
-          element={
-            <ProtectedRoute allowedRoles={['mentor', 'admin']}>
-              <MyApplicationsPage />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/mentor/dashboard" replace />}
         />
         <Route
           path="mentor/plans"
@@ -429,11 +419,7 @@ export const AppRoutes: React.FC = () => {
         />
         <Route
           path="admin/applications"
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <AdminApplicationsPage />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/admin/enrollments" replace />}
         />
         <Route
           path="admin/enrollments"

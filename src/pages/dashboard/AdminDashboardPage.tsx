@@ -10,7 +10,6 @@ import {
   Loader2,
   GraduationCap,
   ArrowRight,
-  ClipboardList,
   UserCheck,
   Users,
   CreditCard,
@@ -34,16 +33,6 @@ interface OperationalDesk {
 
 const OPERATIONAL_DESKS: OperationalDesk[] = [
   {
-    id: 'applications',
-    title: 'Applications Desk',
-    description: 'Review and triage incoming student and mentor admission applications with atomic capacity checks.',
-    to: '/admin/applications',
-    buttonLabel: 'Review Applications',
-    icon: ClipboardList,
-    accentColor: 'teal',
-    variant: 'primary',
-  },
-  {
     id: 'enrollments',
     title: 'Enrollments Desk',
     description: 'Manage cohort student rosters, update enrollment states, and track student registration status.',
@@ -51,7 +40,7 @@ const OPERATIONAL_DESKS: OperationalDesk[] = [
     buttonLabel: 'Manage Enrollments',
     icon: UserCheck,
     accentColor: 'teal',
-    variant: 'outline',
+    variant: 'primary',
   },
   {
     id: 'programs',

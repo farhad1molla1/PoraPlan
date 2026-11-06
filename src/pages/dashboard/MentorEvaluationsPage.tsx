@@ -34,6 +34,7 @@ import {
   Award,
   Trash2,
   Edit3,
+  X,
 } from 'lucide-react';
 
 export const MentorEvaluationsPage: React.FC = () => {
@@ -378,8 +379,9 @@ export const MentorEvaluationsPage: React.FC = () => {
             type="button"
             onClick={() => setActionSuccess(null)}
             className="text-emerald-700 hover:text-emerald-900 font-bold"
+            aria-label="Dismiss success message"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
@@ -395,8 +397,9 @@ export const MentorEvaluationsPage: React.FC = () => {
             type="button"
             onClick={() => setErrorMessage(null)}
             className="text-red-700 hover:text-red-900 font-bold"
+            aria-label="Dismiss error message"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
@@ -787,8 +790,9 @@ export const MentorEvaluationsPage: React.FC = () => {
                 type="button"
                 onClick={() => setShowScheduleModal(false)}
                 className="text-brand-paper hover:text-brand-gold transition-colors font-bold text-lg p-1"
+                aria-label="Close schedule modal"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -1002,8 +1006,9 @@ export const MentorEvaluationsPage: React.FC = () => {
                 type="button"
                 onClick={() => setShowResultModal(false)}
                 className="text-brand-paper hover:text-brand-gold transition-colors font-bold text-lg p-1"
+                aria-label="Close result modal"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -1114,8 +1119,9 @@ export const MentorEvaluationsPage: React.FC = () => {
                 type="button"
                 onClick={() => setShowDossierModal(false)}
                 className="text-brand-paper hover:text-brand-gold transition-colors font-bold text-lg p-1"
+                aria-label="Close dossier modal"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 

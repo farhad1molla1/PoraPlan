@@ -1291,7 +1291,7 @@ export function createMockTask(params: {
       type: 'task_created',
       title: 'New Task Assigned',
       message: `Mentor assigned task "${cleanTitle}"`,
-      link: '/student/library?tab=tasks',
+      link: '/student/tasks',
       idempotencyKey: `task:${taskId}`,
     });
   }
@@ -1412,7 +1412,7 @@ export function updateMockTask(
       type: 'task_updated',
       title: 'Task Updated',
       message: `Mentor updated task "${current.title}"`,
-      link: '/student/library?tab=tasks',
+      link: '/student/tasks',
       idempotencyKey: `task_update:${taskId}:${current.updated_at}`,
     });
   }

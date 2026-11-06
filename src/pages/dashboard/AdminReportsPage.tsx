@@ -22,6 +22,7 @@ import {
   Search,
   ExternalLink,
   CheckCircle2,
+  X,
 } from 'lucide-react';
 
 export const AdminReportsPage: React.FC = () => {
@@ -574,8 +575,8 @@ export const AdminReportsPage: React.FC = () => {
                     className="w-full bg-transparent text-xs text-brand-dark focus:outline-none"
                   />
                   {studentSearch && (
-                    <button type="button" onClick={() => setStudentSearch('')} className="text-brand-muted hover:text-brand-dark">
-                      ✕
+                    <button type="button" onClick={() => setStudentSearch('')} className="text-brand-muted hover:text-brand-dark" aria-label="Clear student search">
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
@@ -769,8 +770,8 @@ export const AdminReportsPage: React.FC = () => {
                     className="w-full bg-transparent text-xs text-brand-dark focus:outline-none"
                   />
                   {mentorSearch && (
-                    <button type="button" onClick={() => setMentorSearch('')} className="text-brand-muted hover:text-brand-dark">
-                      ✕
+                    <button type="button" onClick={() => setMentorSearch('')} className="text-brand-muted hover:text-brand-dark" aria-label="Clear mentor search">
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>

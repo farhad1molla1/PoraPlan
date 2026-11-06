@@ -380,7 +380,7 @@ async function runVerification() {
   // ---------------------------------------------------------------------------
   console.log('\n--- SECTION 9: Module Isolation & Preservation ---');
 
-  assert(fs.existsSync(path.resolve('src/pages/dashboard/StudentResourcesPage.tsx')), 'StudentResourcesPage.tsx preserved');
+  assert(fs.existsSync(path.resolve('src/pages/dashboard/StudentLibraryPage.tsx')), 'StudentLibraryPage.tsx preserved');
   assert(fs.existsSync(path.resolve('src/pages/dashboard/StudentTasksPage.tsx')), 'StudentTasksPage.tsx preserved');
   assert(fs.existsSync(path.resolve('src/pages/dashboard/StudentDoubtsPage.tsx')), 'StudentDoubtsPage.tsx preserved');
   assert(fs.existsSync(path.resolve('src/pages/dashboard/MentorReviewQueuePage.tsx')), 'MentorReviewQueuePage.tsx preserved');

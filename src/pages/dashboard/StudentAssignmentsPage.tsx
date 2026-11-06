@@ -39,6 +39,7 @@ import {
   Download,
   Trash2,
   Image as ImageIcon,
+  X,
 } from 'lucide-react';
 
 export const StudentAssignmentsPage: React.FC = () => {
@@ -892,9 +893,10 @@ export const StudentAssignmentsPage: React.FC = () => {
                         </h4>
                         <button
                           onClick={() => setActiveAssignmentId(null)}
-                          className="font-mono text-xs text-brand-muted hover:text-brand-dark font-bold"
+                          className="font-mono text-xs text-brand-muted hover:text-brand-dark font-bold flex items-center gap-1"
+                          aria-label="Close submission form"
                         >
-                          ✕ Close
+                          <X className="w-3.5 h-3.5" /> Close
                         </button>
                       </div>
 

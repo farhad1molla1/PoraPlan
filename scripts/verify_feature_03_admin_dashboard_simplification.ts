@@ -10,8 +10,7 @@
  *    - Removed redundant screaming header label ("ADMIN WORKSPACE").
  *    - Removed static promotional/documentation blurbs ("Authentication & Access Controls").
  * 3. Operational Desks Grid Coverage:
- *    - All 8 core administrative areas accessible with direct routes:
- *      - Applications Desk (/admin/applications)
+ *    - All 7 core administrative areas accessible with direct routes:
  *      - Enrollments Desk (/admin/enrollments)
  *      - Programs & Cohorts (/admin/programs)
  *      - Mentor Allocations (/admin/mentor-assignments)
@@ -87,8 +86,8 @@ async function runSuite() {
   // ---------------------------------------------------------------------------
   console.log('\n--- Suite 3: Operational Desks Grid Coverage ---');
 
-  assert(adminSrc.includes('Applications Desk'), 'Includes Applications Desk');
-  assert(adminSrc.includes('/admin/applications'), 'Includes link to /admin/applications');
+  assert(!adminSrc.includes('Applications Desk'), 'Removed Applications Desk from admin console');
+  assert(!adminSrc.includes('/admin/applications'), 'Removed link to /admin/applications');
 
   assert(adminSrc.includes('Enrollments Desk'), 'Includes Enrollments Desk');
   assert(adminSrc.includes('/admin/enrollments'), 'Includes link to /admin/enrollments');
@@ -160,3 +159,4 @@ runSuite().catch((err) => {
   console.error('Test execution failed:', err);
   process.exit(1);
 });
+

@@ -64,7 +64,8 @@ async function runMilestone12_5SecurityVerification() {
   const mentorId = 'mock-mentor-ppm001';
   const otherMentorId = 'mock-mentor-ppm002';
   const studentId = 'mock-student-pp001';
-  const strangerStudentId = 'mock-student-pp003';
+  // Dedicated test fixture: an unassigned student who is not enrolled in mentor PPM001's cohort (cohort-uu-cse-b67)
+  const strangerStudentId = 'mock-student-unassigned-001';
 
   // =========================================================================
   // GROUP 1: ADMIN AUTHORIZATION TESTS

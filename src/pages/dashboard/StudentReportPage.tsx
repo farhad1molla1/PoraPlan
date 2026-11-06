@@ -935,8 +935,9 @@ export const StudentReportPage: React.FC = () => {
                       ))}
                   </ul>
                 ) : (
-                  <p className="text-xs academic-sans text-emerald-800 font-bold">
-                    ✓ No critical academic deficits or overdue backlogs flagged in this window.
+                  <p className="text-xs academic-sans text-emerald-800 font-bold flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-700 stroke-[2.5] shrink-0" />
+                    <span>No critical academic deficits or overdue backlogs flagged in this window.</span>
                   </p>
                 )}
               </div>

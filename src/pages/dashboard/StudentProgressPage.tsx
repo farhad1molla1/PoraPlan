@@ -26,6 +26,7 @@ import {
   Award,
   Sparkles,
   FileCheck,
+  Check,
 } from 'lucide-react';
 
 export const StudentProgressPage: React.FC = () => {
@@ -262,8 +263,9 @@ export const StudentProgressPage: React.FC = () => {
                 <div className="p-2 border-2 border-brand-dark bg-brand-teal text-white font-extrabold shadow-brutal-xs col-span-2 sm:col-span-1">
                   <span className="text-[10px] text-brand-bg opacity-80 block uppercase">Step 7</span>
                   <span>Progress</span>
-                  <span className="text-[10px] text-brand-gold block font-semibold mt-0.5">
-                    Verified ✓
+                  <span className="text-[10px] text-brand-gold flex items-center gap-1 font-semibold mt-0.5">
+                    <span>Verified</span>
+                    <Check className="w-3 h-3 stroke-[3]" />
                   </span>
                 </div>
               </div>

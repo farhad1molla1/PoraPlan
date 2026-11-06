@@ -67,7 +67,7 @@ async function run() {
   assert(creationNotifs[0].type === 'task_created', 'Creation notification has type "task_created"');
   assert(creationNotifs[0].title === 'New Task Assigned', 'Creation notification title is "New Task Assigned"');
   assert(creationNotifs[0].idempotency_key === `task:${newTask!.id}`, 'Creation idempotency key is task:${id}');
-  assert(creationNotifs[0].link === '/student/library?tab=tasks', 'Link routes to /student/library?tab=tasks');
+  assert(creationNotifs[0].link === '/student/tasks', 'Link routes to /student/tasks');
 
   // Clear notifications for update tests
   mockNotifications.length = 0;
@@ -88,7 +88,7 @@ async function run() {
   assert(titleNotifs[0].message.includes('Extended Edition'), 'Notification message mentions new title');
   assert(titleNotifs[0].actor_id === mentorId, 'Actor ID is the mentor');
   assert(titleNotifs[0].recipient_id === studentId, 'Recipient ID is the student');
-  assert(titleNotifs[0].link === '/student/library?tab=tasks', 'Link is /student/library?tab=tasks');
+  assert(titleNotifs[0].link === '/student/tasks', 'Link is /student/tasks');
   assert(
     titleNotifs[0].idempotency_key === `task_update:${newTask!.id}:${updatedTitleTask!.updated_at}`,
     'Idempotency key uses task_update:${id}:${updated_at} format'
