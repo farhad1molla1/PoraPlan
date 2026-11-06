@@ -384,7 +384,7 @@ export const MentorAssignmentsPage: React.FC = () => {
       </div>
 
       {/* Student Selector Card */}
-      <div className="bg-white border-3 border-brand-dark p-4 sm:p-5 shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-brand-paper border-3 border-brand-dark p-4 sm:p-5 shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-brand-gold/20 border-2 border-brand-dark flex items-center justify-center font-bold text-brand-navy">
             <Users className="w-5 h-5 text-brand-navy" />
@@ -407,7 +407,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                   </span>
                   <Link
                     to={`/profile/${selectedStudent.id}`}
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-brand-dark bg-brand-paper-tint text-[10px] font-mono font-bold text-brand-navy shadow-brutal-xs hover:bg-white"
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-brand-dark bg-brand-paper-tint text-[10px] font-mono font-bold text-brand-navy shadow-brutal-xs hover:bg-brand-paper"
                   >
                     <User className="w-3 h-3 text-brand-teal" />
                     <span>Profile</span>
@@ -467,7 +467,7 @@ export const MentorAssignmentsPage: React.FC = () => {
               className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
                 filterState === 'all'
                   ? 'bg-brand-navy text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                  : 'bg-white text-brand-dark hover:bg-brand-paper'
+                  : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
               }`}
             >
               All Sets ({assignments.length})
@@ -477,7 +477,7 @@ export const MentorAssignmentsPage: React.FC = () => {
               className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
                 filterState === 'pending'
                   ? 'bg-brand-gold text-brand-dark shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                  : 'bg-white text-brand-dark hover:bg-brand-paper'
+                  : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
               }`}
             >
               Awaiting Student ({assignments.filter((a) => !a.submission).length})
@@ -487,7 +487,7 @@ export const MentorAssignmentsPage: React.FC = () => {
               className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
                 filterState === 'submitted'
                   ? 'bg-brand-teal text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                  : 'bg-white text-brand-dark hover:bg-brand-paper'
+                  : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
               }`}
             >
               Needs Review ({assignments.filter((a) => a.submission && a.submission.status !== 'reviewed').length})
@@ -497,7 +497,7 @@ export const MentorAssignmentsPage: React.FC = () => {
               className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
                 filterState === 'reviewed'
                   ? 'bg-brand-navy text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                  : 'bg-white text-brand-dark hover:bg-brand-paper'
+                  : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
               }`}
             >
               Reviewed ({assignments.filter((a) => a.submission && a.submission.status === 'reviewed').length})
@@ -512,14 +512,14 @@ export const MentorAssignmentsPage: React.FC = () => {
 
       {/* Main Content List */}
       {loadingStudents || loadingAssignments ? (
-        <div className="bg-white border-3 border-brand-dark p-12 text-center shadow-brutal">
+        <div className="bg-brand-paper border-3 border-brand-dark p-12 text-center shadow-brutal">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
           <p className="font-mono text-sm text-brand-muted font-bold uppercase tracking-wider">
             Loading assignment roster...
           </p>
         </div>
       ) : students.length === 0 ? (
-        <div className="bg-white border-4 border-brand-dark p-8 md:p-12 text-center shadow-brutal">
+        <div className="bg-brand-paper border-4 border-brand-dark p-8 md:p-12 text-center shadow-brutal">
           <div className="w-16 h-16 bg-brand-paper-tint border-3 border-brand-dark flex items-center justify-center mx-auto mb-4 shadow-brutal-sm">
             <Users className="w-8 h-8 text-brand-muted" />
           </div>
@@ -531,7 +531,7 @@ export const MentorAssignmentsPage: React.FC = () => {
           </p>
         </div>
       ) : filteredAssignments.length === 0 ? (
-        <div className="bg-white border-4 border-brand-dark p-8 md:p-12 text-center shadow-brutal">
+        <div className="bg-brand-paper border-4 border-brand-dark p-8 md:p-12 text-center shadow-brutal">
           <div className="w-16 h-16 bg-brand-paper-tint border-3 border-brand-dark flex items-center justify-center mx-auto mb-4 shadow-brutal-sm">
             <FileText className="w-8 h-8 text-brand-muted" />
           </div>
@@ -561,7 +561,7 @@ export const MentorAssignmentsPage: React.FC = () => {
             return (
               <div
                 key={assignment.id}
-                className="bg-white border-3 border-brand-dark p-5 sm:p-6 shadow-brutal-sm hover:shadow-brutal transition-all"
+                className="bg-brand-paper border-3 border-brand-dark p-5 sm:p-6 shadow-brutal-sm hover:shadow-brutal transition-all"
               >
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div className="space-y-2 flex-1">
@@ -591,7 +591,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                       </Badge>
 
                       {assignment.total_points && (
-                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-white border border-brand-dark px-2 py-0.5 text-brand-dark">
+                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-brand-paper border border-brand-dark px-2 py-0.5 text-brand-dark">
                           {assignment.total_points} PTS
                         </span>
                       )}
@@ -694,7 +694,7 @@ export const MentorAssignmentsPage: React.FC = () => {
       {/* CREATE / EDIT ASSIGNMENT MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/60 backdrop-blur-xs">
-          <div className="bg-white border-4 border-brand-dark p-6 max-w-xl w-full shadow-brutal max-h-[90vh] overflow-y-auto">
+          <div className="bg-brand-paper border-4 border-brand-dark p-6 max-w-xl w-full shadow-brutal max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b-2 border-brand-dark mb-4">
               <h3 className="font-heading font-black text-xl text-brand-navy flex items-center gap-2">
                 <FileText className="w-5 h-5 text-brand-gold" />
@@ -737,7 +737,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   placeholder="e.g. Newtonian Mechanics: Inclined Plane Dynamics"
-                  className="w-full bg-white border-2 border-brand-dark p-2.5 text-xs sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   required
                 />
               </div>
@@ -751,7 +751,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                   <select
                     value={formSubjectId}
                     onChange={(e) => setFormSubjectId(e.target.value)}
-                    className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   >
                     <option value="">-- None / General --</option>
                     {subjects.map((s) => (
@@ -769,7 +769,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                   <select
                     value={formPlanId}
                     onChange={(e) => setFormPlanId(e.target.value)}
-                    className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   >
                     <option value="">-- None / Standalone --</option>
                     {plans.map((p) => (
@@ -793,7 +793,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                     max="1000"
                     value={formTotalPoints}
                     onChange={(e) => setFormTotalPoints(e.target.value)}
-                    className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   />
                 </div>
 
@@ -805,7 +805,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                     type="date"
                     value={formDueDate}
                     onChange={(e) => setFormDueDate(e.target.value)}
-                    className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   />
                 </div>
               </div>
@@ -820,7 +820,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                   value={formInstructions}
                   onChange={(e) => setFormInstructions(e.target.value)}
                   placeholder="Detail the specific questions, page numbers, or derivation criteria required from the student..."
-                  className="w-full bg-white border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 />
               </div>
 
@@ -832,7 +832,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                 <select
                   value={formStatus}
                   onChange={(e) => setFormStatus(e.target.value as AssignmentStatus)}
-                  className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
                   <option value="published">Published (Visible to Student)</option>
                   <option value="draft">Draft (Saved only for Mentor)</option>
@@ -879,7 +879,7 @@ export const MentorAssignmentsPage: React.FC = () => {
       {/* REVIEW SUBMISSION MODAL */}
       {reviewTarget && reviewTarget.submission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/60 backdrop-blur-xs">
-          <div className="bg-white border-4 border-brand-dark p-6 max-w-xl w-full shadow-brutal max-h-[90vh] overflow-y-auto">
+          <div className="bg-brand-paper border-4 border-brand-dark p-6 max-w-xl w-full shadow-brutal max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b-2 border-brand-dark mb-4">
               <div>
                 <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-brand-teal">
@@ -930,7 +930,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                 </label>
 
                 {reviewTarget.submission.submission_type === 'link' ? (
-                  <div className="p-4 bg-white border-2 border-brand-dark space-y-2">
+                  <div className="p-4 bg-brand-paper border-2 border-brand-dark space-y-2">
                     <div className="flex items-center gap-2 text-brand-teal font-mono text-xs">
                       <ExternalLink className="w-4 h-4 flex-shrink-0" />
                       <a
@@ -949,7 +949,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                     )}
                   </div>
                 ) : reviewTarget.submission.submission_type === 'file' ? (
-                  <div className="p-4 bg-white border-2 border-brand-dark space-y-2">
+                  <div className="p-4 bg-brand-paper border-2 border-brand-dark space-y-2">
                     <div className="flex items-center gap-2 font-mono text-xs text-brand-navy">
                       <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
                       <strong>{reviewTarget.submission.file_name || 'Attached File'}</strong>
@@ -966,7 +966,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <div className="p-4 bg-white border-2 border-brand-dark text-xs sm:text-sm font-sans whitespace-pre-wrap text-brand-dark leading-relaxed max-h-60 overflow-y-auto">
+                  <div className="p-4 bg-brand-paper border-2 border-brand-dark text-xs sm:text-sm font-sans whitespace-pre-wrap text-brand-dark leading-relaxed max-h-60 overflow-y-auto">
                     {reviewTarget.submission.content}
                   </div>
                 )}
@@ -1003,7 +1003,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                       value={reviewFeedback}
                       onChange={(e) => setReviewFeedback(e.target.value)}
                       placeholder="Detail calculation errors, conceptual gaps, notation advice, or commend strong derivation steps..."
-                      className="w-full bg-white border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       required
                     />
                   </div>
@@ -1021,7 +1021,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                         value={reviewScore}
                         onChange={(e) => setReviewScore(e.target.value)}
                         placeholder="e.g. 85"
-                        className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       />
                     </div>
 
@@ -1032,7 +1032,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                       <select
                         value={reviewStatus}
                         onChange={(e) => setReviewStatus(e.target.value as SubmissionStatus)}
-                        className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       >
                         <option value="reviewed">Reviewed &amp; Approved</option>
                         <option value="needs_revision">Needs Revision (Request Redo)</option>
@@ -1080,7 +1080,7 @@ export const MentorAssignmentsPage: React.FC = () => {
       {/* DELETE CONFIRMATION DIALOG */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/60 backdrop-blur-xs">
-          <div className="bg-white border-4 border-brand-dark p-6 max-w-md w-full shadow-brutal">
+          <div className="bg-brand-paper border-4 border-brand-dark p-6 max-w-md w-full shadow-brutal">
             <h3 className="font-heading font-black text-xl text-brand-navy mb-2 flex items-center gap-2">
               <Trash2 className="w-5 h-5 text-red-600" />
               Delete Assignment?

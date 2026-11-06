@@ -723,7 +723,7 @@ export const ProfilePage: React.FC = () => {
                   required
                   value={formData.fullName}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border-2 border-brand-dark bg-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   placeholder="e.g. Fahim Rahman"
                 />
               </div>
@@ -738,7 +738,7 @@ export const ProfilePage: React.FC = () => {
                   type="text"
                   value={formData.whatsappNumber}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border-2 border-brand-dark bg-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   placeholder="e.g. +880 1712-345678"
                 />
                 <span className="font-mono text-[10px] text-brand-muted block">
@@ -764,7 +764,7 @@ export const ProfilePage: React.FC = () => {
                       type="text"
                       value={formData.university}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border-2 border-brand-dark bg-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       placeholder="e.g. Dhaka University"
                     />
                   </div>
@@ -779,7 +779,7 @@ export const ProfilePage: React.FC = () => {
                       type="text"
                       value={formData.department}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border-2 border-brand-dark bg-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       placeholder="e.g. Computer Science & Engineering"
                     />
                   </div>
@@ -794,7 +794,7 @@ export const ProfilePage: React.FC = () => {
                       type="text"
                       value={formData.batch}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border-2 border-brand-dark bg-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       placeholder="e.g. 2023 or Batch 58"
                     />
                   </div>
@@ -809,7 +809,7 @@ export const ProfilePage: React.FC = () => {
                       type="text"
                       value={formData.currentSemester}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border-2 border-brand-dark bg-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       placeholder="e.g. 4th Semester"
                     />
                   </div>
@@ -833,7 +833,7 @@ export const ProfilePage: React.FC = () => {
                       type="text"
                       value={formData.academicBackground}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border-2 border-brand-dark bg-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       placeholder="e.g. Ph.D. in Computer Science"
                     />
                   </div>
@@ -848,7 +848,7 @@ export const ProfilePage: React.FC = () => {
                       type="text"
                       value={formData.university}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border-2 border-brand-dark bg-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       placeholder="e.g. University of Dhaka"
                     />
                   </div>
@@ -863,7 +863,7 @@ export const ProfilePage: React.FC = () => {
                       type="text"
                       value={formData.expertise}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border-2 border-brand-dark bg-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       placeholder="e.g. Algorithms, Data Structures, Discrete Math"
                     />
                   </div>
@@ -878,7 +878,7 @@ export const ProfilePage: React.FC = () => {
                       type="text"
                       value={formData.mentoringSubjects}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border-2 border-brand-dark bg-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       placeholder="e.g. CSE-201, CSE-205, General Study Organization"
                     />
                   </div>
@@ -897,7 +897,7 @@ export const ProfilePage: React.FC = () => {
                 rows={3}
                 value={formData.bio}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border-2 border-brand-dark bg-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal leading-relaxed"
+                className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal leading-relaxed"
                 placeholder={
                   isStudent
                     ? 'Outline your current academic goals, target courses, and study challenges...'
@@ -990,7 +990,7 @@ export const ProfilePage: React.FC = () => {
                     value={emailToLink}
                     onChange={(e) => setEmailToLink(e.target.value)}
                     placeholder="your.email@gmail.com"
-                    className="flex-1 px-3 py-1.5 text-xs border-2 border-brand-dark bg-white font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="flex-1 px-3 py-1.5 text-xs border-2 border-brand-dark bg-brand-paper font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   />
                   <Button
                     type="submit"

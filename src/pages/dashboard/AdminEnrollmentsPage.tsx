@@ -287,17 +287,17 @@ export const AdminEnrollmentsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border-3 border-[#082B4C] bg-white p-6 shadow-[4px_4px_0_0_#082B4C]">
+      <div className="border-3 border-brand-dark bg-brand-paper p-6 shadow-brutal">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-[#F6FAFB] text-[#082B4C] border border-[#082B4C] mb-2">
-              <UserCheck className="w-3.5 h-3.5 text-[#0BA7B4]" />
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-brand-bg text-brand-navy border border-brand-dark mb-2">
+              <UserCheck className="w-3.5 h-3.5 text-brand-teal" />
               Active Roster Desk
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-[#082B4C]">
+            <h1 className="text-2xl md:text-3xl font-black text-brand-navy">
               Program Enrollments
             </h1>
-            <p className="text-sm text-[#082B4C]/70 mt-1 max-w-2xl font-medium">
+            <p className="text-sm text-brand-navy/70 mt-1 max-w-2xl font-medium">
               Manage admitted student rosters across programs and cohorts. Track progress,
               manage cohort participation status, and view academic profiles.
             </p>
@@ -334,22 +334,22 @@ export const AdminEnrollmentsPage: React.FC = () => {
         </div>
 
         {/* Quick Stat Counters */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-6 border-t-2 border-[#082B4C]/10">
-          <div className="p-3 bg-[#F6FAFB] border-2 border-[#082B4C]">
-            <p className="text-xs font-bold text-[#082B4C]/60 uppercase">Total Students</p>
-            <p className="text-2xl font-black text-[#082B4C] mt-0.5">{totalCount}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-6 border-t-2 border-brand-dark/10">
+          <div className="p-3 bg-brand-bg border-2 border-brand-dark">
+            <p className="text-xs font-bold text-brand-navy/60 uppercase">Total Students</p>
+            <p className="text-2xl font-black text-brand-navy mt-0.5">{totalCount}</p>
           </div>
           <div className="p-3 bg-[#0BA7B4]/10 border-2 border-[#0BA7B4]">
-            <p className="text-xs font-bold text-[#082B4C]/70 uppercase">Active</p>
-            <p className="text-2xl font-black text-[#082B4C] mt-0.5">{activeCount}</p>
+            <p className="text-xs font-bold text-brand-navy/70 uppercase">Active</p>
+            <p className="text-2xl font-black text-brand-navy mt-0.5">{activeCount}</p>
           </div>
           <div className="p-3 bg-[#F5A623]/10 border-2 border-[#F5A623]">
-            <p className="text-xs font-bold text-[#082B4C]/70 uppercase">On Hold</p>
-            <p className="text-2xl font-black text-[#082B4C] mt-0.5">{onHoldCount}</p>
+            <p className="text-xs font-bold text-brand-navy/70 uppercase">On Hold</p>
+            <p className="text-2xl font-black text-brand-navy mt-0.5">{onHoldCount}</p>
           </div>
-          <div className="p-3 bg-[#082B4C]/10 border-2 border-[#082B4C]">
-            <p className="text-xs font-bold text-[#082B4C]/70 uppercase">Completed</p>
-            <p className="text-2xl font-black text-[#082B4C] mt-0.5">{completedCount}</p>
+          <div className="p-3 bg-brand-navy/10 border-2 border-brand-dark">
+            <p className="text-xs font-bold text-brand-navy/70 uppercase">Completed</p>
+            <p className="text-2xl font-black text-brand-navy mt-0.5">{completedCount}</p>
           </div>
           <div className="p-3 bg-gray-100 border-2 border-gray-400">
             <p className="text-xs font-bold text-gray-600 uppercase">Withdrawn</p>
@@ -378,12 +378,12 @@ export const AdminEnrollmentsPage: React.FC = () => {
       {successMessage && (
         <div className="p-4 bg-teal-50 border-3 border-[#0BA7B4] shadow-[4px_4px_0_0_#0BA7B4] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-[#0BA7B4] flex-shrink-0" />
-            <p className="text-sm font-bold text-[#082B4C]">{successMessage}</p>
+            <CheckCircle2 className="w-5 h-5 text-brand-teal flex-shrink-0" />
+            <p className="text-sm font-bold text-brand-navy">{successMessage}</p>
           </div>
           <button
             onClick={() => setSuccessMessage(null)}
-            className="text-[#082B4C] hover:opacity-75"
+            className="text-brand-navy hover:opacity-75"
             aria-label="Dismiss alert"
           >
             <X className="w-5 h-5" />
@@ -392,17 +392,17 @@ export const AdminEnrollmentsPage: React.FC = () => {
       )}
 
       {/* Filter and Search Bar */}
-      <div className="border-3 border-[#082B4C] bg-white p-4 shadow-[4px_4px_0_0_#082B4C]">
+      <div className="border-3 border-brand-dark bg-brand-paper p-4 shadow-brutal">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           {/* Search box */}
           <div className="md:col-span-4 relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#082B4C]/50" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-navy/50" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search student, ID, university..."
-              className="w-full pl-9 pr-3 py-2 text-sm border-2 border-[#082B4C] font-medium placeholder-[#082B4C]/40 focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+              className="w-full pl-9 pr-3 py-2 text-sm border-2 border-brand-dark font-medium placeholder-[#082B4C]/40 focus:outline-none focus:ring-2 focus:ring-brand-teal"
             />
           </div>
 
@@ -414,7 +414,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
                 setProgramFilter(e.target.value);
                 setCohortFilter('all');
               }}
-              className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+              className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Programs</option>
               {programs.map((p) => (
@@ -430,7 +430,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
             <select
               value={cohortFilter}
               onChange={(e) => setCohortFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+              className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Cohorts</option>
               {filteredCohorts.map((c) => (
@@ -446,7 +446,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+              className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
@@ -460,15 +460,15 @@ export const AdminEnrollmentsPage: React.FC = () => {
 
       {/* Main Roster List */}
       {loading ? (
-        <div className="border-3 border-[#082B4C] bg-white p-12 text-center shadow-[4px_4px_0_0_#082B4C]">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#0BA7B4] mb-3" />
-          <p className="text-sm font-bold text-[#082B4C]">Loading enrollments roster...</p>
+        <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
+          <p className="text-sm font-bold text-brand-navy">Loading enrollments roster...</p>
         </div>
       ) : filteredEnrollments.length === 0 ? (
-        <div className="border-3 border-[#082B4C] bg-white p-12 text-center shadow-[4px_4px_0_0_#082B4C]">
-          <UserCheck className="w-12 h-12 text-[#082B4C]/30 mx-auto mb-3" />
-          <h3 className="text-lg font-black text-[#082B4C]">No Enrollments Found</h3>
-          <p className="text-sm text-[#082B4C]/70 mt-1 max-w-md mx-auto">
+        <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
+          <UserCheck className="w-12 h-12 text-brand-navy/30 mx-auto mb-3" />
+          <h3 className="text-lg font-black text-brand-navy">No Enrollments Found</h3>
+          <p className="text-sm text-brand-navy/70 mt-1 max-w-md mx-auto">
             {searchQuery || statusFilter !== 'all' || programFilter !== 'all' || cohortFilter !== 'all'
               ? 'No enrollments match the selected filters or search query.'
               : 'Students will appear here automatically when their applications are approved.'}
@@ -490,11 +490,11 @@ export const AdminEnrollmentsPage: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="border-3 border-[#082B4C] bg-white shadow-[4px_4px_0_0_#082B4C] overflow-hidden">
+        <div className="border-3 border-brand-dark bg-brand-paper shadow-brutal overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b-3 border-[#082B4C] bg-[#F6FAFB] text-xs font-black uppercase text-[#082B4C] tracking-wider">
+                <tr className="border-b-3 border-brand-dark bg-brand-bg text-xs font-black uppercase text-brand-navy tracking-wider">
                   <th className="py-3 px-4">Student</th>
                   <th className="py-3 px-4">Program & Cohort</th>
                   <th className="py-3 px-4">Enrolled Date</th>
@@ -511,24 +511,24 @@ export const AdminEnrollmentsPage: React.FC = () => {
                   return (
                     <tr
                       key={enr.id}
-                      className="hover:bg-[#F6FAFB]/80 transition-colors"
+                      className="hover:bg-brand-bg/80 transition-colors"
                     >
                       {/* Student Info */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 border-2 border-[#082B4C] bg-[#0BA7B4]/20 flex items-center justify-center font-black text-[#082B4C] flex-shrink-0 text-sm">
+                          <div className="w-9 h-9 border-2 border-brand-dark bg-[#0BA7B4]/20 flex items-center justify-center font-black text-brand-navy flex-shrink-0 text-sm">
                             {student?.full_name?.charAt(0) || 'S'}
                           </div>
                           <div>
-                            <div className="font-black text-[#082B4C] flex items-center gap-2">
+                            <div className="font-black text-brand-navy flex items-center gap-2">
                               <span>{student?.full_name || 'Unknown Student'}</span>
                               {student?.poraplan_id && (
-                                <span className="font-mono text-xs px-1.5 py-0.2 bg-[#F6FAFB] border border-[#082B4C]/30 text-[#082B4C]/80 font-bold">
+                                <span className="font-mono text-xs px-1.5 py-0.2 bg-brand-bg border border-brand-dark/30 text-brand-navy/80 font-bold">
                                   {student.poraplan_id}
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-[#082B4C]/70 flex items-center gap-2 mt-0.5 font-medium">
+                            <div className="text-xs text-brand-navy/70 flex items-center gap-2 mt-0.5 font-medium">
                               {student?.university && (
                                 <span>{student.university}</span>
                               )}
@@ -551,23 +551,23 @@ export const AdminEnrollmentsPage: React.FC = () => {
 
                       {/* Program & Cohort */}
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-[#082B4C]">
+                        <div className="font-bold text-brand-navy">
                           {program?.name || 'General Mentorship'}
                         </div>
-                        <div className="text-xs text-[#082B4C]/70 flex items-center gap-1.5 mt-0.5 font-medium">
+                        <div className="text-xs text-brand-navy/70 flex items-center gap-1.5 mt-0.5 font-medium">
                           <span className="font-mono font-semibold px-1 py-0.2 bg-gray-100 border border-gray-300 text-gray-700">
                             {cohort?.name || 'Assigned Cohort'}
                           </span>
                           {cohort?.code && (
-                            <span className="text-[#082B4C]/50">({cohort.code})</span>
+                            <span className="text-brand-navy/50">({cohort.code})</span>
                           )}
                         </div>
                       </td>
 
                       {/* Enrolled Date */}
-                      <td className="py-3.5 px-4 font-mono text-xs text-[#082B4C]/80">
+                      <td className="py-3.5 px-4 font-mono text-xs text-brand-navy/80">
                         <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-[#0BA7B4]" />
+                          <Calendar className="w-3.5 h-3.5 text-brand-teal" />
                           <span>{new Date(enr.enrolled_at).toLocaleDateString()}</span>
                         </div>
                       </td>
@@ -606,22 +606,22 @@ export const AdminEnrollmentsPage: React.FC = () => {
 
       {/* Status Management Modal */}
       {modalOpen && selectedEnrollment && (
-        <div className="fixed inset-0 z-50 bg-[#082B4C]/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border-3 border-[#082B4C] shadow-[8px_8px_0_0_#082B4C] max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-brand-navy/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-brand-paper border-3 border-brand-dark shadow-brutal-xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
             {/* Modal Header */}
-            <div className="flex items-start justify-between pb-4 border-b-2 border-[#082B4C]/10">
+            <div className="flex items-start justify-between pb-4 border-b-2 border-brand-dark/10">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-[#0BA7B4]/10 text-[#082B4C] border border-[#0BA7B4] mb-1.5">
-                  <UserCheck className="w-3 h-3 text-[#0BA7B4]" />
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-[#0BA7B4]/10 text-brand-navy border border-[#0BA7B4] mb-1.5">
+                  <UserCheck className="w-3 h-3 text-brand-teal" />
                   Enrollment Record
                 </div>
-                <h2 className="text-xl font-black text-[#082B4C]">
+                <h2 className="text-xl font-black text-brand-navy">
                   Update Student Enrollment
                 </h2>
               </div>
               <button
                 onClick={() => setModalOpen(false)}
-                className="p-1 border border-transparent hover:border-[#082B4C] text-[#082B4C]/60 hover:text-[#082B4C]"
+                className="p-1 border border-transparent hover:border-brand-dark text-brand-navy/60 hover:text-brand-navy"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
@@ -629,13 +629,13 @@ export const AdminEnrollmentsPage: React.FC = () => {
             </div>
 
             {/* Student & Program Summary */}
-            <div className="mt-4 p-3 bg-[#F6FAFB] border-2 border-[#082B4C] space-y-2">
+            <div className="mt-4 p-3 bg-brand-bg border-2 border-brand-dark space-y-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-black text-[#082B4C]">
+                  <p className="text-sm font-black text-brand-navy">
                     {selectedEnrollment.student?.full_name}
                   </p>
-                  <p className="text-xs text-[#082B4C]/70 font-mono">
+                  <p className="text-xs text-brand-navy/70 font-mono">
                     ID: {selectedEnrollment.student?.poraplan_id || 'N/A'} • {selectedEnrollment.student?.email}
                   </p>
                 </div>
@@ -647,30 +647,30 @@ export const AdminEnrollmentsPage: React.FC = () => {
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#082B4C]/10 text-xs">
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-brand-dark/10 text-xs">
                 <div>
-                  <span className="font-bold text-[#082B4C]/70">Program: </span>
-                  <span className="font-semibold text-[#082B4C]">
+                  <span className="font-bold text-brand-navy/70">Program: </span>
+                  <span className="font-semibold text-brand-navy">
                     {selectedEnrollment.program?.name}
                   </span>
                 </div>
                 <div>
-                  <span className="font-bold text-[#082B4C]/70">Cohort: </span>
-                  <span className="font-semibold text-[#082B4C]">
+                  <span className="font-bold text-brand-navy/70">Cohort: </span>
+                  <span className="font-semibold text-brand-navy">
                     {selectedEnrollment.cohort?.name}
                   </span>
                 </div>
                 {selectedEnrollment.student?.university && (
                   <div className="col-span-2">
-                    <span className="font-bold text-[#082B4C]/70">University: </span>
-                    <span className="font-semibold text-[#082B4C]">
+                    <span className="font-bold text-brand-navy/70">University: </span>
+                    <span className="font-semibold text-brand-navy">
                       {selectedEnrollment.student.university} ({selectedEnrollment.student.department || 'N/A'})
                     </span>
                   </div>
                 )}
                 {selectedEnrollment.student?.whatsapp_number && (
                   <div className="col-span-2 flex items-center gap-1.5 font-mono">
-                    <Phone className="w-3 h-3 text-[#0BA7B4]" />
+                    <Phone className="w-3 h-3 text-brand-teal" />
                     <span>{selectedEnrollment.student.whatsapp_number}</span>
                   </div>
                 )}
@@ -679,7 +679,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
 
             {/* Status Selector */}
             <div className="mt-5 space-y-2">
-              <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider">
+              <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
                 Select New Status
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -690,16 +690,16 @@ export const AdminEnrollmentsPage: React.FC = () => {
                     onClick={() => setNewStatus(st)}
                     className={`p-3 text-left border-2 font-bold transition-all ${
                       newStatus === st
-                        ? 'border-[#082B4C] bg-[#0BA7B4]/15 shadow-[2px_2px_0_0_#082B4C]'
-                        : 'border-[#082B4C]/30 bg-white hover:border-[#082B4C]'
+                        ? 'border-brand-dark bg-[#0BA7B4]/15 shadow-[2px_2px_0_0_#082B4C]'
+                        : 'border-brand-dark/30 bg-brand-paper hover:border-brand-dark'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="capitalize text-sm text-[#082B4C]">
+                      <span className="capitalize text-sm text-brand-navy">
                         {st.replace('_', ' ')}
                       </span>
                       {newStatus === st && (
-                        <CheckCircle2 className="w-4 h-4 text-[#0BA7B4]" />
+                        <CheckCircle2 className="w-4 h-4 text-brand-teal" />
                       )}
                     </div>
                   </button>
@@ -708,7 +708,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
             </div>
 
             {/* Actions */}
-            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t-2 border-[#082B4C]/10">
+            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t-2 border-brand-dark/10">
               <Button
                 variant="outline"
                 size="sm"
@@ -739,20 +739,20 @@ export const AdminEnrollmentsPage: React.FC = () => {
       {/* Manual Direct Enrollment Modal */}
       {enrollModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border-3 border-[#082B4C] shadow-[8px_8px_0_0_#082B4C] w-full max-w-lg p-6 animate-fade-in">
-            <div className="flex items-start justify-between border-b-2 border-[#082B4C]/10 pb-4">
+          <div className="bg-brand-paper border-3 border-brand-dark shadow-brutal-xl w-full max-w-lg p-6 animate-fade-in">
+            <div className="flex items-start justify-between border-b-2 border-brand-dark/10 pb-4">
               <div>
-                <h3 className="text-lg font-black text-[#082B4C] flex items-center gap-2">
-                  <UserPlus className="w-5 h-5 text-[#0BA7B4]" />
+                <h3 className="text-lg font-black text-brand-navy flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-brand-teal" />
                   Direct Student Enrollment
                 </h3>
-                <p className="text-xs text-[#082B4C]/70 mt-1">
+                <p className="text-xs text-brand-navy/70 mt-1">
                   Enroll an existing student directly into an active cohort without requiring a public application.
                 </p>
               </div>
               <button
                 onClick={() => setEnrollModalOpen(false)}
-                className="text-[#082B4C]/50 hover:text-[#082B4C] p-1"
+                className="text-brand-navy/50 hover:text-brand-navy p-1"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
@@ -769,11 +769,11 @@ export const AdminEnrollmentsPage: React.FC = () => {
             <form onSubmit={handleDirectEnrollSubmit} className="mt-4 space-y-4">
               {/* 1. Select Student */}
               <div>
-                <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider mb-1">
+                <label className="block text-xs font-black uppercase text-brand-navy tracking-wider mb-1">
                   1. Select Student <span className="text-red-500">*</span>
                 </label>
                 {loadingStudents ? (
-                  <div className="p-2 border-2 border-[#082B4C] bg-gray-50 text-xs text-[#082B4C]/60 flex items-center gap-2">
+                  <div className="p-2 border-2 border-brand-dark bg-gray-50 text-xs text-brand-navy/60 flex items-center gap-2">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading scholars list...
                   </div>
                 ) : (
@@ -781,7 +781,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
                     value={selectedStudentId}
                     onChange={(e) => setSelectedStudentId(e.target.value)}
                     required
-                    className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                    className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   >
                     <option value="">-- Choose Student --</option>
                     {studentsList.map((s) => (
@@ -795,14 +795,14 @@ export const AdminEnrollmentsPage: React.FC = () => {
 
               {/* 2. Select Program */}
               <div>
-                <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider mb-1">
+                <label className="block text-xs font-black uppercase text-brand-navy tracking-wider mb-1">
                   2. Select Program <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={selectedProgramId}
                   onChange={(e) => handleProgramSelection(e.target.value)}
                   required
-                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
                   <option value="">-- Choose Program --</option>
                   {programs.map((p) => (
@@ -815,7 +815,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
 
               {/* 3. Select Cohort */}
               <div>
-                <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider mb-1">
+                <label className="block text-xs font-black uppercase text-brand-navy tracking-wider mb-1">
                   3. Select Cohort <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -823,7 +823,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
                   onChange={(e) => setSelectedCohortId(e.target.value)}
                   required
                   disabled={!selectedProgramId}
-                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4] disabled:bg-gray-100 disabled:text-gray-400"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal disabled:bg-gray-100 disabled:text-gray-400"
                 >
                   <option value="">
                     {!selectedProgramId ? '-- Select Program First --' : '-- Choose Cohort --'}
@@ -851,15 +851,15 @@ export const AdminEnrollmentsPage: React.FC = () => {
 
               {/* 4. Optional Mentor Allocation */}
               <div>
-                <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider mb-1 flex items-center justify-between">
+                <label className="block text-xs font-black uppercase text-brand-navy tracking-wider mb-1 flex items-center justify-between">
                   <span>4. Assign Mentor (Optional)</span>
-                  {loadingMentors && <Loader2 className="w-3 h-3 animate-spin text-[#0BA7B4]" />}
+                  {loadingMentors && <Loader2 className="w-3 h-3 animate-spin text-brand-teal" />}
                 </label>
                 <select
                   value={selectedMentorId}
                   onChange={(e) => setSelectedMentorId(e.target.value)}
                   disabled={!selectedProgramId || loadingMentors}
-                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4] disabled:bg-gray-100 disabled:text-gray-400"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal disabled:bg-gray-100 disabled:text-gray-400"
                 >
                   <option value="">-- No Direct Mentor (Use Cohort Default) --</option>
                   {eligibleMentors.map((m) => (
@@ -868,14 +868,14 @@ export const AdminEnrollmentsPage: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                <p className="text-[11px] text-[#082B4C]/60 mt-1">
+                <p className="text-[11px] text-brand-navy/60 mt-1">
                   Only mentors eligible for the selected program appear here.
                 </p>
               </div>
 
               {/* 5. Remarks / Notes */}
               <div>
-                <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider mb-1">
+                <label className="block text-xs font-black uppercase text-brand-navy tracking-wider mb-1">
                   5. Administrative Remarks
                 </label>
                 <textarea
@@ -883,12 +883,12 @@ export const AdminEnrollmentsPage: React.FC = () => {
                   onChange={(e) => setEnrollmentNotes(e.target.value)}
                   rows={2}
                   placeholder="Optional intake rationale, sponsorship details, or special terms..."
-                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-medium bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 />
               </div>
 
               {/* Action buttons */}
-              <div className="pt-4 border-t-2 border-[#082B4C]/10 flex items-center justify-end gap-3">
+              <div className="pt-4 border-t-2 border-brand-dark/10 flex items-center justify-end gap-3">
                 <Button
                   type="button"
                   variant="outline"

@@ -368,17 +368,17 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 1. HEADER & DESK SUMMARY */}
-      <div className="border-3 border-[#082B4C] bg-white p-6 shadow-[4px_4px_0_0_#082B4C]">
+      <div className="border-3 border-brand-dark bg-brand-paper p-6 shadow-brutal">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-[#F6FAFB] text-[#082B4C] border border-[#082B4C] mb-2">
-              <Users className="w-3.5 h-3.5 text-[#0BA7B4]" />
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-brand-bg text-brand-navy border border-brand-dark mb-2">
+              <Users className="w-3.5 h-3.5 text-brand-teal" />
               Mentorship Allocations
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-[#082B4C]">
+            <h1 className="text-2xl md:text-3xl font-black text-brand-navy">
               Mentor Assignment &amp; Matching Desk
             </h1>
-            <p className="text-sm text-[#082B4C]/70 mt-1 max-w-2xl font-medium">
+            <p className="text-sm text-brand-navy/70 mt-1 max-w-2xl font-medium">
               Allocate default mentors to cohort groups, set individual student overrides,
               and manage mentor workload allocations with strict precedence resolution.
             </p>
@@ -402,26 +402,26 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
         </div>
 
         {/* Quick Stat Ribbon */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-6 border-t-2 border-[#082B4C]/10">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-6 border-t-2 border-brand-dark/10">
           <div className="p-3 bg-[#0BA7B4]/10 border-2 border-[#0BA7B4]">
-            <p className="text-xs font-bold text-[#082B4C]/70 uppercase">Cohort Mentors</p>
-            <p className="text-2xl font-black text-[#082B4C] mt-0.5">{activeCohortAssignmentsCount}</p>
+            <p className="text-xs font-bold text-brand-navy/70 uppercase">Cohort Mentors</p>
+            <p className="text-2xl font-black text-brand-navy mt-0.5">{activeCohortAssignmentsCount}</p>
           </div>
           <div className="p-3 bg-[#F5A623]/10 border-2 border-[#F5A623]">
-            <p className="text-xs font-bold text-[#082B4C]/70 uppercase">Individual Overrides</p>
-            <p className="text-2xl font-black text-[#082B4C] mt-0.5">{activeIndividualOverridesCount}</p>
+            <p className="text-xs font-bold text-brand-navy/70 uppercase">Individual Overrides</p>
+            <p className="text-2xl font-black text-brand-navy mt-0.5">{activeIndividualOverridesCount}</p>
           </div>
-          <div className="p-3 bg-[#082B4C]/10 border-2 border-[#082B4C]">
-            <p className="text-xs font-bold text-[#082B4C]/70 uppercase">Students Paired</p>
-            <p className="text-2xl font-black text-[#082B4C] mt-0.5">{studentsWithMentorCount}</p>
+          <div className="p-3 bg-brand-navy/10 border-2 border-brand-dark">
+            <p className="text-xs font-bold text-brand-navy/70 uppercase">Students Paired</p>
+            <p className="text-2xl font-black text-brand-navy mt-0.5">{studentsWithMentorCount}</p>
           </div>
           <div className="p-3 bg-red-50 border-2 border-red-300">
             <p className="text-xs font-bold text-red-700 uppercase">Unassigned Students</p>
             <p className="text-2xl font-black text-red-800 mt-0.5">{studentsWithoutMentorCount}</p>
           </div>
-          <div className="p-3 bg-[#F6FAFB] border-2 border-[#082B4C]">
-            <p className="text-xs font-bold text-[#082B4C]/60 uppercase">Available Mentors</p>
-            <p className="text-2xl font-black text-[#082B4C] mt-0.5">{mentorsCount}</p>
+          <div className="p-3 bg-brand-bg border-2 border-brand-dark">
+            <p className="text-xs font-bold text-brand-navy/60 uppercase">Available Mentors</p>
+            <p className="text-2xl font-black text-brand-navy mt-0.5">{mentorsCount}</p>
           </div>
         </div>
       </div>
@@ -442,23 +442,23 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {successMessage && (
         <div className="p-4 bg-teal-50 border-3 border-[#0BA7B4] shadow-[4px_4px_0_0_#0BA7B4] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-[#0BA7B4] flex-shrink-0" />
-            <p className="text-sm font-bold text-[#082B4C]">{successMessage}</p>
+            <CheckCircle2 className="w-5 h-5 text-brand-teal flex-shrink-0" />
+            <p className="text-sm font-bold text-brand-navy">{successMessage}</p>
           </div>
-          <button onClick={() => setSuccessMessage(null)} className="text-[#082B4C] hover:opacity-75">
+          <button onClick={() => setSuccessMessage(null)} className="text-brand-navy hover:opacity-75">
             <X className="w-5 h-5" />
           </button>
         </div>
       )}
 
       {/* 2. TAB CONTROLS */}
-      <div className="flex border-b-3 border-[#082B4C] bg-white shadow-[4px_4px_0_0_#082B4C]">
+      <div className="flex border-b-3 border-brand-dark bg-brand-paper shadow-brutal">
         <button
           onClick={() => setActiveTab('cohorts')}
-          className={`flex-1 sm:flex-none py-3 px-6 text-sm font-black border-r-2 border-[#082B4C] transition-colors flex items-center justify-center gap-2 ${
+          className={`flex-1 sm:flex-none py-3 px-6 text-sm font-black border-r-2 border-brand-dark transition-colors flex items-center justify-center gap-2 ${
             activeTab === 'cohorts'
               ? 'bg-[#0BA7B4] text-white'
-              : 'bg-white text-[#082B4C] hover:bg-[#F6FAFB]'
+              : 'bg-brand-paper text-brand-navy hover:bg-brand-bg'
           }`}
         >
           <GraduationCap className="w-4 h-4" />
@@ -467,10 +467,10 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('students')}
-          className={`flex-1 sm:flex-none py-3 px-6 text-sm font-black border-r-2 border-[#082B4C] transition-colors flex items-center justify-center gap-2 ${
+          className={`flex-1 sm:flex-none py-3 px-6 text-sm font-black border-r-2 border-brand-dark transition-colors flex items-center justify-center gap-2 ${
             activeTab === 'students'
               ? 'bg-[#0BA7B4] text-white'
-              : 'bg-white text-[#082B4C] hover:bg-[#F6FAFB]'
+              : 'bg-brand-paper text-brand-navy hover:bg-brand-bg'
           }`}
         >
           <UserCheck className="w-4 h-4" />
@@ -482,7 +482,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
           className={`flex-1 sm:flex-none py-3 px-6 text-sm font-black transition-colors flex items-center justify-center gap-2 ${
             activeTab === 'workload'
               ? 'bg-[#0BA7B4] text-white'
-              : 'bg-white text-[#082B4C] hover:bg-[#F6FAFB]'
+              : 'bg-brand-paper text-brand-navy hover:bg-brand-bg'
           }`}
         >
           <Briefcase className="w-4 h-4" />
@@ -496,15 +496,15 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {activeTab === 'cohorts' && (
         <div className="space-y-4">
           {/* Program Filter Bar */}
-          <div className="border-3 border-[#082B4C] bg-white p-4 shadow-[4px_4px_0_0_#082B4C] flex items-center justify-between gap-4">
+          <div className="border-3 border-brand-dark bg-brand-paper p-4 shadow-brutal flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-black uppercase text-[#082B4C] tracking-wider">
+              <span className="text-xs font-black uppercase text-brand-navy tracking-wider">
                 Filter by Program:
               </span>
               <select
                 value={programFilter}
                 onChange={(e) => setProgramFilter(e.target.value)}
-                className="px-3 py-1.5 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                className="px-3 py-1.5 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
               >
                 <option value="all">All Programs ({programs.length})</option>
                 {programs.map((p) => (
@@ -514,22 +514,22 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div className="text-xs font-mono text-[#082B4C]/70">
+            <div className="text-xs font-mono text-brand-navy/70">
               Showing {filteredCohorts.length} cohorts
             </div>
           </div>
 
           {/* Cohorts Grid */}
           {loading ? (
-            <div className="border-3 border-[#082B4C] bg-white p-12 text-center shadow-[4px_4px_0_0_#082B4C]">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#0BA7B4] mb-3" />
-              <p className="text-sm font-bold text-[#082B4C]">Loading cohort allocations...</p>
+            <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
+              <p className="text-sm font-bold text-brand-navy">Loading cohort allocations...</p>
             </div>
           ) : filteredCohorts.length === 0 ? (
-            <div className="border-3 border-[#082B4C] bg-white p-12 text-center shadow-[4px_4px_0_0_#082B4C]">
-              <GraduationCap className="w-12 h-12 text-[#082B4C]/30 mx-auto mb-3" />
-              <h3 className="text-lg font-black text-[#082B4C]">No Cohorts Found</h3>
-              <p className="text-sm text-[#082B4C]/70 mt-1">
+            <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
+              <GraduationCap className="w-12 h-12 text-brand-navy/30 mx-auto mb-3" />
+              <h3 className="text-lg font-black text-brand-navy">No Cohorts Found</h3>
+              <p className="text-sm text-brand-navy/70 mt-1">
                 No cohorts match the selected program filter.
               </p>
             </div>
@@ -547,12 +547,12 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 return (
                   <div
                     key={cohort.id}
-                    className="border-3 border-[#082B4C] bg-white p-5 shadow-[4px_4px_0_0_#082B4C] flex flex-col justify-between space-y-4"
+                    className="border-3 border-brand-dark bg-brand-paper p-5 shadow-brutal flex flex-col justify-between space-y-4"
                   >
                     <div>
                       {/* Program & Status Badges */}
                       <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="font-mono text-xs font-bold text-[#0BA7B4] uppercase">
+                        <span className="font-mono text-xs font-bold text-brand-teal uppercase">
                           {program?.name || 'Academic Mentorship'}
                         </span>
                         <Badge
@@ -565,10 +565,10 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                       </div>
 
                       {/* Cohort Name & Code */}
-                      <h3 className="text-lg font-black text-[#082B4C]">
+                      <h3 className="text-lg font-black text-brand-navy">
                         {cohort.name}
                       </h3>
-                      <div className="flex items-center gap-2 font-mono text-xs text-[#082B4C]/70 mt-0.5">
+                      <div className="flex items-center gap-2 font-mono text-xs text-brand-navy/70 mt-0.5">
                         <span className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 font-bold">
                           {cohort.code}
                         </span>
@@ -577,30 +577,30 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                       </div>
 
                       {/* Mentor Status Card */}
-                      <div className="mt-4 p-3 bg-[#F6FAFB] border-2 border-[#082B4C]">
-                        <p className="text-xs font-bold uppercase tracking-wider text-[#082B4C]/60 mb-1">
+                      <div className="mt-4 p-3 bg-brand-bg border-2 border-brand-dark">
+                        <p className="text-xs font-bold uppercase tracking-wider text-brand-navy/60 mb-1">
                           Default Cohort Mentor
                         </p>
                         {activeAssignment && activeAssignment.mentor ? (
                           <div className="space-y-1">
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-black text-[#082B4C]">
+                              <span className="text-sm font-black text-brand-navy">
                                 {activeAssignment.mentor.full_name}
                               </span>
                               <Badge variant="gold" size="sm" className="font-bold">
                                 Cohort Default
                               </Badge>
                             </div>
-                            <div className="text-xs text-[#082B4C]/70 font-mono">
+                            <div className="text-xs text-brand-navy/70 font-mono">
                               ID: {activeAssignment.mentor.poraplan_id || 'N/A'} • {activeAssignment.mentor.email}
                             </div>
                             {activeAssignment.mentor.whatsapp_number && (
-                              <div className="text-xs text-[#082B4C]/80 flex items-center gap-1 font-mono pt-0.5">
-                                <Phone className="w-3 h-3 text-[#0BA7B4]" />
+                              <div className="text-xs text-brand-navy/80 flex items-center gap-1 font-mono pt-0.5">
+                                <Phone className="w-3 h-3 text-brand-teal" />
                                 <span>{activeAssignment.mentor.whatsapp_number}</span>
                               </div>
                             )}
-                            <div className="text-[11px] text-[#082B4C]/60 pt-1 font-mono">
+                            <div className="text-[11px] text-brand-navy/60 pt-1 font-mono">
                               Assigned {new Date(activeAssignment.assigned_at).toLocaleDateString()}
                             </div>
                           </div>
@@ -610,7 +610,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                               <AlertTriangle className="w-3.5 h-3.5" />
                               No default mentor allocated to this cohort
                             </p>
-                            <p className="text-[11px] text-[#082B4C]/60 mt-0.5">
+                            <p className="text-[11px] text-brand-navy/60 mt-0.5">
                               Enrolled students currently have no default mentor unless individually overridden.
                             </p>
                           </div>
@@ -619,7 +619,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                     </div>
 
                     {/* Actions */}
-                    <div className="pt-3 border-t-2 border-[#082B4C]/10 flex items-center justify-between gap-2">
+                    <div className="pt-3 border-t-2 border-brand-dark/10 flex items-center justify-between gap-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -677,16 +677,16 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {activeTab === 'students' && (
         <div className="space-y-4">
           {/* Search and Filters */}
-          <div className="border-3 border-[#082B4C] bg-white p-4 shadow-[4px_4px_0_0_#082B4C]">
+          <div className="border-3 border-brand-dark bg-brand-paper p-4 shadow-brutal">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
               <div className="md:col-span-5 relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#082B4C]/50" />
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-navy/50" />
                 <input
                   type="text"
                   value={studentSearch}
                   onChange={(e) => setStudentSearch(e.target.value)}
                   placeholder="Search student, PoraPlan ID, university..."
-                  className="w-full pl-9 pr-3 py-2 text-sm border-2 border-[#082B4C] font-medium placeholder-[#082B4C]/40 focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                  className="w-full pl-9 pr-3 py-2 text-sm border-2 border-brand-dark font-medium placeholder-[#082B4C]/40 focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 />
               </div>
 
@@ -697,7 +697,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                     setProgramFilter(e.target.value);
                     setCohortFilter('all');
                   }}
-                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
                   <option value="all">All Programs ({programs.length})</option>
                   {programs.map((p) => (
@@ -712,7 +712,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 <select
                   value={cohortFilter}
                   onChange={(e) => setCohortFilter(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
                   <option value="all">All Cohorts</option>
                   {cohorts
@@ -729,24 +729,24 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
 
           {/* Student Roster Table */}
           {loading ? (
-            <div className="border-3 border-[#082B4C] bg-white p-12 text-center shadow-[4px_4px_0_0_#082B4C]">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#0BA7B4] mb-3" />
-              <p className="text-sm font-bold text-[#082B4C]">Loading student roster &amp; resolutions...</p>
+            <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
+              <p className="text-sm font-bold text-brand-navy">Loading student roster &amp; resolutions...</p>
             </div>
           ) : filteredEnrollments.length === 0 ? (
-            <div className="border-3 border-[#082B4C] bg-white p-12 text-center shadow-[4px_4px_0_0_#082B4C]">
-              <UserCheck className="w-12 h-12 text-[#082B4C]/30 mx-auto mb-3" />
-              <h3 className="text-lg font-black text-[#082B4C]">No Students Found</h3>
-              <p className="text-sm text-[#082B4C]/70 mt-1">
+            <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
+              <UserCheck className="w-12 h-12 text-brand-navy/30 mx-auto mb-3" />
+              <h3 className="text-lg font-black text-brand-navy">No Students Found</h3>
+              <p className="text-sm text-brand-navy/70 mt-1">
                 No active student enrollments match your filters.
               </p>
             </div>
           ) : (
-            <div className="border-3 border-[#082B4C] bg-white shadow-[4px_4px_0_0_#082B4C] overflow-hidden">
+            <div className="border-3 border-brand-dark bg-brand-paper shadow-brutal overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b-3 border-[#082B4C] bg-[#F6FAFB] text-xs font-black uppercase text-[#082B4C] tracking-wider">
+                    <tr className="border-b-3 border-brand-dark bg-brand-bg text-xs font-black uppercase text-brand-navy tracking-wider">
                       <th className="py-3 px-4">Student</th>
                       <th className="py-3 px-4">Program &amp; Cohort</th>
                       <th className="py-3 px-4">Effective Mentor</th>
@@ -763,26 +763,26 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                       const isIndividual = assignType === 'individual';
 
                       return (
-                        <tr key={enr.id} className="hover:bg-[#F6FAFB]/80 transition-colors">
+                        <tr key={enr.id} className="hover:bg-brand-bg/80 transition-colors">
                           {/* Student */}
                           <td className="py-3 px-4">
-                            <div className="font-black text-[#082B4C] flex items-center gap-2">
+                            <div className="font-black text-brand-navy flex items-center gap-2">
                               <span>{student?.full_name || 'Student'}</span>
                               {student?.poraplan_id && (
-                                <span className="font-mono text-xs px-1.5 py-0.2 bg-[#F6FAFB] border border-[#082B4C]/30 font-bold">
+                                <span className="font-mono text-xs px-1.5 py-0.2 bg-brand-bg border border-brand-dark/30 font-bold">
                                   {student.poraplan_id}
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-[#082B4C]/70 font-medium">
+                            <div className="text-xs text-brand-navy/70 font-medium">
                               {student?.university || 'University'} • Sem {student?.current_semester || 'N/A'}
                             </div>
                           </td>
 
                           {/* Program & Cohort */}
                           <td className="py-3 px-4">
-                            <div className="font-bold text-[#082B4C]">{enr.program?.name}</div>
-                            <div className="text-xs text-[#082B4C]/70 font-mono font-medium">
+                            <div className="font-bold text-brand-navy">{enr.program?.name}</div>
+                            <div className="text-xs text-brand-navy/70 font-mono font-medium">
                               {enr.cohort?.name} ({enr.cohort?.code})
                             </div>
                           </td>
@@ -791,15 +791,15 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                           <td className="py-3 px-4">
                             {effectiveMentor ? (
                               <div>
-                                <div className="font-black text-[#082B4C] flex items-center gap-1.5">
+                                <div className="font-black text-brand-navy flex items-center gap-1.5">
                                   <span>{effectiveMentor.full_name}</span>
                                   {effectiveMentor.poraplan_id && (
-                                    <span className="font-mono text-xs text-[#0BA7B4] font-bold">
+                                    <span className="font-mono text-xs text-brand-teal font-bold">
                                       ({effectiveMentor.poraplan_id})
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-xs text-[#082B4C]/70 font-mono">
+                                <div className="text-xs text-brand-navy/70 font-mono">
                                   {effectiveMentor.email}
                                 </div>
                               </div>
@@ -880,22 +880,22 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {/* ============================================================================== */}
       {activeTab === 'workload' && (
         <div className="space-y-4">
-          <div className="border-3 border-[#082B4C] bg-white p-6 shadow-[4px_4px_0_0_#082B4C]">
-            <h2 className="text-lg font-black text-[#082B4C] flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-[#0BA7B4]" />
+          <div className="border-3 border-brand-dark bg-brand-paper p-6 shadow-brutal">
+            <h2 className="text-lg font-black text-brand-navy flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-brand-teal" />
               Mentor Capacity &amp; Allocation Distribution
             </h2>
-            <p className="text-xs text-[#082B4C]/70 mt-1">
+            <p className="text-xs text-brand-navy/70 mt-1">
               Informational workload distribution overview. Students with individual overrides
               are deduplicated so they are not double-counted across cohort and individual tallies.
             </p>
           </div>
 
-          <div className="border-3 border-[#082B4C] bg-white shadow-[4px_4px_0_0_#082B4C] overflow-hidden">
+          <div className="border-3 border-brand-dark bg-brand-paper shadow-brutal overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b-3 border-[#082B4C] bg-[#F6FAFB] text-xs font-black uppercase text-[#082B4C] tracking-wider">
+                  <tr className="border-b-3 border-brand-dark bg-brand-bg text-xs font-black uppercase text-brand-navy tracking-wider">
                     <th className="py-3 px-4">Mentor</th>
                     <th className="py-3 px-4">Contact</th>
                     <th className="py-3 px-4 text-center">Active Cohorts</th>
@@ -906,45 +906,45 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 </thead>
                 <tbody className="divide-y-2 divide-[#082B4C]/10 text-sm">
                   {workload.map((w) => (
-                    <tr key={w.mentor.id} className="hover:bg-[#F6FAFB]/80 transition-colors">
+                    <tr key={w.mentor.id} className="hover:bg-brand-bg/80 transition-colors">
                       <td className="py-3 px-4">
-                        <div className="font-black text-[#082B4C] flex items-center gap-2">
+                        <div className="font-black text-brand-navy flex items-center gap-2">
                           <span>{w.mentor.full_name}</span>
                           {w.mentor.poraplan_id && (
-                            <span className="font-mono text-xs px-1.5 py-0.2 bg-[#F6FAFB] border border-[#082B4C]/30 font-bold">
+                            <span className="font-mono text-xs px-1.5 py-0.2 bg-brand-bg border border-brand-dark/30 font-bold">
                               {w.mentor.poraplan_id}
                             </span>
                           )}
                         </div>
-                        <div className="text-xs text-[#082B4C]/70 font-medium">
+                        <div className="text-xs text-brand-navy/70 font-medium">
                           {w.mentor.academic_background || w.mentor.expertise || 'Mentor'}
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 font-mono text-xs text-[#082B4C]">
+                      <td className="py-3 px-4 font-mono text-xs text-brand-navy">
                         <div>{w.mentor.email}</div>
                         {w.mentor.whatsapp_number && (
-                          <div className="text-[#0BA7B4] flex items-center gap-1 mt-0.5">
+                          <div className="text-brand-teal flex items-center gap-1 mt-0.5">
                             <Phone className="w-3 h-3" />
                             <span>{w.mentor.whatsapp_number}</span>
                           </div>
                         )}
                       </td>
 
-                      <td className="py-3 px-4 text-center font-bold text-base text-[#082B4C]">
+                      <td className="py-3 px-4 text-center font-bold text-base text-brand-navy">
                         <span className="px-2.5 py-0.5 bg-gray-100 border border-gray-300">
                           {w.activeCohortsCount}
                         </span>
                       </td>
 
-                      <td className="py-3 px-4 text-center font-bold text-base text-[#082B4C]">
+                      <td className="py-3 px-4 text-center font-bold text-base text-brand-navy">
                         <span className="px-2.5 py-0.5 bg-[#F5A623]/20 border border-[#F5A623]">
                           {w.individualOverridesCount}
                         </span>
                       </td>
 
                       <td className="py-3 px-4 text-center">
-                        <span className="px-3 py-1 bg-[#0BA7B4]/20 border-2 border-[#0BA7B4] font-black text-base text-[#082B4C]">
+                        <span className="px-3 py-1 bg-[#0BA7B4]/20 border-2 border-[#0BA7B4] font-black text-base text-brand-navy">
                           {w.totalEffectiveMenteesCount}
                         </span>
                       </td>
@@ -970,37 +970,37 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {/* MODAL 1: ASSIGN / REPLACE COHORT DEFAULT MENTOR */}
       {/* ============================================================================== */}
       {cohortModalOpen && selectedCohort && (
-        <div className="fixed inset-0 z-50 bg-[#082B4C]/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border-3 border-[#082B4C] shadow-[8px_8px_0_0_#082B4C] max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start justify-between pb-4 border-b-2 border-[#082B4C]/10">
+        <div className="fixed inset-0 z-50 bg-brand-navy/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-brand-paper border-3 border-brand-dark shadow-brutal-xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
+            <div className="flex items-start justify-between pb-4 border-b-2 border-brand-dark/10">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-[#0BA7B4]/10 text-[#082B4C] border border-[#0BA7B4] mb-1.5">
-                  <GraduationCap className="w-3 h-3 text-[#0BA7B4]" />
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-[#0BA7B4]/10 text-brand-navy border border-[#0BA7B4] mb-1.5">
+                  <GraduationCap className="w-3 h-3 text-brand-teal" />
                   Cohort Mentorship
                 </div>
-                <h2 className="text-xl font-black text-[#082B4C]">
+                <h2 className="text-xl font-black text-brand-navy">
                   Assign Default Mentor
                 </h2>
               </div>
               <button
                 onClick={() => setCohortModalOpen(false)}
-                className="p-1 text-[#082B4C]/60 hover:text-[#082B4C]"
+                className="p-1 text-brand-navy/60 hover:text-brand-navy"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Target Cohort Summary */}
-            <div className="mt-4 p-3 bg-[#F6FAFB] border-2 border-[#082B4C] space-y-1">
-              <p className="text-xs font-bold uppercase text-[#082B4C]/60">Target Cohort</p>
-              <p className="text-base font-black text-[#082B4C]">
+            <div className="mt-4 p-3 bg-brand-bg border-2 border-brand-dark space-y-1">
+              <p className="text-xs font-bold uppercase text-brand-navy/60">Target Cohort</p>
+              <p className="text-base font-black text-brand-navy">
                 {selectedCohort.name} ({selectedCohort.code})
               </p>
-              <p className="text-xs text-[#082B4C]/70">
+              <p className="text-xs text-brand-navy/70">
                 Program:{' '}
                 {programs.find((p) => p.id === selectedCohort.program_id)?.name || 'Mentorship Program'}
               </p>
-              <p className="text-xs font-mono text-[#0BA7B4] pt-1">
+              <p className="text-xs font-mono text-brand-teal pt-1">
                 Notice: All enrolled students in this cohort will inherit this mentor unless an
                 individual override is assigned.
               </p>
@@ -1008,7 +1008,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
 
             {/* Select Mentor */}
             <div className="mt-4 space-y-2">
-              <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider">
+              <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
                 Select Eligible Mentor
               </label>
               {eligibleMentorsForCohort.length === 0 ? (
@@ -1019,7 +1019,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 <select
                   value={selectedMentorId}
                   onChange={(e) => setSelectedMentorId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
                   {eligibleMentorsForCohort.map((m) => (
                     <option key={m.id} value={m.id}>
@@ -1032,7 +1032,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
 
             {/* Admin Notes */}
             <div className="mt-4 space-y-2">
-              <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider">
+              <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
                 Internal Allocation Notes (Optional)
               </label>
               <textarea
@@ -1040,12 +1040,12 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 onChange={(e) => setAssignmentNotes(e.target.value)}
                 placeholder="e.g. Lead academic mentor for undergraduate batch curriculum."
                 rows={2}
-                className="w-full p-2.5 text-xs border-2 border-[#082B4C] font-medium focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                className="w-full p-2.5 text-xs border-2 border-brand-dark font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal"
               />
             </div>
 
             {/* Actions */}
-            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t-2 border-[#082B4C]/10">
+            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t-2 border-brand-dark/10">
               <Button
                 variant="outline"
                 size="sm"
@@ -1077,36 +1077,36 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {/* MODAL 2: ASSIGN INDIVIDUAL STUDENT OVERRIDE */}
       {/* ============================================================================== */}
       {individualModalOpen && selectedStudentEnrollment && (
-        <div className="fixed inset-0 z-50 bg-[#082B4C]/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border-3 border-[#082B4C] shadow-[8px_8px_0_0_#082B4C] max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start justify-between pb-4 border-b-2 border-[#082B4C]/10">
+        <div className="fixed inset-0 z-50 bg-brand-navy/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-brand-paper border-3 border-brand-dark shadow-brutal-xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
+            <div className="flex items-start justify-between pb-4 border-b-2 border-brand-dark/10">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-[#F5A623]/20 text-[#082B4C] border border-[#F5A623] mb-1.5">
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-[#F5A623]/20 text-brand-navy border border-[#F5A623] mb-1.5">
                   <UserCheck className="w-3 h-3 text-[#F5A623]" />
                   Individual Override
                 </div>
-                <h2 className="text-xl font-black text-[#082B4C]">
+                <h2 className="text-xl font-black text-brand-navy">
                   Set Individual Mentor Override
                 </h2>
               </div>
               <button
                 onClick={() => setIndividualModalOpen(false)}
-                className="p-1 text-[#082B4C]/60 hover:text-[#082B4C]"
+                className="p-1 text-brand-navy/60 hover:text-brand-navy"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Target Student Summary */}
-            <div className="mt-4 p-3 bg-[#F6FAFB] border-2 border-[#082B4C] space-y-1">
-              <p className="text-xs font-bold uppercase text-[#082B4C]/60">Student Details</p>
-              <p className="text-base font-black text-[#082B4C]">
+            <div className="mt-4 p-3 bg-brand-bg border-2 border-brand-dark space-y-1">
+              <p className="text-xs font-bold uppercase text-brand-navy/60">Student Details</p>
+              <p className="text-base font-black text-brand-navy">
                 {selectedStudentEnrollment.student?.full_name}
               </p>
-              <p className="text-xs text-[#082B4C]/70 font-mono">
+              <p className="text-xs text-brand-navy/70 font-mono">
                 ID: {selectedStudentEnrollment.student?.poraplan_id || 'N/A'} • {selectedStudentEnrollment.student?.university}
               </p>
-              <p className="text-xs text-[#082B4C]/80 pt-1">
+              <p className="text-xs text-brand-navy/80 pt-1">
                 <span className="font-bold">Cohort:</span> {selectedStudentEnrollment.cohort?.name} ({selectedStudentEnrollment.cohort?.code})
               </p>
               <p className="text-xs font-mono text-[#F5A623] pt-1">
@@ -1116,7 +1116,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
 
             {/* Select Mentor */}
             <div className="mt-4 space-y-2">
-              <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider">
+              <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
                 Select Eligible Mentor
               </label>
               {eligibleMentorsForStudent.length === 0 ? (
@@ -1127,7 +1127,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 <select
                   value={selectedIndividualMentorId}
                   onChange={(e) => setSelectedIndividualMentorId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border-2 border-[#082B4C] font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
                   {eligibleMentorsForStudent.map((m) => (
                     <option key={m.id} value={m.id}>
@@ -1140,7 +1140,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
 
             {/* Admin Notes */}
             <div className="mt-4 space-y-2">
-              <label className="block text-xs font-black uppercase text-[#082B4C] tracking-wider">
+              <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
                 Reason / Override Notes (Optional)
               </label>
               <textarea
@@ -1148,12 +1148,12 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 onChange={(e) => setIndividualNotes(e.target.value)}
                 placeholder="e.g. Student requested specialized 1-on-1 algorithm pacing."
                 rows={2}
-                className="w-full p-2.5 text-xs border-2 border-[#082B4C] font-medium focus:outline-none focus:ring-2 focus:ring-[#0BA7B4]"
+                className="w-full p-2.5 text-xs border-2 border-brand-dark font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal"
               />
             </div>
 
             {/* Actions */}
-            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t-2 border-[#082B4C]/10">
+            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t-2 border-brand-dark/10">
               <Button
                 variant="outline"
                 size="sm"
@@ -1185,18 +1185,18 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {/* MODAL 3: ASSIGNMENT HISTORY LOG */}
       {/* ============================================================================== */}
       {historyModalOpen && (
-        <div className="fixed inset-0 z-50 bg-[#082B4C]/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border-3 border-[#082B4C] shadow-[8px_8px_0_0_#082B4C] max-w-xl w-full p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start justify-between pb-3 border-b-2 border-[#082B4C]/10">
+        <div className="fixed inset-0 z-50 bg-brand-navy/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-brand-paper border-3 border-brand-dark shadow-brutal-xl max-w-xl w-full p-6 animate-in fade-in zoom-in-95">
+            <div className="flex items-start justify-between pb-3 border-b-2 border-brand-dark/10">
               <div>
-                <h3 className="text-base font-black text-[#082B4C] flex items-center gap-2">
-                  <History className="w-4 h-4 text-[#0BA7B4]" />
+                <h3 className="text-base font-black text-brand-navy flex items-center gap-2">
+                  <History className="w-4 h-4 text-brand-teal" />
                   {historyTitle}
                 </h3>
               </div>
               <button
                 onClick={() => setHistoryModalOpen(false)}
-                className="p-1 text-[#082B4C]/60 hover:text-[#082B4C]"
+                className="p-1 text-brand-navy/60 hover:text-brand-navy"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1210,23 +1210,23 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                     className={`p-3 border-2 ${
                       ch.is_active
                         ? 'border-[#0BA7B4] bg-[#0BA7B4]/10'
-                        : 'border-[#082B4C]/20 bg-gray-50'
+                        : 'border-brand-dark/20 bg-gray-50'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-black text-[#082B4C] text-sm">
+                      <span className="font-black text-brand-navy text-sm">
                         {ch.mentor?.full_name || 'Mentor'}
                       </span>
                       <Badge variant={ch.is_active ? 'teal' : 'paper'} size="sm">
                         {ch.is_active ? 'ACTIVE' : 'ENDED'}
                       </Badge>
                     </div>
-                    <div className="text-xs text-[#082B4C]/70 font-mono mt-0.5">
+                    <div className="text-xs text-brand-navy/70 font-mono mt-0.5">
                       Assigned: {new Date(ch.assigned_at).toLocaleDateString()}
                       {ch.ended_at && ` • Ended: ${new Date(ch.ended_at).toLocaleDateString()}`}
                     </div>
                     {ch.notes && (
-                      <p className="text-xs text-[#082B4C]/80 mt-1 italic">&ldquo;{ch.notes}&rdquo;</p>
+                      <p className="text-xs text-brand-navy/80 mt-1 italic">&ldquo;{ch.notes}&rdquo;</p>
                     )}
                   </div>
                 ))
@@ -1237,34 +1237,34 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                     className={`p-3 border-2 ${
                       sh.is_active
                         ? 'border-[#F5A623] bg-[#F5A623]/10'
-                        : 'border-[#082B4C]/20 bg-gray-50'
+                        : 'border-brand-dark/20 bg-gray-50'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-black text-[#082B4C] text-sm">
+                      <span className="font-black text-brand-navy text-sm">
                         {sh.mentor?.full_name || 'Mentor'}
                       </span>
                       <Badge variant={sh.is_active ? 'gold' : 'paper'} size="sm">
                         {sh.is_active ? 'ACTIVE OVERRIDE' : 'ENDED'}
                       </Badge>
                     </div>
-                    <div className="text-xs text-[#082B4C]/70 font-mono mt-0.5">
+                    <div className="text-xs text-brand-navy/70 font-mono mt-0.5">
                       Assigned: {new Date(sh.assigned_at).toLocaleDateString()}
                       {sh.ended_at && ` • Ended: ${new Date(sh.ended_at).toLocaleDateString()}`}
                     </div>
                     {sh.notes && (
-                      <p className="text-xs text-[#082B4C]/80 mt-1 italic">&ldquo;{sh.notes}&rdquo;</p>
+                      <p className="text-xs text-brand-navy/80 mt-1 italic">&ldquo;{sh.notes}&rdquo;</p>
                     )}
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-center text-[#082B4C]/60 py-6">
+                <p className="text-xs text-center text-brand-navy/60 py-6">
                   No historical records logged yet.
                 </p>
               )}
             </div>
 
-            <div className="mt-4 pt-3 border-t-2 border-[#082B4C]/10 flex justify-end">
+            <div className="mt-4 pt-3 border-t-2 border-brand-dark/10 flex justify-end">
               <Button variant="outline" size="sm" onClick={() => setHistoryModalOpen(false)}>
                 Close
               </Button>

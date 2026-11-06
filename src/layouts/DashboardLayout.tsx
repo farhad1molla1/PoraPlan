@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import {
@@ -27,11 +28,15 @@ import {
   BarChart3,
   CreditCard,
   ChevronDown,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react';
 import { getUnreadNotificationCount } from '../lib/notifications';
 
 export const DashboardLayout: React.FC = () => {
   const { user, profile, role, poraplanId, signOut, connectEmail } = useAuth();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -375,6 +380,69 @@ export const DashboardLayout: React.FC = () => {
                   <Sparkles className="w-4 h-4 text-brand-gold shrink-0 stroke-[2.2]" />
                   <span className="flex-1">Identity & Email Details</span>
                 </button>
+
+                <div className="border-t-2 border-brand-dark/15 my-1.5" />
+
+                {/* Theme Selector Section */}
+                <div className="px-3.5 py-2" role="none">
+                  <span className="font-mono text-[9px] uppercase font-bold text-brand-muted tracking-wider block mb-1.5">
+                    Theme
+                  </span>
+                  <div
+                    role="radiogroup"
+                    aria-label="Theme mode"
+                    className="grid grid-cols-3 gap-1 bg-brand-paper-tint p-1 border border-brand-dark/20"
+                  >
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={theme === 'light'}
+                      aria-label="Light mode"
+                      title="Light mode"
+                      onClick={() => setTheme('light')}
+                      className={`flex items-center justify-center gap-1 py-1 px-1.5 text-[11px] font-heading font-bold transition-all border ${
+                        theme === 'light'
+                          ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs'
+                          : 'border-transparent text-brand-muted hover:text-brand-dark'
+                      }`}
+                    >
+                      <Sun className="w-3.5 h-3.5 shrink-0 stroke-[2.2]" />
+                      <span>Light</span>
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={theme === 'dark'}
+                      aria-label="Dark mode"
+                      title="Dark mode"
+                      onClick={() => setTheme('dark')}
+                      className={`flex items-center justify-center gap-1 py-1 px-1.5 text-[11px] font-heading font-bold transition-all border ${
+                        theme === 'dark'
+                          ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs'
+                          : 'border-transparent text-brand-muted hover:text-brand-dark'
+                      }`}
+                    >
+                      <Moon className="w-3.5 h-3.5 shrink-0 stroke-[2.2]" />
+                      <span>Dark</span>
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={theme === 'system'}
+                      aria-label="System mode"
+                      title="System mode"
+                      onClick={() => setTheme('system')}
+                      className={`flex items-center justify-center gap-1 py-1 px-1.5 text-[11px] font-heading font-bold transition-all border ${
+                        theme === 'system'
+                          ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs'
+                          : 'border-transparent text-brand-muted hover:text-brand-dark'
+                      }`}
+                    >
+                      <Monitor className="w-3.5 h-3.5 shrink-0 stroke-[2.2]" />
+                      <span>Auto</span>
+                    </button>
+                  </div>
+                </div>
 
                 <div className="border-t-2 border-brand-dark/15 my-1.5" />
 

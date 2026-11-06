@@ -289,7 +289,7 @@ export const MentorReviewQueuePage: React.FC = () => {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Total</span>
             <FileCheck className="w-4 h-4 text-brand-navy" />
@@ -298,7 +298,7 @@ export const MentorReviewQueuePage: React.FC = () => {
           <div className="text-[11px] text-brand-muted mt-0.5">All student submissions</div>
         </div>
 
-        <div className="bg-white border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Needs Review</span>
             <Clock className="w-4 h-4 text-brand-gold" />
@@ -307,7 +307,7 @@ export const MentorReviewQueuePage: React.FC = () => {
           <div className="text-[11px] text-brand-muted mt-0.5">Awaiting evaluation</div>
         </div>
 
-        <div className="bg-white border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Reviewed</span>
             <CheckCircle2 className="w-4 h-4 text-brand-teal" />
@@ -316,7 +316,7 @@ export const MentorReviewQueuePage: React.FC = () => {
           <div className="text-[11px] text-brand-muted mt-0.5">Feedback saved</div>
         </div>
 
-        <div className="bg-white border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Needs Revision</span>
             <RotateCcw className="w-4 h-4 text-red-600" />
@@ -345,7 +345,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
               filterState === 'all'
                 ? 'bg-brand-navy text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-white text-brand-dark hover:bg-brand-paper'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
             All Submissions ({totalCount})
@@ -355,7 +355,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
               filterState === 'needs_review'
                 ? 'bg-brand-gold text-brand-dark shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-white text-brand-dark hover:bg-brand-paper'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
             Needs Review ({needsReviewCount})
@@ -365,7 +365,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
               filterState === 'reviewed'
                 ? 'bg-brand-teal text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-white text-brand-dark hover:bg-brand-paper'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
             Reviewed ({reviewedCount})
@@ -375,7 +375,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
               filterState === 'needs_revision'
                 ? 'bg-red-600 text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-white text-brand-dark hover:bg-brand-paper'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
             Needs Revision ({revisionCount})
@@ -388,21 +388,21 @@ export const MentorReviewQueuePage: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search student or assignment..."
-            className="w-full bg-white border-2 border-brand-dark px-3 py-1.5 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+            className="w-full bg-brand-paper border-2 border-brand-dark px-3 py-1.5 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
           />
         </div>
       </div>
 
       {/* Main List */}
       {loading ? (
-        <div className="bg-white border-3 border-brand-dark p-12 text-center shadow-brutal">
+        <div className="bg-brand-paper border-3 border-brand-dark p-12 text-center shadow-brutal">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
           <p className="font-mono text-sm text-brand-muted font-bold uppercase tracking-wider">
             Loading student submissions...
           </p>
         </div>
       ) : filteredSubmissions.length === 0 ? (
-        <div className="bg-white border-4 border-brand-dark p-8 md:p-12 text-center shadow-brutal">
+        <div className="bg-brand-paper border-4 border-brand-dark p-8 md:p-12 text-center shadow-brutal">
           <div className="w-16 h-16 bg-brand-paper-tint border-3 border-brand-dark flex items-center justify-center mx-auto mb-4 shadow-brutal-sm">
             <FileCheck className="w-8 h-8 text-brand-muted" />
           </div>
@@ -430,7 +430,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             return (
               <div
                 key={sub.id}
-                className="bg-white border-3 border-brand-dark p-5 sm:p-6 shadow-brutal-sm hover:shadow-brutal transition-all"
+                className="bg-brand-paper border-3 border-brand-dark p-5 sm:p-6 shadow-brutal-sm hover:shadow-brutal transition-all"
               >
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div className="space-y-2 flex-1">
@@ -486,7 +486,7 @@ export const MentorReviewQueuePage: React.FC = () => {
                         </div>
                       ) : sub.submission_type === 'file' ? (
                         <div className="space-y-2">
-                          <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-white border border-brand-dark">
+                          <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-brand-paper border border-brand-dark">
                             <div className="flex items-center gap-2 min-w-0">
                               <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
                               <div className="min-w-0">
@@ -588,7 +588,7 @@ export const MentorReviewQueuePage: React.FC = () => {
       {/* EVALUATION & FEEDBACK MODAL */}
       {reviewTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/60 backdrop-blur-xs">
-          <div className="bg-white border-4 border-brand-dark p-6 max-w-xl w-full shadow-brutal max-h-[90vh] overflow-y-auto">
+          <div className="bg-brand-paper border-4 border-brand-dark p-6 max-w-xl w-full shadow-brutal max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b-2 border-brand-dark mb-4">
               <div>
                 <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-brand-teal">
@@ -639,7 +639,7 @@ export const MentorReviewQueuePage: React.FC = () => {
                 </label>
 
                 {reviewTarget.submission_type === 'link' ? (
-                  <div className="p-4 bg-white border-2 border-brand-dark space-y-2">
+                  <div className="p-4 bg-brand-paper border-2 border-brand-dark space-y-2">
                     <div className="flex items-center gap-2 text-brand-teal font-mono text-xs">
                       <ExternalLink className="w-4 h-4 flex-shrink-0" />
                       <a
@@ -658,7 +658,7 @@ export const MentorReviewQueuePage: React.FC = () => {
                     )}
                   </div>
                 ) : reviewTarget.submission_type === 'file' ? (
-                  <div className="p-4 bg-white border-2 border-brand-dark space-y-3">
+                  <div className="p-4 bg-brand-paper border-2 border-brand-dark space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2 font-mono text-xs text-brand-navy min-w-0">
                         <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
@@ -703,7 +703,7 @@ export const MentorReviewQueuePage: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <div className="p-4 bg-white border-2 border-brand-dark text-xs sm:text-sm font-sans whitespace-pre-wrap text-brand-dark leading-relaxed max-h-60 overflow-y-auto">
+                  <div className="p-4 bg-brand-paper border-2 border-brand-dark text-xs sm:text-sm font-sans whitespace-pre-wrap text-brand-dark leading-relaxed max-h-60 overflow-y-auto">
                     {reviewTarget.content}
                   </div>
                 )}
@@ -740,7 +740,7 @@ export const MentorReviewQueuePage: React.FC = () => {
                       value={reviewFeedback}
                       onChange={(e) => setReviewFeedback(e.target.value)}
                       placeholder="Identify mathematical derivation errors, explain missing intermediate steps, or praise sound reasoning..."
-                      className="w-full bg-white border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       required
                     />
                   </div>
@@ -758,7 +758,7 @@ export const MentorReviewQueuePage: React.FC = () => {
                         value={reviewScore}
                         onChange={(e) => setReviewScore(e.target.value)}
                         placeholder="e.g. 85"
-                        className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       />
                     </div>
 
@@ -769,7 +769,7 @@ export const MentorReviewQueuePage: React.FC = () => {
                       <select
                         value={reviewStatus}
                         onChange={(e) => setReviewStatus(e.target.value as SubmissionStatus)}
-                        className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       >
                         <option value="reviewed">Reviewed &amp; Approved</option>
                         <option value="needs_revision">Needs Revision (Request Redo)</option>

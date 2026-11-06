@@ -442,13 +442,13 @@ export const MentorDoubtsPage: React.FC = () => {
             placeholder="Search by student name, question title, or content..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 border-2 border-brand-dark bg-white font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+            className="w-full pl-9 pr-3 py-1.5 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Student Filter */}
-          <div className="flex items-center gap-1 border-2 border-brand-dark bg-white px-2 py-1 text-xs">
+          <div className="flex items-center gap-1 border-2 border-brand-dark bg-brand-paper px-2 py-1 text-xs">
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">Student:</span>
             <select
               value={selectedStudentId}
@@ -465,7 +465,7 @@ export const MentorDoubtsPage: React.FC = () => {
           </div>
 
           {/* Status Filter */}
-          <div className="flex items-center gap-1 border-2 border-brand-dark bg-white px-2 py-1 text-xs">
+          <div className="flex items-center gap-1 border-2 border-brand-dark bg-brand-paper px-2 py-1 text-xs">
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">Status:</span>
             <select
               value={selectedStatus}
@@ -530,7 +530,7 @@ export const MentorDoubtsPage: React.FC = () => {
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                     <div className="flex flex-wrap items-center gap-1.5">
                       {/* Scholar Badge */}
-                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-white text-brand-navy flex items-center gap-1">
+                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-brand-paper text-brand-navy flex items-center gap-1">
                         <User className="w-3 h-3 text-brand-teal" />
                         {doubt.student_name}{doubt.student_poraplan_id ? ` (${doubt.student_poraplan_id})` : ''}
                       </span>
@@ -597,7 +597,7 @@ export const MentorDoubtsPage: React.FC = () => {
                       {doubt.responses_count || 0} {(doubt.responses_count === 1) ? 'response' : 'responses'}
                     </span>
                     {doubt.attachment_path && (
-                      <span className="text-brand-navy font-bold flex items-center gap-1 bg-white border border-brand-dark/20 px-1.5 py-0.5">
+                      <span className="text-brand-navy font-bold flex items-center gap-1 bg-brand-paper border border-brand-dark/20 px-1.5 py-0.5">
                         <Paperclip className="w-3 h-3 text-brand-teal" />
                         Attachment
                       </span>
@@ -629,18 +629,18 @@ export const MentorDoubtsPage: React.FC = () => {
                     {activeDoubt.student_id ? (
                       <Link
                         to={`/profile/${activeDoubt.student_id}`}
-                        className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-white text-brand-navy hover:text-brand-teal hover:border-brand-teal transition-colors"
+                        className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-brand-paper text-brand-navy hover:text-brand-teal hover:border-brand-teal transition-colors"
                       >
                         Student: {activeDoubt.student_name}{activeDoubt.student_poraplan_id ? ` (${activeDoubt.student_poraplan_id})` : ''}
                       </Link>
                     ) : (
-                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-white text-brand-navy">
+                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-brand-paper text-brand-navy">
                         Student: {activeDoubt.student_name}{activeDoubt.student_poraplan_id ? ` (${activeDoubt.student_poraplan_id})` : ''}
                       </span>
                     )}
 
                     {activeDoubt.subject_name && (
-                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/30 bg-white text-brand-navy">
+                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/30 bg-brand-paper text-brand-navy">
                         {activeDoubt.subject_name}
                       </span>
                     )}
@@ -659,7 +659,7 @@ export const MentorDoubtsPage: React.FC = () => {
               </div>
 
               {/* Scholar Question Box */}
-              <div className="p-4 border-2 border-brand-dark bg-white mb-4">
+              <div className="p-4 border-2 border-brand-dark bg-brand-paper mb-4">
                 <div className="flex items-center justify-between text-[11px] font-mono text-brand-muted mb-2 border-b border-brand-dark/10 pb-1.5">
                   <span className="font-bold text-brand-navy">Question from Student:</span>
                   <span>{new Date(activeDoubt.created_at || '').toLocaleString()}</span>
@@ -705,7 +705,7 @@ export const MentorDoubtsPage: React.FC = () => {
                       <div
                         key={resp.id}
                         className={`p-3.5 border-2 border-brand-dark ${
-                          isMentor ? 'bg-brand-teal/10 border-l-4 border-l-brand-teal' : 'bg-white'
+                          isMentor ? 'bg-brand-teal/10 border-l-4 border-l-brand-teal' : 'bg-brand-paper'
                         }`}
                       >
                         <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
@@ -771,7 +771,7 @@ export const MentorDoubtsPage: React.FC = () => {
                 />
 
                 {replyFile && (
-                  <div className="p-2 border border-brand-dark bg-white flex items-center justify-between text-xs font-mono">
+                  <div className="p-2 border border-brand-dark bg-brand-paper flex items-center justify-between text-xs font-mono">
                     <span className="truncate max-w-[300px]">
                       Attached: <strong>{replyFile.name}</strong> ({formatFileSize(replyFile.size)})
                     </span>
@@ -795,7 +795,7 @@ export const MentorDoubtsPage: React.FC = () => {
                     placeholder="Provide conceptual clarification, formula proof, step-by-step guidance..."
                     value={replyMessage}
                     onChange={(e) => setReplyMessage(e.target.value)}
-                    className="flex-1 p-2.5 border-2 border-brand-dark bg-white font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="flex-1 p-2.5 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   />
                   <div className="flex flex-col justify-start">
                     <Button

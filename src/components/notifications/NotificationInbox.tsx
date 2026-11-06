@@ -325,7 +325,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
             className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-colors border ${
               statusFilter === 'all'
                 ? 'bg-brand-navy text-white border-brand-dark shadow-brutal-xs'
-                : 'bg-white text-brand-dark border-brand-dark/30 hover:bg-brand-paper-tint'
+                : 'bg-brand-paper text-brand-dark border-brand-dark/30 hover:bg-brand-paper-tint'
             }`}
           >
             All ({notifications.length})
@@ -335,7 +335,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
             className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-colors border ${
               statusFilter === 'unread'
                 ? 'bg-brand-navy text-white border-brand-dark shadow-brutal-xs'
-                : 'bg-white text-brand-dark border-brand-dark/30 hover:bg-brand-paper-tint'
+                : 'bg-brand-paper text-brand-dark border-brand-dark/30 hover:bg-brand-paper-tint'
             }`}
           >
             Unread ({unreadCount})
@@ -345,7 +345,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
             className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-colors border ${
               statusFilter === 'read'
                 ? 'bg-brand-navy text-white border-brand-dark shadow-brutal-xs'
-                : 'bg-white text-brand-dark border-brand-dark/30 hover:bg-brand-paper-tint'
+                : 'bg-brand-paper text-brand-dark border-brand-dark/30 hover:bg-brand-paper-tint'
             }`}
           >
             Read ({notifications.length - unreadCount})
@@ -358,7 +358,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="bg-white border-2 border-brand-dark px-2.5 py-1 text-xs font-mono font-bold text-brand-navy shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+            className="bg-brand-paper border-2 border-brand-dark px-2.5 py-1 text-xs font-mono font-bold text-brand-navy shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
             aria-label="Filter notifications by category"
           >
             <option value="all">All Categories</option>
@@ -490,7 +490,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
                       <button
                         onClick={(e) => handleMarkAsRead(notif.id, e)}
                         disabled={actionLoadingId === notif.id}
-                        className="p-1.5 border border-brand-dark bg-white hover:bg-brand-gold hover:text-brand-dark text-brand-navy transition-colors shadow-brutal-xs"
+                        className="p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-gold hover:text-brand-dark text-brand-navy transition-colors shadow-brutal-xs"
                         title="Mark as read"
                         aria-label="Mark as read"
                       >
@@ -500,7 +500,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
                     <button
                       onClick={(e) => handleDelete(notif.id, e)}
                       disabled={actionLoadingId === notif.id}
-                      className="p-1.5 border border-brand-dark bg-white hover:bg-red-500 hover:text-white text-brand-muted transition-colors shadow-brutal-xs"
+                      className="p-1.5 border border-brand-dark bg-brand-paper hover:bg-red-500 hover:text-white text-brand-muted transition-colors shadow-brutal-xs"
                       title="Dismiss notification"
                       aria-label="Dismiss notification"
                     >

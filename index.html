@@ -8,6 +8,22 @@
     <title>PoraPlan | Personal Study Assistance &amp; Mentorship</title>
     <meta name="description" content="PoraPlan is a personal study assistance &amp; mentorship platform. You study. We organize how, what and when." />
     
+    <!-- Anti-flash inline theme initializer -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('poraplan_theme');
+          var theme = (saved === 'light' || saved === 'dark' || saved === 'system') ? saved : 'system';
+          var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    
     <!-- Google Fonts for Neo-Brutalist Retro Academic aesthetic & Academic Report Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

@@ -489,7 +489,7 @@ export const StudentAssignmentsPage: React.FC = () => {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Total</span>
             <FileText className="w-4 h-4 text-brand-navy" />
@@ -498,7 +498,7 @@ export const StudentAssignmentsPage: React.FC = () => {
           <div className="text-[11px] text-brand-muted mt-0.5">Assigned sets</div>
         </div>
 
-        <div className="bg-white border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Pending</span>
             <Clock className="w-4 h-4 text-brand-gold" />
@@ -507,7 +507,7 @@ export const StudentAssignmentsPage: React.FC = () => {
           <div className="text-[11px] text-brand-muted mt-0.5">To be submitted</div>
         </div>
 
-        <div className="bg-white border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Submitted</span>
             <Send className="w-4 h-4 text-brand-teal" />
@@ -516,7 +516,7 @@ export const StudentAssignmentsPage: React.FC = () => {
           <div className="text-[11px] text-brand-muted mt-0.5">Awaiting review</div>
         </div>
 
-        <div className="bg-white border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Reviewed</span>
             <CheckCircle2 className="w-4 h-4 text-brand-navy" />
@@ -545,7 +545,7 @@ export const StudentAssignmentsPage: React.FC = () => {
             className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
               statusFilter === 'all'
                 ? 'bg-brand-navy text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-white text-brand-dark hover:bg-brand-paper'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
             All ({totalCount})
@@ -555,7 +555,7 @@ export const StudentAssignmentsPage: React.FC = () => {
             className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
               statusFilter === 'pending'
                 ? 'bg-brand-gold text-brand-dark shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-white text-brand-dark hover:bg-brand-paper'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
             To Submit ({pendingCount})
@@ -565,7 +565,7 @@ export const StudentAssignmentsPage: React.FC = () => {
             className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
               statusFilter === 'submitted'
                 ? 'bg-brand-teal text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-white text-brand-dark hover:bg-brand-paper'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
             Submitted ({submittedCount})
@@ -575,7 +575,7 @@ export const StudentAssignmentsPage: React.FC = () => {
             className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
               statusFilter === 'reviewed'
                 ? 'bg-brand-navy text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-white text-brand-dark hover:bg-brand-paper'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
             Reviewed ({reviewedCount})
@@ -592,14 +592,14 @@ export const StudentAssignmentsPage: React.FC = () => {
 
       {/* Main Content Area */}
       {loading ? (
-        <div className="bg-white border-3 border-brand-dark p-12 text-center shadow-brutal">
+        <div className="bg-brand-paper border-3 border-brand-dark p-12 text-center shadow-brutal">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
           <p className="font-mono text-sm text-brand-muted font-bold uppercase tracking-wider">
             Loading assignment roster...
           </p>
         </div>
       ) : filteredAssignments.length === 0 ? (
-        <div className="bg-white border-4 border-brand-dark p-8 md:p-12 text-center shadow-brutal">
+        <div className="bg-brand-paper border-4 border-brand-dark p-8 md:p-12 text-center shadow-brutal">
           <div className="w-16 h-16 bg-brand-paper-tint border-3 border-brand-dark rounded-none flex items-center justify-center mx-auto mb-4 shadow-brutal-sm">
             <FileText className="w-8 h-8 text-brand-muted" />
           </div>
@@ -637,7 +637,7 @@ export const StudentAssignmentsPage: React.FC = () => {
             return (
               <div
                 key={assignment.id}
-                className={`bg-white border-3 border-brand-dark transition-all ${
+                className={`bg-brand-paper border-3 border-brand-dark transition-all ${
                   isSelected ? 'ring-2 ring-brand-navy shadow-brutal' : 'shadow-brutal-sm hover:shadow-brutal'
                 }`}
               >
@@ -745,7 +745,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                           </div>
                         ) : assignment.submission?.submission_type === 'file' ? (
                           <div className="space-y-3 mt-1">
-                            <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-white border-2 border-brand-dark">
+                            <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-brand-paper border-2 border-brand-dark">
                               <div className="flex items-center gap-2 min-w-0">
                                 <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
                                 <div className="min-w-0">
@@ -911,7 +911,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                           className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
                             submissionType === 'text'
                               ? 'bg-brand-navy text-white shadow-brutal-xs'
-                              : 'bg-white text-brand-dark hover:bg-brand-paper'
+                              : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
                           }`}
                         >
                           <FileText className="w-3.5 h-3.5" />
@@ -926,7 +926,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                           className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
                             submissionType === 'link'
                               ? 'bg-brand-navy text-white shadow-brutal-xs'
-                              : 'bg-white text-brand-dark hover:bg-brand-paper'
+                              : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
                           }`}
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
@@ -941,7 +941,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                           className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
                             submissionType === 'file'
                               ? 'bg-brand-navy text-white shadow-brutal-xs'
-                              : 'bg-white text-brand-dark hover:bg-brand-paper'
+                              : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
                           }`}
                         >
                           <Paperclip className="w-3.5 h-3.5" />
@@ -974,7 +974,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                               value={textContent}
                               onChange={(e) => setTextContent(e.target.value)}
                               placeholder="Write out your mathematical derivation, proof steps, or chapter review answers here..."
-                              className="w-full bg-white border-2 border-brand-dark p-3 text-xs sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                              className="w-full bg-brand-paper border-2 border-brand-dark p-3 text-xs sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                               required
                             />
                             <p className="text-[11px] font-mono text-brand-muted mt-1">
@@ -994,7 +994,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                 value={linkUrl}
                                 onChange={(e) => setLinkUrl(e.target.value)}
                                 placeholder="https://drive.google.com/... or https://github.com/..."
-                                className="w-full bg-white border-2 border-brand-dark p-2.5 text-xs sm:text-sm text-brand-dark font-mono focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                                className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs sm:text-sm text-brand-dark font-mono focus:outline-none focus:ring-2 focus:ring-brand-teal"
                                 required
                               />
                               <p className="text-[11px] font-mono text-brand-muted mt-1">
@@ -1010,7 +1010,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                 value={textContent}
                                 onChange={(e) => setTextContent(e.target.value)}
                                 placeholder="Any specific questions or areas where you encountered difficulty..."
-                                className="w-full bg-white border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                                className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                               />
                             </div>
                           </div>
@@ -1019,7 +1019,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                         {submissionType === 'file' && (
                           <div className="space-y-4">
                             {/* File Upload Box */}
-                            <div className="bg-white border-2 border-brand-dark p-4 space-y-3 shadow-brutal-xs">
+                            <div className="bg-brand-paper border-2 border-brand-dark p-4 space-y-3 shadow-brutal-xs">
                               <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
                                 Attach Solution Document (PDF, PNG, JPG, WebP, DOCX — Max 10MB) *
                               </label>
@@ -1154,7 +1154,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                     type="file"
                                     onChange={handleFileSelect}
                                     accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
-                                    className="w-full bg-white border-2 border-brand-dark p-2 text-xs font-mono focus:outline-none"
+                                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono focus:outline-none"
                                     required={!existingFilePath && !fileName}
                                   />
                                   <p className="text-[11px] font-mono text-brand-muted">
@@ -1183,7 +1183,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                 value={textContent}
                                 onChange={(e) => setTextContent(e.target.value)}
                                 placeholder="Summary of attached exercise solutions, questions, or derivation notes..."
-                                className="w-full bg-white border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                                className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                                 required
                               />
                             </div>

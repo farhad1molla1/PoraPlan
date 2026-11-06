@@ -286,14 +286,14 @@ export const AdminReportsPage: React.FC = () => {
                 type="date"
                 value={customStart}
                 onChange={(e) => setCustomStart(e.target.value)}
-                className="px-2 py-0.5 border border-brand-dark bg-white text-xs font-bold"
+                className="px-2 py-0.5 border border-brand-dark bg-brand-paper text-xs font-bold"
               />
               <span>to</span>
               <input
                 type="date"
                 value={customEnd}
                 onChange={(e) => setCustomEnd(e.target.value)}
-                className="px-2 py-0.5 border border-brand-dark bg-white text-xs font-bold"
+                className="px-2 py-0.5 border border-brand-dark bg-brand-paper text-xs font-bold"
               />
             </div>
           )}
@@ -343,7 +343,7 @@ export const AdminReportsPage: React.FC = () => {
                         const target = e.target as HTMLImageElement;
                         target.src = '/assets/poraplan-logo.png';
                       }}
-                      className="w-12 h-12 object-contain rounded border border-brand-dark/20 bg-white p-1 shrink-0"
+                      className="w-12 h-12 object-contain rounded border border-brand-dark/20 bg-brand-paper p-1 shrink-0"
                     />
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
@@ -380,7 +380,7 @@ export const AdminReportsPage: React.FC = () => {
                 {/* 6 Core KPI Indicators (Distinguishes Registered vs Active Users) */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 break-inside-avoid">
                   {/* 1. Students */}
-                  <div className="p-3 border-2 border-brand-dark bg-white shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
                       <span className="text-[9.5px] uppercase font-bold academic-sans">Students</span>
                       <Users className="w-3.5 h-3.5 text-brand-teal" />
@@ -396,7 +396,7 @@ export const AdminReportsPage: React.FC = () => {
                   </div>
 
                   {/* 2. Mentors */}
-                  <div className="p-3 border-2 border-brand-dark bg-white shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
                       <span className="text-[9.5px] uppercase font-bold academic-sans">Mentors</span>
                       <ShieldCheck className="w-3.5 h-3.5 text-brand-navy" />
@@ -412,7 +412,7 @@ export const AdminReportsPage: React.FC = () => {
                   </div>
 
                   {/* 3. Enrollments */}
-                  <div className="p-3 border-2 border-brand-dark bg-white shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
                       <span className="text-[9.5px] uppercase font-bold academic-sans">Enrollments</span>
                       <GraduationCap className="w-3.5 h-3.5 text-brand-teal" />
@@ -428,7 +428,7 @@ export const AdminReportsPage: React.FC = () => {
                   </div>
 
                   {/* 4. Attention Radar */}
-                  <div className="p-3 border-2 border-brand-dark bg-white shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
                       <span className="text-[9.5px] uppercase font-bold academic-sans">Attention</span>
                       <AlertTriangle className="w-3.5 h-3.5 text-red-700" />
@@ -444,7 +444,7 @@ export const AdminReportsPage: React.FC = () => {
                   </div>
 
                   {/* 5. Pending Reviews */}
-                  <div className="p-3 border-2 border-brand-dark bg-white shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
                       <span className="text-[9.5px] uppercase font-bold academic-sans">Review Queue</span>
                       <FileCheck className="w-3.5 h-3.5 text-amber-700" />
@@ -460,7 +460,7 @@ export const AdminReportsPage: React.FC = () => {
                   </div>
 
                   {/* 6. Overdue Tasks */}
-                  <div className="p-3 border-2 border-brand-dark bg-white shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
                       <span className="text-[9.5px] uppercase font-bold academic-sans">Task Backlog</span>
                       <Clock className="w-3.5 h-3.5 text-brand-gold" />
@@ -494,7 +494,7 @@ export const AdminReportsPage: React.FC = () => {
                       <span>All active scholars are on track with zero critical backlogs or severe completion deficits in this window.</span>
                     </div>
                   ) : (
-                    <div className="border-2 border-brand-dark bg-white overflow-x-auto">
+                    <div className="border-2 border-brand-dark bg-brand-paper overflow-x-auto">
                       <table className="w-full text-left text-xs academic-sans">
                         <thead className="bg-brand-paper border-b-2 border-brand-dark text-brand-navy uppercase text-[9.5px] tracking-wider font-bold">
                           <tr>
@@ -565,7 +565,7 @@ export const AdminReportsPage: React.FC = () => {
             <div className="space-y-4">
               {/* Directory Filter Bar */}
               <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs font-mono">
-                <div className="flex-1 flex items-center gap-2 border-2 border-brand-dark bg-white px-3 py-1.5 shadow-xs">
+                <div className="flex-1 flex items-center gap-2 border-2 border-brand-dark bg-brand-paper px-3 py-1.5 shadow-xs">
                   <Search className="w-4 h-4 text-brand-muted shrink-0" />
                   <input
                     type="text"
@@ -587,7 +587,7 @@ export const AdminReportsPage: React.FC = () => {
                     <select
                       value={studentStatusFilter}
                       onChange={(e) => setStudentStatusFilter(e.target.value)}
-                      className="px-2 py-1 border-2 border-brand-dark bg-white text-xs font-bold"
+                      className="px-2 py-1 border-2 border-brand-dark bg-brand-paper text-xs font-bold"
                     >
                       <option value="all">All ({report.students.length})</option>
                       <option value="active">Active Only</option>
@@ -602,7 +602,7 @@ export const AdminReportsPage: React.FC = () => {
                     <select
                       value={studentAttentionFilter}
                       onChange={(e) => setStudentAttentionFilter(e.target.value)}
-                      className="px-2 py-1 border-2 border-brand-dark bg-white text-xs font-bold"
+                      className="px-2 py-1 border-2 border-brand-dark bg-brand-paper text-xs font-bold"
                     >
                       <option value="all">All Levels</option>
                       <option value="critical">Critical Attention</option>
@@ -738,7 +738,7 @@ export const AdminReportsPage: React.FC = () => {
                           <td className="p-3 text-right">
                             <Link
                               to={`/student/reports?studentId=${s.studentId}`}
-                              className="px-2.5 py-1 border-2 border-brand-dark bg-white font-mono text-[11px] font-bold text-brand-navy hover:bg-brand-teal hover:text-white transition-all shadow-xs inline-flex items-center gap-1"
+                              className="px-2.5 py-1 border-2 border-brand-dark bg-brand-paper font-mono text-[11px] font-bold text-brand-navy hover:bg-brand-teal hover:text-white transition-all shadow-xs inline-flex items-center gap-1"
                             >
                               <span>View Report</span>
                               <ExternalLink className="w-3 h-3" />
@@ -760,7 +760,7 @@ export const AdminReportsPage: React.FC = () => {
             <div className="space-y-4">
               {/* Mentor Search Bar */}
               <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex items-center justify-between gap-3 text-xs font-mono">
-                <div className="flex-1 flex items-center gap-2 border-2 border-brand-dark bg-white px-3 py-1.5 shadow-xs">
+                <div className="flex-1 flex items-center gap-2 border-2 border-brand-dark bg-brand-paper px-3 py-1.5 shadow-xs">
                   <Search className="w-4 h-4 text-brand-muted shrink-0" />
                   <input
                     type="text"
@@ -837,7 +837,7 @@ export const AdminReportsPage: React.FC = () => {
                           <td className="p-3 text-right">
                             <Link
                               to={`/mentor/reports?mentorId=${m.mentorId}`}
-                              className="px-2.5 py-1 border-2 border-brand-dark bg-white font-mono text-[11px] font-bold text-brand-navy hover:bg-brand-navy hover:text-white transition-all shadow-xs inline-flex items-center gap-1"
+                              className="px-2.5 py-1 border-2 border-brand-dark bg-brand-paper font-mono text-[11px] font-bold text-brand-navy hover:bg-brand-navy hover:text-white transition-all shadow-xs inline-flex items-center gap-1"
                             >
                               <span>Audit Roster</span>
                               <ExternalLink className="w-3 h-3" />

@@ -305,7 +305,7 @@ export const StudentReportPage: React.FC = () => {
                     const target = e.target as HTMLImageElement;
                     target.src = '/assets/poraplan-logo.png';
                   }}
-                  className="w-12 h-12 object-contain rounded border border-brand-dark/20 bg-white p-1 shrink-0"
+                  className="w-12 h-12 object-contain rounded border border-brand-dark/20 bg-brand-paper p-1 shrink-0"
                 />
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
@@ -614,7 +614,7 @@ export const StudentReportPage: React.FC = () => {
                 </span>
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs academic-sans">
-                <div className="p-2 border border-brand-dark/20 bg-white">
+                <div className="p-2 border border-brand-dark/20 bg-brand-paper">
                   <span className="text-brand-muted text-[10px] block">SUBMITTED</span>
                   <span className="font-bold text-brand-navy text-base">
                     {report.assignmentMetrics.submitted}
@@ -623,14 +623,14 @@ export const StudentReportPage: React.FC = () => {
                     {report.assignmentMetrics.submittedOnTime} on-time, {report.assignmentMetrics.submittedLate} late
                   </span>
                 </div>
-                <div className="p-2 border border-brand-dark/20 bg-white">
+                <div className="p-2 border border-brand-dark/20 bg-brand-paper">
                   <span className="text-brand-muted text-[10px] block">PENDING REVIEW</span>
                   <span className="font-bold text-amber-700 text-base">
                     {report.assignmentMetrics.pendingReview}
                   </span>
                   <span className="text-[10px] text-brand-muted block">With mentor</span>
                 </div>
-                <div className="p-2 border border-brand-dark/20 bg-white">
+                <div className="p-2 border border-brand-dark/20 bg-brand-paper">
                   <span className="text-brand-muted text-[10px] block">REVIEWED &amp; GRADED</span>
                   <span className="font-bold text-emerald-700 text-base">
                     {report.assignmentMetrics.reviewed}
@@ -641,14 +641,14 @@ export const StudentReportPage: React.FC = () => {
                       : 'Graded'}
                   </span>
                 </div>
-                <div className="p-2 border border-brand-dark/20 bg-white">
+                <div className="p-2 border border-brand-dark/20 bg-brand-paper">
                   <span className="text-brand-muted text-[10px] block">REVISION REQUESTED</span>
                   <span className="font-bold text-red-700 text-base">
                     {report.assignmentMetrics.needsRevision}
                   </span>
                   <span className="text-[10px] text-brand-muted block">Action required</span>
                 </div>
-                <div className="p-2 border border-brand-dark/20 bg-white">
+                <div className="p-2 border border-brand-dark/20 bg-brand-paper">
                   <span className="text-brand-muted text-[10px] block">NOT SUBMITTED</span>
                   <span className="font-bold text-brand-muted text-base">
                     {report.assignmentMetrics.unsubmitted}
@@ -710,7 +710,7 @@ export const StudentReportPage: React.FC = () => {
                   No mentor-scheduled tasks were assigned during this reporting window. Consistency tracking is marked N/A.
                 </div>
               ) : (
-                <div className="p-3 border border-brand-dark/30 bg-white space-y-2.5">
+                <div className="p-3 border border-brand-dark/30 bg-brand-paper space-y-2.5">
                   {/* Metric Summary Ribbon */}
                   <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-brand-dark/15 text-xs academic-sans">
                     <div className="flex items-center gap-4">

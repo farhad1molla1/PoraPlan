@@ -364,7 +364,7 @@ export const MentorReportPage: React.FC = () => {
                       const target = e.target as HTMLImageElement;
                       target.src = '/assets/poraplan-logo.png';
                     }}
-                    className="w-12 h-12 object-contain rounded border border-brand-dark/20 bg-white p-1 shrink-0"
+                    className="w-12 h-12 object-contain rounded border border-brand-dark/20 bg-brand-paper p-1 shrink-0"
                   />
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
@@ -693,7 +693,7 @@ export const MentorReportPage: React.FC = () => {
                         const target = e.target as HTMLImageElement;
                         target.src = '/assets/poraplan-logo.png';
                       }}
-                      className="w-12 h-12 object-contain rounded border border-brand-dark/20 bg-white p-1 shrink-0"
+                      className="w-12 h-12 object-contain rounded border border-brand-dark/20 bg-brand-paper p-1 shrink-0"
                     />
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
@@ -919,7 +919,7 @@ export const MentorReportPage: React.FC = () => {
                       No mentor-scheduled tasks were assigned during this audit window.
                     </div>
                   ) : (
-                    <div className="p-3 border-2 border-brand-dark bg-white space-y-2.5">
+                    <div className="p-3 border-2 border-brand-dark bg-brand-paper space-y-2.5">
                       <div className="flex items-end justify-between gap-2 overflow-x-auto pt-1 pb-1">
                         {studentDetailReport.studyConsistency.scheduledDays.map((day) => {
                           const onTimePct = day.assignedCount > 0 ? (day.completedOnTimeCount / day.assignedCount) * 100 : 0;

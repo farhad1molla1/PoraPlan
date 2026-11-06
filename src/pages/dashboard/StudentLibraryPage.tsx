@@ -787,7 +787,7 @@ export const StudentLibraryPage: React.FC = () => {
             <span>Study Resources</span>
             <span
               className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
-                activeTab === 'resources' ? 'bg-white text-brand-dark' : 'bg-brand-paper text-brand-muted'
+                activeTab === 'resources' ? 'bg-brand-paper text-brand-dark' : 'bg-brand-paper text-brand-muted'
               }`}
             >
               {resourcesLoading && activeTab === 'resources' && tabCounts.resources === null
@@ -813,7 +813,7 @@ export const StudentLibraryPage: React.FC = () => {
             <span>Tasks & Study History</span>
             <span
               className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
-                activeTab === 'tasks' ? 'bg-white text-brand-dark' : 'bg-brand-paper text-brand-muted'
+                activeTab === 'tasks' ? 'bg-brand-paper text-brand-dark' : 'bg-brand-paper text-brand-muted'
               }`}
             >
               {tasksLoading && activeTab === 'tasks' && tabCounts.tasks === null

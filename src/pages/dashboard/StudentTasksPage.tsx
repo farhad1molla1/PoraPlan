@@ -417,7 +417,7 @@ export const StudentTasksPage: React.FC = () => {
                       className={`w-6 h-6 border-2 border-brand-dark flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                         isCompleted
                           ? 'bg-brand-teal text-white shadow-none'
-                          : 'bg-white hover:bg-brand-paper shadow-brutal-xs'
+                          : 'bg-brand-paper hover:bg-brand-paper shadow-brutal-xs'
                       }`}
                     >
                       {isUpdating ? (
@@ -504,7 +504,7 @@ export const StudentTasksPage: React.FC = () => {
                                   path: task.attachment_path,
                                 })
                               }
-                              className="px-2 py-1 bg-white border border-brand-dark font-heading text-[11px] font-bold text-brand-navy hover:bg-brand-paper shadow-brutal-xs flex items-center gap-1"
+                              className="px-2 py-1 bg-brand-paper border border-brand-dark font-heading text-[11px] font-bold text-brand-navy hover:bg-brand-paper shadow-brutal-xs flex items-center gap-1"
                             >
                               <Eye className="w-3 h-3 text-brand-teal" />
                               Preview

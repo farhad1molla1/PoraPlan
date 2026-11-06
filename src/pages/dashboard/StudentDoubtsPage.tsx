@@ -560,13 +560,13 @@ export const StudentDoubtsPage: React.FC = () => {
             placeholder="Search doubts by title, question, or study area..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 border-2 border-brand-dark bg-white font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+            className="w-full pl-9 pr-3 py-1.5 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Status Filter */}
-          <div className="flex items-center gap-1 border-2 border-brand-dark bg-white px-2 py-1 text-xs">
+          <div className="flex items-center gap-1 border-2 border-brand-dark bg-brand-paper px-2 py-1 text-xs">
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">Status:</span>
             <select
               value={statusFilter}
@@ -581,7 +581,7 @@ export const StudentDoubtsPage: React.FC = () => {
           </div>
 
           {/* Subject Filter */}
-          <div className="flex items-center gap-1 border-2 border-brand-dark bg-white px-2 py-1 text-xs">
+          <div className="flex items-center gap-1 border-2 border-brand-dark bg-brand-paper px-2 py-1 text-xs">
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">Subject:</span>
             <select
               value={subjectFilter}
@@ -677,7 +677,7 @@ export const StudentDoubtsPage: React.FC = () => {
 
                       {/* Subject Tag */}
                       {doubt.subject_name && (
-                        <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/30 bg-white text-brand-navy">
+                        <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/30 bg-brand-paper text-brand-navy">
                           {doubt.subject_code ? `${doubt.subject_code}: ` : ''}{doubt.subject_name}
                         </span>
                       )}
@@ -706,12 +706,12 @@ export const StudentDoubtsPage: React.FC = () => {
                   {(doubt.plan_title || doubt.task_title) && (
                     <div className="mt-2.5 flex flex-wrap items-center gap-2 text-[11px] font-mono text-brand-muted">
                       {doubt.plan_title && (
-                        <span className="bg-white/80 border border-brand-dark/20 px-1.5 py-0.5">
+                        <span className="bg-brand-paper/80 border border-brand-dark/20 px-1.5 py-0.5">
                           Plan: {doubt.plan_title}
                         </span>
                       )}
                       {doubt.task_title && (
-                        <span className="bg-white/80 border border-brand-dark/20 px-1.5 py-0.5">
+                        <span className="bg-brand-paper/80 border border-brand-dark/20 px-1.5 py-0.5">
                           Task: {doubt.task_title}
                         </span>
                       )}
@@ -727,7 +727,7 @@ export const StudentDoubtsPage: React.FC = () => {
                       {doubt.responses_count || 0} {(doubt.responses_count === 1) ? 'reply' : 'replies'}
                     </span>
                     {doubt.attachment_path && (
-                      <span className="text-brand-navy font-bold flex items-center gap-1 bg-white border border-brand-dark/20 px-1.5 py-0.5">
+                      <span className="text-brand-navy font-bold flex items-center gap-1 bg-brand-paper border border-brand-dark/20 px-1.5 py-0.5">
                         <Paperclip className="w-3 h-3 text-brand-teal" />
                         Attachment
                       </span>
@@ -789,7 +789,7 @@ export const StudentDoubtsPage: React.FC = () => {
                   placeholder="e.g. Incline Atwood machine normal force vs friction"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full p-2 border-2 border-brand-dark bg-white font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 />
               </div>
 
@@ -802,7 +802,7 @@ export const StudentDoubtsPage: React.FC = () => {
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value as DoubtPriority)}
-                    className="w-full p-2 border-2 border-brand-dark bg-white font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   >
                     <option value="normal">Normal</option>
                     <option value="low">Low</option>
@@ -823,7 +823,7 @@ export const StudentDoubtsPage: React.FC = () => {
                       setSelectedPlanId('');
                       setSelectedTaskId('');
                     }}
-                    className="w-full p-2 border-2 border-brand-dark bg-white font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   >
                     <option value="">General (No Specific Subject)</option>
                     {subjects.map((s) => (
@@ -845,7 +845,7 @@ export const StudentDoubtsPage: React.FC = () => {
                     <select
                       value={selectedPlanId}
                       onChange={(e) => setSelectedPlanId(e.target.value)}
-                      className="w-full p-1.5 border border-brand-dark bg-white text-xs text-brand-navy focus:outline-none"
+                      className="w-full p-1.5 border border-brand-dark bg-brand-paper text-xs text-brand-navy focus:outline-none"
                     >
                       <option value="">None</option>
                       {filteredPlansForSubject.map((p) => (
@@ -863,7 +863,7 @@ export const StudentDoubtsPage: React.FC = () => {
                     <select
                       value={selectedTaskId}
                       onChange={(e) => setSelectedTaskId(e.target.value)}
-                      className="w-full p-1.5 border border-brand-dark bg-white text-xs text-brand-navy focus:outline-none"
+                      className="w-full p-1.5 border border-brand-dark bg-brand-paper text-xs text-brand-navy focus:outline-none"
                     >
                       <option value="">None</option>
                       {filteredTasksForSubject.map((t) => (
@@ -887,7 +887,7 @@ export const StudentDoubtsPage: React.FC = () => {
                   placeholder="Explain exactly what you understand, what formula or step is confusing, and what answer you arrived at..."
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
-                  className="w-full p-2.5 border-2 border-brand-dark bg-white font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full p-2.5 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 />
               </div>
 
@@ -911,7 +911,7 @@ export const StudentDoubtsPage: React.FC = () => {
                 )}
 
                 {selectedFile ? (
-                  <div className="p-2.5 border-2 border-brand-dark bg-white flex items-center justify-between gap-2 shadow-brutal-xs">
+                  <div className="p-2.5 border-2 border-brand-dark bg-brand-paper flex items-center justify-between gap-2 shadow-brutal-xs">
                     <div className="flex items-center gap-2 min-w-0">
                       <FileText className="w-4 h-4 text-brand-teal shrink-0" />
                       <div className="min-w-0">
@@ -935,7 +935,7 @@ export const StudentDoubtsPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full border-2 border-dashed border-brand-dark/60 bg-white hover:bg-brand-paper p-3 text-center transition-colors shadow-brutal-xs flex items-center justify-center gap-2"
+                    className="w-full border-2 border-dashed border-brand-dark/60 bg-brand-paper hover:bg-brand-paper p-3 text-center transition-colors shadow-brutal-xs flex items-center justify-center gap-2"
                   >
                     <Paperclip className="w-4 h-4 text-brand-teal" />
                     <span className="font-heading font-bold text-xs text-brand-navy">
@@ -1003,7 +1003,7 @@ export const StudentDoubtsPage: React.FC = () => {
                     )}
 
                     {activeDoubt.subject_name && (
-                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/30 bg-white text-brand-navy">
+                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/30 bg-brand-paper text-brand-navy">
                         {activeDoubt.subject_name}
                       </span>
                     )}
@@ -1022,7 +1022,7 @@ export const StudentDoubtsPage: React.FC = () => {
               </div>
 
               {/* Original Question Card */}
-              <div className="p-4 border-2 border-brand-dark bg-white mb-4">
+              <div className="p-4 border-2 border-brand-dark bg-brand-paper mb-4">
                 <div className="flex items-center justify-between text-[11px] font-mono text-brand-muted mb-2 border-b border-brand-dark/10 pb-1.5">
                   <span className="font-bold text-brand-navy">Your Question:</span>
                   <span>{new Date(activeDoubt.created_at || '').toLocaleString()}</span>
@@ -1069,7 +1069,7 @@ export const StudentDoubtsPage: React.FC = () => {
                       <div
                         key={resp.id}
                         className={`p-3.5 border-2 border-brand-dark ${
-                          isMentor ? 'bg-brand-teal/10 border-l-4 border-l-brand-teal' : 'bg-white'
+                          isMentor ? 'bg-brand-teal/10 border-l-4 border-l-brand-teal' : 'bg-brand-paper'
                         }`}
                       >
                         <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
@@ -1131,7 +1131,7 @@ export const StudentDoubtsPage: React.FC = () => {
                 />
 
                 {replyFile && (
-                  <div className="p-2 border border-brand-dark bg-white flex items-center justify-between text-xs font-mono">
+                  <div className="p-2 border border-brand-dark bg-brand-paper flex items-center justify-between text-xs font-mono">
                     <span className="truncate max-w-[300px]">
                       Attached: <strong>{replyFile.name}</strong> ({formatFileSize(replyFile.size)})
                     </span>
@@ -1155,7 +1155,7 @@ export const StudentDoubtsPage: React.FC = () => {
                     placeholder="Type a follow-up inquiry or clarification..."
                     value={replyMessage}
                     onChange={(e) => setReplyMessage(e.target.value)}
-                    className="flex-1 p-2 border-2 border-brand-dark bg-white font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="flex-1 p-2 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   />
                   <Button
                     type="button"

@@ -384,7 +384,7 @@ export const PublicProfilePage: React.FC = () => {
             </div>
 
             {profile.bio ? (
-              <p className="font-sans text-sm text-brand-dark/90 leading-relaxed whitespace-pre-line bg-white p-4 border border-brand-dark/30">
+              <p className="font-sans text-sm text-brand-dark/90 leading-relaxed whitespace-pre-line bg-brand-paper p-4 border border-brand-dark/30">
                 {profile.bio}
               </p>
             ) : (

@@ -127,7 +127,7 @@ export const AttachmentViewerModal: React.FC<AttachmentViewerModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 border-2 border-brand-dark bg-white hover:bg-brand-paper shadow-brutal-xs text-brand-dark transition-all"
+              className="p-1.5 border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint shadow-brutal-xs text-brand-dark transition-all"
               aria-label="Close Attachment Viewer"
             >
               <X className="w-4 h-4" />
@@ -136,7 +136,7 @@ export const AttachmentViewerModal: React.FC<AttachmentViewerModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-white">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-brand-paper">
           {loading ? (
             <div className="py-20 text-center space-y-3">
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal" />
