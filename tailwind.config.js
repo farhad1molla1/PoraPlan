@@ -9,21 +9,21 @@ export default {
     extend: {
       colors: {
         brand: {
-          navy: 'var(--brand-navy)',
-          teal: 'var(--brand-teal)',
-          gold: 'var(--brand-gold)',
-          bg: 'var(--brand-bg)',
-          dark: 'var(--brand-dark)',
-          muted: 'var(--brand-muted)',
-          paper: 'var(--brand-paper)',
-          'paper-tint': 'var(--brand-paper-tint)',
-          'gold-light': 'var(--brand-gold-light)',
-          'teal-light': 'var(--brand-teal-light)',
-          'navy-light': 'var(--brand-navy-light)',
+          navy: 'rgb(var(--brand-navy) / <alpha-value>)',
+          teal: 'rgb(var(--brand-teal) / <alpha-value>)',
+          gold: 'rgb(var(--brand-gold) / <alpha-value>)',
+          bg: 'rgb(var(--brand-bg) / <alpha-value>)',
+          dark: 'rgb(var(--brand-dark) / <alpha-value>)',
+          muted: 'rgb(var(--brand-muted) / <alpha-value>)',
+          paper: 'rgb(var(--brand-paper) / <alpha-value>)',
+          'paper-tint': 'rgb(var(--brand-paper-tint) / <alpha-value>)',
+          'gold-light': 'rgb(var(--brand-gold-light) / <alpha-value>)',
+          'teal-light': 'rgb(var(--brand-teal-light) / <alpha-value>)',
+          'navy-light': 'rgb(var(--brand-navy-light) / <alpha-value>)',
         },
       },
       borderColor: {
-        'brand-dark': 'var(--brand-border)',
+        'brand-dark': 'rgb(var(--brand-dark) / <alpha-value>)',
       },
       boxShadow: {
         'brutal-xs': '2px 2px 0px 0px var(--brand-shadow)',

@@ -220,11 +220,11 @@ console.log('================================================================\n'
 {
   const fs = require('fs');
   const css = fs.readFileSync('src/styles/index.css', 'utf8');
-  assert(css.includes('--brand-navy: #082B4C;'), 'Light theme --brand-navy is exactly #082B4C');
-  assert(css.includes('--brand-bg: #F6FAFB;'), 'Light theme --brand-bg is exactly #F6FAFB');
-  assert(css.includes('--brand-dark: #172B3A;'), 'Light theme --brand-dark is exactly #172B3A');
-  assert(css.includes('--brand-bg: #0B1220;'), 'Dark theme --brand-bg is #0B1220');
-  assert(css.includes('--brand-paper: #172438;'), 'Dark theme --brand-paper is #172438');
+  assert(css.includes('--brand-navy: 8 43 76;'), 'Light theme --brand-navy is exactly 8 43 76 (#082B4C)');
+  assert(css.includes('--brand-bg: 246 250 251;'), 'Light theme --brand-bg is exactly 246 250 251 (#F6FAFB)');
+  assert(css.includes('--brand-dark: 23 43 58;'), 'Light theme --brand-dark is exactly 23 43 58 (#172B3A)');
+  assert(css.includes('--brand-bg: 11 18 32;'), 'Dark theme --brand-bg is 11 18 32 (#0B1220)');
+  assert(css.includes('--brand-paper: 23 36 56;'), 'Dark theme --brand-paper is 23 36 56 (#172438)');
   assert(css.includes('--brand-border: #29384D;'), 'Dark theme --brand-border is #29384D');
 }
 
@@ -243,3 +243,4 @@ console.log(`================================================================`);
 if (failed > 0) {
   process.exit(1);
 }
+
