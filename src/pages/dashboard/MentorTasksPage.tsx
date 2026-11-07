@@ -683,7 +683,7 @@ export const MentorTasksPage: React.FC = () => {
                     key={student.id}
                     type="button"
                     onClick={() => setSelectedStudentId(student.id)}
-                    className={`shrink-0 px-3.5 py-2 border-2 border-brand-dark text-left transition-all ${
+                    className={`shrink-0 px-3.5 py-2 border-2 border-brand-dark text-left transition-all min-h-[44px] flex flex-col justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                       isSelected
                         ? 'bg-brand-navy text-brand-paper shadow-brutal-sm -translate-y-0.5'
                         : 'bg-brand-bg text-brand-dark hover:bg-brand-paper shadow-brutal-xs'
@@ -770,13 +770,17 @@ export const MentorTasksPage: React.FC = () => {
                           type="button"
                           onClick={() => handleToggleStatus(task)}
                           aria-label={isCompleted ? `Mark ${task.title} as pending` : `Mark ${task.title} as completed`}
-                          className={`w-6 h-6 border-2 border-brand-dark flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                            isCompleted
-                              ? 'bg-brand-teal text-white shadow-none'
-                              : 'bg-brand-paper hover:bg-brand-paper shadow-brutal-xs'
-                          }`}
+                          className="relative -m-2.5 p-2.5 sm:m-0 sm:p-0 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
                         >
-                          {isCompleted ? <CheckCircle className="w-4 h-4" /> : <Circle className="w-3.5 h-3.5 text-brand-dark/30" />}
+                          <span
+                            className={`w-6 h-6 border-2 border-brand-dark flex items-center justify-center shrink-0 transition-colors ${
+                              isCompleted
+                                ? 'bg-brand-teal text-white shadow-none'
+                                : 'bg-brand-paper hover:bg-brand-paper shadow-brutal-xs'
+                            }`}
+                          >
+                            {isCompleted ? <CheckCircle className="w-4 h-4" /> : <Circle className="w-3.5 h-3.5 text-brand-dark/30" />}
+                          </span>
                         </button>
 
                         <div className="space-y-2 flex-1">
@@ -901,12 +905,12 @@ export const MentorTasksPage: React.FC = () => {
                       </div>
 
                       {/* Mentor Action Buttons */}
-                      <div className="flex items-center gap-1.5 self-end sm:self-start">
+                      <div className="flex items-center gap-2 self-end sm:self-start">
                         <button
                           type="button"
                           onClick={() => openEditModal(task)}
                           aria-label={`Edit ${task.title}`}
-                          className="p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-bg shadow-brutal-xs text-brand-navy"
+                          className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-bg shadow-brutal-xs text-brand-navy flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -914,7 +918,7 @@ export const MentorTasksPage: React.FC = () => {
                           type="button"
                           onClick={() => setDeleteTargetTask(task)}
                           aria-label={`Delete ${task.title}`}
-                          className="p-1.5 border border-brand-dark bg-red-50 hover:bg-red-100 shadow-brutal-xs text-red-700"
+                          className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 border border-brand-dark bg-red-50 hover:bg-red-100 shadow-brutal-xs text-red-700 flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -944,7 +948,7 @@ export const MentorTasksPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="p-1 border border-brand-paper/40 hover:bg-brand-paper/10 text-brand-paper"
+                  className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center border border-brand-paper/40 hover:bg-brand-paper/10 text-brand-paper cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold"
                   aria-label="Close modal"
                 >
                   <X className="w-5 h-5" />

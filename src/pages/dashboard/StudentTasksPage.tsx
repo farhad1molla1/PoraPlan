@@ -274,7 +274,7 @@ export const StudentTasksPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1 font-heading text-xs font-bold transition-colors whitespace-nowrap ${
+              className={`min-h-[40px] sm:min-h-0 py-2 sm:py-1 px-3 font-heading text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'all'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
                   : 'text-brand-dark hover:bg-brand-bg'
@@ -285,7 +285,7 @@ export const StudentTasksPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('pending')}
-              className={`px-3 py-1 font-heading text-xs font-bold transition-colors whitespace-nowrap ${
+              className={`min-h-[40px] sm:min-h-0 py-2 sm:py-1 px-3 font-heading text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'pending'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
                   : 'text-brand-dark hover:bg-brand-bg'
@@ -296,7 +296,7 @@ export const StudentTasksPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('in_progress')}
-              className={`px-3 py-1 font-heading text-xs font-bold transition-colors whitespace-nowrap ${
+              className={`min-h-[40px] sm:min-h-0 py-2 sm:py-1 px-3 font-heading text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'in_progress'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
                   : 'text-brand-dark hover:bg-brand-bg'
@@ -307,7 +307,7 @@ export const StudentTasksPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('completed')}
-              className={`px-3 py-1 font-heading text-xs font-bold transition-colors whitespace-nowrap ${
+              className={`min-h-[40px] sm:min-h-0 py-2 sm:py-1 px-3 font-heading text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'completed'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
                   : 'text-brand-dark hover:bg-brand-bg'
@@ -414,19 +414,23 @@ export const StudentTasksPage: React.FC = () => {
                       onClick={() => handleToggleStatus(task)}
                       disabled={isUpdating}
                       aria-label={isCompleted ? `Mark ${task.title} as pending` : `Mark ${task.title} as completed`}
-                      className={`w-6 h-6 border-2 border-brand-dark flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                        isCompleted
-                          ? 'bg-brand-teal text-white shadow-none'
-                          : 'bg-brand-paper hover:bg-brand-paper shadow-brutal-xs'
-                      }`}
+                      className="relative -m-2.5 p-2.5 sm:m-0 sm:p-0 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
                     >
-                      {isUpdating ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-navy" />
-                      ) : isCompleted ? (
-                        <CheckCircle className="w-4 h-4" />
-                      ) : (
-                        <Circle className="w-3.5 h-3.5 text-brand-dark/30" />
-                      )}
+                      <span
+                        className={`w-6 h-6 border-2 border-brand-dark flex items-center justify-center shrink-0 transition-colors ${
+                          isCompleted
+                            ? 'bg-brand-teal text-white shadow-none'
+                            : 'bg-brand-paper hover:bg-brand-paper shadow-brutal-xs'
+                        }`}
+                      >
+                        {isUpdating ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-navy" />
+                        ) : isCompleted ? (
+                          <CheckCircle className="w-4 h-4" />
+                        ) : (
+                          <Circle className="w-3.5 h-3.5 text-brand-dark/30" />
+                        )}
+                      </span>
                     </button>
 
                     <div className="space-y-2 flex-1">

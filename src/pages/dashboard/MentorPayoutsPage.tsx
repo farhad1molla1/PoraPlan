@@ -194,7 +194,8 @@ const MentorPayoutDrawer: React.FC<MentorPayoutDrawerProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1 text-brand-muted hover:text-brand-dark border border-brand-dark/30 hover:bg-brand-paper-tint"
+              className="min-w-[40px] min-h-[40px] p-2 flex items-center justify-center text-brand-dark hover:text-brand-navy border border-brand-dark bg-brand-paper hover:bg-brand-paper-tint shadow-brutal-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+              aria-label="Close payout details"
             >
               <X className="w-4 h-4" />
             </button>
@@ -299,7 +300,7 @@ const MentorPayoutDrawer: React.FC<MentorPayoutDrawerProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t-2 border-brand-dark bg-brand-paper flex justify-end">
+        <div className="p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] border-t-2 border-brand-dark bg-brand-paper flex justify-end sticky bottom-0 z-10">
           <Button variant="outline" size="sm" onClick={onClose}>
             Close
           </Button>

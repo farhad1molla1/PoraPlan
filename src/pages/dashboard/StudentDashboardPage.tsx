@@ -326,13 +326,17 @@ export const StudentDashboardPage: React.FC = () => {
                       type="button"
                       onClick={() => handleToggleTaskStatus(task)}
                       disabled={updatingTaskId === task.id}
-                      className={`mt-0.5 w-5 h-5 border-2 border-brand-dark flex items-center justify-center shrink-0 transition-colors ${
-                        isDone ? 'bg-brand-teal text-white' : 'bg-brand-paper hover:bg-brand-gold-light'
-                      }`}
+                      className="relative -m-2.5 p-2.5 sm:m-0 sm:p-0 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
                       title={isDone ? 'Mark as pending' : 'Mark as completed'}
                       aria-label={`Toggle task completion for ${task.title}`}
                     >
-                      {isDone ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Circle className="w-3 h-3 text-transparent" />}
+                      <span
+                        className={`w-5 h-5 border-2 border-brand-dark flex items-center justify-center shrink-0 transition-colors ${
+                          isDone ? 'bg-brand-teal text-white' : 'bg-brand-paper hover:bg-brand-gold-light'
+                        }`}
+                      >
+                        {isDone ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Circle className="w-3 h-3 text-transparent" />}
+                      </span>
                     </button>
 
                     <div className="flex-1 min-w-0">

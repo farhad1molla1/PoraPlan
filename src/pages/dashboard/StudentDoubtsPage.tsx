@@ -566,12 +566,13 @@ export const StudentDoubtsPage: React.FC = () => {
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Status Filter */}
-          <div className="flex items-center gap-1 border-2 border-brand-dark bg-brand-paper px-2 py-1 text-xs">
+          <div className="flex items-center gap-1.5 border-2 border-brand-dark bg-brand-paper px-2.5 py-1.5 sm:py-1 min-h-[42px] sm:min-h-0 text-xs shadow-brutal-xs">
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">Status:</span>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="font-sans text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer"
+              className="font-sans text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[36px] sm:min-h-0 py-1"
+              aria-label="Filter doubts by status"
             >
               <option value="all">All Statuses</option>
               <option value="open">Open (Awaiting)</option>
@@ -581,12 +582,13 @@ export const StudentDoubtsPage: React.FC = () => {
           </div>
 
           {/* Subject Filter */}
-          <div className="flex items-center gap-1 border-2 border-brand-dark bg-brand-paper px-2 py-1 text-xs">
+          <div className="flex items-center gap-1.5 border-2 border-brand-dark bg-brand-paper px-2.5 py-1.5 sm:py-1 min-h-[42px] sm:min-h-0 text-xs shadow-brutal-xs">
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">Subject:</span>
             <select
               value={subjectFilter}
               onChange={(e) => setSubjectFilter(e.target.value)}
-              className="font-sans text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer"
+              className="font-sans text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[36px] sm:min-h-0 py-1"
+              aria-label="Filter doubts by study area"
             >
               <option value="all">All Study Areas</option>
               {subjects.map((s) => (

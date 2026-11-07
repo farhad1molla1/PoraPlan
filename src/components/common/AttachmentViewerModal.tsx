@@ -127,7 +127,7 @@ export const AttachmentViewerModal: React.FC<AttachmentViewerModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint shadow-brutal-xs text-brand-dark transition-all"
+              className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint shadow-brutal-xs text-brand-dark transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal active:translate-x-0.5 active:translate-y-0.5"
               aria-label="Close Attachment Viewer"
             >
               <X className="w-4 h-4" />

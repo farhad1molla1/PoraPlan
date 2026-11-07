@@ -960,21 +960,21 @@ export const AdminProgramsPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleOpenEditProgram(prog)}
-                        className="p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-paper-tint text-brand-dark shadow-brutal-xs"
+                        className="min-w-[40px] min-h-[40px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-paper-tint text-brand-dark shadow-brutal-xs flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
                         title="Edit program"
                         aria-label="Edit program"
                       >
-                        <Edit className="w-3.5 h-3.5" />
+                        <Edit className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                       </button>
 
                       <button
                         type="button"
                         onClick={() => handleDeleteProgram(prog)}
-                        className="p-1.5 border border-brand-dark bg-brand-paper hover:bg-red-50 text-red-600 shadow-brutal-xs"
+                        className="min-w-[40px] min-h-[40px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 border border-brand-dark bg-brand-paper hover:bg-red-50 text-red-600 shadow-brutal-xs flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                         title="Delete program"
                         aria-label="Delete program"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -1317,16 +1317,18 @@ export const AdminProgramsPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenEditCohort(cohort)}
-                            className="p-1 border border-brand-dark bg-brand-paper text-brand-dark hover:bg-brand-paper-tint shadow-brutal-xs"
+                            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-1.5 sm:p-1 border border-brand-dark bg-brand-paper text-brand-dark hover:bg-brand-paper-tint shadow-brutal-xs flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
                             title="Edit cohort"
+                            aria-label={`Edit ${cohort.name}`}
                           >
                             <Edit className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteCohort(cohort)}
-                            className="p-1 border border-brand-dark bg-brand-paper text-red-600 hover:bg-red-50 shadow-brutal-xs"
+                            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-1.5 sm:p-1 border border-brand-dark bg-brand-paper text-red-600 hover:bg-red-50 shadow-brutal-xs flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                             title="Delete cohort"
+                            aria-label={`Delete ${cohort.name}`}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
