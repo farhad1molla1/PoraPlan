@@ -683,17 +683,28 @@ export const AdminReportsPage: React.FC = () => {
               </div>
 
               {/* Student Directory Table */}
-              <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal overflow-x-auto">
+              <div className="flex items-center justify-between text-[11px] font-mono text-brand-muted px-0.5">
+                <span>Total Scholars: <strong className="text-brand-navy">{filteredStudents.length}</strong></span>
+                <span className="lg:hidden text-[10.5px]">Scroll horizontally for metrics &rarr;</span>
+              </div>
+              <div
+                tabIndex={0}
+                role="region"
+                aria-label="Student Progress Directory, horizontally scrollable"
+                className="border-2 border-brand-dark bg-brand-paper shadow-brutal overflow-x-auto focus:outline-none focus:ring-1 focus:ring-brand-teal"
+              >
                 <table className="w-full text-left text-xs academic-sans">
                   <thead className="bg-brand-paper-tint border-b-2 border-brand-dark text-brand-navy uppercase text-[9.5px] tracking-wider font-bold">
                     <tr>
-                      <th className="p-3">Student &amp; Academic Meta</th>
-                      <th className="p-3">Program &amp; Mentor</th>
-                      <th className="p-3 text-center">Tasks (Rate / Overdue)</th>
-                      <th className="p-3 text-center">Mastery Score</th>
-                      <th className="p-3 text-center">Consistency</th>
-                      <th className="p-3 text-center">Attention Status</th>
-                      <th className="p-3 text-right">Official Report</th>
+                      <th scope="col" className="sticky left-0 print:static z-20 print:z-auto bg-brand-paper-tint p-3 min-w-[140px] sm:min-w-[180px] max-w-[180px] sm:max-w-none border-r-2 border-brand-dark/20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] print:shadow-none">
+                        Student &amp; Academic Meta
+                      </th>
+                      <th scope="col" className="p-3">Program &amp; Mentor</th>
+                      <th scope="col" className="p-3 text-center">Tasks (Rate / Overdue)</th>
+                      <th scope="col" className="p-3 text-center">Mastery Score</th>
+                      <th scope="col" className="p-3 text-center">Consistency</th>
+                      <th scope="col" className="p-3 text-center">Attention Status</th>
+                      <th scope="col" className="p-3 text-right">Official Report</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-brand-dark/15">
@@ -705,12 +716,12 @@ export const AdminReportsPage: React.FC = () => {
                       </tr>
                     ) : (
                       filteredStudents.map((s) => (
-                        <tr key={s.studentId} className="hover:bg-brand-paper-tint/50">
-                          <td className="p-3">
-                            <div className="font-bold text-brand-navy text-sm">{s.studentName}</div>
-                            <div className="text-[10.5px] font-mono text-brand-teal font-semibold">{s.poraplanId}</div>
+                        <tr key={s.studentId} className="group hover:bg-brand-paper-tint/50 transition-colors">
+                          <td className="sticky left-0 print:static z-10 print:z-auto bg-brand-paper group-hover:bg-brand-paper-tint/50 transition-colors p-3 min-w-[140px] sm:min-w-[180px] max-w-[180px] sm:max-w-none border-r-2 border-brand-dark/20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] print:shadow-none">
+                            <div className="font-bold text-brand-navy text-sm leading-snug">{s.studentName}</div>
+                            <div className="text-[10.5px] font-mono text-brand-teal font-semibold mt-0.5">{s.poraplanId}</div>
                             {(s.university || s.department) && (
-                              <div className="text-[10px] text-brand-muted mt-0.5">
+                              <div className="text-[10px] text-brand-muted mt-0.5 line-clamp-2">
                                 {[s.university, s.department, s.batch ? `Batch ${s.batch}` : null].filter(Boolean).join(' • ')}
                               </div>
                             )}
@@ -846,17 +857,28 @@ export const AdminReportsPage: React.FC = () => {
               </div>
 
               {/* Mentor Workload Directory Table */}
-              <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal overflow-x-auto">
+              <div className="flex items-center justify-between text-[11px] font-mono text-brand-muted px-0.5">
+                <span>Total Mentors: <strong className="text-brand-navy">{filteredMentors.length}</strong></span>
+                <span className="lg:hidden text-[10.5px]">Scroll horizontally for workload &rarr;</span>
+              </div>
+              <div
+                tabIndex={0}
+                role="region"
+                aria-label="Mentor Workload Directory, horizontally scrollable"
+                className="border-2 border-brand-dark bg-brand-paper shadow-brutal overflow-x-auto focus:outline-none focus:ring-1 focus:ring-brand-teal"
+              >
                 <table className="w-full text-left text-xs academic-sans">
                   <thead className="bg-brand-paper-tint border-b-2 border-brand-dark text-brand-navy uppercase text-[9.5px] tracking-wider font-bold">
                     <tr>
-                      <th className="p-3">Mentor &amp; Expertise</th>
-                      <th className="p-3 text-center">Assigned Mentees</th>
-                      <th className="p-3 text-center">Active Cohorts</th>
-                      <th className="p-3 text-center">Recent Evaluations</th>
-                      <th className="p-3 text-center">Reviews Queue</th>
-                      <th className="p-3 text-center">Mentees Requiring Attention</th>
-                      <th className="p-3 text-right">Mentor Audit</th>
+                      <th scope="col" className="sticky left-0 print:static z-20 print:z-auto bg-brand-paper-tint p-3 min-w-[140px] sm:min-w-[180px] max-w-[180px] sm:max-w-none border-r-2 border-brand-dark/20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] print:shadow-none">
+                        Mentor &amp; Expertise
+                      </th>
+                      <th scope="col" className="p-3 text-center">Assigned Mentees</th>
+                      <th scope="col" className="p-3 text-center">Active Cohorts</th>
+                      <th scope="col" className="p-3 text-center">Recent Evaluations</th>
+                      <th scope="col" className="p-3 text-center">Reviews Queue</th>
+                      <th scope="col" className="p-3 text-center">Mentees Requiring Attention</th>
+                      <th scope="col" className="p-3 text-right">Mentor Audit</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-brand-dark/15">
@@ -868,12 +890,12 @@ export const AdminReportsPage: React.FC = () => {
                       </tr>
                     ) : (
                       filteredMentors.map((m) => (
-                        <tr key={m.mentorId} className="hover:bg-brand-paper-tint/50">
-                          <td className="p-3">
-                            <div className="font-bold text-brand-navy text-sm">{m.mentorName}</div>
-                            <div className="text-[10.5px] font-mono text-brand-gold font-semibold">{m.poraplanId}</div>
+                        <tr key={m.mentorId} className="group hover:bg-brand-paper-tint/50 transition-colors">
+                          <td className="sticky left-0 print:static z-10 print:z-auto bg-brand-paper group-hover:bg-brand-paper-tint/50 transition-colors p-3 min-w-[140px] sm:min-w-[180px] max-w-[180px] sm:max-w-none border-r-2 border-brand-dark/20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] print:shadow-none">
+                            <div className="font-bold text-brand-navy text-sm leading-snug">{m.mentorName}</div>
+                            <div className="text-[10.5px] font-mono text-brand-gold font-semibold mt-0.5">{m.poraplanId}</div>
                             {m.expertiseSubjects.length > 0 && (
-                              <div className="text-[10px] text-brand-muted mt-0.5">
+                              <div className="text-[10px] text-brand-muted mt-0.5 line-clamp-2">
                                 Subjects: {m.expertiseSubjects.join(', ')}
                               </div>
                             )}

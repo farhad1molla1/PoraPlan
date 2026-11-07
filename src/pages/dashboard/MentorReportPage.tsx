@@ -494,34 +494,46 @@ export const MentorReportPage: React.FC = () => {
                     <Users className="w-4 h-4 text-brand-teal" />
                     <span>Assigned Mentees Performance &amp; Triage Status</span>
                   </h3>
-                  <span className="text-[10px] academic-sans text-brand-muted">
-                    {mentorReport.studentSummaries.length} Scholars Listed
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] academic-sans text-brand-muted lg:hidden">
+                      Scroll horizontally &rarr;
+                    </span>
+                    <span className="text-[10px] academic-sans text-brand-muted">
+                      {mentorReport.studentSummaries.length} Scholars Listed
+                    </span>
+                  </div>
                 </div>
 
                 {mentorReport.studentSummaries.length > 0 ? (
-                  <div className="border-2 border-brand-dark overflow-x-auto bg-brand-paper">
+                  <div
+                    tabIndex={0}
+                    role="region"
+                    aria-label="Assigned Mentees Performance & Triage Status, horizontally scrollable"
+                    className="border-2 border-brand-dark overflow-x-auto bg-brand-paper focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  >
                     <table className="w-full text-left academic-sans text-xs border-collapse">
                       <thead className="bg-brand-paper-tint border-b-2 border-brand-dark text-[10px] uppercase font-bold text-brand-navy">
                         <tr>
-                          <th className="p-2.5">Scholar</th>
-                          <th className="p-2.5 text-center">Tasks (Done/Due)</th>
-                          <th className="p-2.5 text-center">Velocity</th>
-                          <th className="p-2.5 text-center">Problem Sets</th>
-                          <th className="p-2.5 text-center">Exams Avg</th>
-                          <th className="p-2.5 text-center">Schedule Consistency</th>
-                          <th className="p-2.5 text-center">Triage Status</th>
-                          <th className="p-2.5 text-right print:hidden">Action</th>
+                          <th scope="col" className="sticky left-0 print:static z-20 print:z-auto bg-brand-paper-tint p-2.5 min-w-[130px] sm:min-w-[160px] max-w-[160px] sm:max-w-none border-r-2 border-brand-dark/20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] print:shadow-none">
+                            Scholar
+                          </th>
+                          <th scope="col" className="p-2.5 text-center">Tasks (Done/Due)</th>
+                          <th scope="col" className="p-2.5 text-center">Velocity</th>
+                          <th scope="col" className="p-2.5 text-center">Problem Sets</th>
+                          <th scope="col" className="p-2.5 text-center">Exams Avg</th>
+                          <th scope="col" className="p-2.5 text-center">Schedule Consistency</th>
+                          <th scope="col" className="p-2.5 text-center">Triage Status</th>
+                          <th scope="col" className="p-2.5 text-right print:hidden">Action</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-brand-dark/10">
                         {mentorReport.studentSummaries.map((s) => (
-                          <tr key={s.studentId} className="hover:bg-brand-paper-tint/50">
-                            <td className="p-2.5">
-                              <span className="font-bold text-brand-navy block text-sm">
+                          <tr key={s.studentId} className="group hover:bg-brand-paper-tint/50 transition-colors">
+                            <td className="sticky left-0 print:static z-10 print:z-auto bg-brand-paper group-hover:bg-brand-paper-tint/50 transition-colors p-2.5 min-w-[130px] sm:min-w-[160px] max-w-[160px] sm:max-w-none border-r-2 border-brand-dark/20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] print:shadow-none">
+                              <span className="font-bold text-brand-navy block text-sm leading-snug">
                                 {s.studentName}
                               </span>
-                              <span className="text-[10px] text-brand-muted font-normal">
+                              <span className="text-[10px] text-brand-muted font-normal block mt-0.5">
                                 {s.poraplanId} {s.cohortName ? `• ${s.cohortName}` : ''}
                               </span>
                             </td>
