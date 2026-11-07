@@ -361,7 +361,108 @@ export const AdminUsersPage: React.FC = () => {
         </div>
       ) : (
         <div className="rounded-xl border border-border-default bg-surface-card shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
+          <div className="lg:hidden p-3 sm:p-4 space-y-3 bg-surface-base/30">
+            {filteredUsers.map((u) => {
+              const initial = u.full_name ? u.full_name.charAt(0).toUpperCase() : '?';
+              const isSelected = selectedUser?.id === u.id;
+
+              return (
+                <div
+                  key={u.id}
+                  onClick={() => setSelectedUser(u)}
+                  className={`p-4 rounded-xl border border-border-default bg-surface-card shadow-xs hover:border-forest-600 transition-all cursor-pointer space-y-3 ${
+                    isSelected ? 'ring-2 ring-forest-600 bg-forest-900/5 dark:bg-forest-100/5' : ''
+                  }`}
+                >
+                  {/* Card Header: Avatar/Initials + Name + ID + Role & Status Badges */}
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {u.avatar_url ? (
+                        <img
+                          src={u.avatar_url}
+                          alt={u.full_name}
+                          className="w-10 h-10 rounded-full object-cover border border-border-default shrink-0"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-forest-900/10 dark:bg-forest-100/10 text-forest-800 dark:text-forest-200 font-semibold flex items-center justify-center shrink-0 text-sm">
+                          {initial}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5 leading-tight">
+                          <p className="font-semibold text-text-primary text-sm truncate">{u.full_name}</p>
+                          {u.poraplan_id && (
+                            <span className="font-mono text-xs font-semibold px-1.5 py-0.5 rounded bg-surface-base border border-border-default text-text-primary shrink-0">
+                              {u.poraplan_id}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                          <Badge variant={getRoleBadgeVariant(u.role)} size="sm">
+                            {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
+                          </Badge>
+                          <Badge variant={getStatusBadgeVariant(u.status)} size="sm">
+                            {u.status === 'not_activated'
+                              ? 'Not Activated'
+                              : u.status === 'suspended'
+                              ? 'Suspended'
+                              : 'Active'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Secondary Details */}
+                  <div className="p-2.5 rounded-lg bg-surface-base border border-border-default/70 text-xs space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-text-muted text-[11px] flex items-center gap-1 shrink-0">
+                        <Mail className="w-3.5 h-3.5 text-text-muted" /> Email
+                      </span>
+                      <span className="text-text-primary font-medium truncate max-w-[200px] sm:max-w-[260px]" title={u.email}>
+                        {u.email}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-border-default/40">
+                      <span className="text-text-muted text-[11px] flex items-center gap-1 shrink-0">
+                        <Phone className="w-3.5 h-3.5 text-emerald-600" /> WhatsApp
+                      </span>
+                      <span className="text-text-secondary font-mono">
+                        {u.whatsapp_number || '—'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-border-default/40">
+                      <span className="text-text-muted text-[11px] flex items-center gap-1 shrink-0">
+                        <Calendar className="w-3.5 h-3.5 text-text-muted" /> Registered
+                      </span>
+                      <span className="text-text-secondary font-mono">
+                        {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card Action CTA */}
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedUser(u)}
+                      className="w-full min-h-[44px] flex items-center justify-center gap-1 text-xs font-semibold text-forest-700 hover:text-forest-900 dark:text-forest-300"
+                    >
+                      View Details & Profile
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table (>= lg: 1024px) */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border-default bg-surface-base/50 text-text-secondary text-xs uppercase tracking-wider font-semibold">

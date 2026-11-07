@@ -518,66 +518,151 @@ export const StudentBillingPage: React.FC = () => {
               ))}
             </div>
 
-            {/* Table */}
+            {/* Table & Responsive Cards */}
             {filteredRecords.length === 0 ? (
               <div className="p-6 bg-brand-paper border border-brand-dark/20 text-center text-xs text-brand-muted">
                 No records found.
               </div>
             ) : (
-              <div className="border border-brand-dark/30 bg-brand-paper overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-brand-bg border-b border-brand-dark/20 font-heading uppercase text-[11px] text-brand-muted">
-                    <tr>
-                      <th className="p-2.5">Billing Period</th>
-                      <th className="p-2.5">Status</th>
-                      <th className="p-2.5">Next Due Date</th>
-                      <th className="p-2.5">Method</th>
-                      <th className="p-2.5">Payment Date</th>
-                      <th className="p-2.5">Reference</th>
-                      <th className="p-2.5 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-brand-dark/10">
-                    {paginatedRecords.map((r) => (
-                      <tr
-                        key={r.id}
-                        onClick={() => setSelectedRecord(r)}
-                        className="hover:bg-brand-paper-tint/60 transition-colors cursor-pointer"
-                      >
-                        <td className="p-2.5 font-heading font-bold text-brand-navy">
-                          {formatCalendarDate(r.cycle_start_date)} – {formatCalendarDate(r.cycle_end_date)}
-                        </td>
-                        <td className="p-2.5">
+              <>
+                {/* Mobile Responsive Cards (< md: 768px) */}
+                <div className="md:hidden space-y-3">
+                  {paginatedRecords.map((r) => (
+                    <div
+                      key={r.id}
+                      onClick={() => setSelectedRecord(r)}
+                      className="p-4 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs hover:shadow-brutal transition-all cursor-pointer space-y-3"
+                    >
+                      {/* Card Header: Billing Period + Status Badge */}
+                      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-brand-dark/15">
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-mono uppercase text-brand-muted font-bold block">
+                            Billing Period
+                          </span>
+                          <span className="font-heading font-extrabold text-sm text-brand-navy leading-snug">
+                            {formatCalendarDate(r.cycle_start_date)} – {formatCalendarDate(r.cycle_end_date)}
+                          </span>
+                        </div>
+                        <div className="shrink-0">
                           {getStatusBadge(r.status)}
-                        </td>
-                        <td className="p-2.5 font-mono text-[11px] text-brand-muted">
-                          {formatCalendarDate(r.next_due_date)}
-                        </td>
-                        <td className="p-2.5">
-                          {formatPaymentMethod(r.payment_method)}
-                        </td>
-                        <td className="p-2.5 font-mono text-[11px] text-brand-muted">
-                          {r.payment_date ? formatCalendarDate(r.payment_date) : 'Pending'}
-                        </td>
-                        <td className="p-2.5 font-mono text-[11px] text-brand-dark max-w-[130px] truncate" title={r.transaction_reference || ''}>
-                          {r.transaction_reference || '—'}
-                        </td>
-                        <td className="p-2.5 text-right" onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="px-2 py-0.5 text-[11px]"
-                            onClick={() => setSelectedRecord(r)}
-                            leftIcon={<Eye className="w-3 h-3" />}
+                        </div>
+                      </div>
+
+                      {/* Card Details Grid */}
+                      <div className="grid grid-cols-2 gap-2.5 text-xs bg-brand-bg p-2.5 border border-brand-dark/20">
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block">
+                            Next Due Date
+                          </span>
+                          <span className="font-heading font-bold text-brand-navy text-[11px] flex items-center gap-1 mt-0.5">
+                            <Clock className="w-3 h-3 text-brand-teal shrink-0" />
+                            {formatCalendarDate(r.next_due_date)}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block">
+                            Payment Method
+                          </span>
+                          <span className="font-sans font-bold text-brand-dark text-[11px] block mt-0.5 truncate">
+                            {formatPaymentMethod(r.payment_method)}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block">
+                            Payment Date
+                          </span>
+                          <span className="font-mono text-[11px] text-brand-dark block mt-0.5">
+                            {r.payment_date ? formatCalendarDate(r.payment_date) : 'Pending'}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block">
+                            Reference
+                          </span>
+                          <span
+                            className="font-mono text-[11px] text-brand-dark font-medium block mt-0.5 truncate"
+                            title={r.transaction_reference || ''}
                           >
-                            Details
-                          </Button>
-                        </td>
+                            {r.transaction_reference || '—'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card Action Button */}
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full min-h-[44px] flex items-center justify-center gap-1.5 text-xs font-bold"
+                          onClick={() => setSelectedRecord(r)}
+                          leftIcon={<Eye className="w-3.5 h-3.5" />}
+                        >
+                          View Details & Activity
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop Table (>= md: 768px) */}
+                <div className="hidden md:block border border-brand-dark/30 bg-brand-paper overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-brand-bg border-b border-brand-dark/20 font-heading uppercase text-[11px] text-brand-muted">
+                      <tr>
+                        <th className="p-2.5">Billing Period</th>
+                        <th className="p-2.5">Status</th>
+                        <th className="p-2.5">Next Due Date</th>
+                        <th className="p-2.5">Method</th>
+                        <th className="p-2.5">Payment Date</th>
+                        <th className="p-2.5">Reference</th>
+                        <th className="p-2.5 text-right">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-brand-dark/10">
+                      {paginatedRecords.map((r) => (
+                        <tr
+                          key={r.id}
+                          onClick={() => setSelectedRecord(r)}
+                          className="hover:bg-brand-paper-tint/60 transition-colors cursor-pointer"
+                        >
+                          <td className="p-2.5 font-heading font-bold text-brand-navy">
+                            {formatCalendarDate(r.cycle_start_date)} – {formatCalendarDate(r.cycle_end_date)}
+                          </td>
+                          <td className="p-2.5">
+                            {getStatusBadge(r.status)}
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px] text-brand-muted">
+                            {formatCalendarDate(r.next_due_date)}
+                          </td>
+                          <td className="p-2.5">
+                            {formatPaymentMethod(r.payment_method)}
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px] text-brand-muted">
+                            {r.payment_date ? formatCalendarDate(r.payment_date) : 'Pending'}
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px] text-brand-dark max-w-[130px] truncate" title={r.transaction_reference || ''}>
+                            {r.transaction_reference || '—'}
+                          </td>
+                          <td className="p-2.5 text-right" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-2 py-0.5 text-[11px]"
+                              onClick={() => setSelectedRecord(r)}
+                              leftIcon={<Eye className="w-3 h-3" />}
+                            >
+                              Details
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
 
             {/* Pagination */}

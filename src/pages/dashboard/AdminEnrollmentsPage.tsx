@@ -491,7 +491,115 @@ export const AdminEnrollmentsPage: React.FC = () => {
         </div>
       ) : (
         <div className="border-3 border-brand-dark bg-brand-paper shadow-brutal overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile Responsive Cards (< md: 768px) */}
+          <div className="md:hidden p-3 sm:p-4 space-y-3 bg-brand-bg">
+            {filteredEnrollments.map((enr) => {
+              const student = enr.student;
+              const program = enr.program;
+              const cohort = enr.cohort;
+
+              return (
+                <div
+                  key={enr.id}
+                  className="border-2 border-brand-dark bg-brand-paper p-3.5 sm:p-4 shadow-brutal-xs space-y-3"
+                >
+                  {/* Student Identity + Status Badge */}
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 border-2 border-brand-dark bg-[#0BA7B4]/20 flex items-center justify-center font-black text-brand-navy shrink-0 text-sm">
+                        {student?.full_name?.charAt(0) || 'S'}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-black text-brand-navy flex flex-wrap items-center gap-1.5 leading-tight">
+                          <span className="truncate">{student?.full_name || 'Unknown Student'}</span>
+                          {student?.poraplan_id && (
+                            <span className="font-mono text-[11px] px-1.5 py-0.5 bg-brand-bg border border-brand-dark/30 text-brand-navy/80 font-bold shrink-0">
+                              {student.poraplan_id}
+                            </span>
+                          )}
+                        </div>
+                        {(student?.university || student?.department || student?.current_semester) && (
+                          <div className="text-xs text-brand-navy/70 flex flex-wrap items-center gap-1 mt-0.5 font-medium">
+                            {student?.university && <span>{student.university}</span>}
+                            {student?.department && (
+                              <>
+                                <span>•</span>
+                                <span>{student.department}</span>
+                              </>
+                            )}
+                            {student?.current_semester && (
+                              <>
+                                <span>•</span>
+                                <span>Sem {student.current_semester}</span>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <Badge
+                      variant={getEnrollmentStatusBadgeVariant(enr.status)}
+                      size="sm"
+                      className="font-bold uppercase tracking-wide shrink-0"
+                    >
+                      {enr.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+
+                  {/* Program, Cohort, & Enrollment Date */}
+                  <div className="p-2.5 bg-brand-bg border border-brand-dark/20 text-xs space-y-1.5">
+                    <div className="flex justify-between items-start gap-2">
+                      <span className="text-brand-muted font-mono uppercase text-[10px] shrink-0 font-bold">
+                        Program
+                      </span>
+                      <span className="font-bold text-brand-navy text-right leading-tight">
+                        {program?.name || 'General Mentorship'}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center gap-2 pt-1 border-t border-brand-dark/10">
+                      <span className="text-brand-muted font-mono uppercase text-[10px] shrink-0 font-bold">
+                        Cohort
+                      </span>
+                      <div className="flex items-center gap-1 text-[11px]">
+                        <span className="font-mono font-semibold px-1 py-0.5 bg-gray-100 border border-gray-300 text-gray-700">
+                          {cohort?.name || 'Assigned Cohort'}
+                        </span>
+                        {cohort?.code && (
+                          <span className="text-brand-navy/60 font-mono">({cohort.code})</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center gap-2 pt-1 border-t border-brand-dark/10">
+                      <span className="text-brand-muted font-mono uppercase text-[10px] shrink-0 font-bold">
+                        Enrolled
+                      </span>
+                      <span className="font-mono text-brand-navy/80 text-[11px] flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-brand-teal" />
+                        {new Date(enr.enrolled_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openStatusModal(enr)}
+                    className="w-full min-h-[44px] flex items-center justify-center gap-1.5 font-bold text-xs"
+                  >
+                    Manage Status
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table (>= md: 768px) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b-3 border-brand-dark bg-brand-bg text-xs font-black uppercase text-brand-navy tracking-wider">
