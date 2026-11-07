@@ -198,25 +198,25 @@ export const PublicProfilePage: React.FC = () => {
       )}
 
       {/* Hero Profile Card */}
-      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
           {/* Avatar or Initial Block */}
           {profile.avatar_url ? (
             <img
               src={profile.avatar_url}
               alt={profile.full_name}
-              className="w-24 h-24 sm:w-28 sm:h-28 object-cover border-2 border-brand-dark shadow-brutal-sm bg-brand-paper-tint"
+              className="w-20 h-20 sm:w-28 sm:h-28 object-cover border-2 border-brand-dark shadow-brutal-xs sm:shadow-brutal-sm bg-brand-paper-tint"
             />
           ) : (
-            <div className="w-24 h-24 sm:w-28 sm:h-28 border-2 border-brand-dark bg-brand-navy text-brand-bg flex items-center justify-center font-heading font-black text-3xl sm:text-4xl shadow-brutal-sm">
+            <div className="w-20 h-20 sm:w-28 sm:h-28 border-2 border-brand-dark bg-brand-navy text-brand-bg flex items-center justify-center font-heading font-black text-2xl sm:text-4xl shadow-brutal-xs sm:shadow-brutal-sm">
               {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : '?'}
             </div>
           )}
 
           {/* Member Identity & Badges */}
           <div className="flex-1 text-center sm:text-left space-y-2">
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
-              <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-brand-navy tracking-tight">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-2.5">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-heading font-extrabold text-brand-navy tracking-tight">
                 {profile.full_name}
               </h1>
               {profile.poraplan_id && (
@@ -268,7 +268,7 @@ export const PublicProfilePage: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Student Profile Specifics */}
           {profile.role === 'student' && (
-            <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 space-y-4">
+            <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-6 space-y-3.5 sm:space-y-4">
               <div className="flex items-center gap-2 border-b-2 border-brand-dark pb-3">
                 <GraduationCap className="w-5 h-5 text-brand-teal" />
                 <h2 className="font-heading font-extrabold text-base text-brand-navy uppercase tracking-wider">

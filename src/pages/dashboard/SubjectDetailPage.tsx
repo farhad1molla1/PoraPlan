@@ -191,7 +191,7 @@ export const SubjectDetailPage: React.FC = () => {
         {/* Top Header Banner */}
         <section
           aria-labelledby="subject-detail-heading"
-          className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-5 sm:p-7 shadow-brutal space-y-4"
+          className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-4 sm:p-7 shadow-brutal-sm sm:shadow-brutal space-y-3.5 sm:space-y-4"
         >
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -216,7 +216,7 @@ export const SubjectDetailPage: React.FC = () => {
                   <BookOpen className="w-6 h-6 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h1 id="subject-detail-heading" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
+                  <h1 id="subject-detail-heading" className="text-xl sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
                     {subject.name}
                   </h1>
                   <span className="text-xs font-mono text-brand-bg/75">
@@ -258,7 +258,7 @@ export const SubjectDetailPage: React.FC = () => {
         </section>
 
         {/* Syllabus Overview Card */}
-        <section aria-labelledby="syllabus-overview-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-3">
+        <section aria-labelledby="syllabus-overview-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-6 space-y-3">
           <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2.5">
             <h2 id="syllabus-overview-title" className="font-heading font-extrabold text-base text-brand-navy flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-brand-teal stroke-[2.5]" />
@@ -292,7 +292,7 @@ export const SubjectDetailPage: React.FC = () => {
             {/* Component 1: Topics & Study Plans */}
             <Link
               to={isMentor ? '/mentor/plans' : '/student/plans'}
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
+              className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -317,7 +317,7 @@ export const SubjectDetailPage: React.FC = () => {
             {/* Component 2: Tasks */}
             <Link
               to={isMentor ? '/mentor/tasks' : '/student/tasks'}
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
+              className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -342,7 +342,7 @@ export const SubjectDetailPage: React.FC = () => {
             {/* Component 3: Assignments */}
             <Link
               to={isMentor ? '/mentor/assignments' : '/student/assignments'}
-              className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
+              className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -365,7 +365,7 @@ export const SubjectDetailPage: React.FC = () => {
             </Link>
 
             {/* Component 4: Resources */}
-            <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2">
+            <div className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
                   REPOSITORY

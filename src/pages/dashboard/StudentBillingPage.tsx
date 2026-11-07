@@ -423,7 +423,7 @@ export const StudentBillingPage: React.FC = () => {
         <div className="space-y-5">
           {/* Current Billing Period Card */}
           {currentRecord && (
-            <div className="p-4 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-3">
+            <div className="p-3.5 sm:p-5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-3">
               <div className="flex items-center justify-between gap-2 pb-2 border-b border-brand-dark/10">
                 <span className="text-[11px] font-mono uppercase font-bold text-brand-muted">
                   Current Billing Period
@@ -531,7 +531,7 @@ export const StudentBillingPage: React.FC = () => {
                     <div
                       key={r.id}
                       onClick={() => setSelectedRecord(r)}
-                      className="p-4 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs hover:shadow-brutal transition-all cursor-pointer space-y-3"
+                      className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-2.5 cursor-pointer"
                     >
                       {/* Card Header: Billing Period + Status Badge */}
                       <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-brand-dark/15">

@@ -699,7 +699,7 @@ export const AdminProgramsPage: React.FC = () => {
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Top Header Ribbon */}
-        <div className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-6 shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-4 sm:p-6 shadow-brutal-sm sm:shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs uppercase text-brand-gold font-bold tracking-wider">
@@ -709,7 +709,7 @@ export const AdminProgramsPage: React.FC = () => {
                 PROGRAM MANAGEMENT
               </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg">
               Programs, Cohorts &amp; Curriculum
             </h1>
             <p className="font-mono text-xs text-brand-bg/75">
@@ -824,7 +824,7 @@ export const AdminProgramsPage: React.FC = () => {
               return (
                 <div
                   key={prog.id}
-                  className="p-4 sm:p-6 border-2 sm:border-3 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-4"
+                  className="p-3.5 sm:p-6 border-2 sm:border-3 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-3 sm:space-y-4"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-brand-dark pb-3">
                     <div className="flex flex-wrap items-center gap-2">

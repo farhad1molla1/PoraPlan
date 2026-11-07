@@ -246,7 +246,7 @@ export const MentorSubjectsPage: React.FC = () => {
         {/* Top Header Banner */}
         <section
           aria-labelledby="mentor-subjects-heading"
-          className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-5 sm:p-7 shadow-brutal space-y-4"
+          className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-4 sm:p-7 shadow-brutal-sm sm:shadow-brutal space-y-3.5 sm:space-y-4"
         >
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="space-y-1.5">
@@ -264,7 +264,7 @@ export const MentorSubjectsPage: React.FC = () => {
                 </span>
               </div>
 
-              <h1 id="mentor-subjects-heading" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
+              <h1 id="mentor-subjects-heading" className="text-xl sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
                 Subjects
               </h1>
 
@@ -322,7 +322,7 @@ export const MentorSubjectsPage: React.FC = () => {
         )}
 
         {/* Student Selector Bar */}
-        <section aria-label="Target Student Selection" className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 space-y-3">
+        <section aria-label="Target Student Selection" className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-4 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <GraduationCap className="w-5 h-5 text-brand-teal shrink-0 stroke-[2.2]" />
@@ -404,7 +404,7 @@ export const MentorSubjectsPage: React.FC = () => {
               {subjects.map((subject) => (
                 <div
                   key={subject.id}
-                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 flex flex-col justify-between space-y-4"
+                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 flex flex-col justify-between space-y-3 sm:space-y-4"
                 >
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
@@ -419,7 +419,7 @@ export const MentorSubjectsPage: React.FC = () => {
                             {subject.status.toUpperCase()}
                           </Badge>
                         </div>
-                        <h3 className="font-heading font-extrabold text-lg text-brand-navy">
+                        <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy">
                           {subject.name}
                         </h3>
                       </div>

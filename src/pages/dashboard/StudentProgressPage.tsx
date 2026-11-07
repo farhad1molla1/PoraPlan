@@ -103,11 +103,11 @@ export const StudentProgressPage: React.FC = () => {
       progress.subjectsProgress.length > 0);
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fadeIn pb-12">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-fadeIn pb-12">
       {/* ========================================================================= */}
       {/* 1. PAGE HEADER                                                            */}
       {/* ========================================================================= */}
-      <section className="p-4 sm:p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section className="p-3.5 sm:p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="font-mono text-xs uppercase font-bold text-brand-muted bg-brand-bg px-2 py-0.5 border border-brand-dark">
@@ -124,7 +124,7 @@ export const StudentProgressPage: React.FC = () => {
               </span>
             )}
           </div>
-          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy tracking-tight">
+          <h1 className="font-heading font-extrabold text-xl sm:text-2xl md:text-3xl text-brand-navy tracking-tight">
             Progress Tracking
           </h1>
           <p className="font-sans text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl">

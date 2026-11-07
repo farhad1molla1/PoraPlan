@@ -287,14 +287,14 @@ export const AdminEnrollmentsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border-3 border-brand-dark bg-brand-paper p-6 shadow-brutal">
+      <div className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-4 sm:p-6 shadow-brutal-sm sm:shadow-brutal">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-brand-bg text-brand-navy border border-brand-dark mb-2">
               <UserCheck className="w-3.5 h-3.5 text-brand-teal" />
               Active Roster Desk
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-brand-navy">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-brand-navy">
               Program Enrollments
             </h1>
             <p className="text-sm text-brand-navy/70 mt-1 max-w-2xl font-medium">
@@ -334,24 +334,24 @@ export const AdminEnrollmentsPage: React.FC = () => {
         </div>
 
         {/* Quick Stat Counters */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-6 border-t-2 border-brand-dark/10">
-          <div className="p-3 bg-brand-bg border-2 border-brand-dark">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-3 mt-4 pt-4 border-t-2 border-brand-dark/10">
+          <div className="p-2.5 sm:p-3 bg-brand-bg border-2 border-brand-dark">
             <p className="text-xs font-bold text-brand-navy/60 uppercase">Total Students</p>
             <p className="text-2xl font-black text-brand-navy mt-0.5">{totalCount}</p>
           </div>
-          <div className="p-3 bg-[#0BA7B4]/10 border-2 border-[#0BA7B4]">
+          <div className="p-2.5 sm:p-3 bg-[#0BA7B4]/10 border-2 border-[#0BA7B4]">
             <p className="text-xs font-bold text-brand-navy/70 uppercase">Active</p>
             <p className="text-2xl font-black text-brand-navy mt-0.5">{activeCount}</p>
           </div>
-          <div className="p-3 bg-[#F5A623]/10 border-2 border-[#F5A623]">
+          <div className="p-2.5 sm:p-3 bg-[#F5A623]/10 border-2 border-[#F5A623]">
             <p className="text-xs font-bold text-brand-navy/70 uppercase">On Hold</p>
             <p className="text-2xl font-black text-brand-navy mt-0.5">{onHoldCount}</p>
           </div>
-          <div className="p-3 bg-brand-navy/10 border-2 border-brand-dark">
+          <div className="p-2.5 sm:p-3 bg-brand-navy/10 border-2 border-brand-dark">
             <p className="text-xs font-bold text-brand-navy/70 uppercase">Completed</p>
             <p className="text-2xl font-black text-brand-navy mt-0.5">{completedCount}</p>
           </div>
-          <div className="p-3 bg-gray-100 border-2 border-gray-400">
+          <div className="p-2.5 sm:p-3 bg-gray-100 border-2 border-gray-400">
             <p className="text-xs font-bold text-gray-600 uppercase">Withdrawn</p>
             <p className="text-2xl font-black text-gray-700 mt-0.5">{withdrawnCount}</p>
           </div>
@@ -392,7 +392,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
       )}
 
       {/* Filter and Search Bar */}
-      <div className="border-3 border-brand-dark bg-brand-paper p-4 shadow-brutal">
+      <div className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-3.5 sm:p-4 shadow-brutal-sm sm:shadow-brutal">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           {/* Search box */}
           <div className="md:col-span-4 relative">

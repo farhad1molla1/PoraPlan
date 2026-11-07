@@ -826,7 +826,7 @@ export const AdminBillingPage: React.FC = () => {
                     <div
                       key={rec.id}
                       onClick={() => setSelectedStudentRecord(rec)}
-                      className="p-4 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs hover:shadow-brutal transition-all cursor-pointer space-y-3"
+                      className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-2.5 cursor-pointer"
                     >
                       {/* Header: Student Name + PoraPlan ID + Status Badge */}
                       <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-brand-dark/15">
@@ -1134,7 +1134,7 @@ export const AdminBillingPage: React.FC = () => {
                     <div
                       key={rec.id}
                       onClick={() => setSelectedMentorRecord(rec)}
-                      className="p-4 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs hover:shadow-brutal transition-all cursor-pointer space-y-3"
+                      className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-2.5 cursor-pointer"
                     >
                       {/* Header: Mentor Name + Email + Payout Status Badge */}
                       <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-brand-dark/15">

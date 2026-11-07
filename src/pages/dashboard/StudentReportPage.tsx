@@ -159,7 +159,7 @@ export const StudentReportPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 1. INTERACTIVE CONTROL BAR (SCREEN ONLY — HIDDEN IN PRINT)                */}
       {/* ========================================================================= */}
-      <div className="print:hidden p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="print:hidden p-3.5 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             {isAdmin ? (

@@ -127,11 +127,11 @@ export const MentorProgressPage: React.FC = () => {
   const totalCompletedEvaluations = scholars.reduce((acc, s) => acc + s.evaluations.completed, 0);
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fadeIn pb-12">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-fadeIn pb-12">
       {/* ========================================================================= */}
       {/* 1. PAGE HEADER                                                            */}
       {/* ========================================================================= */}
-      <section className="p-4 sm:p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section className="p-3.5 sm:p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="font-mono text-xs uppercase font-bold text-brand-muted bg-brand-bg px-2 py-0.5 border border-brand-dark">
@@ -141,7 +141,7 @@ export const MentorProgressPage: React.FC = () => {
               STUDENTS PROGRESS
             </Badge>
           </div>
-          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy tracking-tight">
+          <h1 className="font-heading font-extrabold text-xl sm:text-2xl md:text-3xl text-brand-navy tracking-tight">
             Student Progress Overview
           </h1>
           <p className="font-sans text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl">
@@ -188,7 +188,7 @@ export const MentorProgressPage: React.FC = () => {
       {/* 2. AGGREGATE KPI CARDS                                                    */}
       {/* ========================================================================= */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
+        <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
               ASSIGNED STUDENTS
@@ -203,7 +203,7 @@ export const MentorProgressPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
+        <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
               ACTIVE TASKS TRACK
@@ -218,7 +218,7 @@ export const MentorProgressPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
+        <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
               PENDING REVIEWS
@@ -235,7 +235,7 @@ export const MentorProgressPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
+        <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
               COMPLETED EVALS
@@ -311,7 +311,7 @@ export const MentorProgressPage: React.FC = () => {
             {filteredScholars.map((scholar) => (
               <div
                 key={scholar.studentId}
-                className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between"
+                className="p-3.5 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-3 min-w-0">

@@ -206,7 +206,7 @@ export const PlanDetailPage: React.FC = () => {
         </nav>
 
         {/* Primary Plan Header Card */}
-        <section aria-labelledby="plan-detail-heading" className="border-2 border-brand-dark bg-brand-navy text-brand-paper shadow-brutal p-5 sm:p-7 space-y-4">
+        <section aria-labelledby="plan-detail-heading" className="border-2 border-brand-dark bg-brand-navy text-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-7 space-y-3.5 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
@@ -229,7 +229,7 @@ export const PlanDetailPage: React.FC = () => {
                   <Compass className="w-6 h-6 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h1 id="plan-detail-heading" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
+                  <h1 id="plan-detail-heading" className="text-xl sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
                     {plan.title}
                   </h1>
                   <span className="text-xs font-mono text-brand-bg/75">
@@ -274,7 +274,7 @@ export const PlanDetailPage: React.FC = () => {
         </section>
 
         {/* Roadmap Overview / Objectives Card */}
-        <section aria-labelledby="roadmap-overview-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-3">
+        <section aria-labelledby="roadmap-overview-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-6 space-y-3">
           <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2.5">
             <h2 id="roadmap-overview-title" className="font-heading font-extrabold text-base text-brand-navy flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-brand-teal stroke-[2.5]" />
@@ -320,7 +320,7 @@ export const PlanDetailPage: React.FC = () => {
               {items.map((item, idx) => (
                 <article
                   key={item.id}
-                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4"
+                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4"
                 >
                   <div className="flex items-start gap-3.5 flex-1">
                     <div className="w-8 h-8 border-2 border-brand-dark bg-brand-navy text-brand-paper font-heading font-extrabold text-xs flex items-center justify-center shrink-0 shadow-brutal-xs">

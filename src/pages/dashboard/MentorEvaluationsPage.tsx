@@ -334,7 +334,7 @@ export const MentorEvaluationsPage: React.FC = () => {
               Check-ins &amp; Reviews
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy tracking-tight mt-1">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-navy tracking-tight mt-1">
             Evaluations
           </h1>
           <p className="text-xs sm:text-sm text-brand-muted mt-0.5">
@@ -406,7 +406,7 @@ export const MentorEvaluationsPage: React.FC = () => {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+        <div className="p-3 sm:p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between mb-1">
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
               ALL ASSESSMENTS
@@ -421,7 +421,7 @@ export const MentorEvaluationsPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+        <div className="p-3 sm:p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between mb-1">
             <span className="font-mono text-[10px] uppercase font-bold text-amber-700">
               SCHEDULED QUEUE
@@ -436,7 +436,7 @@ export const MentorEvaluationsPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+        <div className="p-3 sm:p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between mb-1">
             <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
               COMPLETED REVIEWS
@@ -451,7 +451,7 @@ export const MentorEvaluationsPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+        <div className="p-3 sm:p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between mb-1">
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
               AVERAGE SCORE
@@ -469,7 +469,7 @@ export const MentorEvaluationsPage: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-3">
+      <div className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Status Tabs */}
           <div className="flex flex-wrap items-center gap-1.5">
@@ -577,7 +577,7 @@ export const MentorEvaluationsPage: React.FC = () => {
             return (
               <div
                 key={item.id}
-                className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-3 hover:translate-x-0.5 transition-transform"
+                className="p-3.5 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-2.5 sm:space-y-3 hover:translate-x-0.5 transition-transform"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="space-y-1">

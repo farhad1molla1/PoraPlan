@@ -206,7 +206,7 @@ export const MentorReportPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 1. INTERACTIVE CONTROLS BAR (HIDDEN IN PRINT MODE)                        */}
       {/* ========================================================================= */}
-      <div className="print:hidden p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="print:hidden p-3.5 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             {isAdmin && (
@@ -260,7 +260,7 @@ export const MentorReportPage: React.FC = () => {
       </div>
 
       {/* Filter Row: Period & Scholar Selector (Hidden in Print) */}
-      <div className="print:hidden p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="print:hidden p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Period Selector */}
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-mono">
           <span className="font-bold text-brand-muted uppercase text-[10px] mr-1">Window:</span>

@@ -90,7 +90,7 @@ export const StudentSubjectsPage: React.FC = () => {
         {/* Top Header Banner */}
         <section
           aria-labelledby="subjects-heading"
-          className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-5 sm:p-7 shadow-brutal space-y-4"
+          className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-4 sm:p-7 shadow-brutal-sm sm:shadow-brutal space-y-3.5 sm:space-y-4"
         >
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="space-y-1.5">
@@ -108,7 +108,7 @@ export const StudentSubjectsPage: React.FC = () => {
                 </span>
               </div>
 
-              <h1 id="subjects-heading" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
+              <h1 id="subjects-heading" className="text-xl sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
                 Subjects
               </h1>
 
@@ -174,7 +174,7 @@ export const StudentSubjectsPage: React.FC = () => {
               {subjects.map((subject) => (
                 <div
                   key={subject.id}
-                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 flex flex-col justify-between space-y-4 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform"
+                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 flex flex-col justify-between space-y-3 sm:space-y-4 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform"
                 >
                   <div className="space-y-2.5">
                     <div className="flex items-start justify-between gap-2">
@@ -189,7 +189,7 @@ export const StudentSubjectsPage: React.FC = () => {
                             {subject.status.toUpperCase()}
                           </Badge>
                         </div>
-                        <h2 className="font-heading font-extrabold text-lg text-brand-navy">
+                        <h2 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy">
                           {subject.name}
                         </h2>
                       </div>
@@ -228,7 +228,7 @@ export const StudentSubjectsPage: React.FC = () => {
         {!loading && !error && subjects.length === 0 && (
           <section
             aria-label="No study areas assigned"
-            className="p-6 sm:p-8 border-2 border-dashed border-brand-dark/40 bg-brand-paper shadow-brutal text-center space-y-4"
+            className="p-4 sm:p-8 border-2 border-dashed border-brand-dark/40 bg-brand-paper shadow-brutal-sm sm:shadow-brutal text-center space-y-4"
           >
             <div className="w-12 h-12 border-2 border-brand-dark bg-brand-teal-light mx-auto flex items-center justify-center shadow-brutal-xs">
               <BookOpen className="w-6 h-6 text-brand-teal stroke-[2.5]" />
@@ -270,7 +270,7 @@ export const StudentSubjectsPage: React.FC = () => {
         )}
 
         {/* Academic Guidance Note */}
-        <section className="p-4 border-2 border-brand-dark bg-brand-paper-tint text-xs font-sans text-brand-dark space-y-1 shadow-brutal-xs">
+        <section className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper-tint text-xs font-sans text-brand-dark space-y-1 shadow-brutal-xs">
           <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-brand-navy uppercase">
             <Sparkles className="w-3.5 h-3.5 text-brand-gold shrink-0 stroke-[2.5]" />
             <span>PoraPlan Curriculum Rule</span>

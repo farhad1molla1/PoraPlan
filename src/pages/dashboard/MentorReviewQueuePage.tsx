@@ -248,7 +248,7 @@ export const MentorReviewQueuePage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-brand-bg border-4 border-brand-dark p-6 shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-brand-bg border-2 sm:border-3 border-brand-dark p-4 sm:p-6 shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="font-mono text-xs font-bold text-brand-gold uppercase tracking-wider">
@@ -258,7 +258,7 @@ export const MentorReviewQueuePage: React.FC = () => {
               FEEDBACK
             </Badge>
           </div>
-          <h1 className="font-heading font-black text-2xl md:text-3xl text-brand-navy">
+          <h1 className="font-heading font-black text-xl sm:text-2xl md:text-3xl text-brand-navy">
             Review Queue
           </h1>
           <p className="text-sm text-brand-muted mt-1 max-w-2xl">
@@ -289,7 +289,7 @@ export const MentorReviewQueuePage: React.FC = () => {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Total</span>
             <FileCheck className="w-4 h-4 text-brand-navy" />
@@ -298,7 +298,7 @@ export const MentorReviewQueuePage: React.FC = () => {
           <div className="text-[11px] text-brand-muted mt-0.5">All student submissions</div>
         </div>
 
-        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Needs Review</span>
             <Clock className="w-4 h-4 text-brand-gold" />
@@ -307,7 +307,7 @@ export const MentorReviewQueuePage: React.FC = () => {
           <div className="text-[11px] text-brand-muted mt-0.5">Awaiting evaluation</div>
         </div>
 
-        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Reviewed</span>
             <CheckCircle2 className="w-4 h-4 text-brand-teal" />
@@ -316,7 +316,7 @@ export const MentorReviewQueuePage: React.FC = () => {
           <div className="text-[11px] text-brand-muted mt-0.5">Feedback saved</div>
         </div>
 
-        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
             <span className="font-mono text-xs uppercase font-bold tracking-wider">Needs Revision</span>
             <RotateCcw className="w-4 h-4 text-red-600" />
@@ -430,7 +430,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             return (
               <div
                 key={sub.id}
-                className="bg-brand-paper border-3 border-brand-dark p-5 sm:p-6 shadow-brutal-sm hover:shadow-brutal transition-all"
+                className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3.5 sm:p-6 shadow-brutal-xs sm:shadow-brutal-sm hover:shadow-brutal transition-all"
               >
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div className="space-y-2 flex-1">
