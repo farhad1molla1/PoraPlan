@@ -77,6 +77,23 @@ export const DashboardLayout: React.FC = () => {
     setProfileDropdownOpen(false);
   }, [location.pathname]);
 
+  // Handle Escape key and body scroll lock for profileModalOpen
+  useEffect(() => {
+    if (!profileModalOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isLinkingEmail) {
+        setProfileModalOpen(false);
+      }
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [profileModalOpen, isLinkingEmail]);
+
   // Poll/fetch unread notification count for active user (Student, Mentor, Admin)
   React.useEffect(() => {
     let isMounted = true;
@@ -636,13 +653,22 @@ export const DashboardLayout: React.FC = () => {
       {/* Profile Details Modal Dossier */}
       {profileModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-dark/60 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto"
           role="dialog"
           aria-modal="true"
+          aria-label="Academic Profile & Account Dossier"
           aria-labelledby="profile-modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isLinkingEmail) {
+              setProfileModalOpen(false);
+            }
+          }}
         >
-          <div className="w-full max-w-md bg-brand-paper dark:bg-brand-paper-tint border-3 border-brand-dark shadow-brutal-lg p-5 sm:p-6 space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
+          <div
+            className="w-full max-w-md max-h-[85dvh] flex flex-col bg-brand-paper dark:bg-brand-paper-tint border-3 border-brand-dark shadow-brutal-lg p-4 sm:p-6 animate-in fade-in zoom-in-95 my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3 shrink-0">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-brand-gold stroke-[2.5]" />
                 <h2 id="profile-modal-title" className="font-heading font-extrabold text-lg text-brand-navy">
@@ -652,14 +678,14 @@ export const DashboardLayout: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setProfileModalOpen(false)}
-                className="p-1 border-2 border-brand-dark bg-brand-paper-tint hover:bg-brand-paper shadow-brutal-xs"
+                className="p-2 border-2 border-brand-dark bg-brand-paper-tint hover:bg-brand-paper shadow-brutal-xs min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-transform active:translate-x-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
                 aria-label="Close Profile"
               >
                 <X className="w-4 h-4 text-brand-dark" />
               </button>
             </div>
 
-            <div className="space-y-3 font-mono text-xs">
+            <div className="overflow-y-auto flex-1 py-3 space-y-3 font-mono text-xs pr-1">
               <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
                 <span className="text-[10px] text-brand-muted uppercase block">PoraPlan ID</span>
                 <span className="font-bold text-brand-navy text-sm font-mono">
@@ -730,7 +756,7 @@ export const DashboardLayout: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-2 flex flex-col gap-2 border-t-2 border-brand-dark">
+            <div className="pt-3 shrink-0 flex flex-col gap-2 border-t-2 border-brand-dark">
               <Button
                 variant="primary"
                 size="sm"

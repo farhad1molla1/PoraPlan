@@ -2020,18 +2020,48 @@ const CreateStudentPaymentModal: React.FC<CreateStudentPaymentModalProps> = ({
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" onClick={onClose} />
-      <div className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full p-5 space-y-4 text-xs z-10">
-        <div className="flex items-center justify-between border-b pb-2">
-          <div className="font-heading font-extrabold text-sm text-brand-navy">Record Student Payment</div>
-          <button type="button" onClick={onClose}><X className="w-4 h-4" /></button>
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="record-student-payment-title"
+      onClick={onClose}
+    >
+      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" aria-hidden="true" />
+      <div
+        className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full max-h-[85dvh] flex flex-col p-4 sm:p-5 text-xs z-10 animate-in fade-in zoom-in-95 my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b pb-2 shrink-0">
+          <div id="record-student-payment-title" className="font-heading font-extrabold text-sm text-brand-navy">Record Student Payment</div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 -mr-1 text-brand-dark/70 hover:text-brand-dark min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-transform active:translate-x-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+            aria-label="Close dialog"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {error && <div className="p-2 bg-red-50 border border-red-300 text-red-900">{error}</div>}
+        {error && <div className="p-2 bg-red-50 border border-red-300 text-red-900 shrink-0 mt-2">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 pt-2">
+          <div className="overflow-y-auto flex-1 py-1 space-y-3 pr-1">
           <div>
             <label className="font-bold block mb-1">Scholar & Enrollment</label>
             <select
@@ -2138,8 +2168,9 @@ const CreateStudentPaymentModal: React.FC<CreateStudentPaymentModalProps> = ({
               />
             </div>
           </div>
+          </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t">
+          <div className="flex justify-end gap-2 pt-3 border-t shrink-0">
             <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Cancel
             </Button>
@@ -2195,18 +2226,48 @@ const EditStudentPaymentModal: React.FC<EditStudentPaymentModalProps> = ({
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" onClick={onClose} />
-      <div className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full p-5 space-y-4 text-xs z-10">
-        <div className="flex items-center justify-between border-b pb-2">
-          <div className="font-heading font-extrabold text-sm text-brand-navy">Update Payment Status</div>
-          <button type="button" onClick={onClose}><X className="w-4 h-4" /></button>
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="update-payment-status-title"
+      onClick={onClose}
+    >
+      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" aria-hidden="true" />
+      <div
+        className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full max-h-[85dvh] flex flex-col p-4 sm:p-5 text-xs z-10 animate-in fade-in zoom-in-95 my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b pb-2 shrink-0">
+          <div id="update-payment-status-title" className="font-heading font-extrabold text-sm text-brand-navy">Update Payment Status</div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 -mr-1 text-brand-dark/70 hover:text-brand-dark min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-transform active:translate-x-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+            aria-label="Close dialog"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {error && <div className="p-2 bg-red-50 border border-red-300 text-red-900">{error}</div>}
+        {error && <div className="p-2 bg-red-50 border border-red-300 text-red-900 shrink-0 mt-2">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 pt-2">
+          <div className="overflow-y-auto flex-1 py-1 space-y-3 pr-1">
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="font-bold block mb-1">Status</label>
@@ -2270,7 +2331,9 @@ const EditStudentPaymentModal: React.FC<EditStudentPaymentModalProps> = ({
             </div>
           )}
 
-          <div className="flex justify-end gap-2 pt-2 border-t">
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t shrink-0">
             <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Cancel
             </Button>
@@ -2332,18 +2395,48 @@ const CreateMentorPayoutModal: React.FC<CreateMentorPayoutModalProps> = ({
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" onClick={onClose} />
-      <div className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full p-5 space-y-4 text-xs z-10">
-        <div className="flex items-center justify-between border-b pb-2">
-          <div className="font-heading font-extrabold text-sm text-brand-navy">Record Mentor Payout</div>
-          <button type="button" onClick={onClose}><X className="w-4 h-4" /></button>
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="record-mentor-payout-title"
+      onClick={onClose}
+    >
+      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" aria-hidden="true" />
+      <div
+        className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full max-h-[85dvh] flex flex-col p-4 sm:p-5 text-xs z-10 animate-in fade-in zoom-in-95 my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b pb-2 shrink-0">
+          <div id="record-mentor-payout-title" className="font-heading font-extrabold text-sm text-brand-navy">Record Mentor Payout</div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 -mr-1 text-brand-dark/70 hover:text-brand-dark min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-transform active:translate-x-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+            aria-label="Close dialog"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {error && <div className="p-2 bg-red-50 border border-red-300 text-red-900">{error}</div>}
+        {error && <div className="p-2 bg-red-50 border border-red-300 text-red-900 shrink-0 mt-2">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 pt-2">
+          <div className="overflow-y-auto flex-1 py-1 space-y-3 pr-1">
           <div>
             <label className="font-bold block mb-1">Mentor</label>
             <select
@@ -2438,7 +2531,9 @@ const CreateMentorPayoutModal: React.FC<CreateMentorPayoutModalProps> = ({
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t">
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t shrink-0">
             <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Cancel
             </Button>
@@ -2492,18 +2587,48 @@ const EditMentorPayoutModal: React.FC<EditMentorPayoutModalProps> = ({
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" onClick={onClose} />
-      <div className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full p-5 space-y-4 text-xs z-10">
-        <div className="flex items-center justify-between border-b pb-2">
-          <div className="font-heading font-extrabold text-sm text-brand-navy">Update Payout Status</div>
-          <button type="button" onClick={onClose}><X className="w-4 h-4" /></button>
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="update-payout-status-title"
+      onClick={onClose}
+    >
+      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" aria-hidden="true" />
+      <div
+        className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full max-h-[85dvh] flex flex-col p-4 sm:p-5 text-xs z-10 animate-in fade-in zoom-in-95 my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b pb-2 shrink-0">
+          <div id="update-payout-status-title" className="font-heading font-extrabold text-sm text-brand-navy">Update Payout Status</div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 -mr-1 text-brand-dark/70 hover:text-brand-dark min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-transform active:translate-x-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+            aria-label="Close dialog"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {error && <div className="p-2 bg-red-50 border border-red-300 text-red-900">{error}</div>}
+        {error && <div className="p-2 bg-red-50 border border-red-300 text-red-900 shrink-0 mt-2">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 pt-2">
+          <div className="overflow-y-auto flex-1 py-1 space-y-3 pr-1">
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="font-bold block mb-1">Status</label>
@@ -2553,7 +2678,9 @@ const EditMentorPayoutModal: React.FC<EditMentorPayoutModalProps> = ({
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t">
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t shrink-0">
             <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Cancel
             </Button>
@@ -2604,6 +2731,19 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
     loadEvents();
   }, [loadEvents]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -2629,19 +2769,35 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" onClick={onClose} />
-      <div className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full p-5 space-y-4 text-xs z-10">
-        <div className="flex items-center justify-between border-b pb-2">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="payment-events-modal-title"
+      onClick={onClose}
+    >
+      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" aria-hidden="true" />
+      <div
+        className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full max-h-[85dvh] flex flex-col p-4 sm:p-5 text-xs z-10 animate-in fade-in zoom-in-95 my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b pb-2 shrink-0">
           <div>
-            <div className="font-heading font-extrabold text-sm text-brand-navy">Payment Events & History</div>
+            <div id="payment-events-modal-title" className="font-heading font-extrabold text-sm text-brand-navy">Payment Events & History</div>
             <div className="text-[10px] text-brand-muted truncate max-w-xs">{recordTitle}</div>
           </div>
-          <button type="button" onClick={onClose}><X className="w-4 h-4" /></button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 -mr-1 text-brand-dark/70 hover:text-brand-dark min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-transform active:translate-x-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+            aria-label="Close dialog"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Existing Events List */}
-        <div className="max-h-48 overflow-y-auto space-y-2 border p-2 bg-brand-bg">
+        <div className="max-h-48 overflow-y-auto space-y-2 border p-2 bg-brand-bg shrink-0 my-2">
           {loading ? (
             <div className="text-center py-4 text-brand-muted">Loading events...</div>
           ) : events.length === 0 ? (
@@ -2663,7 +2819,7 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
         </div>
 
         {/* Log New Event Form */}
-        <form onSubmit={handleAddEvent} className="space-y-2.5 border-t pt-3">
+        <form onSubmit={handleAddEvent} className="overflow-y-auto flex-1 space-y-2.5 border-t pt-3 pr-1">
           <div className="font-bold">Log New Event</div>
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -2714,7 +2870,7 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-3 border-t shrink-0">
             <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Close
             </Button>
@@ -2762,6 +2918,19 @@ const PrivateAdminNotesModal: React.FC<PrivateAdminNotesModalProps> = ({
     loadNotes();
   }, [loadNotes]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newNote.trim()) return;
@@ -2783,22 +2952,38 @@ const PrivateAdminNotesModal: React.FC<PrivateAdminNotesModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" onClick={onClose} />
-      <div className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full p-5 space-y-4 text-xs z-10">
-        <div className="flex items-center justify-between border-b pb-2">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="private-admin-notes-title"
+      onClick={onClose}
+    >
+      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" aria-hidden="true" />
+      <div
+        className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full max-h-[85dvh] flex flex-col p-4 sm:p-5 text-xs z-10 animate-in fade-in zoom-in-95 my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b pb-2 shrink-0">
           <div>
-            <div className="font-heading font-extrabold text-sm text-brand-navy flex items-center gap-1.5">
+            <div id="private-admin-notes-title" className="font-heading font-extrabold text-sm text-brand-navy flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-brand-teal" />
               Private Admin Notes
             </div>
             <div className="text-[10px] text-brand-muted truncate max-w-xs">{recordTitle}</div>
           </div>
-          <button type="button" onClick={onClose}><X className="w-4 h-4" /></button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 -mr-1 text-brand-dark/70 hover:text-brand-dark min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-transform active:translate-x-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+            aria-label="Close dialog"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Notes List */}
-        <div className="max-h-48 overflow-y-auto space-y-2 border p-2 bg-brand-bg">
+        <div className="max-h-48 overflow-y-auto space-y-2 border p-2 bg-brand-bg shrink-0 my-2">
           {loading ? (
             <div className="text-center py-4 text-brand-muted">Loading notes...</div>
           ) : notes.length === 0 ? (
@@ -2817,7 +3002,7 @@ const PrivateAdminNotesModal: React.FC<PrivateAdminNotesModalProps> = ({
         </div>
 
         {/* Add Note */}
-        <form onSubmit={handleAddNote} className="space-y-2 border-t pt-3">
+        <form onSubmit={handleAddNote} className="overflow-y-auto flex-1 space-y-2 border-t pt-3 pr-1">
           <textarea
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
@@ -2826,7 +3011,7 @@ const PrivateAdminNotesModal: React.FC<PrivateAdminNotesModalProps> = ({
             required
           />
 
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 pt-1 shrink-0">
             <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Close
             </Button>
@@ -2859,6 +3044,19 @@ const ManageBillingAnchorModal: React.FC<ManageBillingAnchorModalProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
@@ -2884,20 +3082,36 @@ const ManageBillingAnchorModal: React.FC<ManageBillingAnchorModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" onClick={onClose} />
-      <div className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full p-5 space-y-4 text-xs z-10">
-        <div className="flex items-center justify-between border-b pb-2">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="override-billing-anchor-title"
+      onClick={onClose}
+    >
+      <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-xs" aria-hidden="true" />
+      <div
+        className="relative bg-brand-paper border-2 border-brand-dark shadow-2xl max-w-md w-full max-h-[85dvh] flex flex-col p-4 sm:p-5 text-xs z-10 animate-in fade-in zoom-in-95 my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b pb-2 shrink-0">
           <div>
-            <div className="font-heading font-extrabold text-sm text-brand-navy">Override Billing Anchor Date</div>
+            <div id="override-billing-anchor-title" className="font-heading font-extrabold text-sm text-brand-navy">Override Billing Anchor Date</div>
             <div className="text-[10px] text-brand-muted">{studentName}</div>
           </div>
-          <button type="button" onClick={onClose}><X className="w-4 h-4" /></button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 -mr-1 text-brand-dark/70 hover:text-brand-dark min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-transform active:translate-x-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+            aria-label="Close dialog"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {error && <div className="p-2 bg-red-50 border border-red-300 text-red-900">{error}</div>}
+        {error && <div className="p-2 bg-red-50 border border-red-300 text-red-900 shrink-0 mt-2">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 py-2 space-y-3 pr-1">
           <div>
             <span className="text-[10px] font-mono uppercase text-brand-muted block">Current Anchor</span>
             <span className="font-bold text-brand-navy">{formatCalendarDate(currentAnchor)}</span>
@@ -2925,7 +3139,7 @@ const ManageBillingAnchorModal: React.FC<ManageBillingAnchorModalProps> = ({
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t">
+          <div className="flex justify-end gap-2 pt-3 border-t shrink-0">
             <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Cancel
             </Button>

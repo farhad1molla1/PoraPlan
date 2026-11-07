@@ -114,6 +114,26 @@ export const AdminUsersPage: React.FC = () => {
     };
   }, [selectedUser]);
 
+  // Escape key and body scroll lock for User Dossier Drawer
+  useEffect(() => {
+    if (!selectedUser) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedUser(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [selectedUser]);
+
   // Filtered users
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
@@ -571,7 +591,13 @@ export const AdminUsersPage: React.FC = () => {
 
       {/* User Detail Drawer / Modal */}
       {selectedUser && (
-        <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-sm flex justify-end animate-fade-in">
+        <div
+          className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-sm flex justify-end animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+          aria-label="User dossier"
+          onClick={() => setSelectedUser(null)}
+        >
           <div
             className="w-full max-w-xl bg-surface-card border-l border-border-default shadow-2xl h-full flex flex-col overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
@@ -624,8 +650,10 @@ export const AdminUsersPage: React.FC = () => {
                   <span>Public Profile</span>
                 </Link>
                 <button
+                  type="button"
                   onClick={() => setSelectedUser(null)}
-                  className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-base transition-colors"
+                  className="min-w-[44px] min-h-[44px] p-2 -mr-1 flex items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-base transition-colors"
+                  aria-label="Close user dossier"
                 >
                   <X className="w-5 h-5" />
                 </button>

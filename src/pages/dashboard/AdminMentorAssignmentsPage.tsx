@@ -86,6 +86,28 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
   const [cohortHistoryList, setCohortHistoryList] = useState<CohortMentorWithMeta[]>([]);
   const [studentHistoryList, setStudentHistoryList] = useState<StudentMentorAssignmentWithMeta[]>([]);
 
+  // Handle Escape key and body scroll lock when modals are open
+  useEffect(() => {
+    const isAnyModalOpen = cohortModalOpen || individualModalOpen || historyModalOpen;
+    if (!isAnyModalOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (cohortModalOpen && !isSubmittingCohort) setCohortModalOpen(false);
+        if (individualModalOpen && !isSubmittingIndividual) setIndividualModalOpen(false);
+        if (historyModalOpen) setHistoryModalOpen(false);
+      }
+    };
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [cohortModalOpen, individualModalOpen, historyModalOpen, isSubmittingCohort, isSubmittingIndividual]);
+
   // Load all data
   const loadData = async () => {
     try {
@@ -1162,82 +1184,100 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {/* MODAL 1: ASSIGN / REPLACE COHORT DEFAULT MENTOR */}
       {/* ============================================================================== */}
       {cohortModalOpen && selectedCohort && (
-        <div className="fixed inset-0 z-50 bg-brand-navy/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-brand-paper border-3 border-brand-dark shadow-brutal-xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start justify-between pb-4 border-b-2 border-brand-dark/10">
+        <div
+          className="fixed inset-0 z-50 bg-brand-navy/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cohort-modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isSubmittingCohort) {
+              setCohortModalOpen(false);
+            }
+          }}
+        >
+          <div
+            className="bg-brand-paper border-3 border-brand-dark shadow-brutal-xl max-w-lg w-full max-h-[85dvh] flex flex-col p-4 sm:p-6 animate-in fade-in zoom-in-95 my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between pb-3 sm:pb-4 border-b-2 border-brand-dark/10 shrink-0">
               <div>
                 <div className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-[#0BA7B4]/10 text-brand-navy border border-[#0BA7B4] mb-1.5">
                   <GraduationCap className="w-3 h-3 text-brand-teal" />
                   Cohort Mentorship
                 </div>
-                <h2 className="text-xl font-black text-brand-navy">
+                <h2 id="cohort-modal-title" className="text-xl font-black text-brand-navy">
                   Assign Default Mentor
                 </h2>
               </div>
               <button
+                type="button"
                 onClick={() => setCohortModalOpen(false)}
-                className="p-1 text-brand-navy/60 hover:text-brand-navy"
+                disabled={isSubmittingCohort}
+                className="p-2 -mr-1 text-brand-navy/60 hover:text-brand-navy min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+                aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Target Cohort Summary */}
-            <div className="mt-4 p-3 bg-brand-bg border-2 border-brand-dark space-y-1">
-              <p className="text-xs font-bold uppercase text-brand-navy/60">Target Cohort</p>
-              <p className="text-base font-black text-brand-navy">
-                {selectedCohort.name} ({selectedCohort.code})
-              </p>
-              <p className="text-xs text-brand-navy/70">
-                Program:{' '}
-                {programs.find((p) => p.id === selectedCohort.program_id)?.name || 'Mentorship Program'}
-              </p>
-              <p className="text-xs font-mono text-brand-teal pt-1">
-                Notice: All enrolled students in this cohort will inherit this mentor unless an
-                individual override is assigned.
-              </p>
-            </div>
+            <div className="overflow-y-auto flex-1 py-3 space-y-4 pr-1">
+              {/* Target Cohort Summary */}
+              <div className="p-3 bg-brand-bg border-2 border-brand-dark space-y-1">
+                <p className="text-xs font-bold uppercase text-brand-navy/60">Target Cohort</p>
+                <p className="text-base font-black text-brand-navy">
+                  {selectedCohort.name} ({selectedCohort.code})
+                </p>
+                <p className="text-xs text-brand-navy/70">
+                  Program:{' '}
+                  {programs.find((p) => p.id === selectedCohort.program_id)?.name || 'Mentorship Program'}
+                </p>
+                <p className="text-xs font-mono text-brand-teal pt-1">
+                  Notice: All enrolled students in this cohort will inherit this mentor unless an
+                  individual override is assigned.
+                </p>
+              </div>
 
-            {/* Select Mentor */}
-            <div className="mt-4 space-y-2">
-              <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
-                Select Eligible Mentor
-              </label>
-              {eligibleMentorsForCohort.length === 0 ? (
-                <div className="p-3 bg-red-50 border-2 border-red-300 text-xs font-bold text-red-800">
-                  No active mentors found. Provision mentor accounts from the Admin Dashboard first.
-                </div>
-              ) : (
-                <select
-                  value={selectedMentorId}
-                  onChange={(e) => setSelectedMentorId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
-                >
-                  {eligibleMentorsForCohort.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.full_name} ({m.poraplan_id || 'ID'}) — {m.email}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
+              {/* Select Mentor */}
+              <div className="space-y-2">
+                <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
+                  Select Eligible Mentor
+                </label>
+                {eligibleMentorsForCohort.length === 0 ? (
+                  <div className="p-3 bg-red-50 border-2 border-red-300 text-xs font-bold text-red-800">
+                    No active mentors found. Provision mentor accounts from the Admin Dashboard first.
+                  </div>
+                ) : (
+                  <select
+                    value={selectedMentorId}
+                    onChange={(e) => setSelectedMentorId(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  >
+                    {eligibleMentorsForCohort.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.full_name} ({m.poraplan_id || 'ID'}) — {m.email}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
 
-            {/* Admin Notes */}
-            <div className="mt-4 space-y-2">
-              <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
-                Internal Allocation Notes (Optional)
-              </label>
-              <textarea
-                value={assignmentNotes}
-                onChange={(e) => setAssignmentNotes(e.target.value)}
-                placeholder="e.g. Lead academic mentor for undergraduate batch curriculum."
-                rows={2}
-                className="w-full p-2.5 text-xs border-2 border-brand-dark font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal"
-              />
+              {/* Admin Notes */}
+              <div className="space-y-2">
+                <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
+                  Internal Allocation Notes (Optional)
+                </label>
+                <textarea
+                  value={assignmentNotes}
+                  onChange={(e) => setAssignmentNotes(e.target.value)}
+                  placeholder="e.g. Lead academic mentor for undergraduate batch curriculum."
+                  rows={2}
+                  className="w-full p-2.5 text-xs border-2 border-brand-dark font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                />
+              </div>
             </div>
 
             {/* Actions */}
-            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t-2 border-brand-dark/10">
+            <div className="pt-3 sm:pt-4 border-t-2 border-brand-dark/10 flex items-center justify-end gap-3 shrink-0">
               <Button
                 variant="outline"
                 size="sm"
@@ -1269,83 +1309,101 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {/* MODAL 2: ASSIGN INDIVIDUAL STUDENT OVERRIDE */}
       {/* ============================================================================== */}
       {individualModalOpen && selectedStudentEnrollment && (
-        <div className="fixed inset-0 z-50 bg-brand-navy/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-brand-paper border-3 border-brand-dark shadow-brutal-xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start justify-between pb-4 border-b-2 border-brand-dark/10">
+        <div
+          className="fixed inset-0 z-50 bg-brand-navy/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="individual-modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isSubmittingIndividual) {
+              setIndividualModalOpen(false);
+            }
+          }}
+        >
+          <div
+            className="bg-brand-paper border-3 border-brand-dark shadow-brutal-xl max-w-lg w-full max-h-[85dvh] flex flex-col p-4 sm:p-6 animate-in fade-in zoom-in-95 my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between pb-3 sm:pb-4 border-b-2 border-brand-dark/10 shrink-0">
               <div>
                 <div className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-[#F5A623]/20 text-brand-navy border border-[#F5A623] mb-1.5">
                   <UserCheck className="w-3 h-3 text-[#F5A623]" />
                   Individual Override
                 </div>
-                <h2 className="text-xl font-black text-brand-navy">
+                <h2 id="individual-modal-title" className="text-xl font-black text-brand-navy">
                   Set Individual Mentor Override
                 </h2>
               </div>
               <button
+                type="button"
                 onClick={() => setIndividualModalOpen(false)}
-                className="p-1 text-brand-navy/60 hover:text-brand-navy"
+                disabled={isSubmittingIndividual}
+                className="p-2 -mr-1 text-brand-navy/60 hover:text-brand-navy min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+                aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Target Student Summary */}
-            <div className="mt-4 p-3 bg-brand-bg border-2 border-brand-dark space-y-1">
-              <p className="text-xs font-bold uppercase text-brand-navy/60">Student Details</p>
-              <p className="text-base font-black text-brand-navy">
-                {selectedStudentEnrollment.student?.full_name}
-              </p>
-              <p className="text-xs text-brand-navy/70 font-mono">
-                ID: {selectedStudentEnrollment.student?.poraplan_id || 'N/A'} • {selectedStudentEnrollment.student?.university}
-              </p>
-              <p className="text-xs text-brand-navy/80 pt-1">
-                <span className="font-bold">Cohort:</span> {selectedStudentEnrollment.cohort?.name} ({selectedStudentEnrollment.cohort?.code})
-              </p>
-              <p className="text-xs font-mono text-[#F5A623] pt-1">
-                Notice: Setting an individual mentor takes precedence over this cohort&apos;s default mentor for this student only.
-              </p>
-            </div>
+            <div className="overflow-y-auto flex-1 py-3 space-y-4 pr-1">
+              {/* Target Student Summary */}
+              <div className="p-3 bg-brand-bg border-2 border-brand-dark space-y-1">
+                <p className="text-xs font-bold uppercase text-brand-navy/60">Student Details</p>
+                <p className="text-base font-black text-brand-navy">
+                  {selectedStudentEnrollment.student?.full_name}
+                </p>
+                <p className="text-xs text-brand-navy/70 font-mono">
+                  ID: {selectedStudentEnrollment.student?.poraplan_id || 'N/A'} • {selectedStudentEnrollment.student?.university}
+                </p>
+                <p className="text-xs text-brand-navy/80 pt-1">
+                  <span className="font-bold">Cohort:</span> {selectedStudentEnrollment.cohort?.name} ({selectedStudentEnrollment.cohort?.code})
+                </p>
+                <p className="text-xs font-mono text-[#F5A623] pt-1">
+                  Notice: Setting an individual mentor takes precedence over this cohort&apos;s default mentor for this student only.
+                </p>
+              </div>
 
-            {/* Select Mentor */}
-            <div className="mt-4 space-y-2">
-              <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
-                Select Eligible Mentor
-              </label>
-              {eligibleMentorsForStudent.length === 0 ? (
-                <div className="p-3 bg-red-50 border-2 border-red-300 text-xs font-bold text-red-800">
-                  No active mentors found. Provision mentor accounts from the Admin Dashboard first.
-                </div>
-              ) : (
-                <select
-                  value={selectedIndividualMentorId}
-                  onChange={(e) => setSelectedIndividualMentorId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
-                >
-                  {eligibleMentorsForStudent.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.full_name} ({m.poraplan_id || 'ID'}) — {m.email}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
+              {/* Select Mentor */}
+              <div className="space-y-2">
+                <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
+                  Select Eligible Mentor
+                </label>
+                {eligibleMentorsForStudent.length === 0 ? (
+                  <div className="p-3 bg-red-50 border-2 border-red-300 text-xs font-bold text-red-800">
+                    No active mentors found. Provision mentor accounts from the Admin Dashboard first.
+                  </div>
+                ) : (
+                  <select
+                    value={selectedIndividualMentorId}
+                    onChange={(e) => setSelectedIndividualMentorId(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  >
+                    {eligibleMentorsForStudent.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.full_name} ({m.poraplan_id || 'ID'}) — {m.email}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
 
-            {/* Admin Notes */}
-            <div className="mt-4 space-y-2">
-              <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
-                Reason / Override Notes (Optional)
-              </label>
-              <textarea
-                value={individualNotes}
-                onChange={(e) => setIndividualNotes(e.target.value)}
-                placeholder="e.g. Student requested specialized 1-on-1 algorithm pacing."
-                rows={2}
-                className="w-full p-2.5 text-xs border-2 border-brand-dark font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal"
-              />
+              {/* Admin Notes */}
+              <div className="space-y-2">
+                <label className="block text-xs font-black uppercase text-brand-navy tracking-wider">
+                  Reason / Override Notes (Optional)
+                </label>
+                <textarea
+                  value={individualNotes}
+                  onChange={(e) => setIndividualNotes(e.target.value)}
+                  placeholder="e.g. Student requested specialized 1-on-1 algorithm pacing."
+                  rows={2}
+                  className="w-full p-2.5 text-xs border-2 border-brand-dark font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                />
+              </div>
             </div>
 
             {/* Actions */}
-            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t-2 border-brand-dark/10">
+            <div className="pt-3 sm:pt-4 border-t-2 border-brand-dark/10 flex items-center justify-end gap-3 shrink-0">
               <Button
                 variant="outline"
                 size="sm"
@@ -1377,24 +1435,39 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {/* MODAL 3: ASSIGNMENT HISTORY LOG */}
       {/* ============================================================================== */}
       {historyModalOpen && (
-        <div className="fixed inset-0 z-50 bg-brand-navy/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-brand-paper border-3 border-brand-dark shadow-brutal-xl max-w-xl w-full p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start justify-between pb-3 border-b-2 border-brand-dark/10">
+        <div
+          className="fixed inset-0 z-50 bg-brand-navy/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="history-modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setHistoryModalOpen(false);
+            }
+          }}
+        >
+          <div
+            className="bg-brand-paper border-3 border-brand-dark shadow-brutal-xl max-w-xl w-full max-h-[85dvh] flex flex-col p-4 sm:p-6 animate-in fade-in zoom-in-95 my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between pb-3 border-b-2 border-brand-dark/10 shrink-0">
               <div>
-                <h3 className="text-base font-black text-brand-navy flex items-center gap-2">
+                <h3 id="history-modal-title" className="text-base font-black text-brand-navy flex items-center gap-2">
                   <History className="w-4 h-4 text-brand-teal" />
                   {historyTitle}
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setHistoryModalOpen(false)}
-                className="p-1 text-brand-navy/60 hover:text-brand-navy"
+                className="p-2 -mr-1 text-brand-navy/60 hover:text-brand-navy min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+                aria-label="Close history modal"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="mt-4 max-h-80 overflow-y-auto space-y-3">
+            <div className="my-3 overflow-y-auto flex-1 space-y-3 pr-1">
               {cohortHistoryList.length > 0 ? (
                 cohortHistoryList.map((ch) => (
                   <div
@@ -1456,7 +1529,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
               )}
             </div>
 
-            <div className="mt-4 pt-3 border-t-2 border-brand-dark/10 flex justify-end">
+            <div className="pt-3 border-t-2 border-brand-dark/10 flex justify-end shrink-0">
               <Button variant="outline" size="sm" onClick={() => setHistoryModalOpen(false)}>
                 Close
               </Button>

@@ -208,6 +208,30 @@ export const AdminProgramsPage: React.FC = () => {
     }
   }, [successMessage]);
 
+  // Modal Escape key and body scroll lock for builder modals
+  useEffect(() => {
+    if (!sectionModalOpen && !topicModalOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (topicModalOpen) {
+          setTopicModalOpen(false);
+        } else if (sectionModalOpen) {
+          setSectionModalOpen(false);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [sectionModalOpen, topicModalOpen]);
+
   // --- Program Handlers ---
   const handleOpenCreateProgram = () => {
     setEditingProgram(null);
@@ -1681,46 +1705,66 @@ export const AdminProgramsPage: React.FC = () => {
 
       {/* SUB-MODAL: Add / Edit Section */}
       {sectionModalOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-brand-dark/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-brand-paper border-3 border-brand-dark shadow-brutal p-5 space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2">
+        <div
+          className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-label={editingSection ? 'Edit Module' : 'Add Curriculum Module'}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSectionModalOpen(false);
+            }
+          }}
+        >
+          <div
+            className="w-full max-w-md max-h-[85dvh] flex flex-col my-auto bg-brand-paper border-3 border-brand-dark shadow-brutal p-4 sm:p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2 shrink-0">
               <h4 className="font-heading font-extrabold text-sm text-brand-navy">
                 {editingSection ? 'Edit Module' : 'Add Curriculum Module'}
               </h4>
-              <button type="button" onClick={() => setSectionModalOpen(false)}>
+              <button
+                type="button"
+                onClick={() => setSectionModalOpen(false)}
+                className="min-w-[44px] min-h-[44px] p-2 -mr-2 -mt-1 flex items-center justify-center border border-brand-dark bg-brand-paper-tint hover:bg-brand-paper"
+                aria-label="Close module modal"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveSection} className="space-y-3">
-              <div>
-                <label className="font-mono text-xs uppercase font-bold block mb-1">
-                  Module Title <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={sectionForm.title}
-                  onChange={(e) => setSectionForm((prev) => ({ ...prev, title: e.target.value }))}
-                  placeholder="e.g. Phase 1: Academic Diagnostic & Setup"
-                  className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
-                />
+            <form onSubmit={handleSaveSection} className="flex-1 flex flex-col min-h-0 pt-3">
+              <div className="overflow-y-auto flex-1 pr-1 space-y-3">
+                <div>
+                  <label className="font-mono text-xs uppercase font-bold block mb-1">
+                    Module Title <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={sectionForm.title}
+                    onChange={(e) => setSectionForm((prev) => ({ ...prev, title: e.target.value }))}
+                    placeholder="e.g. Phase 1: Academic Diagnostic & Setup"
+                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-mono text-xs uppercase font-bold block mb-1">
+                    Description (optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={sectionForm.description}
+                    onChange={(e) => setSectionForm((prev) => ({ ...prev, description: e.target.value }))}
+                    placeholder="Outline the scope of this learning block..."
+                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="font-mono text-xs uppercase font-bold block mb-1">
-                  Description (optional)
-                </label>
-                <textarea
-                  rows={2}
-                  value={sectionForm.description}
-                  onChange={(e) => setSectionForm((prev) => ({ ...prev, description: e.target.value }))}
-                  placeholder="Outline the scope of this learning block..."
-                  className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-brand-dark/20">
+              <div className="flex items-center justify-end gap-2 pt-3 mt-3 border-t border-brand-dark/20 shrink-0">
                 <Button variant="outline" size="sm" onClick={() => setSectionModalOpen(false)}>
                   Cancel
                 </Button>
@@ -1735,46 +1779,66 @@ export const AdminProgramsPage: React.FC = () => {
 
       {/* SUB-MODAL: Add / Edit Topic */}
       {topicModalOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-brand-dark/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-brand-paper border-3 border-brand-dark shadow-brutal p-5 space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2">
+        <div
+          className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-label={editingTopic?.topic ? 'Edit Topic' : 'Add Curriculum Topic'}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setTopicModalOpen(false);
+            }
+          }}
+        >
+          <div
+            className="w-full max-w-md max-h-[85dvh] flex flex-col my-auto bg-brand-paper border-3 border-brand-dark shadow-brutal p-4 sm:p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2 shrink-0">
               <h4 className="font-heading font-extrabold text-sm text-brand-navy">
                 {editingTopic?.topic ? 'Edit Topic' : 'Add Curriculum Topic'}
               </h4>
-              <button type="button" onClick={() => setTopicModalOpen(false)}>
+              <button
+                type="button"
+                onClick={() => setTopicModalOpen(false)}
+                className="min-w-[44px] min-h-[44px] p-2 -mr-2 -mt-1 flex items-center justify-center border border-brand-dark bg-brand-paper-tint hover:bg-brand-paper"
+                aria-label="Close topic modal"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveTopic} className="space-y-3">
-              <div>
-                <label className="font-mono text-xs uppercase font-bold block mb-1">
-                  Topic Title <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={topicForm.title}
-                  onChange={(e) => setTopicForm((prev) => ({ ...prev, title: e.target.value }))}
-                  placeholder="e.g. 1-on-1 Academic Diagnostic Session"
-                  className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
-                />
+            <form onSubmit={handleSaveTopic} className="flex-1 flex flex-col min-h-0 pt-3">
+              <div className="overflow-y-auto flex-1 pr-1 space-y-3">
+                <div>
+                  <label className="font-mono text-xs uppercase font-bold block mb-1">
+                    Topic Title <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={topicForm.title}
+                    onChange={(e) => setTopicForm((prev) => ({ ...prev, title: e.target.value }))}
+                    placeholder="e.g. 1-on-1 Academic Diagnostic Session"
+                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-mono text-xs uppercase font-bold block mb-1">
+                    Topic Details (optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={topicForm.description}
+                    onChange={(e) => setTopicForm((prev) => ({ ...prev, description: e.target.value }))}
+                    placeholder="Specific learning outcome or required activity..."
+                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="font-mono text-xs uppercase font-bold block mb-1">
-                  Topic Details (optional)
-                </label>
-                <textarea
-                  rows={2}
-                  value={topicForm.description}
-                  onChange={(e) => setTopicForm((prev) => ({ ...prev, description: e.target.value }))}
-                  placeholder="Specific learning outcome or required activity..."
-                  className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-brand-dark/20">
+              <div className="flex items-center justify-end gap-2 pt-3 mt-3 border-t border-brand-dark/20 shrink-0">
                 <Button variant="outline" size="sm" onClick={() => setTopicModalOpen(false)}>
                   Cancel
                 </Button>
