@@ -273,14 +273,14 @@ export const MentorSubjectsPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="shrink-0">
+            <div className="w-full sm:w-auto shrink-0">
               <Button
                 variant="primary"
                 size="md"
                 onClick={openCreateModal}
                 disabled={loadingStudents || students.length === 0}
                 leftIcon={<Plus className="w-4 h-4 stroke-[2.5]" />}
-                className="bg-brand-gold text-brand-dark hover:bg-brand-gold-light border-2 border-brand-dark"
+                className="w-full sm:w-auto bg-brand-gold text-brand-dark hover:bg-brand-gold-light border-2 border-brand-dark"
               >
                 Add Subject
               </Button>
@@ -338,7 +338,7 @@ export const MentorSubjectsPage: React.FC = () => {
                 id="student-selector"
                 value={selectedStudentId}
                 onChange={(e) => setSelectedStudentId(e.target.value)}
-                className="px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-xs font-bold font-sans text-brand-dark focus:bg-brand-teal-light focus:outline-none"
+                className="w-full sm:w-auto px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-xs font-bold font-sans text-brand-dark focus:bg-brand-teal-light focus:outline-none"
               >
                 {students.map((student) => (
                   <option key={student.id} value={student.id}>
@@ -353,7 +353,7 @@ export const MentorSubjectsPage: React.FC = () => {
 
           {activeStudent && (
             <div className="p-2.5 border border-brand-dark/20 bg-brand-paper-tint text-xs font-mono flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
                 <span className="font-bold text-brand-navy">{activeStudent.full_name}</span>
                 {activeStudent.poraplan_id && (
                   <>
@@ -362,9 +362,9 @@ export const MentorSubjectsPage: React.FC = () => {
                   </>
                 )}
                 <span>•</span>
-                <span className="text-brand-muted truncate max-w-[200px]">{activeStudent.email}</span>
+                <span className="text-brand-muted truncate max-w-[150px] sm:max-w-[200px]">{activeStudent.email}</span>
               </div>
-              <Badge variant="teal" size="sm">ACTIVE ROSTER</Badge>
+              <Badge variant="teal" size="sm" className="shrink-0">ACTIVE ROSTER</Badge>
             </div>
           )}
         </section>

@@ -402,7 +402,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
         </div>
 
         {/* Quick Stat Ribbon */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-6 border-t-2 border-brand-dark/10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-6 pt-6 border-t-2 border-brand-dark/10">
           <div className="p-3 bg-[#0BA7B4]/10 border-2 border-[#0BA7B4]">
             <p className="text-xs font-bold text-brand-navy/70 uppercase">Cohort Mentors</p>
             <p className="text-2xl font-black text-brand-navy mt-0.5">{activeCohortAssignmentsCount}</p>
@@ -452,41 +452,41 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       )}
 
       {/* 2. TAB CONTROLS */}
-      <div className="flex border-b-3 border-brand-dark bg-brand-paper shadow-brutal">
+      <div className="flex flex-col lg:flex-row border-3 border-brand-dark bg-brand-paper shadow-brutal">
         <button
           onClick={() => setActiveTab('cohorts')}
-          className={`flex-1 sm:flex-none py-3 px-6 text-sm font-black border-r-2 border-brand-dark transition-colors flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3 px-4 sm:px-6 text-xs sm:text-sm font-black border-b-2 lg:border-b-0 lg:border-r-2 border-brand-dark transition-colors flex items-center justify-center gap-2 text-center ${
             activeTab === 'cohorts'
               ? 'bg-[#0BA7B4] text-white'
               : 'bg-brand-paper text-brand-navy hover:bg-brand-bg'
           }`}
         >
-          <GraduationCap className="w-4 h-4" />
-          Cohort Default Allocations ({cohorts.length})
+          <GraduationCap className="w-4 h-4 shrink-0" />
+          <span>Cohort Default Allocations ({cohorts.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('students')}
-          className={`flex-1 sm:flex-none py-3 px-6 text-sm font-black border-r-2 border-brand-dark transition-colors flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3 px-4 sm:px-6 text-xs sm:text-sm font-black border-b-2 lg:border-b-0 lg:border-r-2 border-brand-dark transition-colors flex items-center justify-center gap-2 text-center ${
             activeTab === 'students'
               ? 'bg-[#0BA7B4] text-white'
               : 'bg-brand-paper text-brand-navy hover:bg-brand-bg'
           }`}
         >
-          <UserCheck className="w-4 h-4" />
-          Student Overrides ({activeEnrollments.length})
+          <UserCheck className="w-4 h-4 shrink-0" />
+          <span>Student Overrides ({activeEnrollments.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('workload')}
-          className={`flex-1 sm:flex-none py-3 px-6 text-sm font-black transition-colors flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3 px-4 sm:px-6 text-xs sm:text-sm font-black transition-colors flex items-center justify-center gap-2 text-center ${
             activeTab === 'workload'
               ? 'bg-[#0BA7B4] text-white'
               : 'bg-brand-paper text-brand-navy hover:bg-brand-bg'
           }`}
         >
-          <Briefcase className="w-4 h-4" />
-          Mentor Workload ({workload.length})
+          <Briefcase className="w-4 h-4 shrink-0" />
+          <span>Mentor Workload ({workload.length})</span>
         </button>
       </div>
 
@@ -496,15 +496,15 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {activeTab === 'cohorts' && (
         <div className="space-y-4">
           {/* Program Filter Bar */}
-          <div className="border-3 border-brand-dark bg-brand-paper p-4 shadow-brutal flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-black uppercase text-brand-navy tracking-wider">
+          <div className="border-3 border-brand-dark bg-brand-paper p-4 shadow-brutal flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
+              <span className="text-xs font-black uppercase text-brand-navy tracking-wider shrink-0">
                 Filter by Program:
               </span>
               <select
                 value={programFilter}
                 onChange={(e) => setProgramFilter(e.target.value)}
-                className="px-3 py-1.5 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                className="w-full sm:w-auto max-w-full px-3 py-1.5 text-xs sm:text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal truncate"
               >
                 <option value="all">All Programs ({programs.length})</option>
                 {programs.map((p) => (
@@ -514,7 +514,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div className="text-xs font-mono text-brand-navy/70">
+            <div className="text-xs font-mono text-brand-navy/70 shrink-0">
               Showing {filteredCohorts.length} cohorts
             </div>
           </div>

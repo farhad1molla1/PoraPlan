@@ -190,7 +190,7 @@ export const MentorDashboardPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
                 {pendingReviews.length > 0 && (
                   <Link
                     to="/mentor/reviews"
@@ -299,12 +299,12 @@ export const MentorDashboardPage: React.FC = () => {
         </section>
 
         {/* 3. DUAL ACTION PANELS: REVIEW QUEUE & UPCOMING EVALUATIONS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 min-w-0">
           
           {/* Submission Review Queue Card */}
           <section
             aria-labelledby="reviews-title"
-            className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 flex flex-col justify-between space-y-4"
+            className="min-w-0 border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 flex flex-col justify-between space-y-4"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
@@ -372,7 +372,7 @@ export const MentorDashboardPage: React.FC = () => {
           {/* Upcoming Evaluations Card */}
           <section
             aria-labelledby="evaluations-title"
-            className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 flex flex-col justify-between space-y-4"
+            className="min-w-0 border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 flex flex-col justify-between space-y-4"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
@@ -443,7 +443,7 @@ export const MentorDashboardPage: React.FC = () => {
         <section
           id="roster"
           aria-labelledby="roster-title"
-          className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-4"
+          className="min-w-0 border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 sm:p-6 space-y-4"
         >
           <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
             <div className="flex items-center gap-2">
@@ -470,7 +470,7 @@ export const MentorDashboardPage: React.FC = () => {
               <span>Loading student roster...</span>
             </div>
           ) : students.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 pt-1 min-w-0">
               {students.map((student) => {
                 const record = assignedStudentRecords.find((r) => r.student.id === student.id);
                 const isIndividual = record?.assignmentType === 'individual';
@@ -478,40 +478,40 @@ export const MentorDashboardPage: React.FC = () => {
                 return (
                   <div
                     key={student.id}
-                    className="p-4 border-2 border-brand-dark bg-brand-paper-tint flex flex-col justify-between gap-3 shadow-brutal-xs"
+                    className="min-w-0 p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper-tint flex flex-col justify-between gap-3 shadow-brutal-xs"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-1.5">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-2 min-w-0">
+                      <div className="space-y-0.5 min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
                           <GraduationCap className="w-4 h-4 text-brand-teal shrink-0" />
-                          <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
+                          <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy truncate">
                             {student.full_name}
                           </h3>
                         </div>
-                        <div className="flex items-center gap-2 text-xs font-mono text-brand-muted">
+                        <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono text-brand-muted">
                           {student.poraplan_id && (
                             <>
-                              <span className="font-bold text-brand-gold">
+                              <span className="font-bold text-brand-gold shrink-0">
                                 ID: {student.poraplan_id}
                               </span>
                               <span>•</span>
                             </>
                           )}
-                          <span className="truncate max-w-[180px]">{student.email}</span>
+                          <span className="truncate max-w-[160px] sm:max-w-[200px]">{student.email}</span>
                         </div>
                         {student.university && (
-                          <div className="text-[11px] text-brand-dark/70 font-sans">
+                          <div className="text-[11px] text-brand-dark/70 font-sans truncate">
                             {student.university} {student.department ? `(${student.department})` : ''}
                           </div>
                         )}
                         {record?.cohort && (
-                          <div className="text-[11px] font-mono text-brand-teal font-semibold pt-0.5">
+                          <div className="text-[11px] font-mono text-brand-teal font-semibold pt-0.5 truncate">
                             {record.program?.name || 'Program'} • {record.cohort.name}
                           </div>
                         )}
                       </div>
 
-                      <div className="flex flex-col items-end gap-1">
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end gap-1.5 shrink-0 self-start">
                         <Badge variant={isIndividual ? 'teal' : 'gold'} size="sm" className="font-bold text-[10px]">
                           {isIndividual ? 'INDIVIDUAL' : 'COHORT'}
                         </Badge>
@@ -520,9 +520,9 @@ export const MentorDashboardPage: React.FC = () => {
                             href={`https://wa.me/${student.whatsapp_number.replace(/\D/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[11px] text-emerald-700 hover:underline flex items-center gap-1 font-mono font-bold"
+                            className="text-[11px] text-emerald-700 hover:underline flex items-center gap-1 font-mono font-bold shrink-0"
                           >
-                            <Phone className="w-3 h-3" />
+                            <Phone className="w-3 h-3 shrink-0" />
                             <span>WhatsApp</span>
                           </a>
                         )}

@@ -698,6 +698,7 @@ export const AdminProgramsPage: React.FC = () => {
             size="sm"
             onClick={handleOpenCreateProgram}
             leftIcon={<Plus className="w-4 h-4" />}
+            className="w-full sm:w-auto"
           >
             Create New Program
           </Button>
@@ -719,9 +720,9 @@ export const AdminProgramsPage: React.FC = () => {
         )}
 
         {/* Filters Bar */}
-        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-wrap items-center justify-between gap-4">
+        <div className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
           {/* Category Tabs */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span className="font-mono text-xs text-brand-muted uppercase font-bold mr-1">Category:</span>
             <button
               type="button"
@@ -759,7 +760,7 @@ export const AdminProgramsPage: React.FC = () => {
           </div>
 
           {/* Status Tabs */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span className="font-mono text-xs text-brand-muted uppercase font-bold mr-1">Status:</span>
             {(['all', 'published', 'draft', 'archived'] as const).map((st) => (
               <button

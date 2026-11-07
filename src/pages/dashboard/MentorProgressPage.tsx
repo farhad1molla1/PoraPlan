@@ -184,7 +184,7 @@ export const MentorProgressPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 2. AGGREGATE KPI CARDS                                                    */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <span className="font-mono text-[10px] sm:text-xs uppercase font-extrabold text-brand-muted">
@@ -304,19 +304,19 @@ export const MentorProgressPage: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredScholars.map((scholar) => (
               <div
                 key={scholar.studentId}
                 className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div>
+                  <div className="flex items-start justify-between gap-2 mb-3 min-w-0">
+                    <div className="min-w-0 flex-1">
                       <span className="font-mono text-[10px] font-bold text-brand-teal bg-brand-bg px-1.5 py-0.5 border border-brand-dark">
                         {scholar.poraplanId}
                       </span>
-                      <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy mt-1">
+                      <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy mt-1 truncate">
                         {scholar.studentName}
                       </h3>
                       {scholar.studentEmail && (
@@ -325,7 +325,7 @@ export const MentorProgressPage: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    <Badge variant="teal" size="sm">
+                    <Badge variant="teal" size="sm" className="shrink-0">
                       {scholar.subjectsCount} Subjects
                     </Badge>
                   </div>
