@@ -37,6 +37,7 @@ export const StudentReportPage: React.FC = () => {
   const studentId = (isAdmin && paramStudentId) ? paramStudentId : (profile?.id || user?.id || '');
 
   const [period, setPeriod] = useState<ReportPeriod>('schedule');
+  const [mobileTab, setMobileTab] = useState<'overview' | 'subjects' | 'discipline'>('overview');
   const [customStart, setCustomStart] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() - 14);
@@ -290,11 +291,384 @@ export const StudentReportPage: React.FC = () => {
           </div>
         </div>
       ) : report ? (
-        <div className="academic-doc space-y-8 print:space-y-0">
+        <>
           {/* ===================================================================== */}
-          {/* PAGE 1: PERFORMANCE OVERVIEW                                          */}
+          {/* MOBILE SEGMENTED VIEW ( < md, HIDDEN IN PRINT )                       */}
           {/* ===================================================================== */}
-          <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-6 print:border-none print:shadow-none print:p-0 print:space-y-5 print:page-break">
+          <div className="md:hidden print:hidden space-y-4 academic-doc">
+            {/* Segmented Control */}
+            <div className="flex border-2 border-brand-dark bg-brand-paper shadow-brutal p-1 gap-1">
+              <button
+                type="button"
+                onClick={() => setMobileTab('overview')}
+                className={`flex-1 min-h-[44px] py-2 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1.5 ${
+                  mobileTab === 'overview'
+                    ? 'bg-brand-navy text-white shadow-brutal-xs'
+                    : 'text-brand-dark hover:bg-brand-paper-tint'
+                }`}
+              >
+                <Target className="w-3.5 h-3.5" />
+                <span>Overview</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileTab('subjects')}
+                className={`flex-1 min-h-[44px] py-2 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1.5 ${
+                  mobileTab === 'subjects'
+                    ? 'bg-brand-navy text-white shadow-brutal-xs'
+                    : 'text-brand-dark hover:bg-brand-paper-tint'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Subjects</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileTab('discipline')}
+                className={`flex-1 min-h-[44px] py-2 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1.5 ${
+                  mobileTab === 'discipline'
+                    ? 'bg-brand-navy text-white shadow-brutal-xs'
+                    : 'text-brand-dark hover:bg-brand-paper-tint'
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                <span>Discipline</span>
+              </button>
+            </div>
+
+            {/* TAB 1: OVERVIEW */}
+            {mobileTab === 'overview' && (
+              <div className="space-y-4 animate-fadeIn">
+                {/* Credentials Banner */}
+                <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2 text-xs academic-sans">
+                  <div className="flex items-center justify-between border-b border-brand-dark/15 pb-2">
+                    <div>
+                      <span className="text-brand-muted text-[10px] uppercase font-bold block">SCHOLAR</span>
+                      <span className="font-bold text-brand-navy text-sm">{report.studentName}</span>
+                    </div>
+                    <span className="font-mono text-xs font-bold text-brand-teal px-2 py-0.5 border border-brand-dark bg-brand-paper-tint">
+                      {report.poraplanId}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div>
+                      <span className="text-brand-muted uppercase font-bold block text-[9px]">PROGRAM</span>
+                      <span className="font-semibold text-brand-dark truncate block">
+                        {report.programName || 'Academic Mentorship'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-brand-muted uppercase font-bold block text-[9px]">ASSIGNED MENTOR</span>
+                      <span className="font-semibold text-brand-dark truncate block">
+                        {report.mentorName || 'Lead Mentor'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-brand-dark/10 flex items-center justify-between text-[10px] text-brand-muted font-mono">
+                    <span>Audit: {report.dateRange.startDate} to {report.dateRange.endDate}</span>
+                    <span>{report.studyConsistency.totalScheduledDays} Study Days</span>
+                  </div>
+                </div>
+
+                {/* 4 Academic KPI Cards (2x2 Grid) */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Attendance / Consistency */}
+                  <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase font-bold text-brand-muted block mb-1">
+                        CONSISTENCY
+                      </span>
+                      <div className="academic-heading text-xl font-bold text-brand-navy">
+                        {report.studyConsistency.isConsistencyApplicable && report.studyConsistency.consistencyPercentage !== null
+                          ? `${report.studyConsistency.consistencyPercentage}%`
+                          : 'N/A'}
+                      </div>
+                      <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-2 overflow-hidden">
+                        <div
+                          className="h-full bg-brand-teal"
+                          style={{ width: `${report.studyConsistency.consistencyPercentage || 0}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono text-brand-muted mt-2 pt-1 border-t border-brand-dark/15">
+                      {report.studyConsistency.consistentScheduledDays}/{report.studyConsistency.totalScheduledDays} Days Active
+                    </span>
+                  </div>
+
+                  {/* Task Execution */}
+                  <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase font-bold text-brand-muted block mb-1">
+                        TASKS EXECUTION
+                      </span>
+                      <div className="academic-heading text-xl font-bold text-brand-navy">
+                        {report.taskMetrics.isCompletionRateApplicable
+                          ? `${report.taskMetrics.completionRate}%`
+                          : 'N/A'}
+                      </div>
+                      <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-2 overflow-hidden">
+                        <div
+                          className="h-full bg-brand-navy"
+                          style={{ width: `${report.taskMetrics.completionRate}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono text-brand-muted mt-2 pt-1 border-t border-brand-dark/15">
+                      {report.taskMetrics.completed}/{report.taskMetrics.totalAssigned} Completed
+                    </span>
+                  </div>
+
+                  {/* Exam Evaluation Avg */}
+                  <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase font-bold text-brand-muted block mb-1">
+                        EXAM EVAL AVG
+                      </span>
+                      <div className="academic-heading text-xl font-bold text-brand-navy">
+                        {report.evaluationMetrics.weightedAveragePercentage !== null
+                          ? `${report.evaluationMetrics.weightedAveragePercentage}%`
+                          : 'N/A'}
+                      </div>
+                      <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-2 overflow-hidden">
+                        <div
+                          className="h-full bg-brand-gold"
+                          style={{ width: `${report.evaluationMetrics.weightedAveragePercentage || 0}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono text-brand-muted mt-2 pt-1 border-t border-brand-dark/15">
+                      {report.evaluationMetrics.scoredCount} Exams Graded
+                    </span>
+                  </div>
+
+                  {/* Practice Sets */}
+                  <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase font-bold text-brand-muted block mb-1">
+                        PRACTICE SETS
+                      </span>
+                      <div className="academic-heading text-xl font-bold text-brand-navy">
+                        {report.assignmentMetrics.isSubmissionRateApplicable
+                          ? `${report.assignmentMetrics.submissionRate}%`
+                          : 'N/A'}
+                      </div>
+                      <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-2 overflow-hidden">
+                        <div
+                          className="h-full bg-brand-teal"
+                          style={{ width: `${report.assignmentMetrics.submissionRate}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono text-brand-muted mt-2 pt-1 border-t border-brand-dark/15">
+                      {report.assignmentMetrics.submitted}/{report.assignmentMetrics.totalAssigned} Submissions
+                    </span>
+                  </div>
+                </div>
+
+                {/* Mentorship Action Plan & Strategic Feedback */}
+                <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2">
+                  <h4 className="academic-heading font-bold text-xs uppercase tracking-wider text-brand-navy flex items-center gap-1.5">
+                    <MessageSquareQuote className="w-4 h-4 text-brand-teal" />
+                    Mentorship Action Plan &amp; Strategic Feedback
+                  </h4>
+                  <div className="p-3 bg-brand-paper-tint border border-brand-dark/20 text-xs font-sans text-brand-dark leading-relaxed">
+                    {report.recommendations.length > 0 ? (
+                      <div className="space-y-1.5">
+                        <span className="font-bold text-brand-navy block">Priority Target: {report.recommendations[0].title}</span>
+                        <p className="text-brand-dark">{report.recommendations[0].recommendedAction}</p>
+                      </div>
+                    ) : (
+                      'Maintain regular study habits, address flagged conceptual areas with your mentor, and submit practice problem sets on schedule.'
+                    )}
+                  </div>
+                </div>
+
+                {/* Verification Sign-Off */}
+                <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex items-center justify-between text-xs academic-sans">
+                  <div>
+                    <span className="text-[9px] uppercase font-bold text-brand-muted block">VERIFICATION STATUS</span>
+                    <span className="font-bold text-brand-navy text-xs">
+                      {report.mentorName ? `${report.mentorName} (Verified)` : 'Official Record'}
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 border border-emerald-600 bg-emerald-50 text-emerald-800 font-mono text-[10px] font-bold">
+                    VERIFIED
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: SUBJECTS */}
+            {mobileTab === 'subjects' && (
+              <div className="space-y-4 animate-fadeIn">
+                <div className="flex items-center justify-between pb-1">
+                  <h3 className="academic-heading font-bold text-sm text-brand-navy flex items-center gap-1.5">
+                    <FileText className="w-4 h-4 text-brand-teal" />
+                    Subject-Wise Academic Breakdown
+                  </h3>
+                  <span className="font-mono text-[10px] text-brand-muted">
+                    {report.subjectBreakdown.length} Study Areas
+                  </span>
+                </div>
+
+                {report.subjectBreakdown.length === 0 ? (
+                  <div className="p-6 border-2 border-dashed border-brand-dark bg-brand-paper text-center font-mono text-xs text-brand-muted">
+                    No subject breakdown recorded for this audit window.
+                  </div>
+                ) : (
+                  <div className="border-2 border-brand-dark overflow-hidden bg-brand-paper shadow-brutal">
+                    <table className="w-full text-left border-collapse text-xs academic-sans">
+                      <thead>
+                        <tr className="bg-brand-paper-tint border-b-2 border-brand-dark text-brand-navy text-[10.5px]">
+                          <th scope="col" className="p-2 sm:p-2.5 font-bold">Subject &amp; Status</th>
+                          <th scope="col" className="p-2 sm:p-2.5 font-bold text-center">Score &amp; Exams</th>
+                          <th scope="col" className="p-2 sm:p-2.5 font-bold text-right">Tasks &amp; Practice</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-brand-dark/10">
+                        {report.subjectBreakdown.map((subj) => (
+                          <tr key={subj.subjectId} className="hover:bg-brand-paper-tint/50 transition-colors">
+                            {/* Column 1: Subject & Status */}
+                            <td className="p-2 sm:p-2.5 align-top">
+                              <div className="font-bold text-brand-navy leading-snug">
+                                {subj.subjectName}
+                              </div>
+                              <div className="mt-1">
+                                <span
+                                  className={`px-1.5 py-0.5 border text-[9.5px] font-bold inline-block ${
+                                    subj.performanceStatus === 'mastery'
+                                      ? 'bg-emerald-50 text-emerald-800 border-emerald-700'
+                                      : subj.performanceStatus === 'attention_required'
+                                      ? 'bg-red-50 text-red-800 border-red-700'
+                                      : 'bg-blue-50 text-blue-800 border-blue-700'
+                                  }`}
+                                >
+                                  {subj.performanceStatusLabel}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Column 2: Score & Exams */}
+                            <td className="p-2 sm:p-2.5 text-center align-top whitespace-nowrap">
+                              <div className="font-bold text-sm text-brand-navy">
+                                {subj.evaluationsAverageScore !== null ? `${subj.evaluationsAverageScore}%` : 'N/A'}
+                              </div>
+                              <div className="text-[10px] text-brand-muted font-mono mt-0.5">
+                                {subj.evaluationsScoredCount} scored
+                              </div>
+                            </td>
+
+                            {/* Column 3: Tasks & Practice */}
+                            <td className="p-2 sm:p-2.5 text-right align-top text-[11px] font-mono">
+                              <div className="text-brand-dark">
+                                Tasks: <strong className="text-brand-navy">{subj.tasksCompleted}/{subj.tasksTotal}</strong>
+                              </div>
+                              <div className="text-[10px] text-brand-muted mt-0.5">
+                                {subj.assignmentsSubmitted}/{subj.assignmentsTotal} p-sets ({subj.tasksCompletionRate}%)
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 3: DISCIPLINE */}
+            {mobileTab === 'discipline' && (
+              <div className="space-y-4 animate-fadeIn">
+                {/* Daily Discipline Summary */}
+                <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-3">
+                  <h3 className="academic-heading font-bold text-xs uppercase tracking-wider text-brand-navy flex items-center gap-1.5 border-b border-brand-dark/15 pb-2">
+                    <Clock className="w-3.5 h-3.5 text-brand-teal" />
+                    Daily Discipline &amp; Task Audit
+                  </h3>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                    <div className="p-2.5 border border-brand-dark bg-brand-paper-tint">
+                      <span className="text-[10px] text-brand-muted uppercase block">Scheduled Days</span>
+                      <span className="font-bold text-brand-navy text-sm">{report.studyConsistency.totalScheduledDays} Days</span>
+                    </div>
+                    <div className="p-2.5 border border-brand-dark bg-brand-paper-tint">
+                      <span className="text-[10px] text-brand-muted uppercase block">Active Days</span>
+                      <span className="font-bold text-brand-teal text-sm">{report.studyConsistency.consistentScheduledDays} Days</span>
+                    </div>
+                    <div className="p-2.5 border border-brand-dark bg-brand-paper-tint">
+                      <span className="text-[10px] text-brand-muted uppercase block">Completed Tasks</span>
+                      <span className="font-bold text-emerald-800 text-sm">{report.taskMetrics.completed} Tasks</span>
+                    </div>
+                    <div className="p-2.5 border border-brand-dark bg-brand-paper-tint">
+                      <span className="text-[10px] text-brand-muted uppercase block">Overdue Tasks</span>
+                      <span className="font-bold text-amber-800 text-sm">
+                        {report.taskMetrics.overdue} Tasks
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Priority Focus Areas (Strengths vs Need Attention) */}
+                <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-3">
+                  <h3 className="academic-heading font-bold text-xs uppercase tracking-wider text-brand-navy flex items-center gap-1.5 border-b border-brand-dark/15 pb-2">
+                    <Target className="w-3.5 h-3.5 text-brand-teal" />
+                    Targeted Revision Focus Areas
+                  </h3>
+
+                  {/* Areas Needing Immediate Attention */}
+                  {report.insights.observations.filter((o) => o.type === 'attention').length > 0 && (
+                    <div className="space-y-1.5">
+                      <span className="font-mono text-[10px] uppercase font-bold text-red-900 block flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3 text-red-600" />
+                        Requires Immediate Focus
+                      </span>
+                      <div className="space-y-1">
+                        {report.insights.observations
+                          .filter((o) => o.type === 'attention')
+                          .map((obs, idx) => (
+                            <div
+                              key={idx}
+                              className="p-2 border border-red-300 bg-red-50/70 text-xs font-mono text-red-900"
+                            >
+                              <span>{obs.text}</span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Academic Strengths */}
+                  {report.insights.observations.filter((o) => o.type === 'strength').length > 0 && (
+                    <div className="space-y-1.5 pt-2">
+                      <span className="font-mono text-[10px] uppercase font-bold text-emerald-900 block flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        Demonstrated Strengths
+                      </span>
+                      <div className="space-y-1">
+                        {report.insights.observations
+                          .filter((o) => o.type === 'strength')
+                          .map((obs, idx) => (
+                            <div
+                              key={idx}
+                              className="p-2 border border-emerald-300 bg-emerald-50/70 text-xs font-mono text-emerald-900"
+                            >
+                              <span>{obs.text}</span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ===================================================================== */}
+          {/* DESKTOP & PRINT VIEW ( >= md, ALWAYS VISIBLE IN PRINT )               */}
+          {/* ===================================================================== */}
+          <div className="hidden md:block print:block academic-doc space-y-8 print:space-y-0">
+            {/* PAGE 1: PERFORMANCE OVERVIEW */}
+            <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-6 print:border-none print:shadow-none print:p-0 print:space-y-5 print:page-break">
             {/* Header: Logo, Branding, Metadata */}
             <header className="border-b-2 border-brand-dark pb-4 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div className="flex items-start gap-3.5">
@@ -1168,7 +1542,8 @@ export const StudentReportPage: React.FC = () => {
             </footer>
           </article>
         </div>
-      ) : null}
+      </>
+    ) : null}
     </div>
   );
 };

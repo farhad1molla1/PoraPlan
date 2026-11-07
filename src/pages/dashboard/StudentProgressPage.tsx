@@ -38,6 +38,8 @@ export const StudentProgressPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<'overview' | 'subjects' | 'activity'>('overview');
+  const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>('all');
 
   useEffect(() => {
     if (!studentId) return;
@@ -202,12 +204,412 @@ export const StudentProgressPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        progress && (
-          <>
-            {/* ========================================================================= */}
-            {/* 2. 7-STEP STUDY CYCLE PROGRESSION                                         */}
-            {/* ========================================================================= */}
-            <section className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper-tint shadow-brutal">
+        progress && (() => {
+          const filteredSubjectsOnMobile =
+            selectedSubjectFilter === 'all'
+              ? progress.subjectsProgress
+              : progress.subjectsProgress.filter((s) => s.subjectId === selectedSubjectFilter);
+
+          return (
+            <>
+              {/* ========================================================================= */}
+              {/* MOBILE SEGMENTED VIEW ( < md )                                            */}
+              {/* ========================================================================= */}
+              <div className="md:hidden space-y-4">
+                {/* Segmented Control */}
+                <div className="flex border-2 border-brand-dark bg-brand-paper shadow-brutal p-1 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setMobileTab('overview')}
+                    className={`flex-1 min-h-[44px] py-2 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1.5 ${
+                      mobileTab === 'overview'
+                        ? 'bg-brand-navy text-white shadow-brutal-xs'
+                        : 'text-brand-dark hover:bg-brand-paper-tint'
+                    }`}
+                  >
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    <span>Overview</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobileTab('subjects')}
+                    className={`flex-1 min-h-[44px] py-2 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1.5 ${
+                      mobileTab === 'subjects'
+                        ? 'bg-brand-navy text-white shadow-brutal-xs'
+                        : 'text-brand-dark hover:bg-brand-paper-tint'
+                    }`}
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span>Subjects</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobileTab('activity')}
+                    className={`flex-1 min-h-[44px] py-2 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1.5 ${
+                      mobileTab === 'activity'
+                        ? 'bg-brand-navy text-white shadow-brutal-xs'
+                        : 'text-brand-dark hover:bg-brand-paper-tint'
+                    }`}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Activity</span>
+                  </button>
+                </div>
+
+                {/* TAB 1: OVERVIEW */}
+                {mobileTab === 'overview' && (
+                  <div className="space-y-4 animate-fadeIn">
+                    {/* Study Cycle Overview Compact Card */}
+                    <div className="p-3.5 border-2 border-brand-dark bg-brand-paper-tint shadow-brutal">
+                      <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-brand-dark/15">
+                        <span className="font-mono text-xs uppercase font-extrabold text-brand-navy flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-brand-teal" />
+                          Study Cycle Progression
+                        </span>
+                        <span className="font-mono text-[10px] text-brand-teal font-bold uppercase">
+                          7 Stages
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-center font-mono text-xs">
+                        <div className="p-2 border border-brand-dark bg-brand-paper">
+                          <span className="text-[10px] text-brand-muted block uppercase">Step 1: Plan</span>
+                          <span className="text-brand-navy font-bold">{progress.studyPlans.activePlans} Active Plans</span>
+                        </div>
+                        <div className="p-2 border border-brand-dark bg-brand-paper">
+                          <span className="text-[10px] text-brand-muted block uppercase">Step 2: Study</span>
+                          <span className="text-brand-navy font-bold">{progress.tasks.completed}/{progress.tasks.total} Tasks</span>
+                        </div>
+                        <div className="p-2 border border-brand-dark bg-brand-paper">
+                          <span className="text-[10px] text-brand-muted block uppercase">Step 3: Practice</span>
+                          <span className="text-brand-navy font-bold">{progress.assignments.totalAssigned} Sets</span>
+                        </div>
+                        <div className="p-2 border border-brand-dark bg-brand-paper">
+                          <span className="text-[10px] text-brand-muted block uppercase">Step 4: Submit</span>
+                          <span className="text-brand-navy font-bold">{progress.assignments.submitted} Submitted</span>
+                        </div>
+                        <div className="p-2 border border-brand-dark bg-brand-paper">
+                          <span className="text-[10px] text-brand-muted block uppercase">Step 5: Review</span>
+                          <span className="text-brand-gold font-bold">{progress.assignments.pendingReview} In Queue</span>
+                        </div>
+                        <div className="p-2 border border-brand-dark bg-brand-paper">
+                          <span className="text-[10px] text-brand-muted block uppercase">Step 6: Feedback</span>
+                          <span className="text-brand-teal font-bold">{progress.assignments.reviewed} Graded</span>
+                        </div>
+                        <div className="p-2 border-2 border-brand-dark bg-brand-teal text-white col-span-2 flex items-center justify-between px-3">
+                          <span className="text-[10px] uppercase font-bold text-brand-bg">Step 7: Mastery</span>
+                          <span className="text-xs font-bold text-white flex items-center gap-1">
+                            Verified Progress <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4 Academic KPI Blocks */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Tasks */}
+                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="font-mono text-[10px] uppercase font-extrabold text-brand-muted">
+                              Tasks
+                            </span>
+                            <ListTodo className="w-3.5 h-3.5 text-brand-teal stroke-[2.5]" />
+                          </div>
+                          <div className="font-heading font-extrabold text-xl text-brand-navy">
+                            {progress.tasks.completed}{' '}
+                            <span className="text-[10px] font-mono font-normal text-brand-muted">
+                              / {progress.tasks.total}
+                            </span>
+                          </div>
+                          <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-2 overflow-hidden">
+                            <div
+                              className="bg-brand-teal h-full"
+                              style={{ width: `${progress.tasks.completionRate}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-3 pt-2 border-t border-brand-dark/15 flex items-center justify-between text-[11px] font-mono">
+                          <span className="text-brand-muted">{progress.tasks.completionRate}%</span>
+                          <Link to="/student/tasks" className="text-brand-navy font-bold hover:underline flex items-center">
+                            View <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* Practice */}
+                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="font-mono text-[10px] uppercase font-extrabold text-brand-muted">
+                              Practice
+                            </span>
+                            <FileText className="w-3.5 h-3.5 text-brand-navy stroke-[2.5]" />
+                          </div>
+                          <div className="font-heading font-extrabold text-xl text-brand-navy">
+                            {progress.assignments.submitted}{' '}
+                            <span className="text-[10px] font-mono font-normal text-brand-muted">
+                              / {progress.assignments.totalAssigned}
+                            </span>
+                          </div>
+                          <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-2 overflow-hidden">
+                            <div
+                              className="bg-brand-navy h-full"
+                              style={{ width: `${progress.assignments.submissionRate}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-3 pt-2 border-t border-brand-dark/15 flex items-center justify-between text-[11px] font-mono">
+                          <span className="text-brand-muted">{progress.assignments.submissionRate}%</span>
+                          <Link to="/student/assignments" className="text-brand-navy font-bold hover:underline flex items-center">
+                            View <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* Evaluations */}
+                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="font-mono text-[10px] uppercase font-extrabold text-brand-muted">
+                              Evaluations
+                            </span>
+                            <Calendar className="w-3.5 h-3.5 text-brand-gold stroke-[2.5]" />
+                          </div>
+                          <div className="font-heading font-extrabold text-xl text-brand-navy">
+                            {progress.evaluations.completed}{' '}
+                            <span className="text-[10px] font-mono font-normal text-brand-muted">
+                              / {progress.evaluations.total}
+                            </span>
+                          </div>
+                          <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-2 overflow-hidden">
+                            <div
+                              className="bg-brand-gold h-full"
+                              style={{ width: `${progress.evaluations.completionRate}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-3 pt-2 border-t border-brand-dark/15 flex items-center justify-between text-[11px] font-mono">
+                          <span className="text-brand-muted">
+                            {progress.evaluations.averageScorePercentage !== null
+                              ? `${progress.evaluations.averageScorePercentage}%`
+                              : 'Pending'}
+                          </span>
+                          <Link to="/student/evaluations" className="text-brand-navy font-bold hover:underline flex items-center">
+                            View <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* Study Plans */}
+                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="font-mono text-[10px] uppercase font-extrabold text-brand-muted">
+                              Roadmaps
+                            </span>
+                            <Compass className="w-3.5 h-3.5 text-brand-teal stroke-[2.5]" />
+                          </div>
+                          <div className="font-heading font-extrabold text-xl text-brand-navy">
+                            {progress.studyPlans.completedPlans}{' '}
+                            <span className="text-[10px] font-mono font-normal text-brand-muted">
+                              / {progress.studyPlans.totalPlans}
+                            </span>
+                          </div>
+                          <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-2 overflow-hidden">
+                            <div
+                              className="bg-brand-teal h-full"
+                              style={{ width: `${progress.studyPlans.itemCompletionRate}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-3 pt-2 border-t border-brand-dark/15 flex items-center justify-between text-[11px] font-mono">
+                          <span className="text-brand-muted">{progress.studyPlans.itemCompletionRate}%</span>
+                          <Link to="/student/plans" className="text-brand-navy font-bold hover:underline flex items-center">
+                            View <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 2: SUBJECTS */}
+                {mobileTab === 'subjects' && (
+                  <div className="space-y-3 animate-fadeIn">
+                    {/* Subject Filter Picker */}
+                    {progress.subjectsProgress.length > 0 && (
+                      <div className="p-2.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex items-center gap-2">
+                        <span className="font-mono text-[10px] uppercase font-bold text-brand-muted shrink-0">
+                          Filter Area:
+                        </span>
+                        <select
+                          value={selectedSubjectFilter}
+                          onChange={(e) => setSelectedSubjectFilter(e.target.value)}
+                          aria-label="Filter subject on mobile"
+                          className="w-full px-2 py-1.5 text-xs font-mono font-bold border border-brand-dark bg-brand-bg text-brand-dark min-h-[40px] focus:outline-none"
+                        >
+                          <option value="all">All Study Areas ({progress.subjectsProgress.length})</option>
+                          {progress.subjectsProgress.map((s) => (
+                            <option key={s.subjectId} value={s.subjectId}>
+                              {s.subjectName} ({s.subjectCode || 'AREA'})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {filteredSubjectsOnMobile.length === 0 ? (
+                      <div className="p-6 border-2 border-dashed border-brand-dark bg-brand-paper text-center">
+                        <p className="font-mono text-xs text-brand-muted">
+                          No subject matched the filter.
+                        </p>
+                      </div>
+                    ) : (
+                      filteredSubjectsOnMobile.map((subj) => (
+                        <div
+                          key={subj.subjectId}
+                          className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-3"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <span className="font-mono text-[10px] font-bold text-brand-muted">
+                                {subj.subjectCode || 'ACADEMIC AREA'}
+                              </span>
+                              <h3 className="font-heading font-extrabold text-base text-brand-navy truncate">
+                                {subj.subjectName}
+                              </h3>
+                            </div>
+                            <Badge variant={subj.status === 'active' ? 'teal' : 'paper'} size="sm">
+                              {subj.status.toUpperCase()}
+                            </Badge>
+                          </div>
+
+                          <div className="space-y-1.5 text-xs font-mono bg-brand-paper-tint p-2.5 border border-brand-dark/20">
+                            <div className="flex items-center justify-between pb-1 border-b border-brand-dark/10">
+                              <span className="text-brand-muted">Tasks:</span>
+                              <span className="font-bold text-brand-navy">
+                                {subj.tasks.completed}/{subj.tasks.total} ({subj.tasks.completionRate}%)
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between pb-1 border-b border-brand-dark/10">
+                              <span className="text-brand-muted">Practice:</span>
+                              <span className="font-bold text-brand-navy">
+                                {subj.assignments.submitted}/{subj.assignments.total}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between pb-1 border-b border-brand-dark/10">
+                              <span className="text-brand-muted">Evaluations:</span>
+                              <span className="font-bold text-brand-navy">
+                                {subj.evaluations.completed}/{subj.evaluations.total}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between pb-1 border-b border-brand-dark/10">
+                              <span className="text-brand-muted">Study Plans:</span>
+                              <span className="font-bold text-brand-navy">
+                                {subj.studyPlansCount} Roadmaps
+                              </span>
+                            </div>
+                            {subj.evaluations.averageScorePercentage !== null && (
+                              <div className="flex items-center justify-between pt-0.5 text-brand-teal font-extrabold">
+                                <span>Evaluation Avg:</span>
+                                <span>{subj.evaluations.averageScorePercentage}%</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="pt-1 flex items-center justify-end">
+                            <Link
+                              to={`/student/subjects/${subj.subjectId}`}
+                              className="font-mono text-xs font-bold text-brand-navy hover:underline flex items-center gap-1"
+                            >
+                              Subject Details <ArrowRight className="w-3 h-3" />
+                            </Link>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* TAB 3: ACTIVITY */}
+                {mobileTab === 'activity' && (
+                  <div className="space-y-3 animate-fadeIn">
+                    <div className="flex items-center justify-between pb-1">
+                      <span className="font-heading font-extrabold text-sm text-brand-navy flex items-center gap-1.5">
+                        <Clock className="w-4 h-4 text-brand-teal" />
+                        Recent Activity
+                      </span>
+                      <span className="font-mono text-[10px] text-brand-muted">
+                        {progress.recentActivity.length} Events
+                      </span>
+                    </div>
+
+                    {progress.recentActivity.length === 0 ? (
+                      <div className="p-6 border-2 border-dashed border-brand-dark bg-brand-paper text-center">
+                        <p className="font-mono text-xs text-brand-muted">
+                          No activity recorded yet.
+                        </p>
+                      </div>
+                    ) : (
+                      progress.recentActivity.map((item) => (
+                        <div
+                          key={item.id}
+                          className="p-3 border border-brand-dark bg-brand-paper flex flex-col gap-1.5 shadow-brutal-xs"
+                        >
+                          <div className="flex items-start gap-2.5">
+                            <div className="p-1 border border-brand-dark bg-brand-paper-tint shrink-0 mt-0.5">
+                              {item.type.startsWith('task') ? (
+                                <ListTodo className="w-3.5 h-3.5 text-brand-teal" />
+                              ) : item.type.startsWith('assignment') ? (
+                                <FileCheck className="w-3.5 h-3.5 text-brand-navy" />
+                              ) : (
+                                <Award className="w-3.5 h-3.5 text-brand-gold" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <span className="font-heading font-bold text-xs text-brand-navy block truncate">
+                                {item.title}
+                              </span>
+                              <div className="flex flex-wrap items-center gap-1 mt-0.5">
+                                {item.statusBadge && (
+                                  <Badge variant={item.statusBadge.variant} size="sm">
+                                    {item.statusBadge.label}
+                                  </Badge>
+                                )}
+                                {item.subjectName && (
+                                  <span className="font-mono text-[9px] text-brand-muted px-1 border border-brand-dark/30 bg-brand-paper-tint">
+                                    {item.subjectName}
+                                  </span>
+                                )}
+                              </div>
+                              {item.details && (
+                                <p className="font-sans text-[11px] text-brand-muted mt-0.5">
+                                  {item.details}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="font-mono text-[10px] text-brand-muted text-right border-t border-brand-dark/10 pt-1">
+                            {new Date(item.timestamp).toLocaleString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* ========================================================================= */}
+              {/* DESKTOP VIEW ( >= md ) (100% PRESERVED)                                   */}
+              {/* ========================================================================= */}
+              <div className="hidden md:block space-y-8">
+                {/* 2. 7-STEP STUDY CYCLE PROGRESSION */}
+                <section className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper-tint shadow-brutal">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                 <span className="font-mono text-xs uppercase font-extrabold text-brand-navy flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-brand-teal" />
@@ -590,8 +992,10 @@ export const StudentProgressPage: React.FC = () => {
                 </div>
               )}
             </section>
-          </>
-        )
+              </div>
+            </>
+          );
+        })()
       )}
     </div>
   );

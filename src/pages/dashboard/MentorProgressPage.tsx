@@ -9,6 +9,7 @@ import {
 } from '../../lib/progress';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
+import { MobileBottomSheet } from '../../components/common/MobileBottomSheet';
 import {
   Users,
   Search,
@@ -21,8 +22,8 @@ import {
   Calendar,
   BookOpen,
   Eye,
-  X,
   ChevronRight,
+  TrendingUp,
 } from 'lucide-react';
 
 export const MentorProgressPage: React.FC = () => {
@@ -40,6 +41,7 @@ export const MentorProgressPage: React.FC = () => {
   const [scholarDetail, setScholarDetail] = useState<StudentProgressSummary | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [modalMobileTab, setModalMobileTab] = useState<'overview' | 'subjects' | 'activity'>('overview');
 
   useEffect(() => {
     if (!mentorId) return;
@@ -90,6 +92,7 @@ export const MentorProgressPage: React.FC = () => {
     setSelectedScholar(scholar);
     setScholarDetail(null);
     setDetailError(null);
+    setModalMobileTab('overview');
     setLoadingDetail(true);
 
     try {
@@ -414,38 +417,37 @@ export const MentorProgressPage: React.FC = () => {
       </section>
 
       {/* ========================================================================= */}
-      {/* 4. SCHOLAR DETAILED PROGRESS MODAL                                        */}
+      {/* 4. SCHOLAR DETAILED PROGRESS BOTTOM SHEET / MODAL                         */}
       {/* ========================================================================= */}
-      {selectedScholar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-brand-dark/60 backdrop-blur-sm animate-fadeIn">
-          <div className="relative w-full max-w-3xl max-h-[90vh] bg-brand-paper border-2 border-brand-dark shadow-brutal flex flex-col overflow-hidden">
-            {/* Modal Header */}
-            <div className="p-4 sm:p-5 border-b-2 border-brand-dark bg-brand-paper-tint flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="teal" size="sm">
-                    STUDENT PROGRESS DETAILS
-                  </Badge>
-                  <span className="font-mono text-xs font-bold text-brand-teal">
-                    {selectedScholar.poraplanId}
-                  </span>
-                </div>
-                <h3 className="font-heading font-extrabold text-xl text-brand-navy">
-                  {selectedScholar.studentName}
-                </h3>
-              </div>
-              <button
-                type="button"
+      <MobileBottomSheet
+        isOpen={!!selectedScholar}
+        onClose={() => setSelectedScholar(null)}
+        title={selectedScholar ? `Progress: ${selectedScholar.studentName}` : 'Student Progress Details'}
+        subtitle={selectedScholar ? `Student ID: ${selectedScholar.poraplanId}` : undefined}
+        maxWidth="3xl"
+        footer={
+          <div className="flex items-center justify-between w-full">
+            <span className="font-mono text-xs text-brand-muted hidden sm:inline">
+              PoraPlan Academic Record
+            </span>
+            <div className="flex items-center gap-2 ml-auto">
+              <Link to="/mentor/evaluations">
+                <Button variant="secondary" size="sm">
+                  Evaluate Student
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setSelectedScholar(null)}
-                className="p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-bg shadow-brutal-xs"
-                title="Close Modal"
               >
-                <X className="w-5 h-5 text-brand-dark" />
-              </button>
+                Close
+              </Button>
             </div>
-
-            {/* Modal Body */}
-            <div className="p-4 sm:p-6 overflow-y-auto space-y-6">
+          </div>
+        }
+      >
+        <div className="p-1 sm:p-2 space-y-6">
               {loadingDetail ? (
                 <div className="py-12 text-center flex flex-col items-center justify-center">
                   <Loader2 className="w-8 h-8 animate-spin text-brand-teal mb-3" />
@@ -459,142 +461,291 @@ export const MentorProgressPage: React.FC = () => {
                 </div>
               ) : scholarDetail ? (
                 <>
-                  {/* KPI Summary */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="p-3 border border-brand-dark bg-brand-paper shadow-brutal-xs">
-                      <span className="text-[10px] font-mono text-brand-muted block uppercase">
-                        Tasks Completed
-                      </span>
-                      <span className="font-heading font-extrabold text-lg text-brand-navy">
-                        {scholarDetail.tasks.completed} / {scholarDetail.tasks.total}
-                      </span>
-                      <span className="text-[10px] font-mono text-brand-teal block font-bold">
-                        {scholarDetail.tasks.completionRate}% Done
-                      </span>
-                    </div>
-
-                    <div className="p-3 border border-brand-dark bg-brand-paper shadow-brutal-xs">
-                      <span className="text-[10px] font-mono text-brand-muted block uppercase">
-                        Practice Sets
-                      </span>
-                      <span className="font-heading font-extrabold text-lg text-brand-navy">
-                        {scholarDetail.assignments.submitted} / {scholarDetail.assignments.totalAssigned}
-                      </span>
-                      <span className="text-[10px] font-mono text-brand-navy block font-bold">
-                        {scholarDetail.assignments.submissionRate}% Submitted
-                      </span>
-                    </div>
-
-                    <div className="p-3 border border-brand-dark bg-brand-paper shadow-brutal-xs">
-                      <span className="text-[10px] font-mono text-brand-muted block uppercase">
-                        Evaluations Graded
-                      </span>
-                      <span className="font-heading font-extrabold text-lg text-brand-navy">
-                        {scholarDetail.evaluations.completed} / {scholarDetail.evaluations.total}
-                      </span>
-                      <span className="text-[10px] font-mono text-brand-gold block font-bold">
-                        {scholarDetail.evaluations.averageScorePercentage !== null
-                          ? `Avg ${scholarDetail.evaluations.averageScorePercentage}%`
-                          : 'No score yet'}
-                      </span>
-                    </div>
-
-                    <div className="p-3 border border-brand-dark bg-brand-paper shadow-brutal-xs">
-                      <span className="text-[10px] font-mono text-brand-muted block uppercase">
-                        Study Plans
-                      </span>
-                      <span className="font-heading font-extrabold text-lg text-brand-navy">
-                        {scholarDetail.studyPlans.activePlans} Active
-                      </span>
-                      <span className="text-[10px] font-mono text-brand-teal block font-bold">
-                        {scholarDetail.studyPlans.totalPlans} Total
-                      </span>
-                    </div>
+                  {/* Mobile Segmented Control (< sm) */}
+                  <div className="sm:hidden flex border-2 border-brand-dark bg-brand-paper p-1 gap-1 mb-3 shadow-brutal-xs">
+                    <button
+                      type="button"
+                      onClick={() => setModalMobileTab('overview')}
+                      className={`flex-1 py-1.5 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 min-h-[40px] ${
+                        modalMobileTab === 'overview'
+                          ? 'bg-brand-navy text-white shadow-brutal-xs'
+                          : 'text-brand-dark hover:bg-brand-paper-tint'
+                      }`}
+                    >
+                      <TrendingUp className="w-3.5 h-3.5" />
+                      <span>Overview</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setModalMobileTab('subjects')}
+                      className={`flex-1 py-1.5 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 min-h-[40px] ${
+                        modalMobileTab === 'subjects'
+                          ? 'bg-brand-navy text-white shadow-brutal-xs'
+                          : 'text-brand-dark hover:bg-brand-paper-tint'
+                      }`}
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>Subjects</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setModalMobileTab('activity')}
+                      className={`flex-1 py-1.5 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 min-h-[40px] ${
+                        modalMobileTab === 'activity'
+                          ? 'bg-brand-navy text-white shadow-brutal-xs'
+                          : 'text-brand-dark hover:bg-brand-paper-tint'
+                      }`}
+                    >
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>Activity</span>
+                    </button>
                   </div>
 
-                  {/* Subject Breakdown in Modal */}
-                  <div>
-                    <h4 className="font-heading font-extrabold text-sm text-brand-navy mb-2 flex items-center gap-1.5">
-                      <BookOpen className="w-4 h-4 text-brand-teal" />
-                      Subject Performance Breakdown
-                    </h4>
-                    {scholarDetail.subjectsProgress.length === 0 ? (
-                      <p className="font-mono text-xs text-brand-muted">No subjects assigned yet.</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {scholarDetail.subjectsProgress.map((subj) => (
-                          <div
-                            key={subj.subjectId}
-                            className="p-3 border border-brand-dark bg-brand-paper-tint text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-brutal-xs"
-                          >
-                            <div>
-                              <span className="font-bold text-brand-navy block sm:inline">
-                                {subj.subjectName} ({subj.subjectCode || 'General'})
-                              </span>
-                              <span className="text-brand-muted sm:ml-2">
-                                Tasks: {subj.tasks.completed}/{subj.tasks.total} · Submissions: {subj.assignments.submitted}/{subj.assignments.total} · Evaluations: {subj.evaluations.completed}/{subj.evaluations.total}
-                              </span>
-                            </div>
-                            {subj.evaluations.averageScorePercentage !== null && (
-                              <span className="font-bold text-brand-teal shrink-0">
-                                Eval Avg: {subj.evaluations.averageScorePercentage}%
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Recent Activity Log in Modal */}
-                  <div>
-                    <h4 className="font-heading font-extrabold text-sm text-brand-navy mb-2 flex items-center gap-1.5">
-                      <Clock className="w-4 h-4 text-brand-teal" />
-                      Recent Verified Academic Events
-                    </h4>
-                    {scholarDetail.recentActivity.length === 0 ? (
-                      <p className="font-mono text-xs text-brand-muted">No activity logged yet.</p>
-                    ) : (
-                      <div className="space-y-2 max-h-60 overflow-y-auto">
-                        {scholarDetail.recentActivity.map((act) => (
-                          <div
-                            key={act.id}
-                            className="p-2.5 border border-brand-dark bg-brand-paper flex items-center justify-between gap-2 text-xs"
-                          >
-                            <div>
-                              <span className="font-bold text-brand-navy block">{act.title}</span>
-                              {act.details && (
-                                <span className="text-brand-muted text-[11px]">{act.details}</span>
-                              )}
-                            </div>
-                            <span className="font-mono text-[10px] text-brand-muted shrink-0">
-                              {new Date(act.timestamp).toLocaleDateString()}
+                  {/* Mobile View Content */}
+                  <div className="sm:hidden space-y-3">
+                    {modalMobileTab === 'overview' && (
+                      <div className="space-y-3 animate-fadeIn">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs">
+                            <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                              Tasks Completed
+                            </span>
+                            <span className="font-heading font-extrabold text-base text-brand-navy">
+                              {scholarDetail.tasks.completed}/{scholarDetail.tasks.total}
+                            </span>
+                            <span className="text-[10px] font-mono text-brand-teal block font-bold mt-0.5">
+                              {scholarDetail.tasks.completionRate}% Done
                             </span>
                           </div>
-                        ))}
+
+                          <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs">
+                            <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                              Practice Sets
+                            </span>
+                            <span className="font-heading font-extrabold text-base text-brand-navy">
+                              {scholarDetail.assignments.submitted}/{scholarDetail.assignments.totalAssigned}
+                            </span>
+                            <span className="text-[10px] font-mono text-brand-gold block font-bold mt-0.5">
+                              {scholarDetail.assignments.pendingReview > 0
+                                ? `${scholarDetail.assignments.pendingReview} in queue`
+                                : `${scholarDetail.assignments.submissionRate}% Submitted`}
+                            </span>
+                          </div>
+
+                          <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs">
+                            <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                              Evaluations
+                            </span>
+                            <span className="font-heading font-extrabold text-base text-brand-navy">
+                              {scholarDetail.evaluations.completed}/{scholarDetail.evaluations.total}
+                            </span>
+                            <span className="text-[10px] font-mono text-brand-navy block font-bold mt-0.5">
+                              {scholarDetail.evaluations.averageScorePercentage !== null
+                                ? `Avg: ${scholarDetail.evaluations.averageScorePercentage}%`
+                                : 'Pending'}
+                            </span>
+                          </div>
+
+                          <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs">
+                            <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                              Study Plans
+                            </span>
+                            <span className="font-heading font-extrabold text-base text-brand-navy">
+                              {scholarDetail.studyPlans.completedPlans}/{scholarDetail.studyPlans.totalPlans}
+                            </span>
+                            <span className="text-[10px] font-mono text-brand-teal block font-bold mt-0.5">
+                              {scholarDetail.studyPlans.activePlans} Active Plans
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     )}
+
+                    {modalMobileTab === 'subjects' && (
+                      <div className="space-y-2 animate-fadeIn">
+                        {scholarDetail.subjectsProgress.length === 0 ? (
+                          <p className="font-mono text-xs text-brand-muted text-center py-4">
+                            No subjects assigned yet.
+                          </p>
+                        ) : (
+                          scholarDetail.subjectsProgress.map((subj) => (
+                            <div
+                              key={subj.subjectId}
+                              className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs space-y-1.5"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-xs text-brand-navy">{subj.subjectName}</span>
+                                <span className="font-mono text-[10px] text-brand-muted">
+                                  {subj.subjectCode || 'General'}
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-1 text-[11px] font-mono bg-brand-paper-tint p-2 border border-brand-dark/15">
+                                <span>Tasks: {subj.tasks.completed}/{subj.tasks.total}</span>
+                                <span>Practice: {subj.assignments.submitted}/{subj.assignments.total}</span>
+                                <span>Evals: {subj.evaluations.completed}/{subj.evaluations.total}</span>
+                                <span className="text-brand-teal font-bold">
+                                  {subj.evaluations.averageScorePercentage !== null
+                                    ? `Avg: ${subj.evaluations.averageScorePercentage}%`
+                                    : 'No Evals'}
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+
+                    {modalMobileTab === 'activity' && (
+                      <div className="space-y-2 animate-fadeIn">
+                        {scholarDetail.recentActivity.length === 0 ? (
+                          <p className="font-mono text-xs text-brand-muted text-center py-4">
+                            No activity logged yet.
+                          </p>
+                        ) : (
+                          scholarDetail.recentActivity.map((act) => (
+                            <div
+                              key={act.id}
+                              className="p-2.5 border border-brand-dark bg-brand-paper flex items-center justify-between gap-2 text-xs"
+                            >
+                              <div className="min-w-0">
+                                <span className="font-bold text-brand-navy block truncate">{act.title}</span>
+                                {act.details && (
+                                  <span className="text-brand-muted text-[10px] block truncate">{act.details}</span>
+                                )}
+                              </div>
+                              <span className="font-mono text-[9px] text-brand-muted shrink-0">
+                                {new Date(act.timestamp).toLocaleDateString()}
+                              </span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Desktop Full View ( >= sm ) (100% PRESERVED) */}
+                  <div className="hidden sm:block space-y-6">
+                    {/* KPI Summary */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="p-3 border border-brand-dark bg-brand-paper shadow-brutal-xs">
+                        <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                          Tasks Completed
+                        </span>
+                        <span className="font-heading font-extrabold text-lg text-brand-navy">
+                          {scholarDetail.tasks.completed} / {scholarDetail.tasks.total}
+                        </span>
+                        <span className="text-[10px] font-mono text-brand-teal block font-bold">
+                          {scholarDetail.tasks.completionRate}% Done
+                        </span>
+                      </div>
+
+                      <div className="p-3 border border-brand-dark bg-brand-paper shadow-brutal-xs">
+                        <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                          Practice Sets
+                        </span>
+                        <span className="font-heading font-extrabold text-lg text-brand-navy">
+                          {scholarDetail.assignments.submitted} / {scholarDetail.assignments.totalAssigned}
+                        </span>
+                        <span className="text-[10px] font-mono text-brand-navy block font-bold">
+                          {scholarDetail.assignments.submissionRate}% Submitted
+                        </span>
+                      </div>
+
+                      <div className="p-3 border border-brand-dark bg-brand-paper shadow-brutal-xs">
+                        <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                          Evaluations Graded
+                        </span>
+                        <span className="font-heading font-extrabold text-lg text-brand-navy">
+                          {scholarDetail.evaluations.completed} / {scholarDetail.evaluations.total}
+                        </span>
+                        <span className="text-[10px] font-mono text-brand-gold block font-bold">
+                          {scholarDetail.evaluations.averageScorePercentage !== null
+                            ? `Avg ${scholarDetail.evaluations.averageScorePercentage}%`
+                            : 'No score yet'}
+                        </span>
+                      </div>
+
+                      <div className="p-3 border border-brand-dark bg-brand-paper shadow-brutal-xs">
+                        <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                          Study Plans
+                        </span>
+                        <span className="font-heading font-extrabold text-lg text-brand-navy">
+                          {scholarDetail.studyPlans.activePlans} Active
+                        </span>
+                        <span className="text-[10px] font-mono text-brand-teal block font-bold">
+                          {scholarDetail.studyPlans.totalPlans} Total
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Subject Breakdown in Modal */}
+                    <div>
+                      <h4 className="font-heading font-extrabold text-sm text-brand-navy mb-2 flex items-center gap-1.5">
+                        <BookOpen className="w-4 h-4 text-brand-teal" />
+                        Subject Performance Breakdown
+                      </h4>
+                      {scholarDetail.subjectsProgress.length === 0 ? (
+                        <p className="font-mono text-xs text-brand-muted">No subjects assigned yet.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {scholarDetail.subjectsProgress.map((subj) => (
+                            <div
+                              key={subj.subjectId}
+                              className="p-3 border border-brand-dark bg-brand-paper-tint text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-brutal-xs"
+                            >
+                              <div>
+                                <span className="font-bold text-brand-navy block sm:inline">
+                                  {subj.subjectName} ({subj.subjectCode || 'General'})
+                                </span>
+                                <span className="text-brand-muted sm:ml-2">
+                                  Tasks: {subj.tasks.completed}/{subj.tasks.total} · Submissions: {subj.assignments.submitted}/{subj.assignments.total} · Evaluations: {subj.evaluations.completed}/{subj.evaluations.total}
+                                </span>
+                              </div>
+                              {subj.evaluations.averageScorePercentage !== null && (
+                                <span className="font-bold text-brand-teal shrink-0">
+                                  Eval Avg: {subj.evaluations.averageScorePercentage}%
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Recent Activity Log in Modal */}
+                    <div>
+                      <h4 className="font-heading font-extrabold text-sm text-brand-navy mb-2 flex items-center gap-1.5">
+                        <Clock className="w-4 h-4 text-brand-teal" />
+                        Recent Verified Academic Events
+                      </h4>
+                      {scholarDetail.recentActivity.length === 0 ? (
+                        <p className="font-mono text-xs text-brand-muted">No activity logged yet.</p>
+                      ) : (
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                          {scholarDetail.recentActivity.map((act) => (
+                            <div
+                              key={act.id}
+                              className="p-2.5 border border-brand-dark bg-brand-paper flex items-center justify-between gap-2 text-xs"
+                            >
+                              <div>
+                                <span className="font-bold text-brand-navy block">{act.title}</span>
+                                {act.details && (
+                                  <span className="text-brand-muted text-[11px]">{act.details}</span>
+                                )}
+                              </div>
+                              <span className="font-mono text-[10px] text-brand-muted shrink-0">
+                                {new Date(act.timestamp).toLocaleDateString()}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </>
               ) : null}
             </div>
-
-            {/* Modal Footer */}
-            <div className="p-3 sm:p-4 border-t-2 border-brand-dark bg-brand-bg flex items-center justify-between">
-              <span className="font-mono text-xs text-brand-muted">
-                PoraPlan Academic Record
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedScholar(null)}
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+        </MobileBottomSheet>
     </div>
   );
 };

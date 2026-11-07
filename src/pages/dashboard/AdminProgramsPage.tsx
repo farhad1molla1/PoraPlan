@@ -751,7 +751,7 @@ export const AdminProgramsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setCategoryFilter('all')}
-              className={`px-3 py-1 font-mono text-xs border ${
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[36px] sm:min-h-0 font-mono text-xs border ${
                 categoryFilter === 'all'
                   ? 'bg-brand-navy text-white border-brand-dark font-bold'
                   : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -762,7 +762,7 @@ export const AdminProgramsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setCategoryFilter('academic_mentorship')}
-              className={`px-3 py-1 font-mono text-xs border ${
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[36px] sm:min-h-0 font-mono text-xs border ${
                 categoryFilter === 'academic_mentorship'
                   ? 'bg-brand-gold text-brand-dark border-brand-dark font-bold'
                   : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -773,7 +773,7 @@ export const AdminProgramsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setCategoryFilter('skillsprint')}
-              className={`px-3 py-1 font-mono text-xs border ${
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[36px] sm:min-h-0 font-mono text-xs border ${
                 categoryFilter === 'skillsprint'
                   ? 'bg-brand-teal text-white border-brand-dark font-bold'
                   : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -791,7 +791,7 @@ export const AdminProgramsPage: React.FC = () => {
                 key={st}
                 type="button"
                 onClick={() => setStatusFilter(st)}
-                className={`px-2.5 py-1 font-mono text-xs uppercase border ${
+                className={`px-2.5 py-1.5 sm:py-1 min-h-[36px] sm:min-h-0 font-mono text-xs uppercase border ${
                   statusFilter === st
                     ? 'bg-brand-dark text-white border-brand-dark font-bold'
                     : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -1231,21 +1231,21 @@ export const AdminProgramsPage: React.FC = () => {
 
       {/* MODAL: Manage Cohorts for Program */}
       {cohortModalOpen && selectedProgramForCohorts && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto">
-          <div className="w-full max-w-3xl bg-brand-paper border-3 border-brand-dark shadow-brutal-lg p-6 space-y-6 my-8">
-            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
-              <div>
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto">
+          <div className="w-full max-w-3xl bg-brand-paper border-3 border-brand-dark shadow-brutal-lg p-4 sm:p-6 space-y-4 sm:space-y-6 my-auto sm:my-8 max-h-[92dvh] flex flex-col">
+            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3 shrink-0">
+              <div className="min-w-0 pr-2">
+                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted block">
                   Cohort Desk
                 </span>
-                <h3 className="font-heading font-extrabold text-lg text-brand-navy">
+                <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy truncate">
                   Cohorts for {selectedProgramForCohorts.name}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setCohortModalOpen(false)}
-                className="p-1 border border-brand-dark bg-brand-paper-tint"
+                className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center border border-brand-dark bg-brand-paper-tint hover:bg-brand-paper shrink-0"
                 aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
@@ -1534,28 +1534,28 @@ export const AdminProgramsPage: React.FC = () => {
 
       {/* MODAL: Curriculum Builder */}
       {curriculumModalOpen && selectedProgramForCurriculum && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto">
-          <div className="w-full max-w-3xl bg-brand-paper border-3 border-brand-dark shadow-brutal-lg p-6 space-y-6 my-8">
-            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
-              <div>
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto">
+          <div className="w-full max-w-3xl bg-brand-paper border-3 border-brand-dark shadow-brutal-lg p-4 sm:p-6 space-y-4 sm:space-y-6 my-auto sm:my-8 max-h-[92dvh] flex flex-col">
+            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3 shrink-0">
+              <div className="min-w-0 pr-2">
+                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted block">
                   Curriculum Builder
                 </span>
-                <h3 className="font-heading font-extrabold text-lg text-brand-navy">
+                <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy truncate">
                   Curriculum for {selectedProgramForCurriculum.name}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setCurriculumModalOpen(false)}
-                className="p-1 border border-brand-dark bg-brand-paper-tint"
+                className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center border border-brand-dark bg-brand-paper-tint hover:bg-brand-paper shrink-0 cursor-pointer"
                 aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0">
               <span className="font-sans text-xs text-brand-muted">
                 Modules are presented sequentially to students and mentors.
               </span>
@@ -1564,13 +1564,14 @@ export const AdminProgramsPage: React.FC = () => {
                 size="sm"
                 onClick={handleOpenCreateSection}
                 leftIcon={<Plus className="w-3.5 h-3.5" />}
+                className="w-full sm:w-auto"
               >
                 Add Module / Section
               </Button>
             </div>
 
             {/* Sections & Topics List */}
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="space-y-4 flex-1 overflow-y-auto pr-1">
               {curriculumSections.length === 0 ? (
                 <div className="p-8 border-2 border-brand-dark bg-brand-paper-tint text-center font-mono text-xs text-brand-muted">
                   No curriculum sections added yet. Click "Add Module / Section" to begin.
@@ -1583,22 +1584,23 @@ export const AdminProgramsPage: React.FC = () => {
                   >
                     {/* Section Header */}
                     <div className="p-3 bg-brand-navy text-white flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-brand-gold">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-mono text-xs font-bold text-brand-gold shrink-0">
                           Module {sIdx + 1}:
                         </span>
-                        <h4 className="font-heading font-bold text-sm text-white truncate max-w-md">
+                        <h4 className="font-heading font-bold text-sm text-white truncate max-w-xs sm:max-w-md">
                           {sec.title}
                         </h4>
                       </div>
 
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 shrink-0">
                         <button
                           type="button"
                           disabled={sIdx === 0}
                           onClick={() => handleMoveSection(sIdx, 'up')}
-                          className="p-1 text-white hover:bg-white/10 disabled:opacity-30"
+                          className="min-w-[36px] min-h-[36px] p-2 flex items-center justify-center text-white hover:bg-white/10 disabled:opacity-30 rounded-xs cursor-pointer"
                           title="Move section up"
+                          aria-label="Move section up"
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
                         </button>
@@ -1606,8 +1608,9 @@ export const AdminProgramsPage: React.FC = () => {
                           type="button"
                           disabled={sIdx === curriculumSections.length - 1}
                           onClick={() => handleMoveSection(sIdx, 'down')}
-                          className="p-1 text-white hover:bg-white/10 disabled:opacity-30"
+                          className="min-w-[36px] min-h-[36px] p-2 flex items-center justify-center text-white hover:bg-white/10 disabled:opacity-30 rounded-xs cursor-pointer"
                           title="Move section down"
+                          aria-label="Move section down"
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
                         </button>
@@ -1618,16 +1621,18 @@ export const AdminProgramsPage: React.FC = () => {
                             setSectionForm({ title: sec.title, description: sec.description || '' });
                             setSectionModalOpen(true);
                           }}
-                          className="p-1 text-white hover:bg-white/10 ml-1"
+                          className="min-w-[36px] min-h-[36px] p-2 flex items-center justify-center text-white hover:bg-white/10 ml-0.5 rounded-xs cursor-pointer"
                           title="Edit module"
+                          aria-label="Edit module"
                         >
                           <Edit className="w-3.5 h-3.5" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDeleteSection(sec.id)}
-                          className="p-1 text-red-400 hover:bg-white/10"
+                          className="min-w-[36px] min-h-[36px] p-2 flex items-center justify-center text-red-400 hover:bg-white/10 rounded-xs cursor-pointer"
                           title="Delete module"
+                          aria-label="Delete module"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1648,14 +1653,14 @@ export const AdminProgramsPage: React.FC = () => {
                             key={t.id}
                             className="p-2 border border-brand-dark/30 bg-brand-paper-tint flex items-center justify-between gap-2 text-xs"
                           >
-                            <div className="flex items-start gap-2">
-                              <span className="font-mono text-[10px] font-bold text-brand-teal mt-0.5">
+                            <div className="flex items-start gap-2 min-w-0">
+                              <span className="font-mono text-[10px] font-bold text-brand-teal mt-0.5 shrink-0">
                                 {sIdx + 1}.{tIdx + 1}
                               </span>
-                              <div>
-                                <span className="font-bold text-brand-navy">{t.title}</span>
+                              <div className="min-w-0">
+                                <span className="font-bold text-brand-navy block truncate">{t.title}</span>
                                 {t.description && (
-                                  <p className="text-[11px] text-brand-muted">{t.description}</p>
+                                  <p className="text-[11px] text-brand-muted line-clamp-2">{t.description}</p>
                                 )}
                               </div>
                             </div>
@@ -1668,18 +1673,20 @@ export const AdminProgramsPage: React.FC = () => {
                                   setTopicForm({ title: t.title, description: t.description || '' });
                                   setTopicModalOpen(true);
                                 }}
-                                className="p-1 hover:bg-black/5"
+                                className="min-w-[36px] min-h-[36px] p-2 flex items-center justify-center hover:bg-black/5 rounded-xs cursor-pointer"
                                 title="Edit topic"
+                                aria-label="Edit topic"
                               >
-                                <Edit className="w-3 h-3 text-brand-dark" />
+                                <Edit className="w-3.5 h-3.5 text-brand-dark" />
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleDeleteTopic(t.id)}
-                                className="p-1 hover:bg-red-50 text-red-600"
+                                className="min-w-[36px] min-h-[36px] p-2 flex items-center justify-center hover:bg-red-50 text-red-600 rounded-xs cursor-pointer"
                                 title="Delete topic"
+                                aria-label="Delete topic"
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </div>
@@ -1708,7 +1715,7 @@ export const AdminProgramsPage: React.FC = () => {
       {/* SUB-MODAL: Add / Edit Section */}
       {sectionModalOpen && (
         <div
-          className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto"
+          className="fixed inset-0 z-60 flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-hidden"
           role="dialog"
           aria-modal="true"
           aria-label={editingSection ? 'Edit Module' : 'Add Curriculum Module'}
@@ -1719,9 +1726,12 @@ export const AdminProgramsPage: React.FC = () => {
           }}
         >
           <div
-            className="w-full max-w-md max-h-[85dvh] flex flex-col my-auto bg-brand-paper border-3 border-brand-dark shadow-brutal p-4 sm:p-5"
+            className="w-full max-w-md max-h-[90dvh] sm:max-h-[85dvh] flex flex-col bg-brand-paper border-t-3 sm:border-3 border-brand-dark rounded-t-2xl sm:rounded-none shadow-brutal p-4 sm:p-5 pb-[max(1rem,env(safe-area-inset-bottom))]"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Mobile Drag Handle Affordance */}
+            <div className="w-12 h-1.5 bg-brand-dark/25 rounded-full mx-auto mb-2.5 sm:hidden shrink-0" aria-hidden="true" />
+
             <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2 shrink-0">
               <h4 className="font-heading font-extrabold text-sm text-brand-navy">
                 {editingSection ? 'Edit Module' : 'Add Curriculum Module'}
@@ -1729,7 +1739,7 @@ export const AdminProgramsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSectionModalOpen(false)}
-                className="min-w-[44px] min-h-[44px] p-2 -mr-2 -mt-1 flex items-center justify-center border border-brand-dark bg-brand-paper-tint hover:bg-brand-paper"
+                className="min-w-[44px] min-h-[44px] p-2 -mr-2 -mt-1 flex items-center justify-center border border-brand-dark bg-brand-paper-tint hover:bg-brand-paper cursor-pointer"
                 aria-label="Close module modal"
               >
                 <X className="w-4 h-4" />
@@ -1782,7 +1792,7 @@ export const AdminProgramsPage: React.FC = () => {
       {/* SUB-MODAL: Add / Edit Topic */}
       {topicModalOpen && (
         <div
-          className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto"
+          className="fixed inset-0 z-60 flex flex-col justify-end sm:justify-center sm:items-center p-0 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-hidden"
           role="dialog"
           aria-modal="true"
           aria-label={editingTopic?.topic ? 'Edit Topic' : 'Add Curriculum Topic'}
@@ -1793,9 +1803,12 @@ export const AdminProgramsPage: React.FC = () => {
           }}
         >
           <div
-            className="w-full max-w-md max-h-[85dvh] flex flex-col my-auto bg-brand-paper border-3 border-brand-dark shadow-brutal p-4 sm:p-5"
+            className="w-full max-w-md max-h-[90dvh] sm:max-h-[85dvh] flex flex-col bg-brand-paper border-t-3 sm:border-3 border-brand-dark rounded-t-2xl sm:rounded-none shadow-brutal p-4 sm:p-5 pb-[max(1rem,env(safe-area-inset-bottom))]"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Mobile Drag Handle Affordance */}
+            <div className="w-12 h-1.5 bg-brand-dark/25 rounded-full mx-auto mb-2.5 sm:hidden shrink-0" aria-hidden="true" />
+
             <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2 shrink-0">
               <h4 className="font-heading font-extrabold text-sm text-brand-navy">
                 {editingTopic?.topic ? 'Edit Topic' : 'Add Curriculum Topic'}
@@ -1803,7 +1816,7 @@ export const AdminProgramsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setTopicModalOpen(false)}
-                className="min-w-[44px] min-h-[44px] p-2 -mr-2 -mt-1 flex items-center justify-center border border-brand-dark bg-brand-paper-tint hover:bg-brand-paper"
+                className="min-w-[44px] min-h-[44px] p-2 -mr-2 -mt-1 flex items-center justify-center border border-brand-dark bg-brand-paper-tint hover:bg-brand-paper cursor-pointer"
                 aria-label="Close topic modal"
               >
                 <X className="w-4 h-4" />
