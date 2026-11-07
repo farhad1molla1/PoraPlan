@@ -807,99 +807,210 @@ export const AdminBillingPage: React.FC = () => {
             </Button>
           </div>
 
-          {/* Table */}
+          {/* Table & Responsive Cards */}
           {filteredStudentRecords.length === 0 ? (
             <div className="p-6 bg-brand-paper border border-brand-dark/20 text-center text-xs text-brand-muted">
               No student payment records found.
             </div>
           ) : (
-            <div className="border border-brand-dark/30 bg-brand-paper overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-brand-bg border-b border-brand-dark/20 font-heading uppercase text-[11px] text-brand-muted">
-                  <tr>
-                    <th className="p-2.5">Student</th>
-                    <th className="p-2.5">Program</th>
-                    <th className="p-2.5">Billing Period</th>
-                    <th className="p-2.5">Status</th>
-                    <th className="p-2.5">Method</th>
-                    <th className="p-2.5">Payment Date</th>
-                    <th className="p-2.5 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-brand-dark/10">
-                  {paginatedStudentRecords.map((rec) => {
-                    const student = studentsMap.get(rec.student_id);
-                    const enrollment = enrollmentsMap.get(rec.enrollment_id);
-                    const program = enrollment ? programsMap.get(enrollment.program_id) : null;
-                    const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
+            <>
+              {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
+              <div className="lg:hidden space-y-3">
+                {paginatedStudentRecords.map((rec) => {
+                  const student = studentsMap.get(rec.student_id);
+                  const enrollment = enrollmentsMap.get(rec.enrollment_id);
+                  const program = enrollment ? programsMap.get(enrollment.program_id) : null;
+                  const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
 
-                    return (
-                      <tr
-                        key={rec.id}
-                        onClick={() => setSelectedStudentRecord(rec)}
-                        className="hover:bg-brand-paper-tint/60 transition-colors cursor-pointer"
-                      >
-                        <td className="p-2.5 font-bold text-brand-navy">
-                          <div>{student?.full_name || 'Scholar'}</div>
+                  return (
+                    <div
+                      key={rec.id}
+                      onClick={() => setSelectedStudentRecord(rec)}
+                      className="p-4 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs hover:shadow-brutal transition-all cursor-pointer space-y-3"
+                    >
+                      {/* Header: Student Name + PoraPlan ID + Status Badge */}
+                      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-brand-dark/15">
+                        <div className="min-w-0">
+                          <span className="font-heading font-extrabold text-sm text-brand-navy leading-snug truncate block">
+                            {student?.full_name || 'Scholar'}
+                          </span>
                           {student?.poraplan_id && (
-                            <div className="text-[10px] font-mono text-brand-muted">{student.poraplan_id}</div>
+                            <span className="font-mono text-[11px] text-brand-teal font-bold block mt-0.5">
+                              {student.poraplan_id}
+                            </span>
                           )}
-                        </td>
-                        <td className="p-2.5 text-brand-dark">
-                          {program?.name || '—'}
-                        </td>
-                        <td className="p-2.5 font-mono text-[11px]">
-                          {formatCalendarDate(rec.cycle_start_date)} – {formatCalendarDate(rec.cycle_end_date)}
-                        </td>
-                        <td className="p-2.5">
+                        </div>
+                        <div className="shrink-0">
                           {getStudentStatusBadge(rec.status)}
-                        </td>
-                        <td className="p-2.5">
-                          <div>{formatPaymentMethod(rec.payment_method)}</div>
-                          {rec.transaction_reference && (
-                            <div className="text-[10px] font-mono text-brand-muted flex items-center gap-1">
-                              <span>{rec.transaction_reference}</span>
-                              {isDuplicate && (
-                                <span title="Duplicate reference warning">
-                                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 inline-block" />
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </td>
-                        <td className="p-2.5 font-mono text-[11px] text-brand-muted">
-                          {rec.payment_date ? formatCalendarDate(rec.payment_date) : 'Pending'}
-                        </td>
-                        <td className="p-2.5 text-right" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="px-2 py-0.5 text-[11px]"
-                              onClick={() => setSelectedStudentRecord(rec)}
-                              leftIcon={<Eye className="w-3 h-3" />}
-                            >
-                              Details
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="px-2 py-0.5 text-[11px]"
-                              onClick={() => {
-                                setEditingStudentRecord(rec);
-                              }}
-                              leftIcon={<Edit2 className="w-3 h-3" />}
-                            >
-                              Edit
-                            </Button>
+                        </div>
+                      </div>
+
+                      {/* Details Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-brand-bg p-2.5 border border-brand-dark/20">
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                            Program
+                          </span>
+                          <span className="font-heading font-bold text-brand-dark text-[11px] block mt-0.5 truncate">
+                            {program?.name || '—'}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                            Billing Period
+                          </span>
+                          <span className="font-mono text-[11px] text-brand-navy font-bold block mt-0.5">
+                            {formatCalendarDate(rec.cycle_start_date)} – {formatCalendarDate(rec.cycle_end_date)}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                            Method & Ref
+                          </span>
+                          <div className="font-sans font-bold text-brand-dark text-[11px] mt-0.5 flex flex-wrap items-center gap-1.5">
+                            <span>{formatPaymentMethod(rec.payment_method)}</span>
+                            {rec.transaction_reference && (
+                              <span className="font-mono text-[10px] text-brand-muted flex items-center gap-0.5">
+                                <span>({rec.transaction_reference})</span>
+                                {isDuplicate && (
+                                  <span title="Duplicate reference warning">
+                                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 inline-block" />
+                                  </span>
+                                )}
+                              </span>
+                            )}
                           </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                            Payment Date
+                          </span>
+                          <span className="font-mono text-[11px] text-brand-muted block mt-0.5">
+                            {rec.payment_date ? formatCalendarDate(rec.payment_date) : 'Pending'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="grid grid-cols-2 gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full min-h-[44px] flex items-center justify-center gap-1.5 text-xs font-bold"
+                          onClick={() => setSelectedStudentRecord(rec)}
+                          leftIcon={<Eye className="w-3.5 h-3.5" />}
+                        >
+                          Details
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full min-h-[44px] flex items-center justify-center gap-1.5 text-xs font-bold"
+                          onClick={() => {
+                            setEditingStudentRecord(rec);
+                          }}
+                          leftIcon={<Edit2 className="w-3.5 h-3.5" />}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Desktop Table (>= lg: 1024px) */}
+              <div className="hidden lg:block border border-brand-dark/30 bg-brand-paper overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-brand-bg border-b border-brand-dark/20 font-heading uppercase text-[11px] text-brand-muted">
+                    <tr>
+                      <th className="p-2.5">Student</th>
+                      <th className="p-2.5">Program</th>
+                      <th className="p-2.5">Billing Period</th>
+                      <th className="p-2.5">Status</th>
+                      <th className="p-2.5">Method</th>
+                      <th className="p-2.5">Payment Date</th>
+                      <th className="p-2.5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-brand-dark/10">
+                    {paginatedStudentRecords.map((rec) => {
+                      const student = studentsMap.get(rec.student_id);
+                      const enrollment = enrollmentsMap.get(rec.enrollment_id);
+                      const program = enrollment ? programsMap.get(enrollment.program_id) : null;
+                      const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
+
+                      return (
+                        <tr
+                          key={rec.id}
+                          onClick={() => setSelectedStudentRecord(rec)}
+                          className="hover:bg-brand-paper-tint/60 transition-colors cursor-pointer"
+                        >
+                          <td className="p-2.5 font-bold text-brand-navy">
+                            <div>{student?.full_name || 'Scholar'}</div>
+                            {student?.poraplan_id && (
+                              <div className="text-[10px] font-mono text-brand-muted">{student.poraplan_id}</div>
+                            )}
+                          </td>
+                          <td className="p-2.5 text-brand-dark">
+                            {program?.name || '—'}
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px]">
+                            {formatCalendarDate(rec.cycle_start_date)} – {formatCalendarDate(rec.cycle_end_date)}
+                          </td>
+                          <td className="p-2.5">
+                            {getStudentStatusBadge(rec.status)}
+                          </td>
+                          <td className="p-2.5">
+                            <div>{formatPaymentMethod(rec.payment_method)}</div>
+                            {rec.transaction_reference && (
+                              <div className="text-[10px] font-mono text-brand-muted flex items-center gap-1">
+                                <span>{rec.transaction_reference}</span>
+                                {isDuplicate && (
+                                  <span title="Duplicate reference warning">
+                                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 inline-block" />
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px] text-brand-muted">
+                            {rec.payment_date ? formatCalendarDate(rec.payment_date) : 'Pending'}
+                          </td>
+                          <td className="p-2.5 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="px-2 py-0.5 text-[11px]"
+                                onClick={() => setSelectedStudentRecord(rec)}
+                                leftIcon={<Eye className="w-3 h-3" />}
+                              >
+                                Details
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="px-2 py-0.5 text-[11px]"
+                                onClick={() => {
+                                  setEditingStudentRecord(rec);
+                                }}
+                                leftIcon={<Edit2 className="w-3 h-3" />}
+                              >
+                                Edit
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
 
           {/* Pagination */}
@@ -1005,98 +1116,206 @@ export const AdminBillingPage: React.FC = () => {
             </Button>
           </div>
 
-          {/* Table */}
+          {/* Table & Responsive Cards */}
           {filteredMentorRecords.length === 0 ? (
             <div className="p-6 bg-brand-paper border border-brand-dark/20 text-center text-xs text-brand-muted">
               No mentor payout records found.
             </div>
           ) : (
-            <div className="border border-brand-dark/30 bg-brand-paper overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-brand-bg border-b border-brand-dark/20 font-heading uppercase text-[11px] text-brand-muted">
-                  <tr>
-                    <th className="p-2.5">Mentor</th>
-                    <th className="p-2.5">Related Context</th>
-                    <th className="p-2.5">Billing Month</th>
-                    <th className="p-2.5">Payout Status</th>
-                    <th className="p-2.5">Method</th>
-                    <th className="p-2.5">Payout Date</th>
-                    <th className="p-2.5 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-brand-dark/10">
-                  {paginatedMentorRecords.map((rec) => {
-                    const mentor = mentorsMap.get(rec.mentor_id);
-                    const relStudent = rec.related_student_id ? studentsMap.get(rec.related_student_id) : null;
-                    const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
+            <>
+              {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
+              <div className="lg:hidden space-y-3">
+                {paginatedMentorRecords.map((rec) => {
+                  const mentor = mentorsMap.get(rec.mentor_id);
+                  const relStudent = rec.related_student_id ? studentsMap.get(rec.related_student_id) : null;
+                  const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
 
-                    return (
-                      <tr
-                        key={rec.id}
-                        onClick={() => setSelectedMentorRecord(rec)}
-                        className="hover:bg-brand-paper-tint/60 transition-colors cursor-pointer"
-                      >
-                        <td className="p-2.5 font-bold text-brand-navy">
-                          <div>{mentor?.full_name || 'Mentor'}</div>
+                  return (
+                    <div
+                      key={rec.id}
+                      onClick={() => setSelectedMentorRecord(rec)}
+                      className="p-4 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs hover:shadow-brutal transition-all cursor-pointer space-y-3"
+                    >
+                      {/* Header: Mentor Name + Email + Payout Status Badge */}
+                      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-brand-dark/15">
+                        <div className="min-w-0">
+                          <span className="font-heading font-extrabold text-sm text-brand-navy leading-snug truncate block">
+                            {mentor?.full_name || 'Mentor'}
+                          </span>
                           {mentor?.email && (
-                            <div className="text-[10px] font-mono text-brand-muted">{mentor.email}</div>
+                            <span className="font-mono text-[11px] text-brand-muted truncate block mt-0.5">
+                              {mentor.email}
+                            </span>
                           )}
-                        </td>
-                        <td className="p-2.5 text-brand-dark">
-                          {relStudent ? `Scholar: ${relStudent.full_name}` : 'Platform Pool'}
-                        </td>
-                        <td className="p-2.5 font-mono text-[11px]">
-                          {formatBillingMonth(rec.billing_month)}
-                        </td>
-                        <td className="p-2.5">
+                        </div>
+                        <div className="shrink-0">
                           {getMentorStatusBadge(rec.status)}
-                        </td>
-                        <td className="p-2.5">
-                          <div>{formatPaymentMethod(rec.payment_method)}</div>
-                          {rec.transaction_reference && (
-                            <div className="text-[10px] font-mono text-brand-muted flex items-center gap-1">
-                              <span>{rec.transaction_reference}</span>
-                              {isDuplicate && (
-                                <span title="Duplicate reference warning">
-                                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 inline-block" />
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </td>
-                        <td className="p-2.5 font-mono text-[11px] text-brand-muted">
-                          {rec.payout_date ? formatCalendarDate(rec.payout_date.split('T')[0]) : 'Pending'}
-                        </td>
-                        <td className="p-2.5 text-right" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="px-2 py-0.5 text-[11px]"
-                              onClick={() => setSelectedMentorRecord(rec)}
-                              leftIcon={<Eye className="w-3 h-3" />}
-                            >
-                              Details
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="px-2 py-0.5 text-[11px]"
-                              onClick={() => {
-                                setEditingMentorRecord(rec);
-                              }}
-                              leftIcon={<Edit2 className="w-3 h-3" />}
-                            >
-                              Edit
-                            </Button>
+                        </div>
+                      </div>
+
+                      {/* Details Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-brand-bg p-2.5 border border-brand-dark/20">
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                            Related Context
+                          </span>
+                          <span className="font-heading font-bold text-brand-dark text-[11px] block mt-0.5 truncate">
+                            {relStudent ? `Scholar: ${relStudent.full_name}` : 'Platform Pool'}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                            Billing Month
+                          </span>
+                          <span className="font-mono text-[11px] text-brand-navy font-bold block mt-0.5">
+                            {formatBillingMonth(rec.billing_month)}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                            Method & Ref
+                          </span>
+                          <div className="font-sans font-bold text-brand-dark text-[11px] mt-0.5 flex flex-wrap items-center gap-1.5">
+                            <span>{formatPaymentMethod(rec.payment_method)}</span>
+                            {rec.transaction_reference && (
+                              <span className="font-mono text-[10px] text-brand-muted flex items-center gap-0.5">
+                                <span>({rec.transaction_reference})</span>
+                                {isDuplicate && (
+                                  <span title="Duplicate reference warning">
+                                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 inline-block" />
+                                  </span>
+                                )}
+                              </span>
+                            )}
                           </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                            Payout Date
+                          </span>
+                          <span className="font-mono text-[11px] text-brand-muted block mt-0.5">
+                            {rec.payout_date ? formatCalendarDate(rec.payout_date.split('T')[0]) : 'Pending'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="grid grid-cols-2 gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full min-h-[44px] flex items-center justify-center gap-1.5 text-xs font-bold"
+                          onClick={() => setSelectedMentorRecord(rec)}
+                          leftIcon={<Eye className="w-3.5 h-3.5" />}
+                        >
+                          Details
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full min-h-[44px] flex items-center justify-center gap-1.5 text-xs font-bold"
+                          onClick={() => setEditingMentorRecord(rec)}
+                          leftIcon={<Edit2 className="w-3.5 h-3.5" />}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Desktop Table (>= lg: 1024px) */}
+              <div className="hidden lg:block border border-brand-dark/30 bg-brand-paper overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-brand-bg border-b border-brand-dark/20 font-heading uppercase text-[11px] text-brand-muted">
+                    <tr>
+                      <th className="p-2.5">Mentor</th>
+                      <th className="p-2.5">Related Context</th>
+                      <th className="p-2.5">Billing Month</th>
+                      <th className="p-2.5">Payout Status</th>
+                      <th className="p-2.5">Method</th>
+                      <th className="p-2.5">Payout Date</th>
+                      <th className="p-2.5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-brand-dark/10">
+                    {paginatedMentorRecords.map((rec) => {
+                      const mentor = mentorsMap.get(rec.mentor_id);
+                      const relStudent = rec.related_student_id ? studentsMap.get(rec.related_student_id) : null;
+                      const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
+
+                      return (
+                        <tr
+                          key={rec.id}
+                          onClick={() => setSelectedMentorRecord(rec)}
+                          className="hover:bg-brand-paper-tint/60 transition-colors cursor-pointer"
+                        >
+                          <td className="p-2.5 font-bold text-brand-navy">
+                            <div>{mentor?.full_name || 'Mentor'}</div>
+                            {mentor?.email && (
+                              <div className="text-[10px] font-mono text-brand-muted">{mentor.email}</div>
+                            )}
+                          </td>
+                          <td className="p-2.5 text-brand-dark">
+                            {relStudent ? `Scholar: ${relStudent.full_name}` : 'Platform Pool'}
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px]">
+                            {formatBillingMonth(rec.billing_month)}
+                          </td>
+                          <td className="p-2.5">
+                            {getMentorStatusBadge(rec.status)}
+                          </td>
+                          <td className="p-2.5">
+                            <div>{formatPaymentMethod(rec.payment_method)}</div>
+                            {rec.transaction_reference && (
+                              <div className="text-[10px] font-mono text-brand-muted flex items-center gap-1">
+                                <span>{rec.transaction_reference}</span>
+                                {isDuplicate && (
+                                  <span title="Duplicate reference warning">
+                                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 inline-block" />
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px] text-brand-muted">
+                            {rec.payout_date ? formatCalendarDate(rec.payout_date.split('T')[0]) : 'Pending'}
+                          </td>
+                          <td className="p-2.5 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="px-2 py-0.5 text-[11px]"
+                                onClick={() => setSelectedMentorRecord(rec)}
+                                leftIcon={<Eye className="w-3 h-3" />}
+                              >
+                                Details
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="px-2 py-0.5 text-[11px]"
+                                onClick={() => {
+                                  setEditingMentorRecord(rec);
+                                }}
+                                leftIcon={<Edit2 className="w-3 h-3" />}
+                              >
+                                Edit
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
 
           {/* Pagination */}

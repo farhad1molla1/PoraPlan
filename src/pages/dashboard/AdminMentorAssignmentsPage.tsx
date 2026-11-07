@@ -743,7 +743,135 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
             </div>
           ) : (
             <div className="border-3 border-brand-dark bg-brand-paper shadow-brutal overflow-hidden">
-              <div className="overflow-x-auto">
+              {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
+              <div className="lg:hidden p-3 sm:p-4 space-y-3 bg-brand-bg">
+                {filteredEnrollments.map((enr) => {
+                  const student = enr.student;
+                  const resolution = studentResolutions[enr.student_id];
+                  const effectiveMentor = resolution?.mentor;
+                  const assignType = resolution?.assignment_type || 'none';
+                  const isIndividual = assignType === 'individual';
+
+                  return (
+                    <div
+                      key={enr.id}
+                      className="border-2 border-brand-dark bg-brand-paper p-3.5 sm:p-4 shadow-brutal-xs space-y-3"
+                    >
+                      {/* Header: Student Name + ID + Assignment Badge */}
+                      <div className="flex items-start justify-between gap-2.5">
+                        <div className="min-w-0">
+                          <div className="font-black text-brand-navy flex flex-wrap items-center gap-1.5 leading-tight">
+                            <span className="truncate">{student?.full_name || 'Student'}</span>
+                            {student?.poraplan_id && (
+                              <span className="font-mono text-[11px] px-1.5 py-0.5 bg-brand-bg border border-brand-dark/30 font-bold shrink-0">
+                                {student.poraplan_id}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-brand-navy/70 font-medium mt-0.5 truncate">
+                            {student?.university || 'University'} • Sem {student?.current_semester || 'N/A'}
+                          </div>
+                        </div>
+
+                        <Badge
+                          variant={getAssignmentBadgeVariant(assignType)}
+                          size="sm"
+                          className="font-bold uppercase tracking-wide shrink-0"
+                        >
+                          {getAssignmentLabel(assignType)}
+                        </Badge>
+                      </div>
+
+                      {/* Academic Context Box */}
+                      <div className="p-2.5 bg-brand-bg border border-brand-dark/20 text-xs space-y-1.5">
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="text-brand-muted font-mono uppercase text-[10px] shrink-0 font-bold">
+                            Program &amp; Cohort
+                          </span>
+                          <div className="text-right leading-tight min-w-0">
+                            <div className="font-bold text-brand-navy truncate">{enr.program?.name}</div>
+                            <div className="text-[11px] text-brand-navy/70 font-mono font-medium truncate">
+                              {enr.cohort?.name} ({enr.cohort?.code})
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-center gap-2 pt-1 border-t border-brand-dark/10">
+                          <span className="text-brand-muted font-mono uppercase text-[10px] shrink-0 font-bold">
+                            Effective Mentor
+                          </span>
+                          <div className="text-right">
+                            {effectiveMentor ? (
+                              <div>
+                                <div className="font-black text-brand-navy flex items-center justify-end gap-1 text-[11px]">
+                                  <span>{effectiveMentor.full_name}</span>
+                                  {effectiveMentor.poraplan_id && (
+                                    <span className="font-mono text-[10px] text-brand-teal font-bold">
+                                      ({effectiveMentor.poraplan_id})
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[10px] text-brand-navy/70 font-mono truncate">
+                                  {effectiveMentor.email}
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-[11px] font-bold text-red-600 flex items-center gap-1 justify-end">
+                                <AlertTriangle className="w-3 h-3" />
+                                No Mentor Assigned
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handleOpenStudentHistory(enr.student_id, student?.full_name)
+                          }
+                          className="w-full min-h-[44px] flex items-center justify-center text-xs font-bold"
+                        >
+                          Allocation History
+                        </Button>
+
+                        {isIndividual && resolution?.assignment_id ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleEndIndividualOverride(
+                                resolution.assignment_id!,
+                                student?.full_name
+                              )
+                            }
+                            className="w-full min-h-[44px] flex items-center justify-center text-xs font-bold text-amber-700 border-amber-600 hover:bg-amber-50 gap-1"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            Revert to Default
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleOpenIndividualModal(enr)}
+                            className="w-full min-h-[44px] flex items-center justify-center text-xs font-bold gap-1"
+                          >
+                            <Users className="w-3.5 h-3.5" />
+                            Override Mentor
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Desktop Table (>= lg: 1024px) */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b-3 border-brand-dark bg-brand-bg text-xs font-black uppercase text-brand-navy tracking-wider">
