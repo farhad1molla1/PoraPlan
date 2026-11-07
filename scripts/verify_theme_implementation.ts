@@ -202,14 +202,14 @@ console.log('================================================================\n'
   let tm: ThemeManager | null = null;
   try {
     tm = new ThemeManager(storage);
-  } catch (e) {
+  } catch {
     // Should not throw
   }
   assert(tm !== null && tm.getMode() === 'system', 'Throws from localStorage are safely swallowed and default to "system"');
   
   try {
     tm?.setMode('dark');
-  } catch (e) {
+  } catch {
     // Should not throw
   }
   assert(tm?.getMode() === 'dark', 'setMode still works in-memory when localStorage write fails');
@@ -223,11 +223,12 @@ console.log('================================================================\n'
   assert(css.includes('--brand-navy: 8 43 76;'), 'Light theme --brand-navy is exactly 8 43 76 (#082B4C)');
   assert(css.includes('--brand-bg: 246 250 251;'), 'Light theme --brand-bg is exactly 246 250 251 (#F6FAFB)');
   assert(css.includes('--brand-dark: 23 43 58;'), 'Light theme --brand-dark is exactly 23 43 58 (#172B3A)');
-  assert(css.includes('--brand-bg: 5 7 10;'), 'Midnight Dark theme --brand-bg is 5 7 10 (#05070A)');
-  assert(css.includes('--brand-paper: 16 25 37;'), 'Midnight Dark theme --brand-paper is 16 25 37 (#101925)');
-  assert(css.includes('--brand-border: 38 52 69;'), 'Midnight Dark theme --brand-border is 38 52 69 (#263445)');
-  assert(css.includes('--brand-teal: 69 200 192;'), 'Midnight Dark theme --brand-teal is 69 200 192 (#45C8C0)');
-  assert(css.includes('--brand-gold: 232 182 92;'), 'Midnight Dark theme --brand-gold is 232 182 92 (#E8B65C)');
+  assert(css.includes('--brand-bg: 5 7 10;'), 'Midnight Charcoal Dark theme --brand-bg is 5 7 10 (#05070A)');
+  assert(css.includes('--brand-paper: 13 20 29;'), 'Midnight Charcoal Dark theme --brand-paper is 13 20 29 (#0D141D)');
+  assert(css.includes('--brand-border: 26 37 49;'), 'Midnight Charcoal Dark theme --brand-border is 26 37 49 (#1A2531)');
+  assert(css.includes('--brand-header: 8 13 20;'), 'Midnight Charcoal Dark theme --brand-header is 8 13 20 (#080D14)');
+  assert(css.includes('--brand-teal: 69 200 192;'), 'Midnight Charcoal Dark theme --brand-teal is 69 200 192 (#45C8C0)');
+  assert(css.includes('--brand-gold: 232 182 92;'), 'Midnight Charcoal Dark theme --brand-gold is 232 182 92 (#E8B65C)');
 }
 
 // 9. Anti-flash inline script in index.html

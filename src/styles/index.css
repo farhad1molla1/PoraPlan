@@ -26,22 +26,22 @@
 }
 
 .dark {
-  /* Premium Midnight Dark Theme tokens */
+  /* Premium Midnight Charcoal Dark Theme tokens */
   --brand-navy: 232 237 244;
   --brand-teal: 69 200 192;
   --brand-gold: 232 182 92;
   --brand-bg: 5 7 10;
-  --brand-header: 11 17 26;
-  --brand-sidebar: 11 17 26;
+  --brand-header: 8 13 20;
+  --brand-sidebar: 8 13 20;
   --brand-dark: 232 237 244;
   --brand-muted: 137 151 168;
-  --brand-paper: 16 25 37;
-  --brand-paper-tint: 22 34 49;
+  --brand-paper: 13 20 29;
+  --brand-paper-tint: 18 27 38;
   --brand-gold-light: 48 39 24;
   --brand-teal-light: 16 43 48;
-  --brand-navy-light: 22 34 49;
-  --brand-border: 38 52 69;
-  --brand-shadow: #020305;
+  --brand-navy-light: 18 27 38;
+  --brand-border: 26 37 49;
+  --brand-shadow: #000000;
   --brand-heading: rgb(232 237 244);
   --pattern-navy-fade: rgba(232, 237, 244, 0.015);
   --pattern-dots-fade: rgba(232, 237, 244, 0.03);
