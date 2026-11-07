@@ -203,7 +203,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint shadow-brutal-xs text-brand-dark cursor-pointer transition-transform active:translate-x-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+            className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint shadow-brutal-xs text-brand-dark cursor-pointer transition-transform active:translate-x-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
             aria-label="Close navigation menu"
           >
             <X className="w-4 h-4 stroke-[2.5]" />
@@ -314,7 +314,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
               <div
                 role="radiogroup"
                 aria-label="Theme mode"
-                className="grid grid-cols-3 gap-1 bg-brand-paper-tint p-1 border border-brand-dark/20"
+                className="grid grid-cols-3 gap-1.5 bg-brand-paper-tint p-1 border-2 border-brand-dark/20"
               >
                 <button
                   type="button"
@@ -323,13 +323,13 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                   aria-label="Light mode"
                   title="Light mode"
                   onClick={() => setTheme('light')}
-                  className={`flex items-center justify-center gap-1 py-1.5 px-1.5 text-[11px] font-heading font-bold transition-all border cursor-pointer ${
+                  className={`min-h-[44px] flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-heading font-bold transition-all border-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                     theme === 'light'
-                      ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs'
-                      : 'border-transparent text-brand-muted hover:text-brand-dark'
+                      ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs font-extrabold'
+                      : 'border-transparent text-brand-muted hover:text-brand-dark hover:bg-brand-paper/50'
                   }`}
                 >
-                  <Sun className="w-3.5 h-3.5 shrink-0 stroke-[2.2]" />
+                  <Sun className="w-4 h-4 shrink-0 stroke-[2.2]" />
                   <span>Light</span>
                 </button>
                 <button
@@ -339,13 +339,13 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                   aria-label="Dark mode"
                   title="Dark mode"
                   onClick={() => setTheme('dark')}
-                  className={`flex items-center justify-center gap-1 py-1.5 px-1.5 text-[11px] font-heading font-bold transition-all border cursor-pointer ${
+                  className={`min-h-[44px] flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-heading font-bold transition-all border-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                     theme === 'dark'
-                      ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs'
-                      : 'border-transparent text-brand-muted hover:text-brand-dark'
+                      ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs font-extrabold'
+                      : 'border-transparent text-brand-muted hover:text-brand-dark hover:bg-brand-paper/50'
                   }`}
                 >
-                  <Moon className="w-3.5 h-3.5 shrink-0 stroke-[2.2]" />
+                  <Moon className="w-4 h-4 shrink-0 stroke-[2.2]" />
                   <span>Dark</span>
                 </button>
                 <button
@@ -355,13 +355,13 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                   aria-label="System mode"
                   title="System mode"
                   onClick={() => setTheme('system')}
-                  className={`flex items-center justify-center gap-1 py-1.5 px-1.5 text-[11px] font-heading font-bold transition-all border cursor-pointer ${
+                  className={`min-h-[44px] flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-heading font-bold transition-all border-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                     theme === 'system'
-                      ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs'
-                      : 'border-transparent text-brand-muted hover:text-brand-dark'
+                      ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs font-extrabold'
+                      : 'border-transparent text-brand-muted hover:text-brand-dark hover:bg-brand-paper/50'
                   }`}
                 >
-                  <Monitor className="w-3.5 h-3.5 shrink-0 stroke-[2.2]" />
+                  <Monitor className="w-4 h-4 shrink-0 stroke-[2.2]" />
                   <span>Auto</span>
                 </button>
               </div>
