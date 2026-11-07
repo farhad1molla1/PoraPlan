@@ -225,7 +225,7 @@ console.log('================================================================\n'
   assert(css.includes('--brand-dark: 23 43 58;'), 'Light theme --brand-dark is exactly 23 43 58 (#172B3A)');
   assert(css.includes('--brand-bg: 5 7 10;'), 'Midnight Charcoal Dark theme --brand-bg is 5 7 10 (#05070A)');
   assert(css.includes('--brand-paper: 13 20 29;'), 'Midnight Charcoal Dark theme --brand-paper is 13 20 29 (#0D141D)');
-  assert(css.includes('--brand-border: 26 37 49;'), 'Midnight Charcoal Dark theme --brand-border is 26 37 49 (#1A2531)');
+  assert(css.includes('--brand-border: 20 29 40;'), 'Midnight Charcoal Dark theme --brand-border is 20 29 40 (#141D28)');
   assert(css.includes('--brand-header: 8 13 20;'), 'Midnight Charcoal Dark theme --brand-header is 8 13 20 (#080D14)');
   assert(css.includes('--brand-teal: 69 200 192;'), 'Midnight Charcoal Dark theme --brand-teal is 69 200 192 (#45C8C0)');
   assert(css.includes('--brand-gold: 232 182 92;'), 'Midnight Charcoal Dark theme --brand-gold is 232 182 92 (#E8B65C)');
