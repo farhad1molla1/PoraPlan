@@ -180,32 +180,32 @@ export const AdminReportsPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 1. INTERACTIVE CONTROL BAR (SCREEN ONLY)                                  */}
       {/* ========================================================================= */}
-      <div className="print:hidden p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="print:hidden p-2.5 sm:p-5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-brand-gold bg-brand-navy px-2 py-0.5 border border-brand-dark">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+            <span className="font-mono text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-brand-gold bg-brand-navy px-1.5 sm:px-2 py-0.5 border border-brand-dark">
               ADMINISTRATIVE ACADEMIC INTELLIGENCE
             </span>
-            <span className="font-mono text-[10px] text-brand-muted">
+            <span className="font-mono text-[9px] sm:text-[10px] text-brand-muted">
               PLATFORM OPERATIONAL OVERSIGHT
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
+          <h1 className="text-base sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
             Admin Academic Intelligence &amp; Operations
           </h1>
-          <p className="text-xs text-brand-muted mt-0.5">
+          <p className="text-[11px] sm:text-xs text-brand-muted mt-0.5">
             Audit platform-wide syllabus execution, review mentor operational workloads, and track evidence-based student attention radars.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={fetchReports}
             disabled={loading}
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1 sm:gap-1.5 min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
@@ -216,24 +216,24 @@ export const AdminReportsPage: React.FC = () => {
             variant="primary"
             size="sm"
             onClick={handlePrint}
-            className="flex items-center gap-1.5 shadow-brutal-xs bg-brand-navy text-white hover:bg-brand-navy/90"
+            className="flex items-center gap-1 sm:gap-1.5 shadow-none sm:shadow-brutal-xs bg-brand-navy text-white hover:bg-brand-navy/90 min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Print Overview (A4)</span>
           </Button>
         </div>
       </div>
 
       {/* Filter Row: Period Selector & Section Tabs (Hidden in Print) */}
-      <div className="print:hidden p-3 sm:p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="print:hidden p-2 sm:p-3.5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
-            className={`px-3 py-1.5 border-2 font-mono text-xs font-bold transition-all ${
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 border sm:border-2 font-mono text-[10px] sm:text-xs font-bold transition-all min-h-[32px] sm:min-h-0 ${
               activeTab === 'overview'
-                ? 'border-brand-dark bg-brand-teal text-white shadow-brutal-xs'
+                ? 'border-brand-dark bg-brand-teal text-white shadow-none sm:shadow-brutal-xs'
                 : 'border-transparent text-brand-muted hover:border-brand-dark hover:bg-brand-paper-tint hover:text-brand-dark'
             }`}
           >
@@ -242,9 +242,9 @@ export const AdminReportsPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('students')}
-            className={`px-3 py-1.5 border-2 font-mono text-xs font-bold transition-all ${
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 border sm:border-2 font-mono text-[10px] sm:text-xs font-bold transition-all min-h-[32px] sm:min-h-0 ${
               activeTab === 'students'
-                ? 'border-brand-dark bg-brand-teal text-white shadow-brutal-xs'
+                ? 'border-brand-dark bg-brand-teal text-white shadow-none sm:shadow-brutal-xs'
                 : 'border-transparent text-brand-muted hover:border-brand-dark hover:bg-brand-paper-tint hover:text-brand-dark'
             }`}
           >
@@ -253,9 +253,9 @@ export const AdminReportsPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('mentors')}
-            className={`px-3 py-1.5 border-2 font-mono text-xs font-bold transition-all ${
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 border sm:border-2 font-mono text-[10px] sm:text-xs font-bold transition-all min-h-[32px] sm:min-h-0 ${
               activeTab === 'mentors'
-                ? 'border-brand-dark bg-brand-teal text-white shadow-brutal-xs'
+                ? 'border-brand-dark bg-brand-teal text-white shadow-none sm:shadow-brutal-xs'
                 : 'border-transparent text-brand-muted hover:border-brand-dark hover:bg-brand-paper-tint hover:text-brand-dark'
             }`}
           >
@@ -264,16 +264,16 @@ export const AdminReportsPage: React.FC = () => {
         </div>
 
         {/* Audit Period Selector */}
-        <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-          <span className="font-bold text-brand-muted uppercase text-[10px]">Window:</span>
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono">
+          <span className="font-bold text-brand-muted uppercase text-[9px] sm:text-[10px]">Window:</span>
           {(['schedule', 'weekly', 'monthly', 'custom'] as ReportPeriod[]).map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => setPeriod(p)}
-              className={`px-2.5 py-1 text-xs font-bold uppercase transition-all ${
+              className={`px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold uppercase transition-all min-h-[30px] sm:min-h-0 ${
                 period === p
-                  ? 'border-2 border-brand-dark bg-brand-navy text-white shadow-brutal-xs'
+                  ? 'border sm:border-2 border-brand-dark bg-brand-navy text-white shadow-none sm:shadow-brutal-xs'
                   : 'border border-brand-dark/20 text-brand-muted hover:border-brand-dark hover:text-brand-dark'
               }`}
             >
@@ -281,19 +281,19 @@ export const AdminReportsPage: React.FC = () => {
             </button>
           ))}
           {period === 'custom' && (
-            <div className="flex items-center gap-1.5 ml-2">
+            <div className="flex items-center gap-1 sm:gap-1.5 ml-1 sm:ml-2">
               <input
                 type="date"
                 value={customStart}
                 onChange={(e) => setCustomStart(e.target.value)}
-                className="px-2 py-1.5 sm:py-0.5 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold"
+                className="px-2 py-1 text-base sm:text-xs min-h-[36px] sm:min-h-0 border border-brand-dark bg-brand-paper font-bold"
               />
               <span>to</span>
               <input
                 type="date"
                 value={customEnd}
                 onChange={(e) => setCustomEnd(e.target.value)}
-                className="px-2 py-1.5 sm:py-0.5 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold"
+                className="px-2 py-1 text-base sm:text-xs min-h-[36px] sm:min-h-0 border border-brand-dark bg-brand-paper font-bold"
               />
             </div>
           )}
@@ -332,10 +332,10 @@ export const AdminReportsPage: React.FC = () => {
           {activeTab === 'overview' && (
             <div className="space-y-6">
               {/* Executive Printable Summary Card */}
-              <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-8 space-y-5 sm:space-y-6 print:border-none print:shadow-none print:p-0 print:space-y-4">
+              <article className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-8 space-y-3 sm:space-y-6 print:border-none print:shadow-none print:p-0 print:space-y-4">
                 {/* Official Institutional Header */}
-                <header className="border-b-2 border-brand-dark pb-3.5 sm:pb-4 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                  <div className="flex items-start gap-3.5">
+                <header className="border-b sm:border-b-2 border-brand-dark pb-2.5 sm:pb-4 flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 sm:gap-4">
+                  <div className="flex items-start gap-2.5 sm:gap-3.5">
                     <img
                       src="/poraplan-logo.png"
                       alt="PoraPlan Logo"
@@ -343,111 +343,111 @@ export const AdminReportsPage: React.FC = () => {
                         const target = e.target as HTMLImageElement;
                         target.src = '/assets/poraplan-logo.png';
                       }}
-                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded border border-brand-dark/20 bg-brand-paper p-1 shrink-0"
+                      className="w-8 h-8 sm:w-12 sm:h-12 object-contain rounded border border-brand-dark/20 bg-brand-paper p-0.5 sm:p-1 shrink-0"
                     />
                     <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="academic-sans text-[9px] uppercase font-bold tracking-widest text-brand-gold bg-brand-navy px-2 py-0.5 border border-brand-dark">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <span className="academic-sans text-[8px] sm:text-[9px] uppercase font-bold tracking-widest text-brand-gold bg-brand-navy px-1.5 sm:px-2 py-0.5 border border-brand-dark">
                           PORAPLAN ACADEMIC INTELLIGENCE
                         </span>
-                        <span className="academic-sans text-[9px] text-brand-muted">
+                        <span className="academic-sans text-[8px] sm:text-[9px] text-brand-muted">
                           CONFIDENTIAL • PLATFORM OPERATIONAL ARCHIVE
                         </span>
                       </div>
-                      <h2 className="academic-heading text-lg sm:text-2xl font-bold text-brand-navy tracking-tight">
+                      <h2 className="academic-heading text-sm sm:text-2xl font-bold text-brand-navy tracking-tight">
                         Executive Operations &amp; Academic Overview
                       </h2>
-                      <p className="academic-sans text-xs text-brand-muted">
+                      <p className="academic-sans text-[11px] sm:text-xs text-brand-muted">
                         Platform-wide audit of enrolled scholars, mentor capacity, pending reviews, and evidence-based attention items.
                       </p>
                     </div>
                   </div>
 
-                  <div className="text-left sm:text-right space-y-0.5 text-xs academic-sans border-t sm:border-t-0 pt-2 sm:pt-0 border-brand-dark/20 shrink-0">
+                  <div className="text-left sm:text-right space-y-0.5 text-[10px] sm:text-xs academic-sans border-t sm:border-t-0 pt-1.5 sm:pt-0 border-brand-dark/20 shrink-0">
                     <div className="text-brand-navy font-bold">
-                      <span className="text-brand-muted block text-[9px] uppercase tracking-wider">AUDIT WINDOW</span>
+                      <span className="text-brand-muted block text-[8px] sm:text-[9px] uppercase tracking-wider">AUDIT WINDOW</span>
                       <span>{report.dateRange.startDate} — {report.dateRange.endDate}</span>
                     </div>
-                    <div className="text-[10px] text-brand-muted">
+                    <div className="text-[9px] sm:text-[10px] text-brand-muted">
                       Window Type: <strong className="text-brand-dark">{report.dateRange.label}</strong>
                     </div>
-                    <div className="text-[10px] text-brand-muted">
+                    <div className="text-[9px] sm:text-[10px] text-brand-muted">
                       Compiled: {new Date(report.generatedAt).toLocaleDateString()}
                     </div>
                   </div>
                 </header>
 
                 {/* 6 Core KPI Indicators (Distinguishes Registered vs Active Users) */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 break-inside-avoid">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 break-inside-avoid">
                   {/* 1. Students */}
-                  <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
-                    <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[11px] uppercase font-bold academic-sans">Students</span>
-                      <Users className="w-3.5 h-3.5 text-brand-teal" />
+                  <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs flex flex-col justify-between">
+                    <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+                      <span className="text-[10px] sm:text-[11px] uppercase font-bold academic-sans">Students</span>
+                      <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-teal" />
                     </div>
                     <div>
-                      <div className="academic-heading text-xl sm:text-2xl font-bold text-brand-navy">
+                      <div className="academic-heading text-base sm:text-2xl font-bold text-brand-navy">
                         {report.overview.activeStudents}
                       </div>
-                      <div className="text-[11px] academic-sans text-brand-muted mt-0.5">
+                      <div className="text-[10px] sm:text-[11px] academic-sans text-brand-muted mt-0.5">
                         Active of {report.overview.totalRegisteredStudents} registered
                       </div>
                     </div>
                   </div>
 
                   {/* 2. Mentors */}
-                  <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
-                    <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[11px] uppercase font-bold academic-sans">Mentors</span>
-                      <ShieldCheck className="w-3.5 h-3.5 text-brand-navy" />
+                  <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs flex flex-col justify-between">
+                    <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+                      <span className="text-[10px] sm:text-[11px] uppercase font-bold academic-sans">Mentors</span>
+                      <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-navy" />
                     </div>
                     <div>
-                      <div className="academic-heading text-xl sm:text-2xl font-bold text-brand-navy">
+                      <div className="academic-heading text-base sm:text-2xl font-bold text-brand-navy">
                         {report.overview.activeMentors}
                       </div>
-                      <div className="text-[11px] academic-sans text-brand-muted mt-0.5">
+                      <div className="text-[10px] sm:text-[11px] academic-sans text-brand-muted mt-0.5">
                         Active of {report.overview.totalMentors} registered
                       </div>
                     </div>
                   </div>
 
                   {/* 3. Enrollments */}
-                  <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
-                    <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[11px] uppercase font-bold academic-sans">Enrollments</span>
-                      <GraduationCap className="w-3.5 h-3.5 text-brand-teal" />
+                  <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs flex flex-col justify-between">
+                    <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+                      <span className="text-[10px] sm:text-[11px] uppercase font-bold academic-sans">Enrollments</span>
+                      <GraduationCap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-teal" />
                     </div>
                     <div>
-                      <div className="academic-heading text-xl sm:text-2xl font-bold text-brand-navy">
+                      <div className="academic-heading text-base sm:text-2xl font-bold text-brand-navy">
                         {report.overview.activeEnrollments}
                       </div>
-                      <div className="text-[11px] academic-sans text-brand-muted mt-0.5">
+                      <div className="text-[10px] sm:text-[11px] academic-sans text-brand-muted mt-0.5">
                         Active program seats
                       </div>
                     </div>
                   </div>
 
                   {/* 4. Attention Radar */}
-                  <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
-                    <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[11px] uppercase font-bold academic-sans">Attention</span>
-                      <AlertTriangle className="w-3.5 h-3.5 text-red-700" />
+                  <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs flex flex-col justify-between">
+                    <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+                      <span className="text-[10px] sm:text-[11px] uppercase font-bold academic-sans">Attention</span>
+                      <AlertTriangle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-700" />
                     </div>
                     <div>
-                      <div className={`academic-heading text-xl sm:text-2xl font-bold ${report.overview.scholarsNeedingAttentionCount > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
+                      <div className={`academic-heading text-base sm:text-2xl font-bold ${report.overview.scholarsNeedingAttentionCount > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
                         {report.overview.scholarsNeedingAttentionCount}
                       </div>
-                      <div className="text-[11px] academic-sans text-brand-muted mt-0.5">
+                      <div className="text-[10px] sm:text-[11px] academic-sans text-brand-muted mt-0.5">
                         Scholars flagged
                       </div>
                     </div>
                   </div>
 
                   {/* 5. Pending Reviews */}
-                  <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
-                    <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[11px] uppercase font-bold academic-sans">Review Queue</span>
-                      <FileCheck className="w-3.5 h-3.5 text-amber-700" />
+                  <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs flex flex-col justify-between">
+                    <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+                      <span className="text-[10px] sm:text-[11px] uppercase font-bold academic-sans">Review Queue</span>
+                      <FileCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-700" />
                     </div>
                     <div>
                       <div className={`academic-heading text-xl sm:text-2xl font-bold ${report.overview.totalSubmissionsPendingReview > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>

@@ -281,24 +281,24 @@ export const MentorResourcesPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fadeIn pb-12">
+    <div className="space-y-3 sm:space-y-6 md:space-y-8 animate-fadeIn pb-12">
       {/* ========================================================================= */}
       {/* 1. PAGE HEADER                                                            */}
       {/* ========================================================================= */}
-      <section className="p-3.5 sm:p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section className="p-2.5 sm:p-6 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div>
-          <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            <span className="font-mono text-xs uppercase font-bold text-brand-muted bg-brand-bg px-2 py-0.5 border border-brand-dark">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1.5">
+            <span className="font-mono text-[10px] sm:text-xs uppercase font-bold text-brand-muted bg-brand-bg px-1.5 sm:px-2 py-0.5 border border-brand-dark">
               CURRICULUM REPOSITORY
             </span>
             <Badge variant="gold" size="sm">
               MENTOR LIBRARY
             </Badge>
           </div>
-          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy tracking-tight">
+          <h1 className="font-heading font-extrabold text-lg sm:text-2xl md:text-3xl text-brand-navy tracking-tight">
             Study Resources
           </h1>
-          <p className="font-sans text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl">
+          <p className="font-sans text-[11px] sm:text-sm text-brand-muted mt-0.5 sm:mt-1 max-w-2xl">
             Curate study materials, reference notes, and lecture links for your assigned students.
           </p>
         </div>
@@ -308,7 +308,7 @@ export const MentorResourcesPage: React.FC = () => {
             variant="primary"
             size="sm"
             onClick={() => setShowCreateModal(true)}
-            leftIcon={<Plus className="w-4 h-4" />}
+            leftIcon={<Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
           >
             Add New Resource
           </Button>
@@ -319,9 +319,9 @@ export const MentorResourcesPage: React.FC = () => {
             disabled={loading || refreshing}
             leftIcon={
               refreshing ? (
-                <Loader2 className="w-4 h-4 animate-spin text-brand-navy" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-navy" />
               ) : (
-                <RefreshCw className="w-4 h-4 text-brand-navy" />
+                <RefreshCw className="w-3.5 h-3.5 text-brand-navy" />
               )
             }
           >
@@ -332,11 +332,11 @@ export const MentorResourcesPage: React.FC = () => {
 
       {/* Error Alert */}
       {errorMessage && (
-        <div className="p-3.5 sm:p-4 border-2 border-red-600 bg-red-50 text-red-900 shadow-brutal-sm sm:shadow-brutal flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+        <div className="p-2.5 sm:p-4 border sm:border-2 border-red-600 bg-red-50 text-red-900 shadow-none sm:shadow-brutal flex items-start gap-2.5 sm:gap-3">
+          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h4 className="font-heading font-bold text-sm">Failed to Load Resources</h4>
-            <p className="font-mono text-xs mt-1 text-red-800">{errorMessage}</p>
+            <h4 className="font-heading font-bold text-xs sm:text-sm">Failed to Load Resources</h4>
+            <p className="font-mono text-[11px] sm:text-xs mt-0.5 sm:mt-1 text-red-800">{errorMessage}</p>
           </div>
         </div>
       )}
@@ -344,27 +344,27 @@ export const MentorResourcesPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 2. FILTER TOOLBAR                                                         */}
       {/* ========================================================================= */}
-      <section className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-3">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+      <section className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal space-y-2 sm:space-y-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 sm:gap-3">
           {/* Search Box */}
           <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
             <input
               type="text"
               placeholder="Search resource title, student, subject..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+              className="w-full pl-9 pr-3 py-1.5 sm:py-2 text-base sm:text-xs min-h-[38px] sm:min-h-0 font-mono border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
             />
           </div>
 
           {/* Student Filter */}
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-bold text-brand-muted shrink-0">Student:</span>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="font-mono text-[10px] sm:text-xs font-bold text-brand-muted shrink-0">Student:</span>
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+              className="px-2 sm:px-2.5 py-1.5 sm:py-1.5 text-base sm:text-xs min-h-[36px] sm:min-h-0 font-mono border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
             >
               <option value="all">All Assigned Students ({students.length})</option>
               {students.map((s) => (
@@ -376,12 +376,12 @@ export const MentorResourcesPage: React.FC = () => {
           </div>
 
           {/* Type Filter */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
             {(['all', 'link', 'note', 'file'] as const).map((type) => (
               <button
                 key={type}
                 onClick={() => setSelectedType(type)}
-                className={`px-2.5 py-1 text-xs font-mono font-bold border border-brand-dark shadow-brutal-xs transition-transform ${
+                className={`px-2 sm:px-2.5 py-1 min-h-[30px] sm:min-h-0 text-[10px] sm:text-xs font-mono font-bold border border-brand-dark shadow-none sm:shadow-brutal-xs transition-transform ${
                   selectedType === type
                     ? 'bg-brand-navy text-white -translate-y-0.5'
                     : 'bg-brand-paper text-brand-dark hover:bg-brand-bg'

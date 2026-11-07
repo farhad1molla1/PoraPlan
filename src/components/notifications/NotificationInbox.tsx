@@ -250,12 +250,12 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
   }, [notifications]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6 pb-12 animate-fade-in">
+    <div className="w-full max-w-5xl mx-auto space-y-3 sm:space-y-6 pb-12 animate-fade-in">
       {/* Header Banner */}
-      <div className="p-4 sm:p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-2.5 sm:p-6 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono text-xs uppercase font-bold text-brand-teal tracking-wider">
+          <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
+            <span className="font-mono text-[10px] sm:text-xs uppercase font-bold text-brand-teal tracking-wider">
               INBOX & ALERTS
             </span>
             {unreadCount > 0 ? (
@@ -268,15 +268,15 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
               </Badge>
             )}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-brand-navy tracking-tight">
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-heading font-extrabold text-brand-navy tracking-tight">
             {title}
           </h1>
-          <p className="text-xs sm:text-sm text-brand-dark/80 mt-1 max-w-2xl font-sans">
+          <p className="text-[11px] sm:text-sm text-brand-dark/80 mt-0.5 sm:mt-1 max-w-2xl font-sans">
             {subtitle}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <Button
             variant="outline"
             size="sm"
@@ -302,9 +302,9 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 border-2 border-brand-dark bg-red-50 text-red-900 shadow-brutal-xs flex items-center justify-between gap-3">
+        <div className="p-2.5 sm:p-4 border sm:border-2 border-brand-dark bg-red-50 text-red-900 shadow-none sm:shadow-brutal-xs flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 shrink-0" />
             <span className="text-xs font-mono">{error}</span>
           </div>
           <button
@@ -317,14 +317,14 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
       )}
 
       {/* Filter Toolbar */}
-      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
         {/* Status Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           <button
             onClick={() => setStatusFilter('all')}
-            className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-colors border ${
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono font-bold uppercase transition-colors border ${
               statusFilter === 'all'
-                ? 'bg-brand-navy text-white border-brand-dark shadow-brutal-xs'
+                ? 'bg-brand-navy text-white border-brand-dark shadow-none sm:shadow-brutal-xs'
                 : 'bg-brand-paper text-brand-dark border-brand-dark/30 hover:bg-brand-paper-tint'
             }`}
           >
@@ -332,9 +332,9 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
           </button>
           <button
             onClick={() => setStatusFilter('unread')}
-            className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-colors border ${
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono font-bold uppercase transition-colors border ${
               statusFilter === 'unread'
-                ? 'bg-brand-navy text-white border-brand-dark shadow-brutal-xs'
+                ? 'bg-brand-navy text-white border-brand-dark shadow-none sm:shadow-brutal-xs'
                 : 'bg-brand-paper text-brand-dark border-brand-dark/30 hover:bg-brand-paper-tint'
             }`}
           >
@@ -342,9 +342,9 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
           </button>
           <button
             onClick={() => setStatusFilter('read')}
-            className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-colors border ${
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono font-bold uppercase transition-colors border ${
               statusFilter === 'read'
-                ? 'bg-brand-navy text-white border-brand-dark shadow-brutal-xs'
+                ? 'bg-brand-navy text-white border-brand-dark shadow-none sm:shadow-brutal-xs'
                 : 'bg-brand-paper text-brand-dark border-brand-dark/30 hover:bg-brand-paper-tint'
             }`}
           >
@@ -358,7 +358,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="bg-brand-paper border-2 border-brand-dark px-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono font-bold text-brand-navy shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal cursor-pointer"
+            className="bg-brand-paper border sm:border-2 border-brand-dark px-2.5 sm:px-3 py-1.5 sm:py-1 text-base sm:text-xs min-h-[36px] sm:min-h-0 font-mono font-bold text-brand-navy shadow-none sm:shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal cursor-pointer"
             aria-label="Filter notifications by category"
           >
             <option value="all">All Categories</option>
@@ -394,21 +394,21 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
 
       {/* Notifications List */}
       {loading ? (
-        <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center space-y-3">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-teal mx-auto" />
-          <p className="font-mono text-xs text-brand-muted uppercase tracking-wider">
+        <div className="p-6 sm:p-12 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal text-center space-y-2 sm:space-y-3">
+          <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-brand-teal mx-auto" />
+          <p className="font-mono text-[10px] sm:text-xs text-brand-muted uppercase tracking-wider">
             Loading notifications...
           </p>
         </div>
       ) : filteredNotifications.length === 0 ? (
-        <div className="p-10 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center space-y-3">
-          <div className="w-12 h-12 border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-center mx-auto shadow-brutal-xs">
-            <Bell className="w-6 h-6 text-brand-muted" />
+        <div className="p-6 sm:p-10 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal text-center space-y-2 sm:space-y-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 border sm:border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-center mx-auto shadow-none sm:shadow-brutal-xs">
+            <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-brand-muted" />
           </div>
-          <h2 className="font-heading font-extrabold text-base text-brand-navy">
+          <h2 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
             {emptyTitle}
           </h2>
-          <p className="text-xs text-brand-dark/70 max-w-sm mx-auto font-sans">
+          <p className="text-[11px] sm:text-xs text-brand-dark/70 max-w-sm mx-auto font-sans">
             {emptyDescription}
           </p>
           {(statusFilter !== 'all' || typeFilter !== 'all') && (
@@ -426,7 +426,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
           )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2.5 sm:space-y-3">
           {filteredNotifications.map((notif) => {
             const meta = getNotificationTypeMeta(notif.type, role);
             const Icon = meta.icon;
@@ -436,42 +436,42 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
               <div
                 key={notif.id}
                 onClick={() => handleCardClick(notif)}
-                className={`p-3.5 sm:p-5 border-2 border-brand-dark transition-all duration-100 ${
+                className={`p-2.5 sm:p-5 border sm:border-2 border-brand-dark transition-all duration-100 ${
                   !notif.read
-                    ? 'bg-amber-50/70 border-l-4 sm:border-l-6 border-l-brand-gold shadow-brutal-sm sm:shadow-brutal'
-                    : 'bg-brand-paper shadow-brutal-xs hover:bg-brand-paper-tint'
+                    ? 'bg-amber-50/70 border-l-3 sm:border-l-6 border-l-brand-gold shadow-none sm:shadow-brutal'
+                    : 'bg-brand-paper shadow-none sm:shadow-brutal-xs hover:bg-brand-paper-tint'
                 } ${hasLink ? 'cursor-pointer' : ''}`}
               >
-                <div className="flex items-start justify-between gap-3 sm:gap-4">
+                <div className="flex items-start justify-between gap-2.5 sm:gap-4">
                   {/* Category Icon */}
-                  <div className="w-10 h-10 border-2 border-brand-dark bg-brand-paper flex items-center justify-center shrink-0 shadow-brutal-xs mt-0.5">
-                    <Icon className="w-5 h-5 text-brand-navy" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 border sm:border-2 border-brand-dark bg-brand-paper flex items-center justify-center shrink-0 shadow-none sm:shadow-brutal-xs mt-0.5">
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-brand-navy" />
                   </div>
 
                   {/* Body */}
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex-1 min-w-0 space-y-0.5 sm:space-y-1">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                       <Badge variant={meta.badgeVariant} size="sm">
                         {meta.label}
                       </Badge>
                       {!notif.read && (
-                        <span className="w-2 h-2 rounded-full bg-brand-coral border border-brand-dark shrink-0" />
+                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-brand-coral border border-brand-dark shrink-0" />
                       )}
-                      <span className="font-mono text-[11px] text-brand-muted">
+                      <span className="font-mono text-[10px] sm:text-[11px] text-brand-muted">
                         {formatDate(notif.created_at)}
                       </span>
                     </div>
 
-                    <h2 className="font-heading font-bold text-sm sm:text-base text-brand-navy break-words">
+                    <h2 className="font-heading font-bold text-xs sm:text-base text-brand-navy break-words">
                       {notif.title}
                     </h2>
 
-                    <p className="font-sans text-xs sm:text-sm text-brand-dark/90 leading-relaxed break-words whitespace-pre-wrap">
+                    <p className="font-sans text-[11px] sm:text-sm text-brand-dark/90 leading-relaxed break-words whitespace-pre-wrap">
                       {notif.message}
                     </p>
 
                     {/* Sender and destination indicator */}
-                    <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] font-mono text-brand-muted">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-0.5 sm:pt-1 text-[10px] sm:text-[11px] font-mono text-brand-muted">
                       {notif.actor_name && (
                         <span>From: <strong className="text-brand-navy font-bold">{notif.actor_name}</strong></span>
                       )}
@@ -485,26 +485,26 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-1 sm:gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                     {!notif.read && (
                       <button
                         onClick={(e) => handleMarkAsRead(notif.id, e)}
                         disabled={actionLoadingId === notif.id}
-                        className="p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-gold hover:text-brand-dark text-brand-navy transition-colors shadow-brutal-xs"
+                        className="p-1 sm:p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-gold hover:text-brand-dark text-brand-navy transition-colors shadow-none sm:shadow-brutal-xs"
                         title="Mark as read"
                         aria-label="Mark as read"
                       >
-                        <CheckCircle2 className="w-4 h-4" />
+                        <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
                     )}
                     <button
                       onClick={(e) => handleDelete(notif.id, e)}
                       disabled={actionLoadingId === notif.id}
-                      className="p-1.5 border border-brand-dark bg-brand-paper hover:bg-red-500 hover:text-white text-brand-muted transition-colors shadow-brutal-xs"
+                      className="p-1 sm:p-1.5 border border-brand-dark bg-brand-paper hover:bg-red-500 hover:text-white text-brand-muted transition-colors shadow-none sm:shadow-brutal-xs"
                       title="Dismiss notification"
                       aria-label="Dismiss notification"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                   </div>
                 </div>

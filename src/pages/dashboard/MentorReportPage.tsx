@@ -206,34 +206,34 @@ export const MentorReportPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 1. INTERACTIVE CONTROLS BAR (HIDDEN IN PRINT MODE)                        */}
       {/* ========================================================================= */}
-      <div className="print:hidden p-3.5 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="print:hidden p-2.5 sm:p-5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
             {isAdmin && (
               <Link
                 to="/admin/reports"
-                className="text-xs font-mono font-bold text-brand-navy hover:text-brand-teal flex items-center gap-1 mr-2"
+                className="text-[11px] sm:text-xs font-mono font-bold text-brand-navy hover:text-brand-teal flex items-center gap-1 mr-2"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Return to Admin Reporting Center</span>
               </Link>
             )}
-            <span className="font-mono text-[10px] uppercase font-extrabold tracking-wider text-brand-gold bg-brand-bg px-2 py-0.5 border border-brand-dark">
+            <span className="font-mono text-[9px] sm:text-[10px] uppercase font-extrabold tracking-wider text-brand-gold bg-brand-bg px-1.5 sm:px-2 py-0.5 border border-brand-dark">
               {isAdmin ? `ADMINISTRATIVE MENTOR AUDIT • ${mentorReport?.mentorName || mentorId}` : 'MENTOR ROSTER OVERSIGHT'}
             </span>
-            <span className="font-mono text-[10px] text-brand-muted">
+            <span className="font-mono text-[9px] sm:text-[10px] text-brand-muted">
               {assignedStudents.length} Assigned Scholar{assignedStudents.length === 1 ? '' : 's'}
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
+          <h1 className="text-lg sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
             Academic Performance &amp; Improvement Oversight
           </h1>
-          <p className="text-xs text-brand-muted mt-0.5">
+          <p className="text-[11px] sm:text-xs text-brand-muted mt-0.5">
             Audit mentee task execution velocity, review submissions queue, and verify milestone evaluations.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <Button
             type="button"
             variant="outline"
@@ -251,27 +251,27 @@ export const MentorReportPage: React.FC = () => {
             variant="primary"
             size="sm"
             onClick={handlePrint}
-            className="flex items-center gap-1.5 shadow-brutal-xs bg-brand-navy text-white hover:bg-brand-navy/90"
+            className="flex items-center gap-1.5 shadow-none sm:shadow-brutal-xs bg-brand-navy text-white hover:bg-brand-navy/90"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Print Report (A4)</span>
           </Button>
         </div>
       </div>
 
       {/* Filter Row: Period & Scholar Selector (Hidden in Print) */}
-      <div className="print:hidden p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="print:hidden p-2 sm:p-3.5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3">
         {/* Period Selector */}
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-mono">
-          <span className="font-bold text-brand-muted uppercase text-[10px] mr-1">Window:</span>
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs font-mono">
+          <span className="font-bold text-brand-muted uppercase text-[9px] sm:text-[10px] mr-1">Window:</span>
           {(['schedule', 'weekly', 'monthly', 'custom'] as ReportPeriod[]).map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => setPeriod(p)}
-              className={`px-3 py-2 sm:py-1.5 min-h-[40px] sm:min-h-0 border-2 border-brand-dark font-mono text-xs font-bold transition-all ${
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark font-mono text-[10px] sm:text-xs font-bold transition-all ${
                 period === p
-                  ? 'bg-brand-navy text-white shadow-brutal-xs -translate-y-0.5'
+                  ? 'bg-brand-navy text-white shadow-none sm:shadow-brutal-xs -translate-y-0.5'
                   : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
               }`}
             >
@@ -291,15 +291,15 @@ export const MentorReportPage: React.FC = () => {
                 type="date"
                 value={customStart}
                 onChange={(e) => setCustomStart(e.target.value)}
-                className="px-2 py-2 sm:py-1 border-2 border-brand-dark bg-brand-bg text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono"
+                className="px-2 py-1.5 sm:py-1 border sm:border-2 border-brand-dark bg-brand-bg text-base sm:text-xs min-h-[36px] sm:min-h-0 font-mono"
                 aria-label="Start Date"
               />
-              <span className="font-bold text-brand-muted">to</span>
+              <span className="font-bold text-brand-muted text-xs">to</span>
               <input
                 type="date"
                 value={customEnd}
                 onChange={(e) => setCustomEnd(e.target.value)}
-                className="px-2 py-2 sm:py-1 border-2 border-brand-dark bg-brand-bg text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono"
+                className="px-2 py-1.5 sm:py-1 border sm:border-2 border-brand-dark bg-brand-bg text-base sm:text-xs min-h-[36px] sm:min-h-0 font-mono"
                 aria-label="End Date"
               />
             </div>
@@ -308,7 +308,7 @@ export const MentorReportPage: React.FC = () => {
 
         {/* Scholar Selector */}
         <div className="flex items-center gap-2 text-xs font-mono w-full md:w-auto">
-          <span className="font-bold text-brand-muted uppercase text-[10px] shrink-0">Scope:</span>
+          <span className="font-bold text-brand-muted uppercase text-[9px] sm:text-[10px] shrink-0">Scope:</span>
           <select
             aria-label="Filter by assigned scholar"
             value={selectedStudentId}
@@ -316,7 +316,7 @@ export const MentorReportPage: React.FC = () => {
               setSelectedStudentId(e.target.value);
               setMobileTab('overview');
             }}
-            className="w-full md:w-auto px-3 py-2 sm:py-1.5 border-2 border-brand-dark bg-brand-bg font-mono text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
+            className="w-full md:w-auto px-2.5 sm:px-3 py-1.5 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-bg font-mono text-base sm:text-xs min-h-[36px] sm:min-h-0 font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
           >
             <option value="all">Full Mentee Roster ({assignedStudents.length})</option>
             {assignedStudents.map((s) => (

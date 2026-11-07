@@ -152,20 +152,20 @@ export const PublicProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in pb-12">
+    <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6 animate-fade-in pb-6 sm:pb-12">
       {/* Top Navigation & Status */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-brand-navy hover:text-brand-teal transition-colors"
+          className="inline-flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-mono font-bold text-brand-navy hover:text-brand-teal transition-colors min-h-[32px] sm:min-h-0"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span>Back</span>
         </button>
 
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[11px] text-brand-muted uppercase tracking-wider flex items-center gap-1">
-            <Lock className="w-3.5 h-3.5 text-brand-teal" />
+          <span className="font-mono text-[10px] sm:text-[11px] text-brand-muted uppercase tracking-wider flex items-center gap-1">
+            <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-teal" />
             Protected Academic Profile
           </span>
         </div>
@@ -173,14 +173,14 @@ export const PublicProfilePage: React.FC = () => {
 
       {/* Owner Notice Banner */}
       {isOwner && (
-        <div className="border-2 border-brand-dark bg-amber-50 p-4 shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-brand-gold shrink-0 mt-0.5" />
+        <div className="border sm:border-2 border-brand-dark bg-amber-50 p-2.5 sm:p-4 shadow-none sm:shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-brand-gold shrink-0 mt-0.5" />
             <div>
-              <p className="text-xs font-bold text-brand-dark uppercase tracking-wider font-mono">
+              <p className="text-[10px] sm:text-xs font-bold text-brand-dark uppercase tracking-wider font-mono">
                 Viewing Your Public Profile
               </p>
-              <p className="text-xs text-brand-dark/80 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-brand-dark/80 mt-0.5">
                 This is how other students and mentors see your academic identity. Sensitive contact details (phone, email) and personal academic background notes are strictly shielded.
               </p>
             </div>
@@ -190,7 +190,7 @@ export const PublicProfilePage: React.FC = () => {
             variant="primary"
             size="sm"
             leftIcon={<Edit3 className="w-3.5 h-3.5" />}
-            className="shrink-0"
+            className="shrink-0 min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
           >
             Edit Profile
           </Button>
@@ -198,29 +198,29 @@ export const PublicProfilePage: React.FC = () => {
       )}
 
       {/* Hero Profile Card */}
-      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-8">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+      <div className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2.5 sm:gap-6">
           {/* Avatar or Initial Block */}
           {profile.avatar_url ? (
             <img
               src={profile.avatar_url}
               alt={profile.full_name}
-              className="w-20 h-20 sm:w-28 sm:h-28 object-cover border-2 border-brand-dark shadow-brutal-xs sm:shadow-brutal-sm bg-brand-paper-tint"
+              className="w-14 h-14 sm:w-28 sm:h-28 object-cover border sm:border-2 border-brand-dark shadow-none sm:shadow-brutal-sm bg-brand-paper-tint"
             />
           ) : (
-            <div className="w-20 h-20 sm:w-28 sm:h-28 border-2 border-brand-dark bg-brand-navy text-brand-bg flex items-center justify-center font-heading font-black text-2xl sm:text-4xl shadow-brutal-xs sm:shadow-brutal-sm">
+            <div className="w-14 h-14 sm:w-28 sm:h-28 border sm:border-2 border-brand-dark bg-brand-navy text-brand-bg flex items-center justify-center font-heading font-black text-xl sm:text-4xl shadow-none sm:shadow-brutal-sm">
               {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : '?'}
             </div>
           )}
 
           {/* Member Identity & Badges */}
-          <div className="flex-1 text-center sm:text-left space-y-2">
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-2.5">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-heading font-extrabold text-brand-navy tracking-tight">
+          <div className="flex-1 text-center sm:text-left space-y-1 sm:space-y-2">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2.5">
+              <h1 className="text-base sm:text-2xl md:text-3xl font-heading font-extrabold text-brand-navy tracking-tight">
                 {profile.full_name}
               </h1>
               {profile.poraplan_id && (
-                <span className="font-mono text-xs font-bold px-2 py-0.5 bg-brand-paper-tint border-2 border-brand-dark shadow-brutal-xs text-brand-navy">
+                <span className="font-mono text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 bg-brand-paper-tint border sm:border-2 border-brand-dark shadow-none sm:shadow-brutal-xs text-brand-navy">
                   {profile.poraplan_id}
                 </span>
               )}
@@ -230,30 +230,30 @@ export const PublicProfilePage: React.FC = () => {
             </div>
 
             {(profile.university || profile.department) && (
-              <p className="text-sm font-sans font-medium text-brand-dark/90 flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <Building className="w-4 h-4 text-brand-teal" />
+              <p className="text-xs sm:text-sm font-sans font-medium text-brand-dark/90 flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2">
+                <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal" />
                 <span>
                   {[profile.department, profile.university].filter(Boolean).join(' • ')}
                 </span>
               </p>
             )}
 
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-2 text-xs font-mono text-brand-muted">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-4 pt-1 sm:pt-2 text-[10px] sm:text-xs font-mono text-brand-muted">
               {profile.batch && (
-                <span className="flex items-center gap-1.5">
-                  <GraduationCap className="w-3.5 h-3.5 text-brand-dark" />
+                <span className="flex items-center gap-1 sm:gap-1.5">
+                  <GraduationCap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-dark" />
                   <span>Batch {profile.batch}</span>
                 </span>
               )}
               {profile.current_semester && (
-                <span className="flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5 text-brand-dark" />
+                <span className="flex items-center gap-1 sm:gap-1.5">
+                  <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-dark" />
                   <span>Semester: {profile.current_semester}</span>
                 </span>
               )}
               {profile.created_at && (
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-brand-dark" />
+                <span className="flex items-center gap-1 sm:gap-1.5">
+                  <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-dark" />
                   <span>Member since {new Date(profile.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
                 </span>
               )}
@@ -263,40 +263,40 @@ export const PublicProfilePage: React.FC = () => {
       </div>
 
       {/* Main Grid: Details & Privacy Guardrails */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6">
         {/* Academic Details (2 Columns) */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-3 sm:space-y-6">
           {/* Student Profile Specifics */}
           {profile.role === 'student' && (
-            <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-6 space-y-3.5 sm:space-y-4">
-              <div className="flex items-center gap-2 border-b-2 border-brand-dark pb-3">
-                <GraduationCap className="w-5 h-5 text-brand-teal" />
-                <h2 className="font-heading font-extrabold text-base text-brand-navy uppercase tracking-wider">
+            <div className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 space-y-2 sm:space-y-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+                <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal" />
+                <h2 className="font-heading font-extrabold text-xs sm:text-base text-brand-navy uppercase tracking-wider">
                   Academic Curriculum & Standing
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                <div className="border border-brand-dark/30 p-3 bg-brand-paper-tint">
-                  <span className="block text-[11px] font-mono uppercase font-bold text-brand-muted">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 pt-0.5 sm:pt-1">
+                <div className="border border-brand-dark/30 p-2 sm:p-3 bg-brand-paper-tint">
+                  <span className="block text-[9px] sm:text-[11px] font-mono uppercase font-bold text-brand-muted">
                     Institution
                   </span>
-                  <span className="font-sans font-bold text-sm text-brand-navy">
+                  <span className="font-sans font-bold text-xs sm:text-sm text-brand-navy">
                     {profile.university || 'Not specified'}
                   </span>
                 </div>
 
-                <div className="border border-brand-dark/30 p-3 bg-brand-paper-tint">
-                  <span className="block text-[11px] font-mono uppercase font-bold text-brand-muted">
+                <div className="border border-brand-dark/30 p-2 sm:p-3 bg-brand-paper-tint">
+                  <span className="block text-[9px] sm:text-[11px] font-mono uppercase font-bold text-brand-muted">
                     Department / Major
                   </span>
-                  <span className="font-sans font-bold text-sm text-brand-navy">
+                  <span className="font-sans font-bold text-xs sm:text-sm text-brand-navy">
                     {profile.department || 'Not specified'}
                   </span>
                 </div>
 
-                <div className="border border-brand-dark/30 p-3 bg-brand-paper-tint">
-                  <span className="block text-[11px] font-mono uppercase font-bold text-brand-muted">
+                <div className="border border-brand-dark/30 p-2 sm:p-3 bg-brand-paper-tint">
+                  <span className="block text-[9px] sm:text-[11px] font-mono uppercase font-bold text-brand-muted">
                     Academic Batch
                   </span>
                   <span className="font-sans font-bold text-sm text-brand-navy">

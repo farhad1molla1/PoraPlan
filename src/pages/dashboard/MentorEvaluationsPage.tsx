@@ -325,24 +325,24 @@ export const MentorEvaluationsPage: React.FC = () => {
     : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-brand-dark pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4 border-b sm:border-b-2 border-brand-dark pb-2.5 sm:pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs uppercase text-brand-gold font-bold tracking-wider">
+            <span className="font-mono text-[10px] sm:text-xs uppercase text-brand-gold font-bold tracking-wider">
               Check-ins &amp; Reviews
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-navy tracking-tight mt-1">
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-navy tracking-tight mt-0.5 sm:mt-1">
             Evaluations
           </h1>
-          <p className="text-xs sm:text-sm text-brand-muted mt-0.5">
+          <p className="text-[11px] sm:text-sm text-brand-muted mt-0.5">
             Schedule and record review sessions (Google Meet/Zoom or written) to evaluate understanding and adjust study plans.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           <Button
             type="button"
             variant="outline"
@@ -362,7 +362,7 @@ export const MentorEvaluationsPage: React.FC = () => {
             onClick={handleOpenScheduleModal}
             className="flex items-center gap-1.5"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Schedule Evaluation</span>
           </Button>
         </div>
@@ -370,7 +370,7 @@ export const MentorEvaluationsPage: React.FC = () => {
 
       {/* Success Notification */}
       {actionSuccess && (
-        <div className="p-3.5 border-2 border-brand-dark bg-emerald-50 text-emerald-900 text-xs font-mono flex items-center justify-between shadow-brutal-xs">
+        <div className="p-2.5 sm:p-3.5 border sm:border-2 border-brand-dark bg-emerald-50 text-emerald-900 text-xs font-mono flex items-center justify-between shadow-none sm:shadow-brutal-xs">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
             <span>{actionSuccess}</span>
@@ -388,7 +388,7 @@ export const MentorEvaluationsPage: React.FC = () => {
 
       {/* Error Message */}
       {errorMessage && (
-        <div className="p-3.5 border-2 border-brand-dark bg-red-50 text-red-900 text-xs font-mono flex items-center justify-between shadow-brutal-xs">
+        <div className="p-2.5 sm:p-3.5 border sm:border-2 border-brand-dark bg-red-50 text-red-900 text-xs font-mono flex items-center justify-between shadow-none sm:shadow-brutal-xs">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-red-700 shrink-0" />
             <span>{errorMessage}</span>
@@ -405,80 +405,80 @@ export const MentorEvaluationsPage: React.FC = () => {
       )}
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3 sm:p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-1">
-            <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+        <div className="p-2 sm:p-3.5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+            <span className="font-mono text-[9px] sm:text-[10px] uppercase font-bold text-brand-muted">
               ALL ASSESSMENTS
             </span>
-            <Calendar className="w-4 h-4 text-brand-navy stroke-[2.5]" />
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy stroke-[2.5]" />
           </div>
-          <div className="font-heading font-extrabold text-2xl text-brand-navy">
+          <div className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
             {totalCount}
           </div>
-          <span className="text-[10px] font-mono text-brand-muted mt-0.5">
+          <span className="text-[9px] sm:text-[10px] font-mono text-brand-muted mt-0.5">
             Cumulative logged
           </span>
         </div>
 
-        <div className="p-3 sm:p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-1">
-            <span className="font-mono text-[10px] uppercase font-bold text-amber-700">
+        <div className="p-2 sm:p-3.5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+            <span className="font-mono text-[9px] sm:text-[10px] uppercase font-bold text-amber-700">
               SCHEDULED QUEUE
             </span>
-            <Clock className="w-4 h-4 text-brand-gold stroke-[2.5]" />
+            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold stroke-[2.5]" />
           </div>
-          <div className="font-heading font-extrabold text-2xl text-brand-gold">
+          <div className="font-heading font-extrabold text-lg sm:text-2xl text-brand-gold">
             {scheduledCount}
           </div>
-          <span className="text-[10px] font-mono text-brand-muted mt-0.5">
+          <span className="text-[9px] sm:text-[10px] font-mono text-brand-muted mt-0.5">
             Awaiting session
           </span>
         </div>
 
-        <div className="p-3 sm:p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-1">
-            <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
+        <div className="p-2 sm:p-3.5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+            <span className="font-mono text-[9px] sm:text-[10px] uppercase font-bold text-brand-teal">
               COMPLETED REVIEWS
             </span>
-            <CheckCircle2 className="w-4 h-4 text-brand-teal stroke-[2.5]" />
+            <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal stroke-[2.5]" />
           </div>
-          <div className="font-heading font-extrabold text-2xl text-brand-teal">
+          <div className="font-heading font-extrabold text-lg sm:text-2xl text-brand-teal">
             {completedCount}
           </div>
-          <span className="text-[10px] font-mono text-brand-muted mt-0.5">
+          <span className="text-[9px] sm:text-[10px] font-mono text-brand-muted mt-0.5">
             Milestones evaluated
           </span>
         </div>
 
-        <div className="p-3 sm:p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-1">
-            <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">
+        <div className="p-2 sm:p-3.5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+            <span className="font-mono text-[9px] sm:text-[10px] uppercase font-bold text-brand-muted">
               AVERAGE SCORE
             </span>
-            <Award className="w-4 h-4 text-brand-navy stroke-[2.5]" />
+            <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy stroke-[2.5]" />
           </div>
-          <div className="font-heading font-extrabold text-2xl text-brand-navy">
+          <div className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
             {averageScore !== null ? `${averageScore}` : '—'}
-            {averageScore !== null && <span className="text-xs font-mono text-brand-muted font-normal"> / 100</span>}
+            {averageScore !== null && <span className="text-[10px] sm:text-xs font-mono text-brand-muted font-normal"> / 100</span>}
           </div>
-          <span className="text-[10px] font-mono text-brand-teal font-bold mt-0.5">
+          <span className="text-[9px] sm:text-[10px] font-mono text-brand-teal font-bold mt-0.5">
             {averageScore !== null ? 'Calibrated retention' : 'No graded sessions yet'}
           </span>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-3">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal space-y-2 sm:space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3">
           {/* Status Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
             <button
               type="button"
               onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1.5 border-2 border-brand-dark text-xs font-mono font-bold transition-all ${
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark text-[10px] sm:text-xs font-mono font-bold transition-all ${
                 statusFilter === 'all'
-                  ? 'bg-brand-navy text-brand-paper shadow-brutal-xs'
+                  ? 'bg-brand-navy text-brand-paper shadow-none sm:shadow-brutal-xs'
                   : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
               }`}
             >
@@ -487,9 +487,9 @@ export const MentorEvaluationsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('scheduled')}
-              className={`px-3 py-1.5 border-2 border-brand-dark text-xs font-mono font-bold transition-all ${
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark text-[10px] sm:text-xs font-mono font-bold transition-all ${
                 statusFilter === 'scheduled'
-                  ? 'bg-brand-gold text-brand-dark shadow-brutal-xs'
+                  ? 'bg-brand-gold text-brand-dark shadow-none sm:shadow-brutal-xs'
                   : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
               }`}
             >
@@ -498,9 +498,9 @@ export const MentorEvaluationsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('completed')}
-              className={`px-3 py-1.5 border-2 border-brand-dark text-xs font-mono font-bold transition-all ${
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark text-[10px] sm:text-xs font-mono font-bold transition-all ${
                 statusFilter === 'completed'
-                  ? 'bg-brand-teal text-brand-paper shadow-brutal-xs'
+                  ? 'bg-brand-teal text-brand-paper shadow-none sm:shadow-brutal-xs'
                   : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
               }`}
             >
@@ -509,13 +509,13 @@ export const MentorEvaluationsPage: React.FC = () => {
           </div>
 
           {/* Student Selector */}
-          <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-brand-muted shrink-0" />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-muted shrink-0" />
             <select
               aria-label="Filter by assigned student"
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="px-3 py-2 sm:py-1.5 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono font-bold text-brand-navy shadow-brutal-xs focus:outline-none"
+              className="px-2.5 sm:px-3 py-1.5 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[36px] sm:min-h-0 font-mono font-bold text-brand-navy shadow-none sm:shadow-brutal-xs focus:outline-none"
             >
               <option value="all">All Assigned Students ({students.length})</option>
               {students.map((s) => (
@@ -528,7 +528,7 @@ export const MentorEvaluationsPage: React.FC = () => {
         </div>
 
         {/* Secondary Filter: Search & Format */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-brand-dark/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 pt-1.5 sm:pt-2 border-t border-brand-dark/20">
           <div className="relative flex-1 max-w-md">
             <Search className="w-3.5 h-3.5 text-brand-muted absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -536,17 +536,17 @@ export const MentorEvaluationsPage: React.FC = () => {
               placeholder="Search by evaluation title, subject, or student name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 sm:py-1.5 border-2 border-brand-dark bg-brand-bg text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark focus:outline-none"
+              className="w-full pl-9 pr-3 py-1.5 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-bg text-base sm:text-xs min-h-[36px] sm:min-h-0 font-sans text-brand-dark focus:outline-none"
             />
           </div>
 
           <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="text-brand-muted uppercase text-[10px] font-bold">Format:</span>
+            <span className="text-brand-muted uppercase text-[9px] sm:text-[10px] font-bold">Format:</span>
             <select
               aria-label="Filter by evaluation format"
               value={formatFilter}
               onChange={(e) => setFormatFilter(e.target.value as any)}
-              className="px-2.5 py-2 sm:py-1 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono font-bold"
+              className="px-2 sm:px-2.5 py-1.5 sm:py-1 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[34px] sm:min-h-0 font-mono font-bold"
             >
               <option value="all">All Formats</option>
               <option value="oral">Oral Walkthrough</option>

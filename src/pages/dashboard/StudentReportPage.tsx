@@ -159,13 +159,13 @@ export const StudentReportPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 1. INTERACTIVE CONTROL BAR (SCREEN ONLY — HIDDEN IN PRINT)                */}
       {/* ========================================================================= */}
-      <div className="print:hidden p-3.5 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="print:hidden p-2.5 sm:p-5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             {isAdmin ? (
               <Link
                 to="/admin/reports"
-                className="text-xs font-mono font-bold text-brand-navy hover:text-brand-teal flex items-center gap-1"
+                className="text-[11px] sm:text-xs font-mono font-bold text-brand-navy hover:text-brand-teal flex items-center gap-1"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Return to Admin Reporting Center</span>
@@ -173,7 +173,7 @@ export const StudentReportPage: React.FC = () => {
             ) : (
               <Link
                 to="/student/library?tab=evaluations"
-                className="text-xs font-mono font-bold text-brand-muted hover:text-brand-dark flex items-center gap-1"
+                className="text-[11px] sm:text-xs font-mono font-bold text-brand-muted hover:text-brand-dark flex items-center gap-1"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back to Academic Library</span>
@@ -181,19 +181,19 @@ export const StudentReportPage: React.FC = () => {
             )}
           </div>
           {isAdmin && (
-            <span className="font-mono text-[11px] uppercase font-bold text-brand-gold bg-brand-navy px-2 py-0.5 border border-brand-dark inline-block mb-1">
+            <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-brand-gold bg-brand-navy px-1.5 sm:px-2 py-0.2 sm:py-0.5 border border-brand-dark inline-block mb-1">
               ADMINISTRATIVE AUDIT VIEW • {report?.studentName || studentId}
             </span>
           )}
-          <h1 className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
+          <h1 className="text-lg sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
             Academic Performance &amp; Improvement Report
           </h1>
-          <p className="text-xs text-brand-muted mt-0.5">
+          <p className="text-[11px] sm:text-xs text-brand-muted mt-0.5">
             Audit syllabus execution, milestone evaluation scores, and targeted improvement actions.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
           <Button
             type="button"
             variant="outline"
@@ -211,9 +211,9 @@ export const StudentReportPage: React.FC = () => {
             variant="primary"
             size="sm"
             onClick={handlePrint}
-            className="flex items-center gap-1.5 shadow-brutal-xs bg-brand-navy text-white hover:bg-brand-navy/90"
+            className="flex items-center gap-1.5 shadow-none sm:shadow-brutal-xs bg-brand-navy text-white hover:bg-brand-navy/90"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Print Report (A4)</span>
           </Button>
         </div>

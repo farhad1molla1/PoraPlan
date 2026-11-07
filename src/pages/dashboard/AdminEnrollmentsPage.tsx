@@ -285,25 +285,25 @@ export const AdminEnrollmentsPage: React.FC = () => {
   const withdrawnCount = enrollments.filter((e) => e.status === 'withdrawn').length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* Header */}
-      <div className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-4 sm:p-6 shadow-brutal-sm sm:shadow-brutal">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="border sm:border-3 border-brand-dark bg-brand-paper p-2.5 sm:p-6 shadow-none sm:shadow-brutal">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 sm:gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-brand-bg text-brand-navy border border-brand-dark mb-2">
-              <UserCheck className="w-3.5 h-3.5 text-brand-teal" />
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-brand-bg text-brand-navy border border-brand-dark mb-1 sm:mb-2">
+              <UserCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-teal" />
               Active Roster Desk
             </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-brand-navy">
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-black text-brand-navy">
               Program Enrollments
             </h1>
-            <p className="text-sm text-brand-navy/70 mt-1 max-w-2xl font-medium">
+            <p className="text-[11px] sm:text-sm text-brand-navy/70 mt-0.5 sm:mt-1 max-w-2xl font-medium">
               Manage admitted student rosters across programs and cohorts. Track progress,
               manage cohort participation status, and view academic profiles.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button
               variant="outline"
               size="sm"
@@ -312,12 +312,12 @@ export const AdminEnrollmentsPage: React.FC = () => {
                 loadData();
               }}
               disabled={loading}
-              className="gap-2"
+              className="gap-1.5 sm:gap-2 min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
             >
               {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
               ) : (
-                <Layers className="w-4 h-4" />
+                <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               )}
               Refresh Roster
             </Button>
@@ -325,84 +325,84 @@ export const AdminEnrollmentsPage: React.FC = () => {
               variant="primary"
               size="sm"
               onClick={openEnrollModal}
-              className="gap-2 bg-[#0BA7B4] hover:bg-[#0BA7B4]/90 text-white font-bold"
+              className="gap-1.5 sm:gap-2 bg-[#0BA7B4] hover:bg-[#0BA7B4]/90 text-white font-bold min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
             >
-              <UserPlus className="w-4 h-4" />
+              <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               Enroll Student
             </Button>
           </div>
         </div>
 
         {/* Quick Stat Counters */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-3 mt-4 pt-4 border-t-2 border-brand-dark/10">
-          <div className="p-2.5 sm:p-3 bg-brand-bg border-2 border-brand-dark">
-            <p className="text-xs font-bold text-brand-navy/60 uppercase">Total Students</p>
-            <p className="text-2xl font-black text-brand-navy mt-0.5">{totalCount}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 sm:gap-3 mt-2.5 sm:mt-4 pt-2.5 sm:pt-4 border-t sm:border-t-2 border-brand-dark/10">
+          <div className="p-1.5 sm:p-3 bg-brand-bg border sm:border-2 border-brand-dark">
+            <p className="text-[9px] sm:text-xs font-bold text-brand-navy/60 uppercase">Total Students</p>
+            <p className="text-base sm:text-2xl font-black text-brand-navy mt-0.5">{totalCount}</p>
           </div>
-          <div className="p-2.5 sm:p-3 bg-[#0BA7B4]/10 border-2 border-[#0BA7B4]">
-            <p className="text-xs font-bold text-brand-navy/70 uppercase">Active</p>
-            <p className="text-2xl font-black text-brand-navy mt-0.5">{activeCount}</p>
+          <div className="p-1.5 sm:p-3 bg-[#0BA7B4]/10 border sm:border-2 border-[#0BA7B4]">
+            <p className="text-[9px] sm:text-xs font-bold text-brand-navy/70 uppercase">Active</p>
+            <p className="text-base sm:text-2xl font-black text-brand-navy mt-0.5">{activeCount}</p>
           </div>
-          <div className="p-2.5 sm:p-3 bg-[#F5A623]/10 border-2 border-[#F5A623]">
-            <p className="text-xs font-bold text-brand-navy/70 uppercase">On Hold</p>
-            <p className="text-2xl font-black text-brand-navy mt-0.5">{onHoldCount}</p>
+          <div className="p-1.5 sm:p-3 bg-[#F5A623]/10 border sm:border-2 border-[#F5A623]">
+            <p className="text-[9px] sm:text-xs font-bold text-brand-navy/70 uppercase">On Hold</p>
+            <p className="text-base sm:text-2xl font-black text-brand-navy mt-0.5">{onHoldCount}</p>
           </div>
-          <div className="p-2.5 sm:p-3 bg-brand-navy/10 border-2 border-brand-dark">
-            <p className="text-xs font-bold text-brand-navy/70 uppercase">Completed</p>
-            <p className="text-2xl font-black text-brand-navy mt-0.5">{completedCount}</p>
+          <div className="p-1.5 sm:p-3 bg-brand-navy/10 border sm:border-2 border-brand-dark">
+            <p className="text-[9px] sm:text-xs font-bold text-brand-navy/70 uppercase">Completed</p>
+            <p className="text-base sm:text-2xl font-black text-brand-navy mt-0.5">{completedCount}</p>
           </div>
-          <div className="p-2.5 sm:p-3 bg-gray-100 border-2 border-gray-400">
-            <p className="text-xs font-bold text-gray-600 uppercase">Withdrawn</p>
-            <p className="text-2xl font-black text-gray-700 mt-0.5">{withdrawnCount}</p>
+          <div className="p-1.5 sm:p-3 bg-gray-100 border sm:border-2 border-gray-400">
+            <p className="text-[9px] sm:text-xs font-bold text-gray-600 uppercase">Withdrawn</p>
+            <p className="text-base sm:text-2xl font-black text-gray-700 mt-0.5">{withdrawnCount}</p>
           </div>
         </div>
       </div>
 
       {/* Notifications / Alerts */}
       {error && (
-        <div className="p-4 bg-red-50 border-3 border-red-500 shadow-[4px_4px_0_0_#ef4444] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-            <p className="text-sm font-bold text-red-800">{error}</p>
+        <div className="p-2.5 sm:p-4 bg-red-50 border sm:border-3 border-red-500 shadow-none sm:shadow-[4px_4px_0_0_#ef4444] flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0" />
+            <p className="text-xs sm:text-sm font-bold text-red-800">{error}</p>
           </div>
           <button
             onClick={() => setError(null)}
             className="text-red-600 hover:text-red-800"
             aria-label="Dismiss error"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       )}
 
       {successMessage && (
-        <div className="p-4 bg-teal-50 border-3 border-[#0BA7B4] shadow-[4px_4px_0_0_#0BA7B4] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-brand-teal flex-shrink-0" />
-            <p className="text-sm font-bold text-brand-navy">{successMessage}</p>
+        <div className="p-2.5 sm:p-4 bg-teal-50 border sm:border-3 border-[#0BA7B4] shadow-none sm:shadow-[4px_4px_0_0_#0BA7B4] flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal flex-shrink-0" />
+            <p className="text-xs sm:text-sm font-bold text-brand-navy">{successMessage}</p>
           </div>
           <button
             onClick={() => setSuccessMessage(null)}
             className="text-brand-navy hover:opacity-75"
             aria-label="Dismiss alert"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       )}
 
       {/* Filter and Search Bar */}
-      <div className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-3.5 sm:p-4 shadow-brutal-sm sm:shadow-brutal">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+      <div className="border sm:border-3 border-brand-dark bg-brand-paper p-2.5 sm:p-4 shadow-none sm:shadow-brutal">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-3 items-center">
           {/* Search box */}
           <div className="md:col-span-4 relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-navy/50" />
+            <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-navy/50" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search student, ID, university..."
-              className="w-full pl-9 pr-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-medium placeholder-[#082B4C]/40 focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="w-full pl-8 sm:pl-9 pr-2.5 sm:pr-3 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark font-medium placeholder-[#082B4C]/40 focus:outline-none focus:ring-2 focus:ring-brand-teal"
             />
           </div>
 
@@ -414,7 +414,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
                 setProgramFilter(e.target.value);
                 setCohortFilter('all');
               }}
-              className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Programs</option>
               {programs.map((p) => (
@@ -430,7 +430,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
             <select
               value={cohortFilter}
               onChange={(e) => setCohortFilter(e.target.value)}
-              className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Cohorts</option>
               {filteredCohorts.map((c) => (
@@ -446,7 +446,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
@@ -460,15 +460,15 @@ export const AdminEnrollmentsPage: React.FC = () => {
 
       {/* Main Roster List */}
       {loading ? (
-        <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
-          <p className="text-sm font-bold text-brand-navy">Loading enrollments roster...</p>
+        <div className="border sm:border-3 border-brand-dark bg-brand-paper p-8 sm:p-12 text-center shadow-none sm:shadow-brutal">
+          <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin mx-auto text-brand-teal mb-2 sm:mb-3" />
+          <p className="text-xs sm:text-sm font-bold text-brand-navy">Loading enrollments roster...</p>
         </div>
       ) : filteredEnrollments.length === 0 ? (
-        <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
-          <UserCheck className="w-12 h-12 text-brand-navy/30 mx-auto mb-3" />
-          <h3 className="text-lg font-black text-brand-navy">No Enrollments Found</h3>
-          <p className="text-sm text-brand-navy/70 mt-1 max-w-md mx-auto">
+        <div className="border sm:border-3 border-brand-dark bg-brand-paper p-8 sm:p-12 text-center shadow-none sm:shadow-brutal">
+          <UserCheck className="w-10 h-10 sm:w-12 sm:h-12 text-brand-navy/30 mx-auto mb-2 sm:mb-3" />
+          <h3 className="text-base sm:text-lg font-black text-brand-navy">No Enrollments Found</h3>
+          <p className="text-xs sm:text-sm text-brand-navy/70 mt-1 max-w-md mx-auto">
             {searchQuery || statusFilter !== 'all' || programFilter !== 'all' || cohortFilter !== 'all'
               ? 'No enrollments match the selected filters or search query.'
               : 'Students will appear here automatically when their applications are approved.'}
@@ -483,16 +483,16 @@ export const AdminEnrollmentsPage: React.FC = () => {
                 setProgramFilter('all');
                 setCohortFilter('all');
               }}
-              className="mt-4 gap-1.5"
+              className="mt-3 sm:mt-4 gap-1 sm:gap-1.5 min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
             >
-              <Filter className="w-4 h-4" /> Reset Filters
+              <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Reset Filters
             </Button>
           )}
         </div>
       ) : (
-        <div className="border-3 border-brand-dark bg-brand-paper shadow-brutal overflow-hidden">
+        <div className="border sm:border-3 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal overflow-hidden">
           {/* Mobile Responsive Cards (< md: 768px) */}
-          <div className="md:hidden p-3 sm:p-4 space-y-3 bg-brand-bg">
+          <div className="md:hidden p-2 sm:p-4 space-y-2 sm:space-y-3 bg-brand-bg">
             {filteredEnrollments.map((enr) => {
               const student = enr.student;
               const program = enr.program;
@@ -501,25 +501,25 @@ export const AdminEnrollmentsPage: React.FC = () => {
               return (
                 <div
                   key={enr.id}
-                  className="border-2 border-brand-dark bg-brand-paper p-3.5 sm:p-4 shadow-brutal-xs space-y-3"
+                  className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-4 shadow-none sm:shadow-brutal-xs space-y-2 sm:space-y-3"
                 >
                   {/* Student Identity + Status Badge */}
-                  <div className="flex items-start justify-between gap-2.5">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-9 h-9 border-2 border-brand-dark bg-[#0BA7B4]/20 flex items-center justify-center font-black text-brand-navy shrink-0 text-sm">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                      <div className="w-7 h-7 sm:w-9 sm:h-9 border sm:border-2 border-brand-dark bg-[#0BA7B4]/20 flex items-center justify-center font-black text-brand-navy shrink-0 text-xs sm:text-sm">
                         {student?.full_name?.charAt(0) || 'S'}
                       </div>
                       <div className="min-w-0">
-                        <div className="font-black text-brand-navy flex flex-wrap items-center gap-1.5 leading-tight">
+                        <div className="font-black text-brand-navy flex flex-wrap items-center gap-1 sm:gap-1.5 leading-tight text-xs sm:text-sm">
                           <span className="truncate">{student?.full_name || 'Unknown Student'}</span>
                           {student?.poraplan_id && (
-                            <span className="font-mono text-[11px] px-1.5 py-0.5 bg-brand-bg border border-brand-dark/30 text-brand-navy/80 font-bold shrink-0">
+                            <span className="font-mono text-[10px] sm:text-[11px] px-1.5 py-0.5 bg-brand-bg border border-brand-dark/30 text-brand-navy/80 font-bold shrink-0">
                               {student.poraplan_id}
                             </span>
                           )}
                         </div>
                         {(student?.university || student?.department || student?.current_semester) && (
-                          <div className="text-xs text-brand-navy/70 flex flex-wrap items-center gap-1 mt-0.5 font-medium">
+                          <div className="text-[10px] sm:text-xs text-brand-navy/70 flex flex-wrap items-center gap-1 mt-0.5 font-medium">
                             {student?.university && <span>{student.university}</span>}
                             {student?.department && (
                               <>
@@ -548,9 +548,9 @@ export const AdminEnrollmentsPage: React.FC = () => {
                   </div>
 
                   {/* Program, Cohort, & Enrollment Date */}
-                  <div className="p-2.5 bg-brand-bg border border-brand-dark/20 text-xs space-y-1.5">
+                  <div className="p-2 sm:p-2.5 bg-brand-bg border border-brand-dark/20 text-[11px] sm:text-xs space-y-1 sm:space-y-1.5">
                     <div className="flex justify-between items-start gap-2">
-                      <span className="text-brand-muted font-mono uppercase text-[10px] shrink-0 font-bold">
+                      <span className="text-brand-muted font-mono uppercase text-[9px] sm:text-[10px] shrink-0 font-bold">
                         Program
                       </span>
                       <span className="font-bold text-brand-navy text-right leading-tight">
@@ -559,10 +559,10 @@ export const AdminEnrollmentsPage: React.FC = () => {
                     </div>
 
                     <div className="flex justify-between items-center gap-2 pt-1 border-t border-brand-dark/10">
-                      <span className="text-brand-muted font-mono uppercase text-[10px] shrink-0 font-bold">
+                      <span className="text-brand-muted font-mono uppercase text-[9px] sm:text-[10px] shrink-0 font-bold">
                         Cohort
                       </span>
-                      <div className="flex items-center gap-1 text-[11px]">
+                      <div className="flex items-center gap-1 text-[10px] sm:text-[11px]">
                         <span className="font-mono font-semibold px-1 py-0.5 bg-gray-100 border border-gray-300 text-gray-700">
                           {cohort?.name || 'Assigned Cohort'}
                         </span>
@@ -573,10 +573,10 @@ export const AdminEnrollmentsPage: React.FC = () => {
                     </div>
 
                     <div className="flex justify-between items-center gap-2 pt-1 border-t border-brand-dark/10">
-                      <span className="text-brand-muted font-mono uppercase text-[10px] shrink-0 font-bold">
+                      <span className="text-brand-muted font-mono uppercase text-[9px] sm:text-[10px] shrink-0 font-bold">
                         Enrolled
                       </span>
-                      <span className="font-mono text-brand-navy/80 text-[11px] flex items-center gap-1">
+                      <span className="font-mono text-brand-navy/80 text-[10px] sm:text-[11px] flex items-center gap-1">
                         <Calendar className="w-3 h-3 text-brand-teal" />
                         {new Date(enr.enrolled_at).toLocaleDateString()}
                       </span>
@@ -588,10 +588,10 @@ export const AdminEnrollmentsPage: React.FC = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => openStatusModal(enr)}
-                    className="w-full min-h-[44px] flex items-center justify-center gap-1.5 font-bold text-xs"
+                    className="w-full min-h-[34px] sm:min-h-[44px] flex items-center justify-center gap-1.5 font-bold text-[11px] sm:text-xs py-1"
                   >
                     Manage Status
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
               );

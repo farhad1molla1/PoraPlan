@@ -84,35 +84,35 @@ export const StudentSubjectsPage: React.FC = () => {
   const assignedMentor = mentors.length > 0 ? mentors[0] : null;
 
   return (
-    <div className="w-full py-5 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6">
 
         {/* Top Header Banner */}
         <section
           aria-labelledby="subjects-heading"
-          className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-4 sm:p-7 shadow-brutal-sm sm:shadow-brutal space-y-3.5 sm:space-y-4"
+          className="border sm:border-2 border-brand-dark bg-brand-navy text-brand-bg p-2.5 sm:p-7 shadow-none sm:shadow-brutal space-y-2.5 sm:space-y-4"
         >
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 sm:gap-4">
+            <div className="space-y-1 sm:space-y-1.5">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <Link
                   to="/student/dashboard"
-                  className="inline-flex items-center gap-1 font-mono text-xs uppercase font-bold text-brand-gold hover:underline"
+                  className="inline-flex items-center gap-1 font-mono text-[11px] sm:text-xs uppercase font-bold text-brand-gold hover:underline"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
                   Dashboard
                 </Link>
                 <span className="text-brand-bg/50 font-mono text-xs">/</span>
-                <span className="font-mono text-xs uppercase text-brand-teal font-bold tracking-wider">
+                <span className="font-mono text-[10px] sm:text-xs uppercase text-brand-teal font-bold tracking-wider">
                   SUBJECTS
                 </span>
               </div>
 
-              <h1 id="subjects-heading" className="text-xl sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
+              <h1 id="subjects-heading" className="text-lg sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
                 Subjects
               </h1>
 
-              <p className="text-xs sm:text-sm text-brand-bg/85 font-sans max-w-2xl leading-relaxed">
+              <p className="text-[11px] sm:text-sm text-brand-bg/85 font-sans max-w-2xl leading-relaxed">
                 Your university courses and subjects organized by your mentor. Each subject anchors your study plans, tasks, and practice exercises.
               </p>
             </div>
@@ -125,15 +125,15 @@ export const StudentSubjectsPage: React.FC = () => {
           </div>
 
           {/* Quick Context Bar */}
-          <div className="p-3 border-2 border-brand-dark bg-brand-paper text-brand-dark text-xs font-sans flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-brutal-xs">
-            <div className="flex items-center gap-2">
-              <Compass className="w-4 h-4 text-brand-teal shrink-0 stroke-[2.2]" />
+          <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper text-brand-dark text-[11px] sm:text-xs font-sans flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 shadow-none sm:shadow-brutal-xs">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal shrink-0 stroke-[2.2]" />
               <span>
                 <span className="font-bold text-brand-navy">Mentorship Structure:</span> Subjects are mapped from your university syllabus by your mentor.
               </span>
             </div>
             {assignedMentor && (
-              <span className="font-mono text-[11px] text-brand-muted">
+              <span className="font-mono text-[10px] sm:text-[11px] text-brand-muted">
                 Curated with Mentor: <strong className="text-brand-navy">{assignedMentor.full_name}</strong>
               </span>
             )}
@@ -169,19 +169,19 @@ export const StudentSubjectsPage: React.FC = () => {
 
         {/* Content: List of Subjects */}
         {!loading && !error && subjects.length > 0 && (
-          <section aria-label="Assigned Study Areas List" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+          <section aria-label="Assigned Study Areas List" className="space-y-2.5 sm:space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-5">
               {subjects.map((subject) => (
                 <div
                   key={subject.id}
-                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 flex flex-col justify-between space-y-3 sm:space-y-4 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform"
+                  className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-5 flex flex-col justify-between space-y-2 sm:space-y-4 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform"
                 >
-                  <div className="space-y-2.5">
+                  <div className="space-y-1.5 sm:space-y-2.5">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
+                      <div className="space-y-0.5 sm:space-y-1">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
                           {subject.code && (
-                            <span className="font-mono text-[10px] font-extrabold uppercase px-2 py-0.5 border border-brand-dark bg-brand-paper-tint text-brand-navy shadow-brutal-xs">
+                            <span className="font-mono text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 sm:px-2 py-0.2 sm:py-0.5 border border-brand-dark bg-brand-paper-tint text-brand-navy shadow-none sm:shadow-brutal-xs">
                               {subject.code}
                             </span>
                           )}
@@ -189,30 +189,30 @@ export const StudentSubjectsPage: React.FC = () => {
                             {subject.status.toUpperCase()}
                           </Badge>
                         </div>
-                        <h2 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy">
+                        <h2 className="font-heading font-extrabold text-sm sm:text-lg text-brand-navy">
                           {subject.name}
                         </h2>
                       </div>
 
-                      <div className="w-9 h-9 p-1 border-2 border-brand-dark bg-brand-teal-light flex items-center justify-center shrink-0 shadow-brutal-xs">
-                        <BookOpen className="w-5 h-5 text-brand-navy stroke-[2.2]" />
+                      <div className="w-7 h-7 sm:w-9 sm:h-9 p-0.5 sm:p-1 border sm:border-2 border-brand-dark bg-brand-teal-light flex items-center justify-center shrink-0 shadow-none sm:shadow-brutal-xs">
+                        <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-brand-navy stroke-[2.2]" />
                       </div>
                     </div>
 
-                    <p className="text-xs text-brand-dark/85 font-sans leading-relaxed line-clamp-3">
+                    <p className="text-[11px] sm:text-xs text-brand-dark/85 font-sans leading-relaxed line-clamp-3">
                       {subject.description || 'Core syllabus study area for disciplined study sessions and problem practice.'}
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-brand-dark/20 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-[11px] font-mono text-brand-muted">
-                      <Calendar className="w-3.5 h-3.5" />
+                  <div className="pt-2 sm:pt-3 border-t border-brand-dark/20 flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-mono text-brand-muted">
+                      <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       <span>{subject.created_at ? `Added ${new Date(subject.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : 'Enrolled'}</span>
                     </div>
 
                     <Link
                       to={`/student/subjects/${subject.id}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-navy text-brand-bg text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-dark transition-colors"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-navy text-brand-bg text-[11px] sm:text-xs font-mono font-bold shadow-none sm:shadow-brutal-xs hover:bg-brand-dark transition-colors min-h-[34px] sm:min-h-0"
                     >
                       <span>Open Area</span>
                       <ArrowRight className="w-3.5 h-3.5" />

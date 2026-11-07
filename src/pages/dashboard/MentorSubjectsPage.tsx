@@ -240,35 +240,35 @@ export const MentorSubjectsPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full py-5 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6">
 
         {/* Top Header Banner */}
         <section
           aria-labelledby="mentor-subjects-heading"
-          className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-4 sm:p-7 shadow-brutal-sm sm:shadow-brutal space-y-3.5 sm:space-y-4"
+          className="border sm:border-2 border-brand-dark bg-brand-navy text-brand-bg p-2.5 sm:p-7 shadow-none sm:shadow-brutal space-y-2 sm:space-y-4"
         >
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-            <div className="space-y-1.5">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 sm:gap-4">
+            <div className="space-y-1 sm:space-y-1.5">
               <div className="flex items-center gap-2">
                 <Link
                   to="/mentor/dashboard"
-                  className="inline-flex items-center gap-1 font-mono text-xs uppercase font-bold text-brand-gold hover:underline"
+                  className="inline-flex items-center gap-1 font-mono text-[11px] sm:text-xs uppercase font-bold text-brand-gold hover:underline"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
                   Mentor Dashboard
                 </Link>
                 <span className="text-brand-bg/50 font-mono text-xs">/</span>
-                <span className="font-mono text-xs uppercase text-brand-gold font-bold tracking-wider">
+                <span className="font-mono text-[10px] sm:text-xs uppercase text-brand-gold font-bold tracking-wider">
                   SUBJECTS
                 </span>
               </div>
 
-              <h1 id="mentor-subjects-heading" className="text-xl sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
+              <h1 id="mentor-subjects-heading" className="text-lg sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
                 Subjects
               </h1>
 
-              <p className="text-xs sm:text-sm text-brand-bg/85 font-sans max-w-2xl leading-relaxed">
+              <p className="text-[11px] sm:text-sm text-brand-bg/85 font-sans max-w-2xl leading-relaxed">
                 Configure syllabus subjects for your assigned students based on their university coursework.
               </p>
             </div>
@@ -276,11 +276,11 @@ export const MentorSubjectsPage: React.FC = () => {
             <div className="w-full sm:w-auto shrink-0">
               <Button
                 variant="primary"
-                size="md"
+                size="sm"
                 onClick={openCreateModal}
                 disabled={loadingStudents || students.length === 0}
-                leftIcon={<Plus className="w-4 h-4 stroke-[2.5]" />}
-                className="w-full sm:w-auto bg-brand-gold text-brand-dark hover:bg-brand-gold-light border-2 border-brand-dark"
+                leftIcon={<Plus className="w-3.5 h-3.5 stroke-[2.5]" />}
+                className="w-full sm:w-auto bg-brand-gold text-brand-dark hover:bg-brand-gold-light border sm:border-2 border-brand-dark"
               >
                 Add Subject
               </Button>
@@ -290,7 +290,7 @@ export const MentorSubjectsPage: React.FC = () => {
 
         {/* Success / Error Alerts */}
         {successMessage && (
-          <div className="p-3 border-2 border-brand-dark bg-emerald-50 text-emerald-900 text-xs font-sans flex items-center justify-between shadow-brutal-xs">
+          <div className="p-2.5 sm:p-3 border sm:border-2 border-brand-dark bg-emerald-50 text-emerald-900 text-xs font-sans flex items-center justify-between shadow-none sm:shadow-brutal-xs">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
               <span>{successMessage}</span>
@@ -306,7 +306,7 @@ export const MentorSubjectsPage: React.FC = () => {
         )}
 
         {errorMessage && (
-          <div className="p-3 border-2 border-brand-dark bg-red-50 text-red-900 text-xs font-sans flex items-center justify-between shadow-brutal-xs">
+          <div className="p-2.5 sm:p-3 border sm:border-2 border-brand-dark bg-red-50 text-red-900 text-xs font-sans flex items-center justify-between shadow-none sm:shadow-brutal-xs">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-red-700 shrink-0" />
               <span>{errorMessage}</span>
@@ -322,23 +322,23 @@ export const MentorSubjectsPage: React.FC = () => {
         )}
 
         {/* Student Selector Bar */}
-        <section aria-label="Target Student Selection" className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-4 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <section aria-label="Target Student Selection" className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-4 space-y-2 sm:space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
             <div className="flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 text-brand-teal shrink-0 stroke-[2.2]" />
-              <label htmlFor="student-selector" className="font-heading font-extrabold text-sm text-brand-navy">
+              <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal shrink-0 stroke-[2.2]" />
+              <label htmlFor="student-selector" className="font-heading font-extrabold text-xs sm:text-sm text-brand-navy">
                 Select Assigned Student:
               </label>
             </div>
 
             {loadingStudents ? (
-              <span className="font-mono text-xs text-brand-muted">Loading assigned students roster...</span>
+              <span className="font-mono text-[10px] sm:text-xs text-brand-muted">Loading assigned students roster...</span>
             ) : students.length > 0 ? (
               <select
                 id="student-selector"
                 value={selectedStudentId}
                 onChange={(e) => setSelectedStudentId(e.target.value)}
-                className="w-full sm:w-auto px-3 py-2 sm:py-1.5 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold font-sans text-brand-dark focus:bg-brand-teal-light focus:outline-none"
+                className="w-full sm:w-auto px-2.5 sm:px-3 py-1.5 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[36px] sm:min-h-0 font-bold font-sans text-brand-dark focus:bg-brand-teal-light focus:outline-none"
               >
                 {students.map((student) => (
                   <option key={student.id} value={student.id}>
@@ -352,17 +352,17 @@ export const MentorSubjectsPage: React.FC = () => {
           </div>
 
           {activeStudent && (
-            <div className="p-2.5 border border-brand-dark/20 bg-brand-paper-tint text-xs font-mono flex flex-wrap items-center justify-between gap-2">
+            <div className="p-2 sm:p-2.5 border border-brand-dark/20 bg-brand-paper-tint text-xs font-mono flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
-                <span className="font-bold text-brand-navy">{activeStudent.full_name}</span>
+                <span className="font-bold text-brand-navy text-[11px] sm:text-xs">{activeStudent.full_name}</span>
                 {activeStudent.poraplan_id && (
                   <>
                     <span>•</span>
-                    <span className="text-brand-gold font-bold">{activeStudent.poraplan_id}</span>
+                    <span className="text-brand-gold font-bold text-[11px] sm:text-xs">{activeStudent.poraplan_id}</span>
                   </>
                 )}
                 <span>•</span>
-                <span className="text-brand-muted truncate max-w-[150px] sm:max-w-[200px]">{activeStudent.email}</span>
+                <span className="text-brand-muted truncate max-w-[150px] sm:max-w-[200px] text-[10px] sm:text-xs">{activeStudent.email}</span>
               </div>
               <Badge variant="teal" size="sm" className="shrink-0">ACTIVE ROSTER</Badge>
             </div>
@@ -371,47 +371,47 @@ export const MentorSubjectsPage: React.FC = () => {
 
         {/* Content Section: Study Areas for Selected Student */}
         {loadingStudents || loadingSubjects ? (
-          <div className="p-8 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center space-y-2">
-            <Loader2 className="w-6 h-6 animate-spin text-brand-teal mx-auto" />
-            <p className="font-heading font-bold text-sm text-brand-navy">
+          <div className="p-6 sm:p-8 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal text-center space-y-2">
+            <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin text-brand-teal mx-auto" />
+            <p className="font-heading font-bold text-xs sm:text-sm text-brand-navy">
               Loading Study Areas...
             </p>
           </div>
         ) : students.length === 0 ? (
           /* Empty State: Mentor has no students on roster */
-          <div className="p-8 border-2 border-dashed border-brand-dark/40 bg-brand-paper shadow-brutal text-center space-y-3">
-            <div className="w-12 h-12 border-2 border-brand-dark bg-brand-teal-light mx-auto flex items-center justify-center">
-              <Users className="w-6 h-6 text-brand-teal stroke-[2.2]" />
+          <div className="p-6 sm:p-8 border sm:border-2 border-dashed border-brand-dark/40 bg-brand-paper shadow-none sm:shadow-brutal text-center space-y-2.5 sm:space-y-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 border sm:border-2 border-brand-dark bg-brand-teal-light mx-auto flex items-center justify-center">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-brand-teal stroke-[2.2]" />
             </div>
-            <h2 className="font-heading font-extrabold text-base text-brand-navy">
+            <h2 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
               No Students Assigned to Your Roster
             </h2>
-            <p className="text-xs text-brand-muted max-w-md mx-auto leading-relaxed">
+            <p className="text-[11px] sm:text-xs text-brand-muted max-w-md mx-auto leading-relaxed">
               You must have enrolled students assigned in the <span className="font-mono">mentor_students</span> table before creating study areas. Contact the system administrator (PPA001) to allocate students to your mentor account.
             </p>
           </div>
         ) : subjects.length > 0 ? (
           /* List of Subjects for Active Student */
-          <div className="space-y-4">
+          <div className="space-y-2.5 sm:space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-brand-teal stroke-[2.5]" />
+              <h2 className="font-heading font-extrabold text-xs sm:text-base text-brand-navy flex items-center gap-1.5 sm:gap-2">
+                <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal stroke-[2.5]" />
                 Enrolled Study Areas for {activeStudent?.full_name} ({subjects.length})
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
               {subjects.map((subject) => (
                 <div
                   key={subject.id}
-                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 flex flex-col justify-between space-y-3 sm:space-y-4"
+                  className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-5 flex flex-col justify-between space-y-2 sm:space-y-4"
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
                           {subject.code && (
-                            <span className="font-mono text-[10px] font-extrabold uppercase px-2 py-0.5 border border-brand-dark bg-brand-paper-tint text-brand-navy shadow-brutal-xs">
+                            <span className="font-mono text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 py-0.2 sm:py-0.5 border border-brand-dark bg-brand-paper-tint text-brand-navy shadow-none sm:shadow-brutal-xs">
                               {subject.code}
                             </span>
                           )}
@@ -419,7 +419,7 @@ export const MentorSubjectsPage: React.FC = () => {
                             {subject.status.toUpperCase()}
                           </Badge>
                         </div>
-                        <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy">
+                        <h3 className="font-heading font-extrabold text-xs sm:text-lg text-brand-navy">
                           {subject.name}
                         </h3>
                       </div>
@@ -428,7 +428,7 @@ export const MentorSubjectsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => openEditModal(subject)}
-                          className="p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-paper-tint shadow-brutal-xs"
+                          className="p-1 sm:p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-paper-tint shadow-none sm:shadow-brutal-xs"
                           title="Edit Study Area"
                           aria-label="Edit Study Area"
                         >
@@ -437,7 +437,7 @@ export const MentorSubjectsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => openDeleteModal(subject)}
-                          className="p-1.5 border border-brand-dark bg-brand-paper hover:bg-red-50 text-brand-dark hover:text-red-700 shadow-brutal-xs"
+                          className="p-1 sm:p-1.5 border border-brand-dark bg-brand-paper hover:bg-red-50 text-brand-dark hover:text-red-700 shadow-none sm:shadow-brutal-xs"
                           title="Delete Study Area"
                           aria-label="Delete Study Area"
                         >
@@ -446,14 +446,14 @@ export const MentorSubjectsPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <p className="text-xs text-brand-dark/85 font-sans leading-relaxed line-clamp-3">
+                    <p className="text-[11px] sm:text-xs text-brand-dark/85 font-sans leading-relaxed line-clamp-3">
                       {subject.description || 'Core syllabus study area for disciplined study sessions and problem practice.'}
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono">
-                    <div className="flex items-center gap-1.5 text-brand-muted text-[11px]">
-                      <Calendar className="w-3.5 h-3.5" />
+                  <div className="pt-2 sm:pt-3 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono">
+                    <div className="flex items-center gap-1.5 text-brand-muted text-[10px] sm:text-[11px]">
+                      <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       <span>{subject.created_at ? new Date(subject.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Configured'}</span>
                     </div>
 

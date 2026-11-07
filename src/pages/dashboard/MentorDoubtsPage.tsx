@@ -357,20 +357,20 @@ export const MentorDoubtsPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* 1. Header & Breadcrumb */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b-2 border-brand-dark pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-4 border-b sm:border-b-2 border-brand-dark pb-2.5 sm:pb-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-brand-muted uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono text-brand-muted uppercase tracking-wider mb-0.5 sm:mb-1">
             <Link to="/mentor" className="hover:text-brand-teal transition-colors">
               Mentor Dashboard
             </Link>
             <ChevronRight className="w-3 h-3" />
             <span className="text-brand-navy font-bold">Doubts</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-brand-navy flex items-center gap-2.5">
-            <HelpCircle className="w-7 h-7 text-brand-teal" />
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-heading font-extrabold text-brand-navy flex items-center gap-2">
+            <HelpCircle className="w-5 h-5 sm:w-7 sm:h-7 text-brand-teal" />
             Student Doubts
           </h1>
-          <p className="text-xs sm:text-sm text-brand-muted mt-1">
+          <p className="text-[11px] sm:text-sm text-brand-muted mt-0.5 sm:mt-1">
             Review questions, clarify conceptual difficulties, and provide guidance for your assigned students.
           </p>
         </div>
@@ -383,41 +383,41 @@ export const MentorDoubtsPage: React.FC = () => {
             disabled={refreshing}
             className="flex items-center gap-1.5"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span>Sync</span>
           </Button>
         </div>
       </div>
 
       {/* 2. Metrics Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-        <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
-          <span className="font-mono text-[11px] uppercase font-bold text-brand-muted">Total Questions</span>
-          <span className="text-xl sm:text-2xl font-heading font-extrabold text-brand-navy mt-1">{totalCount}</span>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+        <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between">
+          <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-brand-muted">Total Questions</span>
+          <span className="text-lg sm:text-2xl font-heading font-extrabold text-brand-navy mt-0.5 sm:mt-1">{totalCount}</span>
         </div>
 
-        <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-gold/15 shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
+        <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-gold/15 shadow-none sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[11px] uppercase font-bold text-amber-800">Awaiting Reply</span>
+            <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-amber-800">Awaiting Reply</span>
             <Clock className="w-3.5 h-3.5 text-amber-700" />
           </div>
-          <span className="text-xl sm:text-2xl font-heading font-extrabold text-amber-900 mt-1">{awaitingCount}</span>
+          <span className="text-lg sm:text-2xl font-heading font-extrabold text-amber-900 mt-0.5 sm:mt-1">{awaitingCount}</span>
         </div>
 
-        <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-teal/15 shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
+        <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-teal/15 shadow-none sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[11px] uppercase font-bold text-teal-800">Answered</span>
+            <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-teal-800">Answered</span>
             <MessageSquare className="w-3.5 h-3.5 text-brand-teal" />
           </div>
-          <span className="text-xl sm:text-2xl font-heading font-extrabold text-teal-900 mt-1">{answeredCount}</span>
+          <span className="text-lg sm:text-2xl font-heading font-extrabold text-teal-900 mt-0.5 sm:mt-1">{answeredCount}</span>
         </div>
 
-        <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-emerald-50 shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
+        <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-emerald-50 shadow-none sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[11px] uppercase font-bold text-emerald-800">Resolved</span>
+            <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-emerald-800">Resolved</span>
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
           </div>
-          <span className="text-xl sm:text-2xl font-heading font-extrabold text-emerald-900 mt-1">{resolvedCount}</span>
+          <span className="text-lg sm:text-2xl font-heading font-extrabold text-emerald-900 mt-0.5 sm:mt-1">{resolvedCount}</span>
         </div>
       </div>
 
@@ -435,26 +435,26 @@ export const MentorDoubtsPage: React.FC = () => {
       )}
 
       {/* 3. Filter Bar */}
-      <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row items-stretch md:items-center gap-3">
+      <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col md:flex-row items-stretch md:items-center gap-2 sm:gap-3">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
+          <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
           <input
             type="text"
             placeholder="Search by student name, question title, or content..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 sm:py-1.5 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+            className="w-full pl-9 pr-3 py-1.5 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[38px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Student Filter */}
-          <div className="flex items-center gap-1.5 border-2 border-brand-dark bg-brand-paper px-2.5 py-1.5 sm:py-1 min-h-[44px] sm:min-h-0 text-xs shadow-brutal-xs">
-            <span className="font-mono text-[11px] uppercase font-bold text-brand-muted">Student:</span>
+          <div className="flex items-center gap-1.5 border sm:border-2 border-brand-dark bg-brand-paper px-2 py-1 min-h-[36px] sm:min-h-0 text-xs shadow-none sm:shadow-brutal-xs">
+            <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-muted">Student:</span>
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="font-sans text-base sm:text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[40px] sm:min-h-0 py-1"
+              className="font-sans text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[32px] sm:min-h-0 py-0.5"
               aria-label="Filter doubts by assigned student"
             >
               <option value="all">All Assigned Students</option>
@@ -467,12 +467,12 @@ export const MentorDoubtsPage: React.FC = () => {
           </div>
 
           {/* Status Filter */}
-          <div className="flex items-center gap-1.5 border-2 border-brand-dark bg-brand-paper px-2.5 py-1.5 sm:py-1 min-h-[44px] sm:min-h-0 text-xs shadow-brutal-xs">
-            <span className="font-mono text-[11px] uppercase font-bold text-brand-muted">Status:</span>
+          <div className="flex items-center gap-1.5 border sm:border-2 border-brand-dark bg-brand-paper px-2 py-1 min-h-[36px] sm:min-h-0 text-xs shadow-none sm:shadow-brutal-xs">
+            <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-muted">Status:</span>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value as any)}
-              className="font-sans text-base sm:text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[40px] sm:min-h-0 py-1"
+              className="font-sans text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[32px] sm:min-h-0 py-0.5"
               aria-label="Filter doubts by status"
             >
               <option value="all">All Statuses</option>
@@ -486,15 +486,15 @@ export const MentorDoubtsPage: React.FC = () => {
 
       {/* 4. Doubts List */}
       {loading ? (
-        <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col items-center justify-center text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-teal mb-3" />
-          <p className="font-mono text-xs text-brand-muted uppercase">Loading student doubts...</p>
+        <div className="p-6 sm:p-12 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col items-center justify-center text-center">
+          <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-brand-teal mb-2 sm:mb-3" />
+          <p className="font-mono text-[10px] sm:text-xs text-brand-muted uppercase">Loading student doubts...</p>
         </div>
       ) : filteredDoubts.length === 0 ? (
-        <div className="p-10 border-2 border-dashed border-brand-dark/40 bg-brand-paper/50 rounded flex flex-col items-center justify-center text-center">
-          <HelpCircle className="w-10 h-10 text-brand-muted mb-2 opacity-50" />
-          <h3 className="font-heading font-bold text-sm text-brand-navy">No Doubt Inquiries Found</h3>
-          <p className="text-xs text-brand-muted max-w-sm mt-1">
+        <div className="p-6 sm:p-10 border sm:border-2 border-dashed border-brand-dark/40 bg-brand-paper/50 rounded flex flex-col items-center justify-center text-center">
+          <HelpCircle className="w-8 h-8 sm:w-10 sm:h-10 text-brand-muted mb-2 opacity-50" />
+          <h3 className="font-heading font-bold text-xs sm:text-sm text-brand-navy">No Doubt Inquiries Found</h3>
+          <p className="text-[11px] sm:text-xs text-brand-muted max-w-sm mt-1">
             {students.length === 0
               ? 'You do not have any assigned students paired with your account yet.'
               : searchQuery || selectedStatus !== 'all' || selectedStudentId !== 'all'
@@ -508,14 +508,14 @@ export const MentorDoubtsPage: React.FC = () => {
                 setSelectedStatus('all');
                 setSelectedStudentId('all');
               }}
-              className="mt-3 font-mono text-xs text-brand-teal underline font-bold"
+              className="mt-3 font-mono text-[11px] sm:text-xs text-brand-teal underline font-bold"
             >
               Reset Filters
             </button>
           )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2.5 sm:space-y-3">
           {filteredDoubts.map((doubt) => {
             const isResolved = doubt.status === 'resolved';
             const isAnswered = doubt.status === 'answered';
@@ -524,8 +524,8 @@ export const MentorDoubtsPage: React.FC = () => {
               <div
                 key={doubt.id}
                 onClick={() => setActiveDoubt(doubt)}
-                className={`p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform cursor-pointer flex flex-col justify-between group ${
-                  doubt.status === 'open' ? 'border-l-4 border-l-brand-gold bg-amber-50/15' : ''
+                className={`p-2.5 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform cursor-pointer flex flex-col justify-between group ${
+                  doubt.status === 'open' ? 'border-l-3 sm:border-l-4 border-l-brand-gold bg-amber-50/15' : ''
                 }`}
               >
                 <div>

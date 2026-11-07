@@ -351,19 +351,19 @@ export const MentorAssignmentsPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* Header Banner */}
-      <div className="bg-brand-bg border-4 border-brand-dark p-6 shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-brand-bg border-2 sm:border-4 border-brand-dark p-2.5 sm:p-6 shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono text-xs font-bold text-brand-gold uppercase tracking-wider">
+          <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
+            <span className="font-mono text-[10px] sm:text-xs font-bold text-brand-gold uppercase tracking-wider">
               Mentorship Practice
             </span>
           </div>
-          <h1 className="font-heading font-black text-2xl md:text-3xl text-brand-navy">
+          <h1 className="font-heading font-black text-lg sm:text-2xl md:text-3xl text-brand-navy">
             Assignments
           </h1>
-          <p className="text-sm text-brand-muted mt-1 max-w-2xl">
+          <p className="text-[11px] sm:text-sm text-brand-muted mt-0.5 sm:mt-1 max-w-2xl">
             Create and assign practice problem sets, questions, and revision exercises for your assigned students.
           </p>
         </div>
@@ -372,11 +372,11 @@ export const MentorAssignmentsPage: React.FC = () => {
           {students.length > 0 && (
             <Button
               variant="primary"
-              size="md"
+              size="sm"
               onClick={handleOpenCreateModal}
-              className="flex items-center gap-2 shadow-brutal"
+              className="flex items-center gap-1.5 sm:gap-2 shadow-none sm:shadow-brutal"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               New Assignment
             </Button>
           )}
@@ -384,16 +384,16 @@ export const MentorAssignmentsPage: React.FC = () => {
       </div>
 
       {/* Student Selector Card */}
-      <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-5 shadow-brutal-xs sm:shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-brand-gold/20 border-2 border-brand-dark flex items-center justify-center font-bold text-brand-navy">
-            <Users className="w-5 h-5 text-brand-navy" />
+      <div className="bg-brand-paper border sm:border-3 border-brand-dark p-2.5 sm:p-5 shadow-none sm:shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-brand-gold/20 border sm:border-2 border-brand-dark flex items-center justify-center font-bold text-brand-navy">
+            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-brand-navy" />
           </div>
           <div>
-            <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-brand-muted">
+            <div className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-brand-muted">
               Select Assigned Student
             </div>
-            <div className="font-heading font-bold text-base text-brand-navy flex items-center gap-2">
+            <div className="font-heading font-bold text-xs sm:text-base text-brand-navy flex items-center gap-1.5 sm:gap-2">
               {selectedStudent ? (
                 <>
                   <Link
@@ -402,12 +402,12 @@ export const MentorAssignmentsPage: React.FC = () => {
                   >
                     {selectedStudent.full_name}
                   </Link>
-                  <span className="font-mono text-xs font-normal text-brand-muted">
+                  <span className="font-mono text-[10px] sm:text-xs font-normal text-brand-muted">
                     ({selectedStudent.poraplan_id})
                   </span>
                   <Link
                     to={`/profile/${selectedStudent.id}`}
-                    className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-brand-dark bg-brand-paper-tint text-[10px] font-mono font-bold text-brand-navy shadow-brutal-xs hover:bg-brand-paper"
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-brand-dark bg-brand-paper-tint text-[9px] sm:text-[10px] font-mono font-bold text-brand-navy shadow-none sm:shadow-brutal-xs hover:bg-brand-paper"
                   >
                     <User className="w-3 h-3 text-brand-teal" />
                     <span>Profile</span>
@@ -421,12 +421,12 @@ export const MentorAssignmentsPage: React.FC = () => {
         </div>
 
         {loadingStudents ? (
-          <div className="flex items-center gap-2 text-xs font-mono text-brand-muted">
-            <Loader2 className="w-4 h-4 animate-spin text-brand-teal" />
+          <div className="flex items-center gap-2 text-[10px] sm:text-xs font-mono text-brand-muted">
+            <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin text-brand-teal" />
             Loading assigned students...
           </div>
         ) : students.length === 0 ? (
-          <div className="text-xs font-mono text-brand-muted bg-brand-paper px-3 py-1.5 border border-brand-dark">
+          <div className="text-[10px] sm:text-xs font-mono text-brand-muted bg-brand-paper px-2.5 py-1 sm:px-3 sm:py-1.5 border border-brand-dark">
             0 Assigned Students
           </div>
         ) : (
@@ -434,7 +434,7 @@ export const MentorAssignmentsPage: React.FC = () => {
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="bg-brand-paper border-2 border-brand-dark px-3 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono font-bold text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="bg-brand-paper border sm:border-2 border-brand-dark px-2.5 sm:px-3 py-1.5 sm:py-1.5 text-base sm:text-xs min-h-[36px] sm:min-h-0 font-mono font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
               aria-label="Filter by assigned student"
             >
               {students.map((student) => (
@@ -449,56 +449,52 @@ export const MentorAssignmentsPage: React.FC = () => {
 
       {/* Error Banner */}
       {errorMessage && (
-        <div className="bg-red-50 border-3 border-red-500 p-4 text-red-700 flex items-start gap-3 shadow-brutal-sm">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <div className="bg-red-50 border sm:border-3 border-red-500 p-2.5 sm:p-4 text-red-700 flex items-start gap-2.5 sm:gap-3 shadow-none sm:shadow-brutal-sm">
+          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-bold text-sm">Action Failed</h4>
-            <p className="text-xs mt-0.5">{errorMessage}</p>
+            <h4 className="font-bold text-xs sm:text-sm">Action Failed</h4>
+            <p className="text-[11px] sm:text-xs mt-0.5">{errorMessage}</p>
           </div>
         </div>
       )}
 
       {/* Filter Tabs & Stats */}
       {selectedStudentId && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-brand-dark pb-3">
-          <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
             <button
               onClick={() => setFilterState('all')}
-              className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
-                filterState === 'all'
-                  ? 'bg-brand-navy text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                  : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
-              }`}
+              className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${filterState === 'all'
+                ? 'bg-brand-navy text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
+                }`}
             >
               All Sets ({assignments.length})
             </button>
             <button
               onClick={() => setFilterState('pending')}
-              className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
-                filterState === 'pending'
-                  ? 'bg-brand-gold text-brand-dark shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                  : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
-              }`}
+              className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${filterState === 'pending'
+                ? 'bg-brand-gold text-brand-dark shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
+                }`}
             >
               Awaiting Student ({assignments.filter((a) => !a.submission).length})
             </button>
             <button
               onClick={() => setFilterState('submitted')}
-              className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
-                filterState === 'submitted'
-                  ? 'bg-brand-teal text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                  : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
-              }`}
+              className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${filterState === 'submitted'
+                ? 'bg-brand-teal text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
+                }`}
             >
               Needs Review ({assignments.filter((a) => a.submission && a.submission.status !== 'reviewed').length})
             </button>
             <button
               onClick={() => setFilterState('reviewed')}
-              className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
-                filterState === 'reviewed'
-                  ? 'bg-brand-navy text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                  : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
-              }`}
+              className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${filterState === 'reviewed'
+                ? 'bg-brand-navy text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
+                }`}
             >
               Reviewed ({assignments.filter((a) => a.submission && a.submission.status === 'reviewed').length})
             </button>
@@ -621,8 +617,8 @@ export const MentorAssignmentsPage: React.FC = () => {
                             {assignment.submission?.submission_type === 'link'
                               ? assignment.submission.link_url
                               : assignment.submission?.submission_type === 'file'
-                              ? assignment.submission.file_name
-                              : assignment.submission?.content}
+                                ? assignment.submission.file_name
+                                : assignment.submission?.content}
                           </span>
                         </div>
                         <Button

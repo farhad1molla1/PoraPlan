@@ -215,17 +215,17 @@ export const AdminUsersPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 py-6">
+    <div className="space-y-3 sm:space-y-8 max-w-7xl mx-auto px-2.5 sm:px-6 py-3 sm:py-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border-default pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4 border-b border-border-default pb-2.5 sm:pb-6">
         <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-forest-900/10 dark:bg-forest-100/10 text-forest-800 dark:text-forest-200">
-              <Users className="w-6 h-6" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-forest-900/10 dark:bg-forest-100/10 text-forest-800 dark:text-forest-200">
+              <Users className="w-4 h-4 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-serif font-bold text-text-primary">User Directory</h1>
-              <p className="text-sm text-text-secondary mt-0.5">
+              <h1 className="text-lg sm:text-2xl font-serif font-bold text-text-primary">User Directory</h1>
+              <p className="text-xs sm:text-sm text-text-secondary mt-0.5">
                 Centralized registry of students, academic mentors, and administrative personnel.
               </p>
             </div>
@@ -237,9 +237,9 @@ export const AdminUsersPage: React.FC = () => {
           size="sm"
           onClick={loadUsers}
           disabled={loading}
-          className="flex items-center gap-2 self-stretch sm:self-auto"
+          className="flex items-center gap-1.5 sm:gap-2 self-stretch sm:self-auto min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           Refresh Directory
         </Button>
       </div>
@@ -247,17 +247,17 @@ export const AdminUsersPage: React.FC = () => {
       {/* Global Action Banner */}
       {actionNotice && (
         <div
-          className={`p-4 rounded-xl border flex items-center justify-between gap-3 text-sm animate-fade-in ${
+          className={`p-2.5 sm:p-4 rounded-lg sm:rounded-xl border flex items-center justify-between gap-2.5 sm:gap-3 text-xs sm:text-sm animate-fade-in ${
             actionNotice.type === 'success'
               ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
               : 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-300'
           }`}
         >
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             {actionNotice.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
             ) : (
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
             )}
             <span>{actionNotice.message}</span>
           </div>
@@ -265,61 +265,61 @@ export const AdminUsersPage: React.FC = () => {
             onClick={() => setActionNotice(null)}
             className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
       )}
 
       {/* Stat Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-        <div className="p-3 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
-          <p className="text-[11px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Total Members</p>
-          <p className="text-xl sm:text-2xl font-bold font-serif text-text-primary mt-1">{stats.total}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl border border-border-default bg-surface-card shadow-sm">
+          <p className="text-[10px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Total Members</p>
+          <p className="text-base sm:text-2xl font-bold font-serif text-text-primary mt-0.5 sm:mt-1">{stats.total}</p>
         </div>
-        <div className="p-3 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
+        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl border border-border-default bg-surface-card shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Scholars</p>
-            <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-forest-700" />
+            <p className="text-[10px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Scholars</p>
+            <GraduationCap className="w-3 h-3 sm:w-4 sm:h-4 text-forest-700" />
           </div>
-          <p className="text-xl sm:text-2xl font-bold font-serif text-forest-900 dark:text-forest-100 mt-1">{stats.students}</p>
+          <p className="text-base sm:text-2xl font-bold font-serif text-forest-900 dark:text-forest-100 mt-0.5 sm:mt-1">{stats.students}</p>
         </div>
-        <div className="p-3 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
+        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl border border-border-default bg-surface-card shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Mentors</p>
-            <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-700" />
+            <p className="text-[10px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Mentors</p>
+            <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 text-teal-700" />
           </div>
-          <p className="text-xl sm:text-2xl font-bold font-serif text-teal-900 dark:text-teal-100 mt-1">{stats.mentors}</p>
+          <p className="text-base sm:text-2xl font-bold font-serif text-teal-900 dark:text-teal-100 mt-0.5 sm:mt-1">{stats.mentors}</p>
         </div>
-        <div className="p-3 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
+        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl border border-border-default bg-surface-card shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Admins</p>
-            <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-700" />
+            <p className="text-[10px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Admins</p>
+            <Shield className="w-3 h-3 sm:w-4 sm:h-4 text-amber-700" />
           </div>
-          <p className="text-xl sm:text-2xl font-bold font-serif text-amber-900 dark:text-amber-100 mt-1">{stats.admins}</p>
+          <p className="text-base sm:text-2xl font-bold font-serif text-amber-900 dark:text-amber-100 mt-0.5 sm:mt-1">{stats.admins}</p>
         </div>
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="p-3 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-sm flex flex-col md:flex-row gap-3 sm:gap-4 justify-between items-stretch md:items-center">
+      <div className="p-2.5 sm:p-4 rounded-lg sm:rounded-xl border border-border-default bg-surface-card shadow-sm flex flex-col md:flex-row gap-2 sm:gap-4 justify-between items-stretch md:items-center">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+          <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder="Search by name, email, or PoraPlan ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 focus:border-transparent text-text-primary"
+            className="w-full pl-9 pr-3 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 focus:border-transparent text-text-primary"
           />
         </div>
 
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
           {/* Role Filter */}
-          <div className="flex items-center gap-2 flex-1 sm:flex-none">
-            <Filter className="w-4 h-4 text-text-muted" />
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-1 sm:flex-none">
+            <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-text-muted" />
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value as any)}
-              className="py-2 px-3 text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 text-text-primary w-full sm:w-auto"
+              className="py-1.5 px-2.5 sm:py-2 sm:px-3 text-base sm:text-sm min-h-[38px] sm:min-h-0 bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 text-text-primary w-full sm:w-auto"
             >
               <option value="all">All Roles</option>
               <option value="student">Students</option>
@@ -332,7 +332,7 @@ export const AdminUsersPage: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="py-2 px-3 text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 text-text-primary flex-1 sm:flex-none w-full sm:w-auto"
+            className="py-1.5 px-2.5 sm:py-2 sm:px-3 text-base sm:text-sm min-h-[38px] sm:min-h-0 bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 text-text-primary flex-1 sm:flex-none w-full sm:w-auto"
           >
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
@@ -344,9 +344,9 @@ export const AdminUsersPage: React.FC = () => {
 
       {/* Directory Table */}
       {loading ? (
-        <div className="p-12 text-center rounded-xl border border-border-default bg-surface-card">
-          <RefreshCw className="w-8 h-8 text-forest-700 animate-spin mx-auto mb-3" />
-          <p className="text-text-secondary text-sm">Loading member directory...</p>
+        <div className="p-8 sm:p-12 text-center rounded-lg sm:rounded-xl border border-border-default bg-surface-card">
+          <RefreshCw className="w-6 h-6 sm:w-8 sm:h-8 text-forest-700 animate-spin mx-auto mb-2 sm:mb-3" />
+          <p className="text-text-secondary text-xs sm:text-sm">Loading member directory...</p>
         </div>
       ) : error ? (
         <div className="p-8 text-center rounded-xl border border-rose-500/20 bg-rose-500/5 text-rose-800 dark:text-rose-300">
@@ -382,7 +382,7 @@ export const AdminUsersPage: React.FC = () => {
       ) : (
         <div className="rounded-xl border border-border-default bg-surface-card shadow-sm overflow-hidden">
           {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
-          <div className="lg:hidden p-2.5 sm:p-4 space-y-2.5 sm:space-y-3 bg-surface-base/30">
+          <div className="lg:hidden p-2 sm:p-4 space-y-2 sm:space-y-3 bg-surface-base/30">
             {filteredUsers.map((u) => {
               const initial = u.full_name ? u.full_name.charAt(0).toUpperCase() : '?';
               const isSelected = selectedUser?.id === u.id;
@@ -391,34 +391,34 @@ export const AdminUsersPage: React.FC = () => {
                 <div
                   key={u.id}
                   onClick={() => setSelectedUser(u)}
-                  className={`p-3.5 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-xs hover:border-forest-600 transition-all cursor-pointer space-y-2.5 sm:space-y-3 ${
+                  className={`p-2.5 sm:p-4 rounded-lg sm:rounded-xl border border-border-default bg-surface-card shadow-none sm:shadow-xs hover:border-forest-600 transition-all cursor-pointer space-y-2 sm:space-y-3 ${
                     isSelected ? 'ring-2 ring-forest-600 bg-forest-900/5 dark:bg-forest-100/5' : ''
                   }`}
                 >
                   {/* Card Header: Avatar/Initials + Name + ID + Role & Status Badges */}
-                  <div className="flex items-start justify-between gap-2.5">
-                    <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                       {u.avatar_url ? (
                         <img
                           src={u.avatar_url}
                           alt={u.full_name}
-                          className="w-10 h-10 rounded-full object-cover border border-border-default shrink-0"
+                          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-border-default shrink-0"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-forest-900/10 dark:bg-forest-100/10 text-forest-800 dark:text-forest-200 font-semibold flex items-center justify-center shrink-0 text-sm">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-forest-900/10 dark:bg-forest-100/10 text-forest-800 dark:text-forest-200 font-semibold flex items-center justify-center shrink-0 text-xs sm:text-sm">
                           {initial}
                         </div>
                       )}
                       <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-1.5 leading-tight">
-                          <p className="font-semibold text-text-primary text-sm truncate">{u.full_name}</p>
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 leading-tight">
+                          <p className="font-semibold text-text-primary text-xs sm:text-sm truncate">{u.full_name}</p>
                           {u.poraplan_id && (
-                            <span className="font-mono text-xs font-semibold px-1.5 py-0.5 rounded bg-surface-base border border-border-default text-text-primary shrink-0">
+                            <span className="font-mono text-[10px] sm:text-xs font-semibold px-1.5 py-0.5 rounded bg-surface-base border border-border-default text-text-primary shrink-0">
                               {u.poraplan_id}
                             </span>
                           )}
                         </div>
-                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-1 sm:mt-1.5">
                           <Badge variant={getRoleBadgeVariant(u.role)} size="sm">
                             {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
                           </Badge>
@@ -435,19 +435,19 @@ export const AdminUsersPage: React.FC = () => {
                   </div>
 
                   {/* Card Secondary Details */}
-                  <div className="p-2.5 rounded-lg bg-surface-base border border-border-default/70 text-xs space-y-1.5">
+                  <div className="p-2 sm:p-2.5 rounded-lg bg-surface-base border border-border-default/70 text-[11px] sm:text-xs space-y-1 sm:space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-text-muted text-[11px] flex items-center gap-1 shrink-0">
-                        <Mail className="w-3.5 h-3.5 text-text-muted" /> Email
+                      <span className="text-text-muted text-[10px] sm:text-[11px] flex items-center gap-1 shrink-0">
+                        <Mail className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-text-muted" /> Email
                       </span>
-                      <span className="text-text-primary font-medium truncate max-w-[200px] sm:max-w-[260px]" title={u.email}>
+                      <span className="text-text-primary font-medium truncate max-w-[170px] sm:max-w-[260px]" title={u.email}>
                         {u.email}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between gap-2 pt-1 border-t border-border-default/40">
-                      <span className="text-text-muted text-[11px] flex items-center gap-1 shrink-0">
-                        <Phone className="w-3.5 h-3.5 text-emerald-600" /> WhatsApp
+                      <span className="text-text-muted text-[10px] sm:text-[11px] flex items-center gap-1 shrink-0">
+                        <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600" /> WhatsApp
                       </span>
                       <span className="text-text-secondary font-mono">
                         {u.whatsapp_number || '—'}
@@ -455,8 +455,8 @@ export const AdminUsersPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center justify-between gap-2 pt-1 border-t border-border-default/40">
-                      <span className="text-text-muted text-[11px] flex items-center gap-1 shrink-0">
-                        <Calendar className="w-3.5 h-3.5 text-text-muted" /> Registered
+                      <span className="text-text-muted text-[10px] sm:text-[11px] flex items-center gap-1 shrink-0">
+                        <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-text-muted" /> Registered
                       </span>
                       <span className="text-text-secondary font-mono">
                         {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
@@ -470,10 +470,10 @@ export const AdminUsersPage: React.FC = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => setSelectedUser(u)}
-                      className="w-full min-h-[44px] flex items-center justify-center gap-1 text-xs font-semibold text-forest-700 hover:text-forest-900 dark:text-forest-300"
+                      className="w-full min-h-[34px] sm:min-h-[44px] flex items-center justify-center gap-1 text-[11px] sm:text-xs font-semibold text-forest-700 hover:text-forest-900 dark:text-forest-300 py-1"
                     >
                       View Details & Profile
-                      <ChevronRight className="w-4 h-4 ml-1" />
+                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1" />
                     </Button>
                   </div>
                 </div>
@@ -603,31 +603,31 @@ export const AdminUsersPage: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Header */}
-            <div className="p-6 border-b border-border-default flex items-start justify-between bg-surface-base/30 sticky top-0 z-10 backdrop-blur-md">
-              <div className="flex items-center gap-4">
+            <div className="p-3 sm:p-6 border-b border-border-default flex items-start justify-between bg-surface-base/30 sticky top-0 z-10 backdrop-blur-md">
+              <div className="flex items-center gap-2.5 sm:gap-4">
                 {selectedUser.avatar_url ? (
                   <img
                     src={selectedUser.avatar_url}
                     alt={selectedUser.full_name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-forest-600/30"
+                    className="w-10 h-10 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-forest-600/30"
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-forest-900/10 dark:bg-forest-100/10 text-forest-800 dark:text-forest-200 font-bold text-xl flex items-center justify-center">
+                  <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-forest-900/10 dark:bg-forest-100/10 text-forest-800 dark:text-forest-200 font-bold text-base sm:text-xl flex items-center justify-center">
                     {selectedUser.full_name ? selectedUser.full_name.charAt(0).toUpperCase() : '?'}
                   </div>
                 )}
                 <div>
-                  <h2 className="text-xl font-bold font-serif text-text-primary">{selectedUser.full_name}</h2>
-                  <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                  <h2 className="text-base sm:text-xl font-bold font-serif text-text-primary">{selectedUser.full_name}</h2>
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1 sm:mt-1.5">
                     {selectedUser.poraplan_id && (
-                      <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-surface-base border border-border-default text-text-primary">
+                      <span className="font-mono text-[10px] sm:text-xs font-semibold px-1.5 py-0.5 rounded bg-surface-base border border-border-default text-text-primary">
                         {selectedUser.poraplan_id}
                       </span>
                     )}
-                    <Badge variant={getRoleBadgeVariant(selectedUser.role)}>
+                    <Badge variant={getRoleBadgeVariant(selectedUser.role)} size="sm">
                       {selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1)}
                     </Badge>
-                    <Badge variant={getStatusBadgeVariant(selectedUser.status)}>
+                    <Badge variant={getStatusBadgeVariant(selectedUser.status)} size="sm">
                       {selectedUser.status === 'not_activated'
                         ? 'Not Activated'
                         : selectedUser.status === 'suspended'
@@ -638,30 +638,30 @@ export const AdminUsersPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <Link
                   to={`/profile/${selectedUser.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border-default bg-surface-base hover:bg-surface-card text-xs font-medium text-text-primary transition-colors"
+                  className="inline-flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border border-border-default bg-surface-base hover:bg-surface-card text-[11px] sm:text-xs font-medium text-text-primary transition-colors"
                   title="Open Public Profile in new tab"
                 >
-                  <ExternalLink className="w-3.5 h-3.5 text-text-muted" />
-                  <span>Public Profile</span>
+                  <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-text-muted" />
+                  <span className="hidden sm:inline">Public Profile</span>
                 </Link>
                 <button
                   type="button"
                   onClick={() => setSelectedUser(null)}
-                  className="min-w-[44px] min-h-[44px] p-2 -mr-1 flex items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-base transition-colors"
+                  className="min-w-[36px] min-h-[36px] sm:min-w-[44px] sm:min-h-[44px] p-1.5 sm:p-2 -mr-1 flex items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-base transition-colors"
                   aria-label="Close user dossier"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             </div>
 
             {/* Drawer Body */}
-            <div className="p-6 space-y-6 flex-1">
+            <div className="p-3 sm:p-6 space-y-3 sm:space-y-6 flex-1">
               {/* Account & Contact Details */}
               <div className="space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted">Account & Contact Information</h3>

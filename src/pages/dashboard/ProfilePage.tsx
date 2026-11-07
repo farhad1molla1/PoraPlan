@@ -247,23 +247,23 @@ export const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-12">
+    <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6 pb-6 sm:pb-12">
       {/* Page Title & Breadcrumb */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b-2 border-brand-dark pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono text-xs uppercase tracking-wider text-brand-muted">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+            <span className="font-mono text-[10px] sm:text-xs uppercase tracking-wider text-brand-muted">
               Account Management
             </span>
             <span className="text-brand-muted">•</span>
-            <span className="font-mono text-xs uppercase tracking-wider text-brand-teal font-bold">
+            <span className="font-mono text-[10px] sm:text-xs uppercase tracking-wider text-brand-teal font-bold">
               Identity Dossier
             </span>
           </div>
-          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy tracking-tight">
+          <h1 className="font-heading font-extrabold text-lg sm:text-2xl md:text-3xl text-brand-navy tracking-tight">
             My Profile
           </h1>
-          <p className="font-sans text-xs sm:text-sm text-brand-muted mt-0.5">
+          <p className="font-sans text-[11px] sm:text-sm text-brand-muted mt-0.5">
             Manage your personal academic records, study coordination details, and PoraPlan identity.
           </p>
         </div>
@@ -275,7 +275,8 @@ export const ProfilePage: React.FC = () => {
               variant="primary"
               size="sm"
               onClick={handleStartEditing}
-              leftIcon={<Edit3 className="w-4 h-4" />}
+              className="min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
+              leftIcon={<Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
             >
               Edit Profile
             </Button>
@@ -287,7 +288,8 @@ export const ProfilePage: React.FC = () => {
                 setIsEditing(false);
                 setErrorMessage(null);
               }}
-              leftIcon={<X className="w-4 h-4" />}
+              className="min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
+              leftIcon={<X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
             >
               Cancel
             </Button>
@@ -297,25 +299,25 @@ export const ProfilePage: React.FC = () => {
 
       {/* Global Alerts */}
       {successMessage && (
-        <div className="p-3.5 border-2 border-brand-dark bg-emerald-50 text-emerald-950 flex items-center gap-3 shadow-brutal-xs">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 stroke-[2.5]" />
+        <div className="p-2.5 sm:p-3.5 border sm:border-2 border-brand-dark bg-emerald-50 text-emerald-950 flex items-center gap-2 sm:gap-3 shadow-none sm:shadow-brutal-xs">
+          <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0 stroke-[2.5]" />
           <span className="font-sans text-xs sm:text-sm font-semibold">{successMessage}</span>
         </div>
       )}
 
       {errorMessage && (
-        <div className="p-3.5 border-2 border-brand-dark bg-red-50 text-red-950 flex items-center gap-3 shadow-brutal-xs">
-          <AlertCircle className="w-5 h-5 text-red-600 shrink-0 stroke-[2.5]" />
+        <div className="p-2.5 sm:p-3.5 border sm:border-2 border-brand-dark bg-red-50 text-red-950 flex items-center gap-2 sm:gap-3 shadow-none sm:shadow-brutal-xs">
+          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 shrink-0 stroke-[2.5]" />
           <span className="font-sans text-xs sm:text-sm font-semibold">{errorMessage}</span>
         </div>
       )}
 
       {/* Main Dossier Card (Identity & Core Information) */}
-      <div className="p-4 sm:p-7 border-2 sm:border-3 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 border-b-2 border-brand-dark pb-4 sm:pb-6">
+      <div className="p-2.5 sm:p-7 border sm:border-3 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal space-y-2.5 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-6 border-b sm:border-b-2 border-brand-dark pb-2.5 sm:pb-6">
           {/* Avatar with Upload Control */}
           <div className="relative group shrink-0">
-            <div className="w-20 h-20 sm:w-28 sm:h-28 border-2 sm:border-3 border-brand-dark bg-brand-navy text-white flex items-center justify-center font-heading font-extrabold text-2xl sm:text-3xl shadow-brutal-xs sm:shadow-brutal-sm overflow-hidden">
+            <div className="w-14 h-14 sm:w-28 sm:h-28 border sm:border-3 border-brand-dark bg-brand-navy text-white flex items-center justify-center font-heading font-extrabold text-lg sm:text-3xl shadow-none sm:shadow-brutal-sm overflow-hidden">
               {profile?.avatar_url ? (
                 <img
                   src={profile.avatar_url}
@@ -345,45 +347,45 @@ export const ProfilePage: React.FC = () => {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
-              className="absolute -bottom-2 -right-2 p-1.5 sm:p-2 bg-brand-gold text-brand-dark border-2 border-brand-dark shadow-brutal-xs hover:bg-[#e89a1c] transition-all cursor-pointer disabled:opacity-50"
+              className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 p-1 sm:p-2 bg-brand-gold text-brand-dark border sm:border-2 border-brand-dark shadow-none sm:shadow-brutal-xs hover:bg-[#e89a1c] transition-all cursor-pointer disabled:opacity-50"
               title="Change profile photo"
               aria-label="Change profile photo"
             >
               {isUploadingAvatar ? (
-                <Loader2 className="w-4 h-4 animate-spin text-brand-dark" />
+                <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin text-brand-dark" />
               ) : (
-                <Camera className="w-4 h-4 stroke-[2.5]" />
+                <Camera className="w-3 h-3 sm:w-4 sm:h-4 stroke-[2.5]" />
               )}
             </button>
           </div>
 
           {/* Identity Meta */}
-          <div className="flex-1 space-y-2 min-w-0">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <div className="flex-1 space-y-1 sm:space-y-2 min-w-0">
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
               <Badge variant={roleBadgeVariant} size="sm">
                 {roleLabel}
               </Badge>
-              <Badge variant="paper" size="sm" className="font-mono">
+              <Badge variant="paper" size="sm" className="font-mono text-[9px] sm:text-[10px]">
                 ID: {poraplanId || profile?.poraplan_id || 'PENDING'}
               </Badge>
-              <span className="inline-flex items-center gap-1 font-mono text-[11px] uppercase font-bold text-brand-teal px-1.5 sm:px-2 py-0.5 border-2 border-brand-dark bg-brand-paper-tint shadow-brutal-xs">
+              <span className="inline-flex items-center gap-1 font-mono text-[9px] sm:text-[11px] uppercase font-bold text-brand-teal px-1.5 sm:px-2 py-0.5 border sm:border-2 border-brand-dark bg-brand-paper-tint shadow-none sm:shadow-brutal-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
                 {profile?.status === 'not_activated' ? 'Activating' : 'Active Member'}
               </span>
             </div>
 
-            <h2 className="font-heading font-black text-xl sm:text-2xl text-brand-navy truncate">
+            <h2 className="font-heading font-black text-base sm:text-2xl text-brand-navy truncate">
               {profile?.full_name || user?.user_metadata?.full_name || 'PoraPlan Member'}
             </h2>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-brand-muted">
-              <span className="flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 stroke-[2.2]" />
+            <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-0.5 sm:gap-y-1 font-mono text-[10px] sm:text-xs text-brand-muted">
+              <span className="flex items-center gap-1 sm:gap-1.5">
+                <Mail className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.2]" />
                 {profile?.email || user?.email || '-'}
               </span>
               {profile?.whatsapp_number && (
-                <span className="flex items-center gap-1.5 text-brand-dark font-medium">
-                  <Phone className="w-3.5 h-3.5 text-emerald-600 stroke-[2.2]" />
+                <span className="flex items-center gap-1 sm:gap-1.5 text-brand-dark font-medium">
+                  <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600 stroke-[2.2]" />
                   {profile.whatsapp_number}
                 </span>
               )}

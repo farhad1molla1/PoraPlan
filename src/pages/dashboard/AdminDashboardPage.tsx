@@ -153,28 +153,28 @@ export const AdminDashboardPage: React.FC = () => {
   const adminName = profile?.full_name || user?.email || 'Administrator';
 
   return (
-    <div className="w-full py-6 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="w-full py-3 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6">
         
         {/* Header / Admin Identity Card */}
         <section
           aria-labelledby="admin-header-title"
-          className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-6 space-y-3.5 sm:space-y-4"
+          className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 space-y-2 sm:space-y-4"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-brand-dark pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <ShieldCheck className="w-5 h-5 text-brand-teal stroke-[2.5]" />
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal stroke-[2.5]" />
                 <h1
                   id="admin-header-title"
-                  className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight"
+                  className="text-base sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight"
                 >
                   System Administration Console
                 </h1>
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-brand-muted">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono text-brand-muted">
                 <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-brand-teal" />
+                  <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-teal" />
                   {currentDate}
                 </span>
                 <span>•</span>
@@ -189,32 +189,32 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 self-start sm:self-auto">
-              <Badge variant="navy" size="sm" className="font-mono uppercase font-bold">
+              <Badge variant="navy" size="sm" className="font-mono uppercase font-bold text-[9px] sm:text-[10px]">
                 {role?.toUpperCase() || 'ADMIN'}
               </Badge>
             </div>
           </div>
 
-          <p className="text-xs sm:text-sm font-sans text-brand-dark/80">
+          <p className="text-[11px] sm:text-sm font-sans text-brand-dark/80">
             Welcome to the centralized platform operations console. Access administrative desks, configure programs and allocations, or provision member accounts.
           </p>
         </section>
 
         {/* Core Administrative Desks Grid */}
-        <section aria-labelledby="admin-desks-title" className="space-y-4">
+        <section aria-labelledby="admin-desks-title" className="space-y-2.5 sm:space-y-4">
           <div className="flex items-center justify-between">
             <h2
               id="admin-desks-title"
-              className="text-base sm:text-lg font-heading font-extrabold text-brand-navy flex items-center gap-2"
+              className="text-xs sm:text-lg font-heading font-extrabold text-brand-navy flex items-center gap-1.5 sm:gap-2"
             >
               <span>Administrative Operations</span>
             </h2>
-            <span className="text-xs font-mono text-brand-muted">
+            <span className="text-[10px] sm:text-xs font-mono text-brand-muted">
               {OPERATIONAL_DESKS.length} Desks Available
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             {OPERATIONAL_DESKS.map((desk) => {
               const IconComponent = desk.icon;
               const iconColorClass =
@@ -227,27 +227,27 @@ export const AdminDashboardPage: React.FC = () => {
               return (
                 <div
                   key={desk.id}
-                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3 sm:p-4 flex flex-col justify-between space-y-2.5 sm:space-y-3 hover:-translate-y-0.5 transition-transform"
+                  className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-4 flex flex-col justify-between space-y-2 sm:space-y-3 hover:-translate-y-0.5 transition-transform"
                 >
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <div className="flex items-center gap-2">
-                      <IconComponent className={`w-4 h-4 ${iconColorClass} stroke-[2.5]`} />
-                      <h3 className="font-heading font-extrabold text-sm text-brand-navy">
+                  <div className="space-y-1 sm:space-y-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <IconComponent className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${iconColorClass} stroke-[2.5]`} />
+                      <h3 className="font-heading font-extrabold text-xs sm:text-sm text-brand-navy">
                         {desk.title}
                       </h3>
                     </div>
-                    <p className="text-xs font-sans text-brand-dark/75 leading-relaxed">
+                    <p className="text-[11px] sm:text-xs font-sans text-brand-dark/75 leading-relaxed">
                       {desk.description}
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-brand-dark/20">
+                  <div className="pt-1.5 sm:pt-2 border-t border-brand-dark/20">
                     <Button
                       to={desk.to}
                       variant={desk.variant}
                       size="sm"
-                      className="w-full justify-between"
-                      rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+                      className="w-full justify-between min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
+                      rightIcon={<ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
                     >
                       {desk.buttonLabel}
                     </Button>
@@ -261,46 +261,46 @@ export const AdminDashboardPage: React.FC = () => {
         {/* Controlled Member Account Provisioning Card */}
         <section
           aria-labelledby="member-provisioning-title"
-          className="border-2 border-brand-dark bg-brand-paper p-3.5 sm:p-6 shadow-brutal-sm sm:shadow-brutal space-y-4 sm:space-y-5"
+          className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-6 shadow-none sm:shadow-brutal space-y-2.5 sm:space-y-5"
         >
-          <div className="border-b-2 border-brand-dark pb-3 flex items-center justify-between">
+          <div className="border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3 flex items-center justify-between">
             <div>
               <h2
                 id="member-provisioning-title"
-                className="font-heading font-extrabold text-base sm:text-lg text-brand-navy flex items-center gap-2"
+                className="font-heading font-extrabold text-xs sm:text-lg text-brand-navy flex items-center gap-1.5 sm:gap-2"
               >
-                <UserPlus className="w-5 h-5 text-brand-teal stroke-[2.5]" />
+                <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal stroke-[2.5]" />
                 Controlled Member Provisioning
               </h2>
-              <p className="text-xs text-brand-dark/80 font-sans mt-0.5">
+              <p className="text-[11px] sm:text-xs text-brand-dark/80 font-sans mt-0.5">
                 Pre-register an authorized student or mentor account into the platform registry.
               </p>
             </div>
-            <span className="text-[11px] font-mono font-bold text-brand-muted uppercase">
+            <span className="text-[10px] sm:text-[11px] font-mono font-bold text-brand-muted uppercase">
               Admin Only
             </span>
           </div>
 
           {provisionMessage && (
             <div
-              className={`p-3 border-2 border-brand-dark text-xs font-sans flex items-start gap-2 ${
+              className={`p-2 sm:p-3 border sm:border-2 border-brand-dark text-[11px] sm:text-xs font-sans flex items-start gap-1.5 sm:gap-2 ${
                 provisionMessage.type === 'success'
                   ? 'bg-emerald-50 text-emerald-900'
                   : 'bg-red-50 text-red-900'
               }`}
             >
               {provisionMessage.type === 'success' ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5 stroke-[2.5]" />
+                <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-700 shrink-0 mt-0.5 stroke-[2.5]" />
               ) : (
-                <AlertCircle className="w-4 h-4 text-red-700 shrink-0 mt-0.5 stroke-[2.5]" />
+                <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-700 shrink-0 mt-0.5 stroke-[2.5]" />
               )}
               <span>{provisionMessage.text}</span>
             </div>
           )}
 
-          <form onSubmit={handleProvisionMember} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <form onSubmit={handleProvisionMember} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             <div>
-              <label htmlFor="provision-id" className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1">
+              <label htmlFor="provision-id" className="block text-[10px] sm:text-xs font-mono font-bold uppercase text-brand-dark mb-0.5 sm:mb-1">
                 PoraPlan ID
               </label>
               <input
@@ -310,12 +310,12 @@ export const AdminDashboardPage: React.FC = () => {
                 value={newId}
                 onChange={(e) => setNewId(e.target.value.toUpperCase())}
                 placeholder="e.g. PP004"
-                className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans uppercase"
+                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans uppercase"
               />
             </div>
 
             <div>
-              <label htmlFor="provision-name" className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1">
+              <label htmlFor="provision-name" className="block text-[10px] sm:text-xs font-mono font-bold uppercase text-brand-dark mb-0.5 sm:mb-1">
                 Full Name
               </label>
               <input
@@ -325,12 +325,12 @@ export const AdminDashboardPage: React.FC = () => {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Member full name"
-                className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
               />
             </div>
 
             <div>
-              <label htmlFor="provision-email" className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1">
+              <label htmlFor="provision-email" className="block text-[10px] sm:text-xs font-mono font-bold uppercase text-brand-dark mb-0.5 sm:mb-1">
                 Contact Email
               </label>
               <input
@@ -340,36 +340,37 @@ export const AdminDashboardPage: React.FC = () => {
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="member@example.com"
-                className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
               />
             </div>
 
             <div>
-              <label htmlFor="provision-role" className="block text-xs font-mono font-bold uppercase text-brand-dark mb-1">
+              <label htmlFor="provision-role" className="block text-[10px] sm:text-xs font-mono font-bold uppercase text-brand-dark mb-0.5 sm:mb-1">
                 Role
               </label>
               <select
                 id="provision-role"
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value as UserRole)}
-                className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
               >
                 <option value="student">Student (PP...)</option>
                 <option value="mentor">Mentor (PPM...)</option>
               </select>
             </div>
 
-            <div className="sm:col-span-2 lg:col-span-4 pt-1">
+            <div className="sm:col-span-2 lg:col-span-4 pt-0.5 sm:pt-1">
               <Button
                 type="submit"
                 variant="primary"
                 size="md"
                 disabled={provisionLoading}
-                leftIcon={!provisionLoading ? <UserPlus className="w-4 h-4 stroke-[2.5]" /> : undefined}
+                className="min-h-[36px] sm:min-h-0 text-xs sm:text-sm"
+                leftIcon={!provisionLoading ? <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" /> : undefined}
               >
                 {provisionLoading ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="flex items-center gap-1.5 sm:gap-2">
+                    <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
                     Pre-registering...
                   </span>
                 ) : (
@@ -383,74 +384,74 @@ export const AdminDashboardPage: React.FC = () => {
         {/* Pre-Registered Test Accounts Reference Table */}
         <section
           aria-labelledby="test-accounts-title"
-          className="border-2 border-brand-dark bg-brand-paper p-5 sm:p-6 shadow-brutal space-y-4"
+          className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-6 shadow-none sm:shadow-brutal space-y-2 sm:space-y-4"
         >
-          <div className="border-b-2 border-brand-dark pb-3">
+          <div className="border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
             <h2
               id="test-accounts-title"
-              className="font-heading font-extrabold text-base text-brand-navy"
+              className="font-heading font-extrabold text-xs sm:text-base text-brand-navy"
             >
               Pre-Registered Testing Accounts
             </h2>
-            <p className="text-xs text-brand-dark/80 font-sans mt-0.5">
+            <p className="text-[11px] sm:text-xs text-brand-dark/80 font-sans mt-0.5">
               Authorized credentials available for development verification.
             </p>
           </div>
 
           {/* Compact Responsive Table (< lg: 1024px) */}
           <div className="lg:hidden">
-            <table className="w-full text-xs font-sans text-left border-collapse">
+            <table className="w-full text-[11px] sm:text-xs font-sans text-left border-collapse">
               <thead>
-                <tr className="border-b-2 border-brand-dark font-mono font-bold uppercase text-[10.5px] text-brand-navy bg-brand-paper-tint">
-                  <th scope="col" className="py-2.5 px-2.5">Member &amp; Role</th>
-                  <th scope="col" className="py-2.5 px-2">System Email</th>
-                  <th scope="col" className="py-2.5 px-2.5 text-right">Status</th>
+                <tr className="border-b sm:border-b-2 border-brand-dark font-mono font-bold uppercase text-[9px] sm:text-[10.5px] text-brand-navy bg-brand-paper-tint">
+                  <th scope="col" className="py-1.5 sm:py-2.5 px-2 sm:px-2.5">Member &amp; Role</th>
+                  <th scope="col" className="py-1.5 sm:py-2.5 px-1.5 sm:px-2">System Email</th>
+                  <th scope="col" className="py-1.5 sm:py-2.5 px-2 sm:px-2.5 text-right">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y border-b-2 border-brand-dark">
+              <tbody className="divide-y border-b sm:border-b-2 border-brand-dark">
                 <tr>
-                  <td className="py-2 px-2.5 align-top">
-                    <div className="font-bold text-brand-navy">Fahim Rahman</div>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="font-mono text-[10.5px] font-bold text-brand-teal">PP001</span>
-                      <Badge variant="teal" size="sm">STUDENT</Badge>
+                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 align-top">
+                    <div className="font-bold text-brand-navy text-xs sm:text-sm">Fahim Rahman</div>
+                    <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5">
+                      <span className="font-mono text-[9px] sm:text-[10.5px] font-bold text-brand-teal">PP001</span>
+                      <Badge variant="teal" size="sm" className="text-[8px] sm:text-[9px]">STUDENT</Badge>
                     </div>
                   </td>
-                  <td className="py-2 px-2 font-mono text-[11px] text-brand-muted align-top break-all">
+                  <td className="py-1.5 sm:py-2 px-1.5 sm:px-2 font-mono text-[10px] sm:text-[11px] text-brand-muted align-top break-all">
                     student.pp001@poraplan.internal
                   </td>
-                  <td className="py-2 px-2.5 text-right align-top">
-                    <span className="text-emerald-700 dark:text-emerald-400 font-bold text-xs">Active</span>
+                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 text-right align-top">
+                    <span className="text-emerald-700 dark:text-emerald-400 font-bold text-[10px] sm:text-xs">Active</span>
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-2.5 align-top">
-                    <div className="font-bold text-brand-navy">Dr. Rafiqul Islam</div>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="font-mono text-[10.5px] font-bold text-brand-teal">PPM001</span>
-                      <Badge variant="gold" size="sm">MENTOR</Badge>
+                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 align-top">
+                    <div className="font-bold text-brand-navy text-xs sm:text-sm">Dr. Rafiqul Islam</div>
+                    <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5">
+                      <span className="font-mono text-[9px] sm:text-[10.5px] font-bold text-brand-teal">PPM001</span>
+                      <Badge variant="gold" size="sm" className="text-[8px] sm:text-[9px]">MENTOR</Badge>
                     </div>
                   </td>
-                  <td className="py-2 px-2 font-mono text-[11px] text-brand-muted align-top break-all">
+                  <td className="py-1.5 sm:py-2 px-1.5 sm:px-2 font-mono text-[10px] sm:text-[11px] text-brand-muted align-top break-all">
                     mentor.ppm001@poraplan.internal
                   </td>
-                  <td className="py-2 px-2.5 text-right align-top">
-                    <span className="text-emerald-700 dark:text-emerald-400 font-bold text-xs">Active</span>
+                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 text-right align-top">
+                    <span className="text-emerald-700 dark:text-emerald-400 font-bold text-[10px] sm:text-xs">Active</span>
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-2.5 align-top">
-                    <div className="font-bold text-brand-navy">PoraPlan System Admin</div>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="font-mono text-[10.5px] font-bold text-brand-teal">PPA001</span>
-                      <Badge variant="navy" size="sm">ADMIN</Badge>
+                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 align-top">
+                    <div className="font-bold text-brand-navy text-xs sm:text-sm">PoraPlan System Admin</div>
+                    <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5">
+                      <span className="font-mono text-[9px] sm:text-[10.5px] font-bold text-brand-teal">PPA001</span>
+                      <Badge variant="navy" size="sm" className="text-[8px] sm:text-[9px]">ADMIN</Badge>
                     </div>
                   </td>
-                  <td className="py-2 px-2 font-mono text-[11px] text-brand-muted align-top break-all">
+                  <td className="py-1.5 sm:py-2 px-1.5 sm:px-2 font-mono text-[10px] sm:text-[11px] text-brand-muted align-top break-all">
                     admin.ppa001@poraplan.internal
                   </td>
-                  <td className="py-2 px-2.5 text-right align-top">
-                    <span className="text-emerald-700 dark:text-emerald-400 font-bold text-xs">Active</span>
+                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 text-right align-top">
+                    <span className="text-emerald-700 dark:text-emerald-400 font-bold text-[10px] sm:text-xs">Active</span>
                   </td>
                 </tr>
               </tbody>

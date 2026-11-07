@@ -355,14 +355,14 @@ export const StudentBillingPage: React.FC = () => {
   }, [filteredRecords, currentPage, pageSize]);
 
   return (
-    <div className="space-y-5 max-w-5xl mx-auto">
+    <div className="space-y-3 sm:space-y-5 max-w-5xl mx-auto">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-2 border-brand-dark">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pb-2 sm:pb-3 border-b sm:border-b-2 border-brand-dark">
         <div>
-          <h1 className="text-xl sm:text-2xl font-heading font-extrabold text-brand-navy">
+          <h1 className="text-lg sm:text-2xl font-heading font-extrabold text-brand-navy">
             My Payments
           </h1>
-          <p className="text-xs font-sans text-brand-muted mt-0.5">
+          <p className="text-[11px] sm:text-xs font-sans text-brand-muted mt-0.5">
             View your current billing period and payment history.
           </p>
         </div>
@@ -423,8 +423,8 @@ export const StudentBillingPage: React.FC = () => {
         <div className="space-y-5">
           {/* Current Billing Period Card */}
           {currentRecord && (
-            <div className="p-3.5 sm:p-5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-3">
-              <div className="flex items-center justify-between gap-2 pb-2 border-b border-brand-dark/10">
+            <div className="p-2.5 sm:p-5 bg-brand-paper border sm:border-2 border-brand-dark shadow-none sm:shadow-brutal-xs space-y-2 sm:space-y-3">
+              <div className="flex items-center justify-between gap-2 pb-1.5 sm:pb-2 border-b border-brand-dark/10">
                 <span className="text-[11px] font-mono uppercase font-bold text-brand-muted">
                   Current Billing Period
                 </span>
@@ -526,20 +526,20 @@ export const StudentBillingPage: React.FC = () => {
             ) : (
               <>
                 {/* Mobile Responsive Cards (< md: 768px) */}
-                <div className="md:hidden space-y-3">
+                <div className="md:hidden space-y-2">
                   {paginatedRecords.map((r) => (
                     <div
                       key={r.id}
                       onClick={() => setSelectedRecord(r)}
-                      className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-2.5 cursor-pointer"
+                      className="p-2.5 bg-brand-paper border sm:border-2 border-brand-dark shadow-none sm:shadow-brutal-xs space-y-2 cursor-pointer"
                     >
                       {/* Card Header: Billing Period + Status Badge */}
-                      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-brand-dark/15">
+                      <div className="flex items-start justify-between gap-2 pb-1.5 border-b border-brand-dark/15">
                         <div className="min-w-0">
-                          <span className="text-[10px] font-mono uppercase text-brand-muted font-bold block">
+                          <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted font-bold block">
                             Billing Period
                           </span>
-                          <span className="font-heading font-extrabold text-sm text-brand-navy leading-snug">
+                          <span className="font-heading font-extrabold text-xs sm:text-sm text-brand-navy leading-snug">
                             {formatCalendarDate(r.cycle_start_date)} – {formatCalendarDate(r.cycle_end_date)}
                           </span>
                         </div>

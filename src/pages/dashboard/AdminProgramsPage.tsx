@@ -695,24 +695,24 @@ export const AdminProgramsPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full py-6 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-screen">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="w-full py-3 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-screen">
+      <div className="max-w-6xl mx-auto space-y-3 sm:space-y-6">
 
         {/* Top Header Ribbon */}
-        <div className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-4 sm:p-6 shadow-brutal-sm sm:shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs uppercase text-brand-gold font-bold tracking-wider">
+        <div className="border sm:border-2 border-brand-dark bg-brand-navy text-brand-bg p-2.5 sm:p-6 shadow-none sm:shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+          <div className="space-y-0.5 sm:space-y-1">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="font-mono text-[10px] sm:text-xs uppercase text-brand-gold font-bold tracking-wider">
                 ADMIN CONSOLE
               </span>
-              <Badge variant="navy" size="sm" className="bg-brand-paper text-brand-dark">
+              <Badge variant="navy" size="sm" className="bg-brand-paper text-brand-dark text-[8px] sm:text-[9px]">
                 PROGRAM MANAGEMENT
               </Badge>
             </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg">
+            <h1 className="text-base sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg">
               Programs, Cohorts &amp; Curriculum
             </h1>
-            <p className="font-mono text-xs text-brand-bg/75">
+            <p className="font-mono text-[10px] sm:text-xs text-brand-bg/75">
               Configure unified Academic Mentorship and SkillSprint offerings.
             </p>
           </div>
@@ -721,8 +721,8 @@ export const AdminProgramsPage: React.FC = () => {
             variant="primary"
             size="sm"
             onClick={handleOpenCreateProgram}
-            leftIcon={<Plus className="w-4 h-4" />}
-            className="w-full sm:w-auto"
+            leftIcon={<Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+            className="w-full sm:w-auto min-h-[34px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
           >
             Create New Program
           </Button>
@@ -730,28 +730,28 @@ export const AdminProgramsPage: React.FC = () => {
 
         {/* Global Notifications */}
         {successMessage && (
-          <div className="p-3.5 border-2 border-brand-dark bg-emerald-50 text-emerald-950 flex items-center gap-3 shadow-brutal-xs">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 stroke-[2.5]" />
+          <div className="p-2.5 sm:p-3.5 border sm:border-2 border-brand-dark bg-emerald-50 text-emerald-950 flex items-center gap-2 sm:gap-3 shadow-none sm:shadow-brutal-xs">
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0 stroke-[2.5]" />
             <span className="font-sans text-xs sm:text-sm font-semibold">{successMessage}</span>
           </div>
         )}
 
         {error && (
-          <div className="p-3.5 border-2 border-brand-dark bg-red-50 text-red-950 flex items-center gap-3 shadow-brutal-xs">
-            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 stroke-[2.5]" />
+          <div className="p-2.5 sm:p-3.5 border sm:border-2 border-brand-dark bg-red-50 text-red-950 flex items-center gap-2 sm:gap-3 shadow-none sm:shadow-brutal-xs">
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 shrink-0 stroke-[2.5]" />
             <span className="font-sans text-xs sm:text-sm font-semibold">{error}</span>
           </div>
         )}
 
         {/* Filters Bar */}
-        <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        <div className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-4">
           {/* Category Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <span className="font-mono text-xs text-brand-muted uppercase font-bold mr-1">Category:</span>
+          <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+            <span className="font-mono text-[10px] sm:text-xs text-brand-muted uppercase font-bold mr-0.5 sm:mr-1">Category:</span>
             <button
               type="button"
               onClick={() => setCategoryFilter('all')}
-              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[38px] sm:min-h-0 font-mono text-xs border motion-reduce:transition-none ${
+              className={`px-2 sm:px-3 py-1 sm:py-1 min-h-[32px] sm:min-h-0 font-mono text-[10px] sm:text-xs border motion-reduce:transition-none ${
                 categoryFilter === 'all'
                   ? 'bg-brand-navy text-white border-brand-dark font-bold'
                   : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -762,7 +762,7 @@ export const AdminProgramsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setCategoryFilter('academic_mentorship')}
-              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[38px] sm:min-h-0 font-mono text-xs border motion-reduce:transition-none ${
+              className={`px-2 sm:px-3 py-1 sm:py-1 min-h-[32px] sm:min-h-0 font-mono text-[10px] sm:text-xs border motion-reduce:transition-none ${
                 categoryFilter === 'academic_mentorship'
                   ? 'bg-brand-gold text-brand-dark border-brand-dark font-bold'
                   : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -773,7 +773,7 @@ export const AdminProgramsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setCategoryFilter('skillsprint')}
-              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[38px] sm:min-h-0 font-mono text-xs border motion-reduce:transition-none ${
+              className={`px-2 sm:px-3 py-1 sm:py-1 min-h-[32px] sm:min-h-0 font-mono text-[10px] sm:text-xs border motion-reduce:transition-none ${
                 categoryFilter === 'skillsprint'
                   ? 'bg-brand-teal text-white border-brand-dark font-bold'
                   : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -784,14 +784,14 @@ export const AdminProgramsPage: React.FC = () => {
           </div>
 
           {/* Status Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <span className="font-mono text-xs text-brand-muted uppercase font-bold mr-1">Status:</span>
+          <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+            <span className="font-mono text-[10px] sm:text-xs text-brand-muted uppercase font-bold mr-0.5 sm:mr-1">Status:</span>
             {(['all', 'published', 'draft', 'archived'] as const).map((st) => (
               <button
                 key={st}
                 type="button"
                 onClick={() => setStatusFilter(st)}
-                className={`px-2.5 py-1.5 sm:py-1 min-h-[38px] sm:min-h-0 font-mono text-xs uppercase border motion-reduce:transition-none ${
+                className={`px-2 py-1 sm:py-1 min-h-[32px] sm:min-h-0 font-mono text-[10px] sm:text-xs uppercase border motion-reduce:transition-none ${
                   statusFilter === st
                     ? 'bg-brand-dark text-white border-brand-dark font-bold'
                     : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -805,17 +805,17 @@ export const AdminProgramsPage: React.FC = () => {
 
         {/* Program Cards List */}
         {loading ? (
-          <div className="p-12 text-center border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-3">
-            <Loader2 className="w-8 h-8 animate-spin motion-reduce:animate-none text-brand-teal mx-auto" />
+          <div className="p-8 sm:p-12 text-center border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal space-y-2 sm:space-y-3">
+            <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin motion-reduce:animate-none text-brand-teal mx-auto" />
             <p className="font-mono text-xs text-brand-muted">Loading programs...</p>
           </div>
         ) : filteredPrograms.length === 0 ? (
-          <div className="p-10 text-center border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-2">
-            <p className="font-heading font-extrabold text-brand-navy">No Programs Matching Filter</p>
-            <p className="font-sans text-xs text-brand-muted">Click "Create New Program" to provision your first offering.</p>
+          <div className="p-6 sm:p-10 text-center border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal space-y-1.5 sm:space-y-2">
+            <p className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">No Programs Matching Filter</p>
+            <p className="font-sans text-[11px] sm:text-xs text-brand-muted">Click "Create New Program" to provision your first offering.</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2.5 sm:space-y-4">
             {filteredPrograms.map((prog) => {
               const progCohorts = cohorts.filter((c) => c.program_id === prog.id);
               const isPublished = prog.publication_status === 'published';
@@ -824,10 +824,10 @@ export const AdminProgramsPage: React.FC = () => {
               return (
                 <div
                   key={prog.id}
-                  className="p-3.5 sm:p-6 border-2 sm:border-3 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-3 sm:space-y-4"
+                  className="p-2.5 sm:p-6 border sm:border-3 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal space-y-2 sm:space-y-4"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-brand-dark pb-3">
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                       <Badge
                         variant={prog.category === 'academic_mentorship' ? 'gold' : 'teal'}
                         size="sm"
@@ -843,7 +843,7 @@ export const AdminProgramsPage: React.FC = () => {
                       </Badge>
 
                       <span
-                        className={`font-mono text-[11px] font-bold px-2 py-0.5 border ${isEnrollmentOpen
+                        className={`font-mono text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 border ${isEnrollmentOpen
                           ? 'bg-emerald-50 text-emerald-800 border-emerald-700'
                           : 'bg-red-50 text-red-800 border-red-700'
                           }`}
@@ -851,17 +851,17 @@ export const AdminProgramsPage: React.FC = () => {
                         ENROLLMENT {prog.enrollment_status.toUpperCase()}
                       </span>
 
-                      <span className="font-mono text-xs text-brand-muted ml-1">
+                      <span className="font-mono text-[10px] sm:text-xs text-brand-muted ml-0.5 sm:ml-1">
                         Slug: <strong className="text-brand-dark">{prog.slug}</strong>
                       </span>
                     </div>
 
                     {/* Quick Toggles */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       <button
                         type="button"
                         onClick={() => handleTogglePublication(prog)}
-                        className="px-2.5 py-1 border border-brand-dark bg-brand-paper-tint text-[11px] font-mono hover:bg-brand-paper shadow-brutal-xs"
+                        className="px-2 sm:px-2.5 py-0.5 sm:py-1 border border-brand-dark bg-brand-paper-tint text-[10px] sm:text-[11px] font-mono hover:bg-brand-paper shadow-none sm:shadow-brutal-xs"
                         title="Toggle publication state"
                       >
                         {isPublished ? 'Unpublish' : 'Publish'}
@@ -870,7 +870,7 @@ export const AdminProgramsPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleToggleEnrollment(prog)}
-                        className="px-2.5 py-1 border border-brand-dark bg-brand-paper-tint text-[11px] font-mono hover:bg-brand-paper shadow-brutal-xs"
+                        className="px-2 sm:px-2.5 py-0.5 sm:py-1 border border-brand-dark bg-brand-paper-tint text-[10px] sm:text-[11px] font-mono hover:bg-brand-paper shadow-none sm:shadow-brutal-xs"
                         title="Toggle enrollment availability"
                       >
                         {isEnrollmentOpen ? 'Close Enrollment' : 'Open Enrollment'}
@@ -878,9 +878,9 @@ export const AdminProgramsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-4 items-start">
+                  <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 items-start">
                     {prog.cover_image_url ? (
-                      <div className="w-full sm:w-44 h-28 shrink-0 overflow-hidden border-2 border-brand-dark bg-brand-paper-tint">
+                      <div className="w-full sm:w-44 h-24 sm:h-28 shrink-0 overflow-hidden border sm:border-2 border-brand-dark bg-brand-paper-tint">
                         <img
                           src={prog.cover_image_url}
                           alt={prog.name}
@@ -888,48 +888,49 @@ export const AdminProgramsPage: React.FC = () => {
                         />
                       </div>
                     ) : (
-                      <div className="w-full sm:w-44 h-28 shrink-0 border-2 border-dashed border-brand-dark/30 bg-brand-paper-tint flex flex-col items-center justify-center gap-1 text-brand-muted">
-                        <ImageIcon className="w-5 h-5 stroke-[1.5]" />
-                        <span className="font-mono text-[11px]">No Thumbnail</span>
+                      <div className="w-full sm:w-44 h-24 sm:h-28 shrink-0 border border-dashed sm:border-2 border-brand-dark/30 bg-brand-paper-tint flex flex-col items-center justify-center gap-1 text-brand-muted">
+                        <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 stroke-[1.5]" />
+                        <span className="font-mono text-[10px] sm:text-[11px]">No Thumbnail</span>
                       </div>
                     )}
-                    <div className="space-y-1.5 flex-1 min-w-0">
-                      <h2 className="font-heading font-extrabold text-xl text-brand-navy">
+                    <div className="space-y-1 sm:space-y-1.5 flex-1 min-w-0">
+                      <h2 className="font-heading font-extrabold text-sm sm:text-xl text-brand-navy">
                         {prog.name}
                       </h2>
-                      <p className="font-sans text-xs sm:text-sm text-brand-dark/80 line-clamp-3">
+                      <p className="font-sans text-[11px] sm:text-sm text-brand-dark/80 line-clamp-3">
                         {prog.short_description}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-xs text-brand-muted border-t border-brand-dark/20 pt-3">
+                  <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-1 sm:gap-y-2 font-mono text-[10px] sm:text-xs text-brand-muted border-t border-brand-dark/20 pt-2 sm:pt-3">
                     {prog.duration && (
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-brand-teal" />
+                      <span className="flex items-center gap-1 sm:gap-1.5">
+                        <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-teal" />
                         {prog.duration}
                       </span>
                     )}
                     {prog.delivery_mode && (
-                      <span className="flex items-center gap-1.5">
+                      <span className="flex items-center gap-1 sm:gap-1.5">
                         <Laptop className="w-3.5 h-3.5 text-brand-navy" />
                         {prog.delivery_mode}
                       </span>
                     )}
-                    <span className="flex items-center gap-1.5 font-bold text-brand-dark">
+                    <span className="flex items-center gap-1 sm:gap-1.5 font-bold text-brand-dark">
                       <Users className="w-3.5 h-3.5 text-brand-gold" />
                       {progCohorts.length} {prog.category === 'skillsprint' ? 'Courses / Cohorts' : 'Cohorts'}
                     </span>
                   </div>
 
                   {/* Actions Bar */}
-                  <div className="pt-3 border-t-2 border-brand-dark flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div className="pt-2 sm:pt-3 border-t sm:border-t-2 border-brand-dark flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleOpenCohorts(prog)}
                         leftIcon={<Users className="w-3.5 h-3.5 text-brand-navy" />}
+                        className="min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
                       >
                         {prog.category === 'skillsprint' ? 'Manage Courses / Runs' : 'Manage Cohorts'} ({progCohorts.length})
                       </Button>
@@ -939,6 +940,7 @@ export const AdminProgramsPage: React.FC = () => {
                         size="sm"
                         onClick={() => handleOpenCurriculum(prog)}
                         leftIcon={<Layers className="w-3.5 h-3.5 text-brand-teal" />}
+                        className="min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
                       >
                         Curriculum Builder
                       </Button>
@@ -949,31 +951,32 @@ export const AdminProgramsPage: React.FC = () => {
                           variant="ghost"
                           size="sm"
                           leftIcon={<Eye className="w-3.5 h-3.5" />}
+                          className="min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
                         >
                           Public Preview
                         </Button>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       <button
                         type="button"
                         onClick={() => handleOpenEditProgram(prog)}
-                        className="min-w-[40px] min-h-[40px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-paper-tint text-brand-dark shadow-brutal-xs flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+                        className="min-w-[34px] min-h-[34px] sm:min-w-0 sm:min-h-0 p-1.5 sm:p-1.5 border border-brand-dark bg-brand-paper hover:bg-brand-paper-tint text-brand-dark shadow-none sm:shadow-brutal-xs flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
                         title="Edit program"
                         aria-label="Edit program"
                       >
-                        <Edit className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                        <Edit className="w-3.5 h-3.5" />
                       </button>
 
                       <button
                         type="button"
                         onClick={() => handleDeleteProgram(prog)}
-                        className="min-w-[40px] min-h-[40px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 border border-brand-dark bg-brand-paper hover:bg-red-50 text-red-600 shadow-brutal-xs flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                        className="min-w-[34px] min-h-[34px] sm:min-w-0 sm:min-h-0 p-1.5 sm:p-1.5 border border-brand-dark bg-brand-paper hover:bg-red-50 text-red-600 shadow-none sm:shadow-brutal-xs flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                         title="Delete program"
                         aria-label="Delete program"
                       >
-                        <Trash2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>

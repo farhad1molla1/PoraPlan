@@ -220,15 +220,15 @@ export const DashboardLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-brand-bg text-brand-dark flex flex-col font-sans">
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-30 bg-brand-header border-b-2 border-brand-dark px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shadow-sm print:hidden">
+      <header className="sticky top-0 z-30 bg-brand-header border-b sm:border-b-2 border-brand-dark px-2.5 sm:px-6 py-1.5 sm:py-3 flex items-center justify-between shadow-xs sm:shadow-sm print:hidden">
         {/* Brand identity & Role Indicator */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link
             to={isStudent ? '/student/dashboard' : isMentor ? '/mentor/dashboard' : '/admin/dashboard'}
-            className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+            className="flex items-center gap-1.5 sm:gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
             aria-label="PoraPlan Workspace"
           >
-            <div className="h-8 w-8 sm:h-9 sm:w-9 p-0.5 bg-brand-paper border-2 border-brand-dark flex items-center justify-center shadow-brutal-xs group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0">
+            <div className="h-7 w-7 sm:h-9 sm:w-9 p-0.5 bg-brand-paper border sm:border-2 border-brand-dark flex items-center justify-center shadow-none sm:shadow-brutal-xs group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0">
               <img
                 src="/poraplan-logo.png"
                 alt="PoraPlan Logo"
@@ -242,10 +242,10 @@ export const DashboardLayout: React.FC = () => {
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-heading font-extrabold text-base sm:text-lg text-brand-navy tracking-tight leading-none">
+              <span className="font-heading font-extrabold text-sm sm:text-lg text-brand-navy tracking-tight leading-none">
                 PoraPlan
               </span>
-              <span className="font-mono text-[10px] text-brand-muted sm:hidden leading-none mt-0.5">
+              <span className="font-mono text-[9px] sm:text-[10px] text-brand-muted sm:hidden leading-none mt-0.5">
                 {roleLabel}
               </span>
             </div>
@@ -257,17 +257,17 @@ export const DashboardLayout: React.FC = () => {
         </div>
 
         {/* User profile controls & Dropdown Menu */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           {/* Notifications Center Bell */}
           <Link
             to={isMentor ? '/mentor/notifications' : isAdmin ? '/admin/notifications' : '/student/notifications'}
-            className="relative min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 p-2 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex items-center justify-center text-brand-dark hover:text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal cursor-pointer"
+            className="relative min-w-[38px] min-h-[38px] sm:min-w-0 sm:min-h-0 p-1.5 sm:p-2 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex items-center justify-center text-brand-dark hover:text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal cursor-pointer"
             title="Notifications Center"
             aria-label={`Notifications Center, ${unreadNotifCount} unread`}
           >
             <Bell className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             {unreadNotifCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-brand-coral text-white font-mono font-bold text-[10px] leading-tight flex items-center justify-center border border-brand-dark shadow-xs">
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 bg-brand-coral text-white font-mono font-bold text-[9px] leading-tight flex items-center justify-center border border-brand-dark shadow-xs">
                 {unreadNotifCount > 99 ? '99+' : unreadNotifCount}
               </span>
             )}
@@ -278,7 +278,7 @@ export const DashboardLayout: React.FC = () => {
             <button
               type="button"
               onClick={() => setProfileDropdownOpen((prev) => !prev)}
-              className="min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 p-1.5 sm:px-2.5 sm:py-1 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+              className="min-w-[38px] min-h-[38px] sm:min-w-0 sm:min-h-0 flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 p-1 sm:px-2.5 sm:py-1 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
               aria-expanded={profileDropdownOpen}
               aria-haspopup="menu"
               aria-label="User account and profile menu"
@@ -549,14 +549,14 @@ export const DashboardLayout: React.FC = () => {
 
         {/* Content Outlet Canvas */}
         <main
-          className="flex-1 min-w-0 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-8"
+          className="flex-1 min-w-0 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:pb-8"
           id="workspace-content"
         >
           <Outlet />
 
           {/* Clean App Footer */}
-          <footer className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-2 text-center print:hidden">
-            <p className="font-mono text-[10px] text-brand-muted">
+          <footer className="max-w-5xl mx-auto px-3 sm:px-6 pt-3 pb-1.5 text-center print:hidden">
+            <p className="font-mono text-[9px] sm:text-[10px] text-brand-muted">
               PoraPlan Study System • You study. We organize how, what and when.
             </p>
           </footer>
@@ -565,7 +565,7 @@ export const DashboardLayout: React.FC = () => {
 
       {/* Mobile Bottom Navigation Bar (< 768px, 4 primary destinations + More button) */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-header border-t-2 border-brand-dark flex items-stretch justify-around shadow-brutal-xs print:hidden pb-[env(safe-area-inset-bottom,0px)] h-[calc(3.5rem+env(safe-area-inset-bottom,0px))]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-header border-t sm:border-t-2 border-brand-dark flex items-stretch justify-around shadow-none print:hidden pb-[env(safe-area-inset-bottom,0px)] h-[calc(3rem+env(safe-area-inset-bottom,0px))]"
         aria-label="Mobile Bottom Navigation"
       >
         {mobileNavItems.map((item) => {
@@ -579,16 +579,16 @@ export const DashboardLayout: React.FC = () => {
             <Link
               key={item.label}
               to={item.to}
-              className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors border-r border-brand-dark/20 relative ${
+              className={`flex-1 flex flex-col items-center justify-center py-0.5 transition-colors border-r border-brand-dark/20 relative ${
                 isActive
                   ? 'bg-brand-teal-light text-brand-navy font-bold'
                   : 'text-brand-muted hover:text-brand-dark'
               }`}
             >
               <div className="relative">
-                <Icon className="w-4 h-4 stroke-[2.2]" />
+                <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
               </div>
-              <span className="text-[10px] font-mono mt-0.5 leading-none truncate max-w-[70px]">
+              <span className="text-[9px] font-mono mt-0.5 leading-none truncate max-w-[65px]">
                 {item.label}
               </span>
             </Link>

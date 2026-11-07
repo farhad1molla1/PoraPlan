@@ -376,14 +376,14 @@ export const MentorPayoutsPage: React.FC = () => {
   }, [filteredRecords, currentPage, pageSize]);
 
   return (
-    <div className="space-y-5 max-w-5xl mx-auto">
+    <div className="space-y-3 sm:space-y-5 max-w-5xl mx-auto">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-2 border-brand-dark">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pb-2 sm:pb-3 border-b sm:border-b-2 border-brand-dark">
         <div>
-          <h1 className="text-xl sm:text-2xl font-heading font-extrabold text-brand-navy">
+          <h1 className="text-lg sm:text-2xl font-heading font-extrabold text-brand-navy">
             My Payouts
           </h1>
-          <p className="text-xs font-sans text-brand-muted mt-0.5">
+          <p className="text-[11px] sm:text-xs font-sans text-brand-muted mt-0.5">
             View your payout status and disbursement history.
           </p>
         </div>
@@ -401,7 +401,7 @@ export const MentorPayoutsPage: React.FC = () => {
 
       {/* Error Notice */}
       {error && (
-        <div className="p-3 bg-red-50 border border-red-300 text-red-900 flex items-center justify-between text-xs">
+        <div className="p-2.5 sm:p-3 bg-red-50 border border-red-300 text-red-900 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
             <span>{error}</span>
@@ -414,18 +414,18 @@ export const MentorPayoutsPage: React.FC = () => {
 
       {/* Loading Skeleton */}
       {loading && records.length === 0 && (
-        <div className="space-y-4 animate-pulse">
-          <div className="h-28 bg-brand-paper border border-brand-dark/20" />
-          <div className="h-48 bg-brand-paper border border-brand-dark/20" />
+        <div className="space-y-3 sm:space-y-4 animate-pulse">
+          <div className="h-20 sm:h-28 bg-brand-paper border border-brand-dark/20" />
+          <div className="h-36 sm:h-48 bg-brand-paper border border-brand-dark/20" />
         </div>
       )}
 
       {/* Empty State */}
       {!loading && !error && records.length === 0 && (
-        <div className="p-8 text-center bg-brand-paper border border-brand-dark/20 space-y-2">
-          <CreditCard className="w-8 h-8 text-brand-muted mx-auto" />
-          <div className="font-heading font-bold text-brand-navy text-sm">No Payout Records Yet</div>
-          <p className="text-xs text-brand-muted max-w-sm mx-auto">
+        <div className="p-6 sm:p-8 text-center bg-brand-paper border border-brand-dark/20 space-y-2">
+          <CreditCard className="w-7 h-7 sm:w-8 sm:h-8 text-brand-muted mx-auto" />
+          <div className="font-heading font-bold text-brand-navy text-xs sm:text-sm">No Payout Records Yet</div>
+          <p className="text-[11px] sm:text-xs text-brand-muted max-w-sm mx-auto">
             Your payout records will appear here once recorded by administration.
           </p>
         </div>
@@ -433,42 +433,42 @@ export const MentorPayoutsPage: React.FC = () => {
 
       {/* Main Content */}
       {records.length > 0 && (
-        <div className="space-y-5">
+        <div className="space-y-3 sm:space-y-5">
           {/* Latest Payout Summary */}
           {latestRecord && (
-            <div className="p-3.5 sm:p-5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-3">
-              <div className="flex items-center justify-between gap-2 pb-2 border-b border-brand-dark/10">
-                <span className="text-[11px] font-mono uppercase font-bold text-brand-muted">
+            <div className="p-2.5 sm:p-5 bg-brand-paper border sm:border-2 border-brand-dark shadow-none sm:shadow-brutal-xs space-y-2 sm:space-y-3">
+              <div className="flex items-center justify-between gap-2 pb-1.5 sm:pb-2 border-b border-brand-dark/10">
+                <span className="text-[10px] sm:text-[11px] font-mono uppercase font-bold text-brand-muted">
                   Latest Payout
                 </span>
                 {getStatusBadge(latestRecord.status)}
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs">
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-brand-muted block">Billing Month</span>
-                  <span className="font-heading font-bold text-brand-dark">
+                  <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block">Billing Month</span>
+                  <span className="font-heading font-bold text-brand-dark text-xs sm:text-sm">
                     {formatBillingMonth(latestRecord.billing_month)}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-brand-muted block">Payout Date</span>
-                  <span className="font-heading font-bold text-brand-navy">
+                  <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block">Payout Date</span>
+                  <span className="font-heading font-bold text-brand-navy text-xs sm:text-sm">
                     {latestRecord.payout_date ? formatCalendarDate(latestRecord.payout_date.split('T')[0]) : 'Pending'}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-brand-muted block">Payout Method</span>
-                  <span className="font-heading font-bold text-brand-dark">
+                  <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block">Payout Method</span>
+                  <span className="font-heading font-bold text-brand-dark text-xs sm:text-sm">
                     {formatPaymentMethod(latestRecord.payment_method)}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-brand-muted block">Mentorship Scope</span>
-                  <span className="font-heading font-bold text-brand-dark">
+                  <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block">Mentorship Scope</span>
+                  <span className="font-heading font-bold text-brand-dark text-xs sm:text-sm">
                     {latestRecord.related_student_id ? 'Assigned Scholar' : 'Platform Pool'}
                   </span>
                 </div>
@@ -477,9 +477,9 @@ export const MentorPayoutsPage: React.FC = () => {
           )}
 
           {/* Payout History Table */}
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="font-heading font-bold text-brand-navy text-sm">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+              <div className="font-heading font-bold text-brand-navy text-xs sm:text-sm">
                 Payout History
               </div>
 
@@ -495,7 +495,7 @@ export const MentorPayoutsPage: React.FC = () => {
                       setSearchQuery(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="pl-8 pr-2 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper focus:outline-none w-full sm:w-44"
+                    className="pl-8 pr-2 py-1.5 sm:py-1 text-base sm:text-xs min-h-[36px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper focus:outline-none w-full sm:w-44"
                   />
                   {searchQuery && (
                     <button
@@ -520,7 +520,7 @@ export const MentorPayoutsPage: React.FC = () => {
                     setStatusFilter(st);
                     setCurrentPage(1);
                   }}
-                  className={`px-2.5 py-0.5 text-xs font-heading font-bold uppercase transition-colors ${
+                  className={`px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-heading font-bold uppercase transition-colors min-h-[28px] sm:min-h-0 ${
                     statusFilter === st
                       ? 'bg-brand-navy text-brand-paper'
                       : 'bg-brand-paper text-brand-dark border border-brand-dark/20 hover:bg-brand-paper-tint'
@@ -533,26 +533,26 @@ export const MentorPayoutsPage: React.FC = () => {
 
             {/* Table & Responsive Cards */}
             {filteredRecords.length === 0 ? (
-              <div className="p-6 bg-brand-paper border border-brand-dark/20 text-center text-xs text-brand-muted">
+              <div className="p-4 sm:p-6 bg-brand-paper border border-brand-dark/20 text-center text-[11px] sm:text-xs text-brand-muted">
                 No payout records found.
               </div>
             ) : (
               <>
                 {/* Mobile Responsive Cards (< md: 768px) */}
-                <div className="md:hidden space-y-3">
+                <div className="md:hidden space-y-2 sm:space-y-3">
                   {paginatedRecords.map((r) => (
                     <div
                       key={r.id}
                       onClick={() => setSelectedRecord(r)}
-                      className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-2.5 cursor-pointer"
+                      className="p-2.5 sm:p-3.5 bg-brand-paper border sm:border-2 border-brand-dark shadow-none sm:shadow-brutal-xs space-y-2 cursor-pointer"
                     >
                       {/* Card Header: Billing Month + Payout Status Badge */}
-                      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-brand-dark/15">
+                      <div className="flex items-start justify-between gap-2 pb-1.5 sm:pb-2.5 border-b border-brand-dark/15">
                         <div className="min-w-0">
-                          <span className="text-[10px] font-mono uppercase text-brand-muted font-bold block">
+                          <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted font-bold block">
                             Billing Month
                           </span>
-                          <span className="font-heading font-extrabold text-sm text-brand-navy leading-snug">
+                          <span className="font-heading font-extrabold text-xs sm:text-sm text-brand-navy leading-snug">
                             {formatBillingMonth(r.billing_month)}
                           </span>
                         </div>

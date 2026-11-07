@@ -388,25 +388,25 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* 1. HEADER & DESK SUMMARY */}
-      <div className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-4 sm:p-6 shadow-brutal-sm sm:shadow-brutal">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="border sm:border-3 border-brand-dark bg-brand-paper p-2.5 sm:p-6 shadow-none sm:shadow-brutal">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 sm:gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-brand-bg text-brand-navy border border-brand-dark mb-2">
-              <Users className="w-3.5 h-3.5 text-brand-teal" />
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-brand-bg text-brand-navy border border-brand-dark mb-1 sm:mb-2">
+              <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-teal" />
               Mentorship Allocations
             </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-brand-navy">
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-black text-brand-navy">
               Mentor Assignment &amp; Matching Desk
             </h1>
-            <p className="text-xs sm:text-sm text-brand-navy/70 mt-1 max-w-2xl font-medium">
+            <p className="text-[11px] sm:text-sm text-brand-navy/70 mt-0.5 sm:mt-1 max-w-2xl font-medium">
               Allocate default mentors to cohort groups, set individual student overrides,
               and manage mentor workload allocations with strict precedence resolution.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button
               variant="outline"
               size="sm"
@@ -415,99 +415,99 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 loadData();
               }}
               disabled={loading}
-              className="gap-2"
+              className="gap-1.5 sm:gap-2 min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Layers className="w-4 h-4" />}
+              {loading ? <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" /> : <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               Refresh Allocations
             </Button>
           </div>
         </div>
 
         {/* Quick Stat Ribbon */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t-2 border-brand-dark/10">
-          <div className="p-2.5 sm:p-3 bg-[#0BA7B4]/10 border-2 border-[#0BA7B4]">
-            <p className="text-[10px] sm:text-xs font-bold text-brand-navy/70 uppercase">Cohort Mentors</p>
-            <p className="text-xl sm:text-2xl font-black text-brand-navy mt-0.5">{activeCohortAssignmentsCount}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-3 mt-2.5 sm:mt-6 pt-2.5 sm:pt-6 border-t sm:border-t-2 border-brand-dark/10">
+          <div className="p-1.5 sm:p-3 bg-[#0BA7B4]/10 border sm:border-2 border-[#0BA7B4]">
+            <p className="text-[9px] sm:text-xs font-bold text-brand-navy/70 uppercase">Cohort Mentors</p>
+            <p className="text-base sm:text-2xl font-black text-brand-navy mt-0.5">{activeCohortAssignmentsCount}</p>
           </div>
-          <div className="p-2.5 sm:p-3 bg-[#F5A623]/10 border-2 border-[#F5A623]">
-            <p className="text-[10px] sm:text-xs font-bold text-brand-navy/70 uppercase">Individual Overrides</p>
-            <p className="text-xl sm:text-2xl font-black text-brand-navy mt-0.5">{activeIndividualOverridesCount}</p>
+          <div className="p-1.5 sm:p-3 bg-[#F5A623]/10 border sm:border-2 border-[#F5A623]">
+            <p className="text-[9px] sm:text-xs font-bold text-brand-navy/70 uppercase">Individual Overrides</p>
+            <p className="text-base sm:text-2xl font-black text-brand-navy mt-0.5">{activeIndividualOverridesCount}</p>
           </div>
-          <div className="p-2.5 sm:p-3 bg-brand-navy/10 border-2 border-brand-dark">
-            <p className="text-[10px] sm:text-xs font-bold text-brand-navy/70 uppercase">Students Paired</p>
-            <p className="text-xl sm:text-2xl font-black text-brand-navy mt-0.5">{studentsWithMentorCount}</p>
+          <div className="p-1.5 sm:p-3 bg-brand-navy/10 border sm:border-2 border-brand-dark">
+            <p className="text-[9px] sm:text-xs font-bold text-brand-navy/70 uppercase">Students Paired</p>
+            <p className="text-base sm:text-2xl font-black text-brand-navy mt-0.5">{studentsWithMentorCount}</p>
           </div>
-          <div className="p-2.5 sm:p-3 bg-red-50 border-2 border-red-300">
-            <p className="text-[10px] sm:text-xs font-bold text-red-700 uppercase">Unassigned Students</p>
-            <p className="text-xl sm:text-2xl font-black text-red-800 mt-0.5">{studentsWithoutMentorCount}</p>
+          <div className="p-1.5 sm:p-3 bg-red-50 border sm:border-2 border-red-300">
+            <p className="text-[9px] sm:text-xs font-bold text-red-700 uppercase">Unassigned Students</p>
+            <p className="text-base sm:text-2xl font-black text-red-800 mt-0.5">{studentsWithoutMentorCount}</p>
           </div>
-          <div className="p-2.5 sm:p-3 bg-brand-bg border-2 border-brand-dark col-span-2 sm:col-span-1">
-            <p className="text-[10px] sm:text-xs font-bold text-brand-navy/60 uppercase">Available Mentors</p>
-            <p className="text-xl sm:text-2xl font-black text-brand-navy mt-0.5">{mentorsCount}</p>
+          <div className="p-1.5 sm:p-3 bg-brand-bg border sm:border-2 border-brand-dark col-span-2 sm:col-span-1">
+            <p className="text-[9px] sm:text-xs font-bold text-brand-navy/60 uppercase">Available Mentors</p>
+            <p className="text-base sm:text-2xl font-black text-brand-navy mt-0.5">{mentorsCount}</p>
           </div>
         </div>
       </div>
 
       {/* Notifications / Alerts */}
       {error && (
-        <div className="p-3 sm:p-4 bg-red-50 border-2 sm:border-3 border-red-500 shadow-[4px_4px_0_0_#ef4444] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-            <p className="text-sm font-bold text-red-800">{error}</p>
+        <div className="p-2.5 sm:p-4 bg-red-50 border sm:border-3 border-red-500 shadow-none sm:shadow-[4px_4px_0_0_#ef4444] flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0" />
+            <p className="text-xs sm:text-sm font-bold text-red-800">{error}</p>
           </div>
           <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800">
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       )}
 
       {successMessage && (
-        <div className="p-3 sm:p-4 bg-teal-50 border-2 sm:border-3 border-[#0BA7B4] shadow-[4px_4px_0_0_#0BA7B4] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-brand-teal flex-shrink-0" />
-            <p className="text-sm font-bold text-brand-navy">{successMessage}</p>
+        <div className="p-2.5 sm:p-4 bg-teal-50 border sm:border-3 border-[#0BA7B4] shadow-none sm:shadow-[4px_4px_0_0_#0BA7B4] flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal flex-shrink-0" />
+            <p className="text-xs sm:text-sm font-bold text-brand-navy">{successMessage}</p>
           </div>
           <button onClick={() => setSuccessMessage(null)} className="text-brand-navy hover:opacity-75">
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       )}
 
       {/* 2. TAB CONTROLS */}
-      <div className="flex flex-col lg:flex-row border-2 sm:border-3 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal">
+      <div className="flex flex-col lg:flex-row border sm:border-3 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal">
         <button
           onClick={() => setActiveTab('cohorts')}
-          className={`flex-1 py-3 px-4 sm:px-6 text-xs sm:text-sm font-black border-b-2 lg:border-b-0 lg:border-r-2 border-brand-dark transition-colors flex items-center justify-center gap-2 text-center ${
+          className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 text-[11px] sm:text-sm font-black border-b sm:border-b-2 lg:border-b-0 lg:border-r-2 border-brand-dark transition-colors flex items-center justify-center gap-1.5 sm:gap-2 text-center min-h-[36px] sm:min-h-0 ${
             activeTab === 'cohorts'
               ? 'bg-[#0BA7B4] text-white'
               : 'bg-brand-paper text-brand-navy hover:bg-brand-bg'
           }`}
         >
-          <GraduationCap className="w-4 h-4 shrink-0" />
+          <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
           <span>Cohort Default Allocations ({cohorts.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('students')}
-          className={`flex-1 py-3 px-4 sm:px-6 text-xs sm:text-sm font-black border-b-2 lg:border-b-0 lg:border-r-2 border-brand-dark transition-colors flex items-center justify-center gap-2 text-center ${
+          className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 text-[11px] sm:text-sm font-black border-b sm:border-b-2 lg:border-b-0 lg:border-r-2 border-brand-dark transition-colors flex items-center justify-center gap-1.5 sm:gap-2 text-center min-h-[36px] sm:min-h-0 ${
             activeTab === 'students'
               ? 'bg-[#0BA7B4] text-white'
               : 'bg-brand-paper text-brand-navy hover:bg-brand-bg'
           }`}
         >
-          <UserCheck className="w-4 h-4 shrink-0" />
+          <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
           <span>Student Overrides ({activeEnrollments.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('workload')}
-          className={`flex-1 py-3 px-4 sm:px-6 text-xs sm:text-sm font-black transition-colors flex items-center justify-center gap-2 text-center ${
+          className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 text-[11px] sm:text-sm font-black transition-colors flex items-center justify-center gap-1.5 sm:gap-2 text-center min-h-[36px] sm:min-h-0 ${
             activeTab === 'workload'
               ? 'bg-[#0BA7B4] text-white'
               : 'bg-brand-paper text-brand-navy hover:bg-brand-bg'
           }`}
         >
-          <Briefcase className="w-4 h-4 shrink-0" />
+          <Briefcase className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
           <span>Mentor Workload ({workload.length})</span>
         </button>
       </div>
@@ -516,7 +516,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {/* TAB 1: COHORT-LEVEL ASSIGNMENTS */}
       {/* ============================================================================== */}
       {activeTab === 'cohorts' && (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Program Filter Bar */}
           <div className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-3.5 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0">

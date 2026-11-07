@@ -103,36 +103,36 @@ export const StudentProgressPage: React.FC = () => {
       progress.subjectsProgress.length > 0);
 
   return (
-    <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-fadeIn pb-12">
+    <div className="space-y-2.5 sm:space-y-6 md:space-y-8 animate-fadeIn pb-8">
       {/* ========================================================================= */}
       {/* 1. PAGE HEADER                                                            */}
       {/* ========================================================================= */}
-      <section className="p-3.5 sm:p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section className="p-2.5 sm:p-6 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div>
-          <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            <span className="font-mono text-xs uppercase font-bold text-brand-muted bg-brand-bg px-2 py-0.5 border border-brand-dark">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5">
+            <span className="font-mono text-[9px] sm:text-xs uppercase font-bold text-brand-muted bg-brand-bg px-1.5 sm:px-2 py-0.2 sm:py-0.5 border border-brand-dark">
               STUDY METRICS
             </span>
             {profile?.poraplan_id && (
-              <span className="font-mono text-xs font-bold text-brand-teal px-2 py-0.5 border border-brand-dark bg-brand-paper shadow-brutal-xs">
+              <span className="font-mono text-[9px] sm:text-xs font-bold text-brand-teal px-1.5 sm:px-2 py-0.2 sm:py-0.5 border border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs">
                 STUDENT ID: {profile.poraplan_id}
               </span>
             )}
             {assignedMentor && (
-              <span className="font-mono text-xs font-bold text-brand-dark px-2 py-0.5 border border-brand-dark bg-brand-bg shadow-brutal-xs flex items-center gap-1">
-                <Users className="w-3.5 h-3.5 text-brand-gold" /> MENTOR: {assignedMentor.full_name}
+              <span className="font-mono text-[9px] sm:text-xs font-bold text-brand-dark px-1.5 sm:px-2 py-0.2 sm:py-0.5 border border-brand-dark bg-brand-bg shadow-none sm:shadow-brutal-xs flex items-center gap-1">
+                <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-gold" /> MENTOR: {assignedMentor.full_name}
               </span>
             )}
           </div>
-          <h1 className="font-heading font-extrabold text-xl sm:text-2xl md:text-3xl text-brand-navy tracking-tight">
+          <h1 className="font-heading font-extrabold text-lg sm:text-2xl md:text-3xl text-brand-navy tracking-tight">
             Progress Tracking
           </h1>
-          <p className="font-sans text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl">
+          <p className="font-sans text-[11px] sm:text-sm text-brand-muted mt-0.5 sm:mt-1 max-w-2xl">
             Summary of your study progress: completed tasks, practice submissions, and mentor evaluations.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <Button
             variant="outline"
             size="sm"
@@ -140,9 +140,9 @@ export const StudentProgressPage: React.FC = () => {
             disabled={loading || refreshing}
             leftIcon={
               refreshing ? (
-                <Loader2 className="w-4 h-4 animate-spin text-brand-navy" />
+                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin text-brand-navy" />
               ) : (
-                <RefreshCw className="w-4 h-4 text-brand-navy" />
+                <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy" />
               )
             }
           >
@@ -215,69 +215,69 @@ export const StudentProgressPage: React.FC = () => {
               {/* ========================================================================= */}
               {/* MOBILE SEGMENTED VIEW ( < md )                                            */}
               {/* ========================================================================= */}
-              <div className="md:hidden space-y-4">
+              <div className="md:hidden space-y-2.5">
                 {/* Segmented Control */}
-                <div className="flex border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal-sm p-1 gap-1">
+                <div className="flex border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-sm p-0.5 sm:p-1 gap-1">
                   <button
                     type="button"
                     onClick={() => setMobileTab('overview')}
-                    className={`flex-1 min-h-[44px] py-2 px-1 text-[11px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
+                    className={`flex-1 min-h-[36px] py-1 px-1 text-[10px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
                       mobileTab === 'overview'
-                        ? 'bg-brand-navy text-white shadow-brutal-xs'
+                        ? 'bg-brand-navy text-white shadow-none'
                         : 'text-brand-dark hover:bg-brand-paper-tint'
                     }`}
                   >
-                    <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+                    <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                     <span>Overview</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setMobileTab('subjects')}
-                    className={`flex-1 min-h-[44px] py-2 px-1 text-[11px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
+                    className={`flex-1 min-h-[36px] py-1 px-1 text-[10px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
                       mobileTab === 'subjects'
-                        ? 'bg-brand-navy text-white shadow-brutal-xs'
+                        ? 'bg-brand-navy text-white shadow-none'
                         : 'text-brand-dark hover:bg-brand-paper-tint'
                     }`}
                   >
-                    <BookOpen className="w-3.5 h-3.5 shrink-0" />
+                    <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                     <span>Subjects</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setMobileTab('activity')}
-                    className={`flex-1 min-h-[44px] py-2 px-1 text-[11px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
+                    className={`flex-1 min-h-[36px] py-1 px-1 text-[10px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
                       mobileTab === 'activity'
-                        ? 'bg-brand-navy text-white shadow-brutal-xs'
+                        ? 'bg-brand-navy text-white shadow-none'
                         : 'text-brand-dark hover:bg-brand-paper-tint'
                     }`}
                   >
-                    <Clock className="w-3.5 h-3.5 shrink-0" />
+                    <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                     <span>Activity</span>
                   </button>
                 </div>
 
                 {/* TAB 1: OVERVIEW */}
                 {mobileTab === 'overview' && (
-                  <div className="space-y-4 animate-fadeIn motion-reduce:animate-none">
+                  <div className="space-y-2.5 animate-fadeIn motion-reduce:animate-none">
                     {/* Study Cycle Overview Compact Card */}
-                    <div className="p-3.5 border-2 border-brand-dark bg-brand-paper-tint shadow-brutal-xs sm:shadow-brutal">
-                      <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-brand-dark/15">
-                        <span className="font-mono text-xs uppercase font-extrabold text-brand-navy flex items-center gap-1.5">
-                          <Sparkles className="w-3.5 h-3.5 text-brand-teal" />
+                    <div className="p-2.5 border sm:border-2 border-brand-dark bg-brand-paper-tint shadow-none sm:shadow-brutal">
+                      <div className="flex items-center justify-between gap-1.5 mb-1.5 pb-1.5 border-b border-brand-dark/15">
+                        <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-navy flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-teal" />
                           Study Cycle Progression
                         </span>
-                        <span className="font-mono text-[11px] text-brand-teal font-bold uppercase">
+                        <span className="font-mono text-[10px] sm:text-[11px] text-brand-teal font-bold uppercase">
                           7 Stages
                         </span>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 text-center font-mono text-xs">
-                        <div className="p-2 border border-brand-dark bg-brand-paper">
-                          <span className="text-[11px] text-brand-muted block uppercase font-bold">Step 1: Plan</span>
-                          <span className="text-brand-navy font-bold">{progress.studyPlans.activePlans} Active Plans</span>
+                      <div className="grid grid-cols-2 gap-1.5 text-center font-mono text-xs">
+                        <div className="p-1.5 border border-brand-dark bg-brand-paper">
+                          <span className="text-[10px] text-brand-muted block uppercase font-bold">Step 1: Plan</span>
+                          <span className="text-brand-navy font-bold text-xs">{progress.studyPlans.activePlans} Active Plans</span>
                         </div>
-                        <div className="p-2 border border-brand-dark bg-brand-paper">
-                          <span className="text-[11px] text-brand-muted block uppercase font-bold">Step 2: Study</span>
-                          <span className="text-brand-navy font-bold">{progress.tasks.completed}/{progress.tasks.total} Tasks</span>
+                        <div className="p-1.5 border border-brand-dark bg-brand-paper">
+                          <span className="text-[10px] text-brand-muted block uppercase font-bold">Step 2: Study</span>
+                          <span className="text-brand-navy font-bold text-xs">{progress.tasks.completed}/{progress.tasks.total} Tasks</span>
                         </div>
                         <div className="p-2 border border-brand-dark bg-brand-paper">
                           <span className="text-[11px] text-brand-muted block uppercase font-bold">Step 3: Practice</span>
@@ -305,30 +305,30 @@ export const StudentProgressPage: React.FC = () => {
                     </div>
 
                     {/* 4 Academic KPI Blocks */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       {/* Tasks */}
-                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal flex flex-col justify-between">
+                      <div className="p-2.5 sm:p-3.5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="font-mono text-[11px] uppercase font-extrabold text-brand-muted">
+                          <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+                            <span className="font-mono text-[10px] sm:text-[11px] uppercase font-extrabold text-brand-muted">
                               Tasks
                             </span>
                             <ListTodo className="w-3.5 h-3.5 text-brand-teal stroke-[2.5]" />
                           </div>
-                          <div className="font-heading font-extrabold text-xl text-brand-navy">
+                          <div className="font-heading font-black text-lg sm:text-xl text-brand-navy">
                             {progress.tasks.completed}{' '}
-                            <span className="text-[11px] font-mono font-normal text-brand-muted">
+                            <span className="text-[10px] sm:text-[11px] font-mono font-normal text-brand-muted">
                               / {progress.tasks.total}
                             </span>
                           </div>
-                          <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-2 overflow-hidden">
+                          <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-1.5 overflow-hidden">
                             <div
                               className="bg-brand-teal h-full"
                               style={{ width: `${progress.tasks.completionRate}%` }}
                             />
                           </div>
                         </div>
-                        <div className="mt-3 pt-2 border-t border-brand-dark/15 flex items-center justify-between text-[11px] font-mono">
+                        <div className="mt-2 pt-1.5 border-t border-brand-dark/15 flex items-center justify-between text-[10px] sm:text-[11px] font-mono">
                           <span className="text-brand-muted">{progress.tasks.completionRate}%</span>
                           <Link to="/student/tasks" className="text-brand-navy font-bold hover:underline flex items-center">
                             View <ChevronRight className="w-3 h-3" />
@@ -337,28 +337,28 @@ export const StudentProgressPage: React.FC = () => {
                       </div>
 
                       {/* Practice */}
-                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal flex flex-col justify-between">
+                      <div className="p-2.5 sm:p-3.5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="font-mono text-[11px] uppercase font-extrabold text-brand-muted">
+                          <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+                            <span className="font-mono text-[10px] sm:text-[11px] uppercase font-extrabold text-brand-muted">
                               Practice
                             </span>
                             <FileText className="w-3.5 h-3.5 text-brand-navy stroke-[2.5]" />
                           </div>
-                          <div className="font-heading font-extrabold text-xl text-brand-navy">
+                          <div className="font-heading font-black text-lg sm:text-xl text-brand-navy">
                             {progress.assignments.submitted}{' '}
-                            <span className="text-[11px] font-mono font-normal text-brand-muted">
+                            <span className="text-[10px] sm:text-[11px] font-mono font-normal text-brand-muted">
                               / {progress.assignments.totalAssigned}
                             </span>
                           </div>
-                          <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-2 overflow-hidden">
+                          <div className="w-full bg-brand-bg h-1.5 border border-brand-dark mt-1.5 overflow-hidden">
                             <div
                               className="bg-brand-navy h-full"
                               style={{ width: `${progress.assignments.submissionRate}%` }}
                             />
                           </div>
                         </div>
-                        <div className="mt-3 pt-2 border-t border-brand-dark/15 flex items-center justify-between text-[11px] font-mono">
+                        <div className="mt-2 pt-1.5 border-t border-brand-dark/15 flex items-center justify-between text-[10px] sm:text-[11px] font-mono">
                           <span className="text-brand-muted">{progress.assignments.submissionRate}%</span>
                           <Link to="/student/assignments" className="text-brand-navy font-bold hover:underline flex items-center">
                             View <ChevronRight className="w-3 h-3" />
@@ -367,7 +367,7 @@ export const StudentProgressPage: React.FC = () => {
                       </div>
 
                       {/* Evaluations */}
-                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal flex flex-col justify-between">
+                      <div className="p-2.5 sm:p-3.5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between">
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
                             <span className="font-mono text-[11px] uppercase font-extrabold text-brand-muted">
@@ -401,7 +401,7 @@ export const StudentProgressPage: React.FC = () => {
                       </div>
 
                       {/* Study Plans */}
-                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal flex flex-col justify-between">
+                      <div className="p-2.5 sm:p-3.5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between">
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
                             <span className="font-mono text-[11px] uppercase font-extrabold text-brand-muted">
@@ -435,18 +435,18 @@ export const StudentProgressPage: React.FC = () => {
 
                 {/* TAB 2: SUBJECTS */}
                 {mobileTab === 'subjects' && (
-                  <div className="space-y-3 animate-fadeIn motion-reduce:animate-none">
+                  <div className="space-y-2.5 animate-fadeIn motion-reduce:animate-none">
                     {/* Subject Filter Picker */}
                     {progress.subjectsProgress.length > 0 && (
-                      <div className="p-2.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex items-center gap-2">
-                        <span className="font-mono text-[11px] uppercase font-bold text-brand-muted shrink-0">
+                      <div className="p-2 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs flex items-center gap-1.5">
+                        <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-muted shrink-0">
                           Filter Area:
                         </span>
                         <select
                           value={selectedSubjectFilter}
                           onChange={(e) => setSelectedSubjectFilter(e.target.value)}
                           aria-label="Filter subject on mobile"
-                          className="w-full px-2 py-1.5 text-xs font-mono font-bold border border-brand-dark bg-brand-bg text-brand-dark min-h-[40px] focus:outline-none"
+                          className="w-full px-2 py-1 text-base sm:text-xs font-mono font-bold border border-brand-dark bg-brand-bg text-brand-dark min-h-[38px] focus:outline-none"
                         >
                           <option value="all">All Study Areas ({progress.subjectsProgress.length})</option>
                           {progress.subjectsProgress.map((s) => (
@@ -459,8 +459,8 @@ export const StudentProgressPage: React.FC = () => {
                     )}
 
                     {filteredSubjectsOnMobile.length === 0 ? (
-                      <div className="p-6 border-2 border-dashed border-brand-dark bg-brand-paper text-center">
-                        <p className="font-mono text-xs text-brand-muted">
+                      <div className="p-4 sm:p-6 border sm:border-2 border-dashed border-brand-dark bg-brand-paper text-center">
+                        <p className="font-mono text-[11px] sm:text-xs text-brand-muted">
                           No subject matched the filter.
                         </p>
                       </div>
@@ -468,14 +468,14 @@ export const StudentProgressPage: React.FC = () => {
                       filteredSubjectsOnMobile.map((subj) => (
                         <div
                           key={subj.subjectId}
-                          className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal space-y-3"
+                          className="p-2.5 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal space-y-2 sm:space-y-3"
                         >
-                          <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start justify-between gap-1.5">
                             <div className="min-w-0">
-                              <span className="font-mono text-[11px] font-bold text-brand-muted">
+                              <span className="font-mono text-[10px] sm:text-[11px] font-bold text-brand-muted">
                                 {subj.subjectCode || 'ACADEMIC AREA'}
                               </span>
-                              <h3 className="font-heading font-extrabold text-base text-brand-navy truncate">
+                              <h3 className="font-heading font-extrabold text-xs sm:text-base text-brand-navy truncate">
                                 {subj.subjectName}
                               </h3>
                             </div>
@@ -484,20 +484,20 @@ export const StudentProgressPage: React.FC = () => {
                             </Badge>
                           </div>
 
-                          <div className="space-y-1.5 text-xs font-mono bg-brand-paper-tint p-2.5 border border-brand-dark/20">
-                            <div className="flex items-center justify-between pb-1 border-b border-brand-dark/10">
+                          <div className="space-y-1 text-[11px] font-mono bg-brand-paper-tint p-2 border border-brand-dark/20">
+                            <div className="flex items-center justify-between pb-0.5 border-b border-brand-dark/10">
                               <span className="text-brand-muted">Tasks:</span>
                               <span className="font-bold text-brand-navy">
                                 {subj.tasks.completed}/{subj.tasks.total} ({subj.tasks.completionRate}%)
                               </span>
                             </div>
-                            <div className="flex items-center justify-between pb-1 border-b border-brand-dark/10">
+                            <div className="flex items-center justify-between pb-0.5 border-b border-brand-dark/10">
                               <span className="text-brand-muted">Practice:</span>
                               <span className="font-bold text-brand-navy">
                                 {subj.assignments.submitted}/{subj.assignments.total}
                               </span>
                             </div>
-                            <div className="flex items-center justify-between pb-1 border-b border-brand-dark/10">
+                            <div className="flex items-center justify-between pb-0.5 border-b border-brand-dark/10">
                               <span className="text-brand-muted">Evaluations:</span>
                               <span className="font-bold text-brand-navy">
                                 {subj.evaluations.completed}/{subj.evaluations.total}

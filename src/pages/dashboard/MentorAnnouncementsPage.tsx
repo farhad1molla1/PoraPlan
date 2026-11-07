@@ -409,19 +409,19 @@ export const MentorAnnouncementsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-12">
+    <div className="max-w-6xl mx-auto space-y-3 sm:space-y-6 pb-12">
       {/* 1. Header & Actions */}
-      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 border-2 border-brand-dark bg-brand-gold text-brand-dark flex items-center justify-center shadow-brutal-xs">
-              <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+          <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
+            <div className="w-7 h-7 sm:w-9 sm:h-9 border sm:border-2 border-brand-dark bg-brand-gold text-brand-dark flex items-center justify-center shadow-none sm:shadow-brutal-xs">
+              <Megaphone className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[2.5]" />
             </div>
-            <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
+            <h1 className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
               Announcements
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-brand-muted font-sans">
+          <p className="text-[11px] sm:text-sm text-brand-muted font-sans">
             Post announcements, schedule updates, and guidance for your assigned students.
           </p>
         </div>
@@ -432,10 +432,10 @@ export const MentorAnnouncementsPage: React.FC = () => {
             size="sm"
             onClick={() => fetchData(true)}
             disabled={refreshing || loading}
-            className="border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint"
+            className="border sm:border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint"
             title="Refresh announcements list"
           >
-            <RefreshCw className={`w-4 h-4 mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
 
@@ -446,9 +446,9 @@ export const MentorAnnouncementsPage: React.FC = () => {
               setShowCreateModal(true);
               setCreateError(null);
             }}
-            className="border-2 border-brand-dark bg-brand-navy text-white hover:bg-brand-teal shadow-brutal-xs"
+            className="border sm:border-2 border-brand-dark bg-brand-navy text-white hover:bg-brand-teal shadow-none sm:shadow-brutal-xs"
           >
-            <Plus className="w-4 h-4 mr-1.5" />
+            <Plus className="w-3.5 h-3.5 mr-1.5" />
             Publish Notice
           </Button>
         </div>
@@ -456,9 +456,9 @@ export const MentorAnnouncementsPage: React.FC = () => {
 
       {/* 2. Success Banner */}
       {successMessage && (
-        <div className="border-2 border-green-700 bg-green-50 p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between">
+        <div className="border sm:border-2 border-green-700 bg-green-50 p-2.5 sm:p-4 shadow-none sm:shadow-brutal flex items-center justify-between">
           <div className="flex items-center gap-2 text-green-900 font-sans text-xs sm:text-sm font-semibold">
-            <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-green-700 shrink-0" />
             <span>{successMessage}</span>
           </div>
           <button
@@ -466,16 +466,16 @@ export const MentorAnnouncementsPage: React.FC = () => {
             onClick={() => setSuccessMessage(null)}
             className="text-green-800 hover:text-green-950 p-1"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {/* 3. Error Banner */}
       {errorMessage && (
-        <div className="border-2 border-red-700 bg-red-50 p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between">
+        <div className="border sm:border-2 border-red-700 bg-red-50 p-2.5 sm:p-4 shadow-none sm:shadow-brutal flex items-center justify-between">
           <div className="flex items-center gap-2 text-red-900 font-sans text-xs sm:text-sm font-semibold">
-            <AlertTriangle className="w-5 h-5 text-red-700 shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-red-700 shrink-0" />
             <span>{errorMessage}</span>
           </div>
           <button
@@ -483,18 +483,18 @@ export const MentorAnnouncementsPage: React.FC = () => {
             onClick={() => setErrorMessage(null)}
             className="text-red-800 hover:text-red-950 p-1"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {/* 4. Statistics Dashboard Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
-        <div className="border-2 border-brand-dark bg-brand-paper p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal">
-          <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-muted block">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+        <div className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-4 shadow-none sm:shadow-brutal">
+          <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-brand-muted block">
             AUTHORED NOTICES
           </span>
-          <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
+          <span className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
             {totalCount}
           </span>
         </div>
@@ -502,14 +502,14 @@ export const MentorAnnouncementsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setStatusFilter('published')}
-          className={`border-2 border-brand-dark p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${
+          className={`border sm:border-2 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${
             statusFilter === 'published' ? 'ring-2 ring-brand-navy bg-teal-50' : 'bg-brand-paper'
           }`}
         >
-          <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-teal block">
+          <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-brand-teal block">
             PUBLISHED (ACTIVE)
           </span>
-          <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
+          <span className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
             {publishedCount}
           </span>
         </button>
@@ -517,33 +517,33 @@ export const MentorAnnouncementsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setStatusFilter('archived')}
-          className={`border-2 border-brand-dark p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${
+          className={`border sm:border-2 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${
             statusFilter === 'archived' ? 'ring-2 ring-brand-navy bg-amber-50' : 'bg-brand-paper'
           }`}
         >
-          <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-muted block">
+          <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-brand-muted block">
             ARCHIVED
           </span>
-          <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-dark">
+          <span className="font-heading font-extrabold text-lg sm:text-2xl text-brand-dark">
             {archivedCount}
           </span>
         </button>
 
-        <div className="border-2 border-brand-dark bg-brand-paper p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal">
-          <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-gold block">
+        <div className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-4 shadow-none sm:shadow-brutal">
+          <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-brand-gold block">
             TOTAL CONFIRMATIONS
           </span>
-          <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
+          <span className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
             {totalAcksCount}
           </span>
         </div>
       </div>
 
       {/* 5. Filter & Search Controls */}
-      <div className="border-2 border-brand-dark bg-brand-paper p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal space-y-2.5 sm:space-y-3">
-        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+      <div className="border sm:border-2 border-brand-dark bg-brand-paper p-2 sm:p-4 shadow-none sm:shadow-brutal space-y-2 sm:space-y-3">
+        <div className="flex flex-col md:flex-row gap-2 sm:gap-3 items-stretch md:items-center justify-between">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
+            <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
             <input
               type="text"
               value={searchQuery}

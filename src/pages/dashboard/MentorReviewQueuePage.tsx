@@ -248,20 +248,20 @@ export const MentorReviewQueuePage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-brand-bg border-2 sm:border-3 border-brand-dark p-4 sm:p-6 shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-brand-bg border sm:border-3 border-brand-dark p-2.5 sm:p-6 shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono text-xs font-bold text-brand-gold uppercase tracking-wider">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+            <span className="font-mono text-[10px] sm:text-xs font-bold text-brand-gold uppercase tracking-wider">
               Student Submissions
             </span>
             <Badge variant="gold" size="sm">
               FEEDBACK
             </Badge>
           </div>
-          <h1 className="font-heading font-black text-xl sm:text-2xl md:text-3xl text-brand-navy">
+          <h1 className="font-heading font-black text-lg sm:text-2xl md:text-3xl text-brand-navy">
             Review Queue
           </h1>
-          <p className="text-sm text-brand-muted mt-1 max-w-2xl">
+          <p className="text-[11px] sm:text-sm text-brand-muted mt-0.5 sm:mt-1 max-w-2xl">
             Review practice tasks, written work, and problem sets submitted by your assigned students. Provide feedback and guidance.
           </p>
         </div>
@@ -288,63 +288,63 @@ export const MentorReviewQueuePage: React.FC = () => {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
-          <div className="flex items-center justify-between text-brand-muted mb-1">
-            <span className="font-mono text-xs uppercase font-bold tracking-wider">Total</span>
-            <FileCheck className="w-4 h-4 text-brand-navy" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+        <div className="bg-brand-paper border sm:border-3 border-brand-dark p-2 sm:p-4 shadow-none sm:shadow-brutal-sm">
+          <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+            <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Total</span>
+            <FileCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy" />
           </div>
-          <div className="font-heading font-black text-2xl text-brand-navy">{totalCount}</div>
-          <div className="text-[11px] text-brand-muted mt-0.5">All student submissions</div>
+          <div className="font-heading font-black text-lg sm:text-2xl text-brand-navy">{totalCount}</div>
+          <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5">All student submissions</div>
         </div>
 
-        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
-          <div className="flex items-center justify-between text-brand-muted mb-1">
-            <span className="font-mono text-xs uppercase font-bold tracking-wider">Needs Review</span>
-            <Clock className="w-4 h-4 text-brand-gold" />
+        <div className="bg-brand-paper border sm:border-3 border-brand-dark p-2 sm:p-4 shadow-none sm:shadow-brutal-sm">
+          <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+            <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Needs Review</span>
+            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold" />
           </div>
-          <div className="font-heading font-black text-2xl text-brand-gold">{needsReviewCount}</div>
-          <div className="text-[11px] text-brand-muted mt-0.5">Awaiting evaluation</div>
+          <div className="font-heading font-black text-lg sm:text-2xl text-brand-gold">{needsReviewCount}</div>
+          <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5">Awaiting evaluation</div>
         </div>
 
-        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
-          <div className="flex items-center justify-between text-brand-muted mb-1">
-            <span className="font-mono text-xs uppercase font-bold tracking-wider">Reviewed</span>
-            <CheckCircle2 className="w-4 h-4 text-brand-teal" />
+        <div className="bg-brand-paper border sm:border-3 border-brand-dark p-2 sm:p-4 shadow-none sm:shadow-brutal-sm">
+          <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+            <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Reviewed</span>
+            <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal" />
           </div>
-          <div className="font-heading font-black text-2xl text-brand-teal">{reviewedCount}</div>
-          <div className="text-[11px] text-brand-muted mt-0.5">Feedback saved</div>
+          <div className="font-heading font-black text-lg sm:text-2xl text-brand-teal">{reviewedCount}</div>
+          <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5">Feedback saved</div>
         </div>
 
-        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
-          <div className="flex items-center justify-between text-brand-muted mb-1">
-            <span className="font-mono text-xs uppercase font-bold tracking-wider">Needs Revision</span>
-            <RotateCcw className="w-4 h-4 text-red-600" />
+        <div className="bg-brand-paper border sm:border-3 border-brand-dark p-2 sm:p-4 shadow-none sm:shadow-brutal-sm">
+          <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+            <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Needs Revision</span>
+            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-600" />
           </div>
-          <div className="font-heading font-black text-2xl text-red-600">{revisionCount}</div>
-          <div className="text-[11px] text-brand-muted mt-0.5">Requested corrections</div>
+          <div className="font-heading font-black text-lg sm:text-2xl text-red-600">{revisionCount}</div>
+          <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5">Requested corrections</div>
         </div>
       </div>
 
       {/* Error Banner */}
       {errorMessage && (
-        <div className="bg-red-50 border-3 border-red-500 p-4 text-red-700 flex items-start gap-3 shadow-brutal-sm">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <div className="bg-red-50 border sm:border-3 border-red-500 p-2.5 sm:p-4 text-red-700 flex items-start gap-2.5 sm:gap-3 shadow-none sm:shadow-brutal-sm">
+          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-bold text-sm">Failed to Load Review Queue</h4>
-            <p className="text-xs mt-0.5">{errorMessage}</p>
+            <h4 className="font-bold text-xs sm:text-sm">Failed to Load Review Queue</h4>
+            <p className="text-[11px] sm:text-xs mt-0.5">{errorMessage}</p>
           </div>
         </div>
       )}
 
       {/* Search & Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-brand-dark pb-3">
-        <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
           <button
             onClick={() => setFilterState('all')}
-            className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
+            className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               filterState === 'all'
-                ? 'bg-brand-navy text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
+                ? 'bg-brand-navy text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
                 : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
@@ -352,9 +352,9 @@ export const MentorReviewQueuePage: React.FC = () => {
           </button>
           <button
             onClick={() => setFilterState('needs_review')}
-            className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
+            className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               filterState === 'needs_review'
-                ? 'bg-brand-gold text-brand-dark shadow-brutal-xs translate-x-0.5 translate-y-0.5'
+                ? 'bg-brand-gold text-brand-dark shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
                 : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
@@ -362,9 +362,9 @@ export const MentorReviewQueuePage: React.FC = () => {
           </button>
           <button
             onClick={() => setFilterState('reviewed')}
-            className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
+            className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               filterState === 'reviewed'
-                ? 'bg-brand-teal text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
+                ? 'bg-brand-teal text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
                 : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
@@ -372,9 +372,9 @@ export const MentorReviewQueuePage: React.FC = () => {
           </button>
           <button
             onClick={() => setFilterState('needs_revision')}
-            className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark transition-all ${
+            className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               filterState === 'needs_revision'
-                ? 'bg-red-600 text-white shadow-brutal-xs translate-x-0.5 translate-y-0.5'
+                ? 'bg-red-600 text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
                 : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
             }`}
           >
@@ -388,7 +388,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search student or assignment..."
-            className="w-full bg-brand-paper border-2 border-brand-dark px-3 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+            className="w-full px-2.5 py-1.5 sm:py-1 text-base sm:text-xs min-h-[36px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
           />
         </div>
       </div>

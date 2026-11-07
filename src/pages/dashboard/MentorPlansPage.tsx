@@ -359,32 +359,32 @@ export const MentorPlansPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full py-5 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-6xl mx-auto space-y-3 sm:space-y-6">
 
         {/* Top Header Banner */}
-        <section aria-labelledby="mentor-plans-title" className="border-2 border-brand-dark bg-brand-navy text-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-7">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1.5">
+        <section aria-labelledby="mentor-plans-title" className="border sm:border-2 border-brand-dark bg-brand-navy text-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-7">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+            <div className="space-y-1 sm:space-y-1.5">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[11px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-2 py-0.5 shadow-brutal-xs">
+                <span className="font-mono text-[9px] sm:text-[11px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-1.5 sm:px-2 py-0.5 shadow-none sm:shadow-brutal-xs">
                   Study Roadmaps
                 </span>
               </div>
-              <h1 id="mentor-plans-title" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
+              <h1 id="mentor-plans-title" className="text-lg sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
                 Study Plans
               </h1>
-              <p className="text-xs sm:text-sm text-brand-bg/80 font-sans max-w-2xl leading-relaxed">
+              <p className="text-[11px] sm:text-sm text-brand-bg/80 font-sans max-w-2xl leading-relaxed">
                 Organize clear study roadmaps, topics, and targets for your assigned students based on their university syllabus.
               </p>
             </div>
 
             <Button
               variant="primary"
-              size="md"
+              size="sm"
               onClick={openCreateModal}
               disabled={loadingStudents || students.length === 0}
-              leftIcon={<Plus className="w-4 h-4 stroke-[2.5]" />}
+              leftIcon={<Plus className="w-3.5 h-3.5 stroke-[2.5]" />}
             >
               Draft Study Plan
             </Button>
@@ -393,48 +393,48 @@ export const MentorPlansPage: React.FC = () => {
 
         {/* Error Banner */}
         {errorMessage && (
-          <div className="p-3 sm:p-4 border-2 border-brand-dark bg-red-50 text-brand-dark shadow-brutal-sm sm:shadow-brutal flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <h3 className="font-heading font-extrabold text-sm text-red-900">
+          <div className="p-2.5 sm:p-4 border sm:border-2 border-brand-dark bg-red-50 text-brand-dark shadow-none sm:shadow-brutal flex items-start gap-2.5 sm:gap-3">
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 shrink-0 mt-0.5" />
+            <div className="space-y-0.5 sm:space-y-1">
+              <h3 className="font-heading font-extrabold text-xs sm:text-sm text-red-900">
                 Study Plans Alert
               </h3>
-              <p className="text-xs text-red-700 font-sans">{errorMessage}</p>
+              <p className="text-[11px] sm:text-xs text-red-700 font-sans">{errorMessage}</p>
             </div>
           </div>
         )}
 
         {/* Student Roster Selector */}
-        <section aria-labelledby="roster-selector-heading" className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-brand-dark pb-3">
-            <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-brand-teal stroke-[2.2]" />
-              <h2 id="roster-selector-heading" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
+        <section aria-labelledby="roster-selector-heading" className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-5 space-y-2 sm:space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal stroke-[2.2]" />
+              <h2 id="roster-selector-heading" className="font-heading font-extrabold text-xs sm:text-base text-brand-navy">
                 Select Assigned Student
               </h2>
             </div>
-            <span className="font-mono text-xs text-brand-muted">
+            <span className="font-mono text-[10px] sm:text-xs text-brand-muted">
               {students.length} {students.length === 1 ? 'student assigned' : 'students assigned'}
             </span>
           </div>
 
           {loadingStudents ? (
-            <div className="py-4 text-center">
-              <Loader2 className="w-5 h-5 animate-spin text-brand-teal mx-auto mb-1" />
-              <span className="font-mono text-xs text-brand-muted">Loading assigned students...</span>
+            <div className="py-3 sm:py-4 text-center">
+              <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-brand-teal mx-auto mb-1" />
+              <span className="font-mono text-[10px] sm:text-xs text-brand-muted">Loading assigned students...</span>
             </div>
           ) : students.length === 0 ? (
-            <div className="py-6 text-center space-y-2">
-              <AlertCircle className="w-6 h-6 text-brand-muted mx-auto" />
-              <p className="font-heading font-bold text-xs text-brand-dark">
+            <div className="py-4 sm:py-6 text-center space-y-1.5 sm:space-y-2">
+              <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-brand-muted mx-auto" />
+              <p className="font-heading font-bold text-[11px] sm:text-xs text-brand-dark">
                 No students currently assigned to your mentorship roster.
               </p>
-              <p className="text-xs text-brand-muted max-w-sm mx-auto">
+              <p className="text-[11px] sm:text-xs text-brand-muted max-w-sm mx-auto">
                 Once a student is paired with your mentor profile, their study plans will be manageable here.
               </p>
             </div>
           ) : (
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-thin">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 pt-1 scrollbar-thin">
               {students.map((student) => {
                 const isSelected = student.id === selectedStudentId;
                 return (
@@ -442,17 +442,17 @@ export const MentorPlansPage: React.FC = () => {
                     key={student.id}
                     type="button"
                     onClick={() => setSelectedStudentId(student.id)}
-                    className={`shrink-0 px-3.5 py-2 border-2 border-brand-dark text-left transition-all ${
+                    className={`shrink-0 px-2.5 sm:px-3.5 py-1.5 sm:py-2 border sm:border-2 border-brand-dark text-left transition-all min-h-[38px] sm:min-h-0 ${
                       isSelected
-                        ? 'bg-brand-navy text-brand-paper shadow-brutal-sm -translate-y-0.5'
-                        : 'bg-brand-bg text-brand-dark hover:bg-brand-paper shadow-brutal-xs'
+                        ? 'bg-brand-navy text-brand-paper shadow-none sm:shadow-brutal-sm -translate-y-0.5'
+                        : 'bg-brand-bg text-brand-dark hover:bg-brand-paper shadow-none sm:shadow-brutal-xs'
                     }`}
                   >
-                    <div className="font-heading font-extrabold text-xs tracking-tight">
+                    <div className="font-heading font-extrabold text-[11px] sm:text-xs tracking-tight">
                       {student.full_name}
                     </div>
                     {student.poraplan_id && (
-                      <div className="font-mono text-[10px] opacity-80 mt-0.5 flex items-center gap-1">
+                      <div className="font-mono text-[9px] sm:text-[10px] opacity-80 mt-0.5 flex items-center gap-1">
                         <span>ID: {student.poraplan_id}</span>
                       </div>
                     )}
@@ -465,39 +465,39 @@ export const MentorPlansPage: React.FC = () => {
 
         {/* Selected Student's Study Plans */}
         {selectedStudentId && activeStudent && (
-          <section aria-label="Student study plans" className="space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2">
+          <section aria-label="Student study plans" className="space-y-2.5 sm:space-y-4">
+            <div className="flex items-center justify-between border-b sm:border-b-2 border-brand-dark pb-1.5 sm:pb-2">
               <div>
-                <h2 className="font-heading font-extrabold text-base text-brand-navy">
+                <h2 className="font-heading font-extrabold text-xs sm:text-base text-brand-navy">
                   Study Plans for {activeStudent.full_name}
                 </h2>
                 {activeStudent.poraplan_id && (
-                  <span className="font-mono text-xs text-brand-muted">
+                  <span className="font-mono text-[10px] sm:text-xs text-brand-muted">
                     Student ID: {activeStudent.poraplan_id}
                   </span>
                 )}
               </div>
 
-              <span className="font-mono text-xs font-bold bg-brand-paper border border-brand-dark px-2.5 py-1 shadow-brutal-xs">
+              <span className="font-mono text-[10px] sm:text-xs font-bold bg-brand-paper border sm:border border-brand-dark px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-none sm:shadow-brutal-xs">
                 {plans.length} {plans.length === 1 ? 'Plan' : 'Plans'} Active
               </span>
             </div>
 
             {loadingPlans ? (
-              <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center space-y-2">
-                <Loader2 className="w-8 h-8 animate-spin text-brand-teal mx-auto" />
-                <span className="font-mono text-xs text-brand-muted block">Loading study plans...</span>
+              <div className="p-6 sm:p-12 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal text-center space-y-2">
+                <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-brand-teal mx-auto" />
+                <span className="font-mono text-[10px] sm:text-xs text-brand-muted block">Loading study plans...</span>
               </div>
             ) : plans.length === 0 ? (
-              <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-8 text-center space-y-4">
-                <div className="w-12 h-12 bg-brand-teal-light border-2 border-brand-dark mx-auto flex items-center justify-center shadow-brutal-xs">
-                  <Compass className="w-6 h-6 text-brand-navy stroke-[2.2]" />
+              <div className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-4 sm:p-8 text-center space-y-3 sm:space-y-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-brand-teal-light border sm:border-2 border-brand-dark mx-auto flex items-center justify-center shadow-none sm:shadow-brutal-xs">
+                  <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-brand-navy stroke-[2.2]" />
                 </div>
-                <div className="max-w-md mx-auto space-y-1">
-                  <h3 className="font-heading font-extrabold text-sm text-brand-navy">
+                <div className="max-w-md mx-auto space-y-0.5 sm:space-y-1">
+                  <h3 className="font-heading font-extrabold text-xs sm:text-sm text-brand-navy">
                     NO STUDY PLANS DRAFTED YET
                   </h3>
-                  <p className="text-xs text-brand-dark/80 font-sans leading-relaxed">
+                  <p className="text-[11px] sm:text-xs text-brand-dark/80 font-sans leading-relaxed">
                     You have not published any study roadmaps for {activeStudent.full_name}. Create a structured milestone plan with topics and target timeframes.
                   </p>
                 </div>
@@ -512,11 +512,11 @@ export const MentorPlansPage: React.FC = () => {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-4">
                 {plans.map((plan) => (
                   <article
                     key={plan.id}
-                    className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 flex flex-col justify-between space-y-3 sm:space-y-4"
+                    className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-5 flex flex-col justify-between space-y-2 sm:space-y-4"
                   >
                     <div className="space-y-2.5 sm:space-y-3">
                       {/* Card Top Strip */}

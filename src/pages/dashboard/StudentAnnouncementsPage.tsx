@@ -246,19 +246,19 @@ export const StudentAnnouncementsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6 pb-12">
+    <div className="max-w-6xl mx-auto space-y-3 sm:space-y-6 pb-12">
       {/* 1. Header & Actions */}
-      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 border-2 border-brand-dark bg-brand-gold text-brand-dark flex items-center justify-center shadow-brutal-xs">
-              <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+          <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
+            <div className="w-7 h-7 sm:w-9 sm:h-9 border sm:border-2 border-brand-dark bg-brand-gold text-brand-dark flex items-center justify-center shadow-none sm:shadow-brutal-xs">
+              <Megaphone className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[2.5]" />
             </div>
-            <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
+            <h1 className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
               Announcements
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-brand-muted font-sans">
+          <p className="text-[11px] sm:text-sm text-brand-muted font-sans">
             Important notices, schedule updates, and guidance from your mentor.
           </p>
         </div>
@@ -269,10 +269,10 @@ export const StudentAnnouncementsPage: React.FC = () => {
             size="sm"
             onClick={() => fetchData(true)}
             disabled={refreshing || loading}
-            className="border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint"
+            className="border sm:border-2 border-brand-dark bg-brand-paper hover:bg-brand-paper-tint"
             title="Refresh announcements list"
           >
-            <RefreshCw className={`w-4 h-4 mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
         </div>
@@ -280,9 +280,9 @@ export const StudentAnnouncementsPage: React.FC = () => {
 
       {/* 2. Success Banner */}
       {ackSuccessMessage && (
-        <div className="border-2 border-green-700 bg-green-50 p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between">
+        <div className="border sm:border-2 border-green-700 bg-green-50 p-2.5 sm:p-4 shadow-none sm:shadow-brutal flex items-center justify-between">
           <div className="flex items-center gap-2 text-green-900 font-sans text-xs sm:text-sm font-semibold">
-            <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-700 shrink-0" />
             <span>{ackSuccessMessage}</span>
           </div>
           <button
@@ -290,16 +290,16 @@ export const StudentAnnouncementsPage: React.FC = () => {
             onClick={() => setAckSuccessMessage(null)}
             className="text-green-800 hover:text-green-950 p-1"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {/* 3. Error Banner */}
       {errorMessage && (
-        <div className="border-2 border-red-700 bg-red-50 p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between">
+        <div className="border sm:border-2 border-red-700 bg-red-50 p-2.5 sm:p-4 shadow-none sm:shadow-brutal flex items-center justify-between">
           <div className="flex items-center gap-2 text-red-900 font-sans text-xs sm:text-sm font-semibold">
-            <AlertTriangle className="w-5 h-5 text-red-700 shrink-0" />
+            <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-700 shrink-0" />
             <span>{errorMessage}</span>
           </div>
           <button
@@ -307,25 +307,25 @@ export const StudentAnnouncementsPage: React.FC = () => {
             onClick={() => setErrorMessage(null)}
             className="text-red-800 hover:text-red-950 p-1"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {/* 4. Statistics Dashboard Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
         {/* Total Bulletins */}
-        <div className="border-2 border-brand-dark bg-brand-paper p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between">
+        <div className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-4 shadow-none sm:shadow-brutal flex items-center justify-between">
           <div>
-            <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-muted block">
+            <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-brand-muted block">
               TOTAL DIRECTIVES
             </span>
-            <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
+            <span className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
               {totalCount}
             </span>
           </div>
-          <div className="w-9 h-9 sm:w-10 sm:h-10 border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-center">
-            <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 text-brand-navy" />
+          <div className="w-7 h-7 sm:w-10 sm:h-10 border sm:border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-center">
+            <Megaphone className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-brand-navy" />
           </div>
         </div>
 
@@ -333,27 +333,27 @@ export const StudentAnnouncementsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setAckFilter('unacknowledged')}
-          className={`border-2 border-brand-dark p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between text-left transition-transform hover:-translate-y-0.5 ${
+          className={`border sm:border-2 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal flex items-center justify-between text-left transition-transform hover:-translate-y-0.5 ${
             ackFilter === 'unacknowledged' ? 'ring-2 ring-brand-navy bg-amber-50' : 'bg-brand-paper'
           }`}
         >
           <div>
-            <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-amber-800 block">
+            <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-amber-800 block">
               PENDING ACKNOWLEDGMENT
             </span>
             <div className="flex items-center gap-2">
-              <span className="font-heading font-extrabold text-xl sm:text-2xl text-amber-900">
+              <span className="font-heading font-extrabold text-lg sm:text-2xl text-amber-900">
                 {unackCount}
               </span>
               {unackCount > 0 && (
-                <span className="px-1.5 py-0.5 bg-red-600 text-white font-mono text-[10px] font-bold uppercase rounded-xs">
+                <span className="px-1.5 py-0.5 bg-red-600 text-white font-mono text-[9px] font-bold uppercase rounded-xs">
                   Action Required
                 </span>
               )}
             </div>
           </div>
-          <div className="w-9 h-9 sm:w-10 sm:h-10 border-2 border-brand-dark bg-amber-100 flex items-center justify-center">
-            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-800" />
+          <div className="w-7 h-7 sm:w-10 sm:h-10 border sm:border-2 border-brand-dark bg-amber-100 flex items-center justify-center">
+            <Clock className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-amber-800" />
           </div>
         </button>
 
@@ -361,27 +361,27 @@ export const StudentAnnouncementsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setAckFilter('acknowledged')}
-          className={`border-2 border-brand-dark p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between text-left transition-transform hover:-translate-y-0.5 ${
+          className={`border sm:border-2 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal flex items-center justify-between text-left transition-transform hover:-translate-y-0.5 ${
             ackFilter === 'acknowledged' ? 'ring-2 ring-brand-navy bg-teal-50' : 'bg-brand-paper'
           }`}
         >
           <div>
-            <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-teal block">
+            <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-brand-teal block">
               ACKNOWLEDGED
             </span>
-            <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
+            <span className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
               {ackCount}
             </span>
           </div>
-          <div className="w-9 h-9 sm:w-10 sm:h-10 border-2 border-brand-dark bg-teal-100 flex items-center justify-center">
-            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal" />
+          <div className="w-7 h-7 sm:w-10 sm:h-10 border sm:border-2 border-brand-dark bg-teal-100 flex items-center justify-center">
+            <CheckCircle2 className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-brand-teal" />
           </div>
         </button>
       </div>
 
       {/* 5. Filter Controls */}
-      <div className="border-2 border-brand-dark bg-brand-paper p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal space-y-2.5 sm:space-y-3">
-        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+      <div className="border sm:border-2 border-brand-dark bg-brand-paper p-2 sm:p-4 shadow-none sm:shadow-brutal space-y-2 sm:space-y-3">
+        <div className="flex flex-col md:flex-row gap-2 sm:gap-3 items-stretch md:items-center justify-between">
           {/* Search box */}
           <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
@@ -390,7 +390,7 @@ export const StudentAnnouncementsPage: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search announcements by title, content, author, or study area..."
-              className="w-full pl-9 pr-3 py-2.5 sm:py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="w-full pl-9 pr-3 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
             />
             {searchQuery && (
               <button
@@ -408,7 +408,7 @@ export const StudentAnnouncementsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setAckFilter('all')}
-              className={`px-3 py-1.5 font-mono text-xs font-bold border-2 border-brand-dark shadow-xs transition-colors whitespace-nowrap ${
+              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 font-mono text-[10px] sm:text-xs font-bold border sm:border-2 border-brand-dark shadow-none sm:shadow-xs transition-colors whitespace-nowrap ${
                 ackFilter === 'all'
                   ? 'bg-brand-navy text-white'
                   : 'bg-brand-paper hover:bg-brand-paper-tint text-brand-dark'
@@ -419,7 +419,7 @@ export const StudentAnnouncementsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setAckFilter('unacknowledged')}
-              className={`px-3 py-1.5 font-mono text-xs font-bold border-2 border-brand-dark shadow-xs transition-colors whitespace-nowrap flex items-center gap-1 ${
+              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 font-mono text-[10px] sm:text-xs font-bold border sm:border-2 border-brand-dark shadow-none sm:shadow-xs transition-colors whitespace-nowrap flex items-center gap-1 ${
                 ackFilter === 'unacknowledged'
                   ? 'bg-amber-600 text-white'
                   : 'bg-brand-paper hover:bg-amber-50 text-amber-900'
@@ -430,7 +430,7 @@ export const StudentAnnouncementsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setAckFilter('acknowledged')}
-              className={`px-3 py-1.5 font-mono text-xs font-bold border-2 border-brand-dark shadow-xs transition-colors whitespace-nowrap ${
+              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 font-mono text-[10px] sm:text-xs font-bold border sm:border-2 border-brand-dark shadow-none sm:shadow-xs transition-colors whitespace-nowrap ${
                 ackFilter === 'acknowledged'
                   ? 'bg-brand-teal text-white'
                   : 'bg-brand-paper hover:bg-teal-50 text-brand-teal'
@@ -442,14 +442,14 @@ export const StudentAnnouncementsPage: React.FC = () => {
         </div>
 
         {/* Secondary filters: Priority & Scope */}
-        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-brand-dark/15 text-xs">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1.5 sm:pt-2 border-t border-brand-dark/15 text-xs">
           <div className="flex items-center gap-1.5">
             <Filter className="w-3.5 h-3.5 text-brand-muted" />
-            <span className="font-mono text-[11px] font-bold text-brand-muted uppercase">Priority:</span>
+            <span className="font-mono text-[10px] sm:text-[11px] font-bold text-brand-muted uppercase">Priority:</span>
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value as any)}
-              className="px-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-bg font-sans focus:outline-none cursor-pointer"
+              className="px-2 sm:px-3 py-1 sm:py-1 text-base sm:text-xs min-h-[34px] sm:min-h-0 border border-brand-dark bg-brand-bg font-sans focus:outline-none cursor-pointer"
             >
               <option value="all">All Priorities</option>
               <option value="urgent">Urgent</option>
@@ -459,11 +459,11 @@ export const StudentAnnouncementsPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="font-mono text-[11px] font-bold text-brand-muted uppercase">Audience Scope:</span>
+            <span className="font-mono text-[10px] sm:text-[11px] font-bold text-brand-muted uppercase">Audience Scope:</span>
             <select
               value={scopeFilter}
               onChange={(e) => setScopeFilter(e.target.value as any)}
-              className="px-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-bg font-sans focus:outline-none cursor-pointer"
+              className="px-2 sm:px-3 py-1 sm:py-1 text-base sm:text-xs min-h-[34px] sm:min-h-0 border border-brand-dark bg-brand-bg font-sans focus:outline-none cursor-pointer"
             >
               <option value="all">All Scopes</option>
               <option value="platform">Platform Wide</option>
@@ -481,7 +481,7 @@ export const StudentAnnouncementsPage: React.FC = () => {
                 setPriorityFilter('all');
                 setScopeFilter('all');
               }}
-              className="font-mono text-[11px] text-brand-teal hover:underline ml-auto"
+              className="font-mono text-[10px] sm:text-[11px] text-brand-teal hover:underline ml-auto"
             >
               Reset all filters
             </button>

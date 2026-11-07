@@ -216,42 +216,42 @@ export const StudentTasksPage: React.FC = () => {
   const completedCount = tasks.filter((t) => t.status === 'completed').length;
 
   return (
-    <div className="w-full py-5 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6">
 
         {/* Top Header Banner */}
-        <section aria-labelledby="tasks-heading" className="border-2 border-brand-dark bg-brand-navy text-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-7">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[11px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-2 py-0.5 shadow-brutal-xs">
+        <section aria-labelledby="tasks-heading" className="border sm:border-2 border-brand-dark bg-brand-navy text-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-7">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+            <div className="space-y-1 sm:space-y-1.5">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="font-mono text-[9px] sm:text-[11px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-1.5 sm:px-2 py-0.2 sm:py-0.5 shadow-none sm:shadow-brutal-xs">
                   DAILY TARGETS
                 </span>
               </div>
-              <h1 id="tasks-heading" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
+              <h1 id="tasks-heading" className="text-lg sm:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
                 Today's Tasks
               </h1>
-              <p className="text-xs sm:text-sm text-brand-bg/80 font-sans max-w-2xl leading-relaxed">
+              <p className="text-[11px] sm:text-sm text-brand-bg/80 font-sans max-w-2xl leading-relaxed">
                 Prioritized daily study tasks and practice sessions organized by your mentor.
               </p>
             </div>
 
             {/* Quick Stats Banner */}
-            <div className="flex items-center gap-2 self-start sm:self-center">
-              <div className="border border-brand-paper/30 bg-brand-navy p-2 sm:p-2.5 text-center min-w-[65px] sm:min-w-[75px] shadow-brutal-xs">
-                <span className="text-[10px] sm:text-[11px] font-mono text-brand-paper/70 block uppercase">Pending</span>
-                <span className="text-base sm:text-lg font-heading font-extrabold text-brand-gold">{pendingCount + inProgressCount}</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 self-start sm:self-center">
+              <div className="border border-brand-paper/30 bg-brand-navy p-1.5 sm:p-2.5 text-center min-w-[55px] sm:min-w-[75px] shadow-none sm:shadow-brutal-xs">
+                <span className="text-[9px] sm:text-[11px] font-mono text-brand-paper/70 block uppercase">Pending</span>
+                <span className="text-sm sm:text-lg font-heading font-extrabold text-brand-gold">{pendingCount + inProgressCount}</span>
               </div>
-              <div className="border border-brand-paper/30 bg-brand-navy p-2 sm:p-2.5 text-center min-w-[65px] sm:min-w-[75px] shadow-brutal-xs">
-                <span className="text-[10px] sm:text-[11px] font-mono text-brand-paper/70 block uppercase">Completed</span>
-                <span className="text-base sm:text-lg font-heading font-extrabold text-brand-teal-light">{completedCount}</span>
+              <div className="border border-brand-paper/30 bg-brand-navy p-1.5 sm:p-2.5 text-center min-w-[55px] sm:min-w-[75px] shadow-none sm:shadow-brutal-xs">
+                <span className="text-[9px] sm:text-[11px] font-mono text-brand-paper/70 block uppercase">Completed</span>
+                <span className="text-sm sm:text-lg font-heading font-extrabold text-brand-teal-light">{completedCount}</span>
               </div>
             </div>
           </div>
 
           {/* Mentor Attribution Strip */}
           {assignedMentor && (
-            <div className="mt-4 pt-3 border-t border-brand-paper/20 flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-brand-bg/90">
+            <div className="mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-brand-paper/20 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-mono text-brand-bg/90">
               <div className="flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5 text-brand-gold" />
                 <span>Assigned Mentor:</span>
@@ -260,7 +260,7 @@ export const StudentTasksPage: React.FC = () => {
                 </strong>
               </div>
               {profile?.poraplan_id && (
-                <div className="text-[11px] text-brand-paper/70">
+                <div className="text-[10px] sm:text-[11px] text-brand-paper/70">
                   Student ID: <span className="text-brand-teal-light font-bold">{profile.poraplan_id}</span>
                 </div>
               )}
@@ -269,12 +269,12 @@ export const StudentTasksPage: React.FC = () => {
         </section>
 
         {/* Filter Tabs & Refresh Action */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 border-2 border-brand-dark bg-brand-paper p-1 shadow-brutal-xs self-start overflow-x-auto max-w-full">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 border sm:border-2 border-brand-dark bg-brand-paper p-0.5 sm:p-1 shadow-none sm:shadow-brutal-xs self-start overflow-x-auto max-w-full">
             <button
               type="button"
               onClick={() => setStatusFilter('all')}
-              className={`min-h-[40px] sm:min-h-0 py-2 sm:py-1 px-3 font-heading text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'all'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
                   : 'text-brand-dark hover:bg-brand-bg'
@@ -285,7 +285,7 @@ export const StudentTasksPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('pending')}
-              className={`min-h-[40px] sm:min-h-0 py-2 sm:py-1 px-3 font-heading text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'pending'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
                   : 'text-brand-dark hover:bg-brand-bg'
@@ -296,7 +296,7 @@ export const StudentTasksPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('in_progress')}
-              className={`min-h-[40px] sm:min-h-0 py-2 sm:py-1 px-3 font-heading text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'in_progress'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
                   : 'text-brand-dark hover:bg-brand-bg'
@@ -307,7 +307,7 @@ export const StudentTasksPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('completed')}
-              className={`min-h-[40px] sm:min-h-0 py-2 sm:py-1 px-3 font-heading text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'completed'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
                   : 'text-brand-dark hover:bg-brand-bg'
@@ -321,7 +321,7 @@ export const StudentTasksPage: React.FC = () => {
             type="button"
             onClick={loadData}
             disabled={loading}
-            className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-heading font-bold border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:bg-brand-bg transition-colors disabled:opacity-50 self-end sm:self-auto"
+            className="flex items-center justify-center gap-1 px-2.5 py-1 text-[11px] sm:text-xs font-heading font-bold border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs hover:bg-brand-bg transition-colors disabled:opacity-50 self-end sm:self-auto min-h-[34px] sm:min-h-0"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -395,7 +395,7 @@ export const StudentTasksPage: React.FC = () => {
 
         {/* Tasks List */}
         {!loading && !error && filteredTasks.length > 0 && (
-          <section aria-label="Tasks list" className="space-y-3">
+          <section aria-label="Tasks list" className="space-y-2 sm:space-y-3">
             {filteredTasks.map((task) => {
               const isCompleted = task.status === 'completed';
               const isUpdating = updatingTaskId === task.id;
@@ -403,49 +403,49 @@ export const StudentTasksPage: React.FC = () => {
               return (
                 <article
                   key={task.id}
-                  className={`border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 transition-all ${
+                  className={`border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4 transition-all ${
                     isCompleted ? 'opacity-80 bg-brand-paper-tint' : ''
                   }`}
                 >
-                  <div className="flex items-start gap-3 sm:gap-3.5 flex-1">
+                  <div className="flex items-start gap-2.5 sm:gap-3.5 flex-1">
                     {/* Completion Checkbox Button */}
                     <button
                       type="button"
                       onClick={() => handleToggleStatus(task)}
                       disabled={isUpdating}
                       aria-label={isCompleted ? `Mark ${task.title} as pending` : `Mark ${task.title} as completed`}
-                      className="relative -m-2.5 p-2.5 sm:m-0 sm:p-0 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+                      className="relative -m-2 p-2 sm:m-0 sm:p-0 min-w-[38px] min-h-[38px] sm:min-w-0 sm:min-h-0 flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
                     >
                       <span
-                        className={`w-6 h-6 border-2 border-brand-dark flex items-center justify-center shrink-0 transition-colors ${
+                        className={`w-5 h-5 sm:w-6 sm:h-6 border sm:border-2 border-brand-dark flex items-center justify-center shrink-0 transition-colors ${
                           isCompleted
                             ? 'bg-brand-teal text-white shadow-none'
-                            : 'bg-brand-paper hover:bg-brand-paper shadow-brutal-xs'
+                            : 'bg-brand-paper hover:bg-brand-paper shadow-none sm:shadow-brutal-xs'
                         }`}
                       >
                         {isUpdating ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-navy" />
                         ) : isCompleted ? (
-                          <CheckCircle className="w-4 h-4" />
+                          <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         ) : (
-                          <Circle className="w-3.5 h-3.5 text-brand-dark/30" />
+                          <Circle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-dark/30" />
                         )}
                       </span>
                     </button>
 
-                    <div className="space-y-1.5 sm:space-y-2 flex-1 min-w-0">
+                    <div className="space-y-1 sm:space-y-2 flex-1 min-w-0">
                       {/* Tags & Badges */}
-                      <div className="flex items-center gap-1.5 flex-wrap">
+                      <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
                         {task.subject_name && (
-                          <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-teal-light border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-navy flex items-center gap-1">
-                            <BookOpen className="w-3 h-3 text-brand-navy" />
+                          <span className="font-mono text-[9px] sm:text-[11px] font-bold uppercase tracking-wider bg-brand-teal-light border border-brand-dark px-1.5 sm:px-2 py-0.2 sm:py-0.5 text-brand-navy flex items-center gap-1">
+                            <BookOpen className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-navy" />
                             {task.subject_name}
                           </span>
                         )}
 
                         {task.plan_title && (
-                          <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-muted flex items-center gap-1">
-                            <Compass className="w-3 h-3 text-brand-muted" />
+                          <span className="font-mono text-[9px] sm:text-[11px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-1.5 sm:px-2 py-0.2 sm:py-0.5 text-brand-muted flex items-center gap-1">
+                            <Compass className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-muted" />
                             {task.plan_title}
                           </span>
                         )}
@@ -454,7 +454,7 @@ export const StudentTasksPage: React.FC = () => {
                           variant={task.priority === 'high' ? 'danger' : task.priority === 'medium' ? 'gold' : 'muted'}
                           size="sm"
                         >
-                          {task.priority.toUpperCase()} PRIORITY
+                          {task.priority.toUpperCase()}
                         </Badge>
 
                         <Badge
@@ -468,7 +468,7 @@ export const StudentTasksPage: React.FC = () => {
                       {/* Title & Description */}
                       <div>
                         <h2
-                          className={`font-heading font-extrabold text-sm sm:text-base text-brand-navy leading-snug ${
+                          className={`font-heading font-extrabold text-xs sm:text-base text-brand-navy leading-snug ${
                             isCompleted ? 'line-through text-brand-dark/60' : ''
                           }`}
                         >
@@ -476,7 +476,7 @@ export const StudentTasksPage: React.FC = () => {
                         </h2>
 
                         {task.description && (
-                          <p className="text-xs text-brand-dark/85 font-sans mt-1 leading-relaxed">
+                          <p className="text-[11px] sm:text-xs text-brand-dark/85 font-sans mt-0.5 sm:mt-1 leading-relaxed">
                             {task.description}
                           </p>
                         )}
@@ -484,21 +484,21 @@ export const StudentTasksPage: React.FC = () => {
 
                       {/* Mentor Reference Attachment */}
                       {task.attachment_path && (
-                        <div className="mt-2 p-2 sm:p-2.5 bg-brand-bg border-2 border-brand-dark flex flex-wrap items-center justify-between gap-2 text-xs">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Paperclip className="w-3.5 h-3.5 text-brand-teal shrink-0" />
-                            <span className="font-mono font-bold text-brand-navy truncate max-w-[200px] sm:max-w-xs">
+                        <div className="mt-1.5 p-1.5 sm:p-2.5 bg-brand-bg border sm:border-2 border-brand-dark flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <Paperclip className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-teal shrink-0" />
+                            <span className="font-mono font-bold text-brand-navy truncate max-w-[160px] sm:max-w-xs">
                               {task.attachment_name || 'Mentor Attached File'}
                             </span>
                             {task.attachment_size && (
-                              <span className="font-mono text-[11px] text-brand-muted shrink-0">
+                              <span className="font-mono text-[10px] text-brand-muted shrink-0">
                                 ({task.attachment_size < 1024 * 1024
                                   ? `${Math.round(task.attachment_size / 1024)} KB`
                                   : `${(task.attachment_size / (1024 * 1024)).toFixed(2)} MB`})
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-1.5 shrink-0">
+                          <div className="flex items-center gap-1 shrink-0">
                             <button
                               type="button"
                               onClick={() =>
@@ -508,7 +508,7 @@ export const StudentTasksPage: React.FC = () => {
                                   path: task.attachment_path,
                                 })
                               }
-                              className="px-2 py-1 bg-brand-paper border border-brand-dark font-heading text-[11px] font-bold text-brand-navy hover:bg-brand-paper shadow-brutal-xs flex items-center gap-1"
+                              className="px-2 py-0.5 sm:py-1 bg-brand-paper border border-brand-dark font-heading text-[10px] sm:text-[11px] font-bold text-brand-navy hover:bg-brand-paper shadow-none sm:shadow-brutal-xs flex items-center gap-1 min-h-[32px] sm:min-h-0"
                             >
                               <Eye className="w-3 h-3 text-brand-teal" />
                               Preview
@@ -521,7 +521,7 @@ export const StudentTasksPage: React.FC = () => {
                                   path: task.attachment_path,
                                 })
                               }
-                              className="px-2 py-1 bg-brand-navy border border-brand-dark font-heading text-[11px] font-bold text-white hover:bg-brand-navy/90 shadow-brutal-xs flex items-center gap-1"
+                              className="px-2 py-0.5 sm:py-1 bg-brand-navy border border-brand-dark font-heading text-[10px] sm:text-[11px] font-bold text-white hover:bg-brand-navy/90 shadow-none sm:shadow-brutal-xs flex items-center gap-1 min-h-[32px] sm:min-h-0"
                             >
                               <Download className="w-3 h-3 text-brand-gold" />
                               Download
@@ -531,23 +531,23 @@ export const StudentTasksPage: React.FC = () => {
                       )}
 
                       {/* Timestamps & Estimates */}
-                      <div className="flex items-center gap-4 text-xs font-mono text-brand-muted pt-1">
+                      <div className="flex items-center gap-3 text-[10px] sm:text-xs font-mono text-brand-muted pt-0.5 sm:pt-1">
                         {task.estimated_minutes && (
                           <span className="flex items-center gap-1 text-brand-navy font-bold">
-                            <Clock className="w-3.5 h-3.5 text-brand-teal" />
-                            {task.estimated_minutes} mins duration
+                            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-teal" />
+                            {task.estimated_minutes}m
                           </span>
                         )}
                         {task.due_date && (
                           <span className="flex items-center gap-1">
-                            <Calendar className="w-3.5 h-3.5" />
+                            <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                             Due: {new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </span>
                         )}
                         {task.completed_at && (
                           <span className="flex items-center gap-1 text-brand-teal font-bold">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            Completed on {new Date(task.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                            Done {new Date(task.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </span>
                         )}
                       </div>

@@ -456,24 +456,25 @@ export const AdminBillingPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5 max-w-6xl mx-auto">
+    <div className="space-y-3 sm:space-y-5 max-w-6xl mx-auto">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-2 border-brand-dark">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 pb-2 sm:pb-3 border-b sm:border-b-2 border-brand-dark">
         <div>
-          <h1 className="text-xl sm:text-2xl font-heading font-extrabold text-brand-navy">
+          <h1 className="text-lg sm:text-2xl font-heading font-extrabold text-brand-navy">
             Payment Management
           </h1>
-          <p className="text-xs font-sans text-brand-muted mt-0.5">
+          <p className="text-[11px] sm:text-xs font-sans text-brand-muted mt-0.5">
             Manage student payments, mentor payouts, and billing cycles.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={loadDeskData}
             disabled={loading}
+            className="min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
             leftIcon={<RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />}
           >
             Refresh
@@ -482,6 +483,7 @@ export const AdminBillingPage: React.FC = () => {
             variant="primary"
             size="sm"
             onClick={() => setIsCreateStudentModalOpen(true)}
+            className="min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
             leftIcon={<Plus className="w-3.5 h-3.5" />}
           >
             Record Payment
@@ -490,6 +492,7 @@ export const AdminBillingPage: React.FC = () => {
             variant="outline"
             size="sm"
             onClick={() => setIsCreateMentorModalOpen(true)}
+            className="min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
             leftIcon={<Plus className="w-3.5 h-3.5" />}
           >
             Record Payout
@@ -499,7 +502,7 @@ export const AdminBillingPage: React.FC = () => {
 
       {/* Notifications */}
       {actionSuccess && (
-        <div className="p-2.5 bg-teal-50 border border-teal-300 text-teal-900 flex items-center justify-between text-xs">
+        <div className="p-2 sm:p-2.5 bg-teal-50 border border-teal-300 text-teal-900 flex items-center justify-between text-[11px] sm:text-xs">
           <span>{actionSuccess}</span>
           <button type="button" onClick={() => setActionSuccess(null)} className="text-teal-700 hover:text-teal-900">
             <X className="w-3.5 h-3.5" />
@@ -508,7 +511,7 @@ export const AdminBillingPage: React.FC = () => {
       )}
 
       {error && (
-        <div className="p-2.5 bg-red-50 border border-red-300 text-red-900 flex items-center justify-between text-xs">
+        <div className="p-2 sm:p-2.5 bg-red-50 border border-red-300 text-red-900 flex items-center justify-between text-[11px] sm:text-xs">
           <span>{error}</span>
           <button type="button" onClick={() => setError(null)} className="text-red-700 hover:text-red-900">
             <X className="w-3.5 h-3.5" />
@@ -517,11 +520,11 @@ export const AdminBillingPage: React.FC = () => {
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-1 border-b border-brand-dark/20 overflow-x-auto text-xs">
+      <div className="flex items-center gap-1 border-b border-brand-dark/20 overflow-x-auto text-[11px] sm:text-xs">
         <button
           type="button"
           onClick={() => setActiveTab('overview')}
-          className={`px-3 py-1.5 font-heading font-bold uppercase transition-colors ${
+          className={`px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 font-heading font-bold uppercase transition-colors ${
             activeTab === 'overview'
               ? 'bg-brand-navy text-brand-paper'
               : 'text-brand-dark hover:bg-brand-paper-tint'
@@ -533,33 +536,33 @@ export const AdminBillingPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveTab('student_payments')}
-          className={`px-3 py-1.5 font-heading font-bold uppercase transition-colors flex items-center gap-1 ${
+          className={`px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 font-heading font-bold uppercase transition-colors flex items-center gap-1 ${
             activeTab === 'student_payments'
               ? 'bg-brand-navy text-brand-paper'
               : 'text-brand-dark hover:bg-brand-paper-tint'
           }`}
         >
           <span>Student Payments</span>
-          <span className="font-mono text-[11px] opacity-80">({studentRecords.length})</span>
+          <span className="font-mono text-[10px] sm:text-[11px] opacity-80">({studentRecords.length})</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('mentor_payouts')}
-          className={`px-3 py-1.5 font-heading font-bold uppercase transition-colors flex items-center gap-1 ${
+          className={`px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 font-heading font-bold uppercase transition-colors flex items-center gap-1 ${
             activeTab === 'mentor_payouts'
               ? 'bg-brand-navy text-brand-paper'
               : 'text-brand-dark hover:bg-brand-paper-tint'
           }`}
         >
           <span>Mentor Payouts</span>
-          <span className="font-mono text-[11px] opacity-80">({mentorRecords.length})</span>
+          <span className="font-mono text-[10px] sm:text-[11px] opacity-80">({mentorRecords.length})</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('calendar')}
-          className={`px-3 py-1.5 font-heading font-bold uppercase transition-colors ${
+          className={`px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 font-heading font-bold uppercase transition-colors ${
             activeTab === 'calendar'
               ? 'bg-brand-navy text-brand-paper'
               : 'text-brand-dark hover:bg-brand-paper-tint'
@@ -571,14 +574,14 @@ export const AdminBillingPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveTab('audit_notes')}
-          className={`px-3 py-1.5 font-heading font-bold uppercase transition-colors flex items-center gap-1 ${
+          className={`px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 font-heading font-bold uppercase transition-colors flex items-center gap-1 ${
             activeTab === 'audit_notes'
               ? 'bg-brand-navy text-brand-paper'
               : 'text-brand-dark hover:bg-brand-paper-tint'
           }`}
         >
           <span>Audit Log</span>
-          <span className="font-mono text-[11px] opacity-80">({auditLogs.length})</span>
+          <span className="font-mono text-[10px] sm:text-[11px] opacity-80">({auditLogs.length})</span>
         </button>
       </div>
 
@@ -586,33 +589,33 @@ export const AdminBillingPage: React.FC = () => {
       {/* TAB 1: OVERVIEW                                                       */}
       {/* ===================================================================== */}
       {activeTab === 'overview' && (
-        <div className="space-y-5">
+        <div className="space-y-3 sm:space-y-5">
           {/* Compact Essential Counts */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3 bg-brand-paper border border-brand-dark/20">
-              <span className="text-[10px] font-mono uppercase text-brand-muted block">Pending Payments</span>
-              <span className="text-xl font-heading font-extrabold text-amber-600 block mt-1">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+            <div className="p-2 sm:p-3 bg-brand-paper border border-brand-dark/20">
+              <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block">Pending Payments</span>
+              <span className="text-base sm:text-xl font-heading font-extrabold text-amber-600 block mt-0.5 sm:mt-1">
                 {counts.pendingStudents}
               </span>
             </div>
 
-            <div className="p-3 bg-brand-paper border border-brand-dark/20">
-              <span className="text-[10px] font-mono uppercase text-brand-muted block">Overdue Payments</span>
-              <span className="text-xl font-heading font-extrabold text-rose-600 block mt-1">
+            <div className="p-2 sm:p-3 bg-brand-paper border border-brand-dark/20">
+              <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block">Overdue Payments</span>
+              <span className="text-base sm:text-xl font-heading font-extrabold text-rose-600 block mt-0.5 sm:mt-1">
                 {counts.overdueStudents}
               </span>
             </div>
 
-            <div className="p-3 bg-brand-paper border border-brand-dark/20">
-              <span className="text-[10px] font-mono uppercase text-brand-muted block">Upcoming Renewals</span>
-              <span className="text-xl font-heading font-extrabold text-brand-navy block mt-1">
+            <div className="p-2 sm:p-3 bg-brand-paper border border-brand-dark/20">
+              <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block">Upcoming Renewals</span>
+              <span className="text-base sm:text-xl font-heading font-extrabold text-brand-navy block mt-0.5 sm:mt-1">
                 {counts.upcomingRenewals}
               </span>
             </div>
 
-            <div className="p-3 bg-brand-paper border border-brand-dark/20">
-              <span className="text-[10px] font-mono uppercase text-brand-muted block">Pending Payouts</span>
-              <span className="text-xl font-heading font-extrabold text-amber-600 block mt-1">
+            <div className="p-2 sm:p-3 bg-brand-paper border border-brand-dark/20">
+              <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block">Pending Payouts</span>
+              <span className="text-base sm:text-xl font-heading font-extrabold text-amber-600 block mt-0.5 sm:mt-1">
                 {counts.pendingMentors}
               </span>
             </div>
@@ -815,7 +818,7 @@ export const AdminBillingPage: React.FC = () => {
           ) : (
             <>
               {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
-              <div className="lg:hidden space-y-3">
+              <div className="lg:hidden space-y-2 sm:space-y-3">
                 {paginatedStudentRecords.map((rec) => {
                   const student = studentsMap.get(rec.student_id);
                   const enrollment = enrollmentsMap.get(rec.enrollment_id);
@@ -826,16 +829,16 @@ export const AdminBillingPage: React.FC = () => {
                     <div
                       key={rec.id}
                       onClick={() => setSelectedStudentRecord(rec)}
-                      className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-2.5 cursor-pointer"
+                      className="p-2.5 sm:p-3.5 bg-brand-paper border sm:border-2 border-brand-dark shadow-none sm:shadow-brutal-xs space-y-2 sm:space-y-2.5 cursor-pointer"
                     >
                       {/* Header: Student Name + PoraPlan ID + Status Badge */}
-                      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-brand-dark/15">
+                      <div className="flex items-start justify-between gap-2 pb-2 sm:pb-2.5 border-b border-brand-dark/15">
                         <div className="min-w-0">
-                          <span className="font-heading font-extrabold text-sm text-brand-navy leading-snug truncate block">
+                          <span className="font-heading font-extrabold text-xs sm:text-sm text-brand-navy leading-snug truncate block">
                             {student?.full_name || 'Scholar'}
                           </span>
                           {student?.poraplan_id && (
-                            <span className="font-mono text-[11px] text-brand-teal font-bold block mt-0.5">
+                            <span className="font-mono text-[10px] sm:text-[11px] text-brand-teal font-bold block mt-0.5">
                               {student.poraplan_id}
                             </span>
                           )}
@@ -846,33 +849,33 @@ export const AdminBillingPage: React.FC = () => {
                       </div>
 
                       {/* Details Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-brand-bg p-2.5 border border-brand-dark/20">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-[11px] sm:text-xs bg-brand-bg p-2 sm:p-2.5 border border-brand-dark/20">
                         <div>
-                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                          <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block font-bold">
                             Program
                           </span>
-                          <span className="font-heading font-bold text-brand-dark text-[11px] block mt-0.5 truncate">
+                          <span className="font-heading font-bold text-brand-dark text-[10px] sm:text-[11px] block mt-0.5 truncate">
                             {program?.name || '—'}
                           </span>
                         </div>
 
                         <div>
-                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                          <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block font-bold">
                             Billing Period
                           </span>
-                          <span className="font-mono text-[11px] text-brand-navy font-bold block mt-0.5">
+                          <span className="font-mono text-[10px] sm:text-[11px] text-brand-navy font-bold block mt-0.5">
                             {formatCalendarDate(rec.cycle_start_date)} – {formatCalendarDate(rec.cycle_end_date)}
                           </span>
                         </div>
 
                         <div>
-                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                          <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block font-bold">
                             Method & Ref
                           </span>
-                          <div className="font-sans font-bold text-brand-dark text-[11px] mt-0.5 flex flex-wrap items-center gap-1.5">
+                          <div className="font-sans font-bold text-brand-dark text-[10px] sm:text-[11px] mt-0.5 flex flex-wrap items-center gap-1.5">
                             <span>{formatPaymentMethod(rec.payment_method)}</span>
                             {rec.transaction_reference && (
-                              <span className="font-mono text-[10px] text-brand-muted flex items-center gap-0.5">
+                              <span className="font-mono text-[9px] sm:text-[10px] text-brand-muted flex items-center gap-0.5">
                                 <span>({rec.transaction_reference})</span>
                                 {isDuplicate && (
                                   <span title="Duplicate reference warning">
@@ -885,21 +888,21 @@ export const AdminBillingPage: React.FC = () => {
                         </div>
 
                         <div>
-                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                          <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block font-bold">
                             Payment Date
                           </span>
-                          <span className="font-mono text-[11px] text-brand-muted block mt-0.5">
+                          <span className="font-mono text-[10px] sm:text-[11px] text-brand-muted block mt-0.5">
                             {rec.payment_date ? formatCalendarDate(rec.payment_date) : 'Pending'}
                           </span>
                         </div>
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="grid grid-cols-2 gap-2" onClick={(e) => e.stopPropagation()}>
+                      <div className="grid grid-cols-2 gap-1.5 sm:gap-2" onClick={(e) => e.stopPropagation()}>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full min-h-[44px] flex items-center justify-center gap-1.5 text-xs font-bold"
+                          className="w-full min-h-[34px] sm:min-h-[44px] flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-bold py-1"
                           onClick={() => setSelectedStudentRecord(rec)}
                           leftIcon={<Eye className="w-3.5 h-3.5" />}
                         >
@@ -908,7 +911,7 @@ export const AdminBillingPage: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full min-h-[44px] flex items-center justify-center gap-1.5 text-xs font-bold"
+                          className="w-full min-h-[34px] sm:min-h-[44px] flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-bold py-1"
                           onClick={() => {
                             setEditingStudentRecord(rec);
                           }}
@@ -1134,16 +1137,16 @@ export const AdminBillingPage: React.FC = () => {
                     <div
                       key={rec.id}
                       onClick={() => setSelectedMentorRecord(rec)}
-                      className="p-3.5 bg-brand-paper border-2 border-brand-dark shadow-brutal-xs space-y-2.5 cursor-pointer"
+                      className="p-2.5 sm:p-3.5 bg-brand-paper border sm:border-2 border-brand-dark shadow-none sm:shadow-brutal-xs space-y-2 sm:space-y-2.5 cursor-pointer"
                     >
                       {/* Header: Mentor Name + Email + Payout Status Badge */}
-                      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-brand-dark/15">
+                      <div className="flex items-start justify-between gap-2 pb-2 sm:pb-2.5 border-b border-brand-dark/15">
                         <div className="min-w-0">
-                          <span className="font-heading font-extrabold text-sm text-brand-navy leading-snug truncate block">
+                          <span className="font-heading font-extrabold text-xs sm:text-sm text-brand-navy leading-snug truncate block">
                             {mentor?.full_name || 'Mentor'}
                           </span>
                           {mentor?.email && (
-                            <span className="font-mono text-[11px] text-brand-muted truncate block mt-0.5">
+                            <span className="font-mono text-[10px] sm:text-[11px] text-brand-muted truncate block mt-0.5">
                               {mentor.email}
                             </span>
                           )}
@@ -1154,33 +1157,33 @@ export const AdminBillingPage: React.FC = () => {
                       </div>
 
                       {/* Details Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-brand-bg p-2.5 border border-brand-dark/20">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-[11px] sm:text-xs bg-brand-bg p-2 sm:p-2.5 border border-brand-dark/20">
                         <div>
-                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                          <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block font-bold">
                             Related Context
                           </span>
-                          <span className="font-heading font-bold text-brand-dark text-[11px] block mt-0.5 truncate">
+                          <span className="font-heading font-bold text-brand-dark text-[10px] sm:text-[11px] block mt-0.5 truncate">
                             {relStudent ? `Scholar: ${relStudent.full_name}` : 'Platform Pool'}
                           </span>
                         </div>
 
                         <div>
-                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                          <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block font-bold">
                             Billing Month
                           </span>
-                          <span className="font-mono text-[11px] text-brand-navy font-bold block mt-0.5">
+                          <span className="font-mono text-[10px] sm:text-[11px] text-brand-navy font-bold block mt-0.5">
                             {formatBillingMonth(rec.billing_month)}
                           </span>
                         </div>
 
                         <div>
-                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                          <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block font-bold">
                             Method & Ref
                           </span>
-                          <div className="font-sans font-bold text-brand-dark text-[11px] mt-0.5 flex flex-wrap items-center gap-1.5">
+                          <div className="font-sans font-bold text-brand-dark text-[10px] sm:text-[11px] mt-0.5 flex flex-wrap items-center gap-1.5">
                             <span>{formatPaymentMethod(rec.payment_method)}</span>
                             {rec.transaction_reference && (
-                              <span className="font-mono text-[10px] text-brand-muted flex items-center gap-0.5">
+                              <span className="font-mono text-[9px] sm:text-[10px] text-brand-muted flex items-center gap-0.5">
                                 <span>({rec.transaction_reference})</span>
                                 {isDuplicate && (
                                   <span title="Duplicate reference warning">
@@ -1193,21 +1196,21 @@ export const AdminBillingPage: React.FC = () => {
                         </div>
 
                         <div>
-                          <span className="text-[10px] font-mono uppercase text-brand-muted block font-bold">
+                          <span className="text-[9px] sm:text-[10px] font-mono uppercase text-brand-muted block font-bold">
                             Payout Date
                           </span>
-                          <span className="font-mono text-[11px] text-brand-muted block mt-0.5">
+                          <span className="font-mono text-[10px] sm:text-[11px] text-brand-muted block mt-0.5">
                             {rec.payout_date ? formatCalendarDate(rec.payout_date.split('T')[0]) : 'Pending'}
                           </span>
                         </div>
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="grid grid-cols-2 gap-2" onClick={(e) => e.stopPropagation()}>
+                      <div className="grid grid-cols-2 gap-1.5 sm:gap-2" onClick={(e) => e.stopPropagation()}>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full min-h-[44px] flex items-center justify-center gap-1.5 text-xs font-bold"
+                          className="w-full min-h-[34px] sm:min-h-[44px] flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-bold py-1"
                           onClick={() => setSelectedMentorRecord(rec)}
                           leftIcon={<Eye className="w-3.5 h-3.5" />}
                         >
@@ -1216,7 +1219,7 @@ export const AdminBillingPage: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full min-h-[44px] flex items-center justify-center gap-1.5 text-xs font-bold"
+                          className="w-full min-h-[34px] sm:min-h-[44px] flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-bold py-1"
                           onClick={() => setEditingMentorRecord(rec)}
                           leftIcon={<Edit2 className="w-3.5 h-3.5" />}
                         >

@@ -18,13 +18,13 @@ export const Card: React.FC<CardProps> = ({
   className,
   ...props
 }) => {
-  const baseClasses = 'relative border-2 border-brand-dark transition-all duration-150 rounded-none motion-reduce:transition-none';
+  const baseClasses = 'relative border sm:border-2 border-brand-dark transition-all duration-150 rounded-none motion-reduce:transition-none';
 
   const shadowClasses = {
     none: '',
-    sm: 'shadow-brutal-xs',
-    md: 'shadow-brutal-xs sm:shadow-brutal-sm',
-    lg: 'shadow-brutal-sm sm:shadow-brutal',
+    sm: 'shadow-none sm:shadow-brutal-xs',
+    md: 'shadow-none sm:shadow-brutal-sm',
+    lg: 'shadow-brutal-xs sm:shadow-brutal',
   };
 
   const hoverClasses = hoverable

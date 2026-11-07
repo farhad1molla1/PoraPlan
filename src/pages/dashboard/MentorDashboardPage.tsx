@@ -118,21 +118,21 @@ export const MentorDashboardPage: React.FC = () => {
   const needsAttentionCount = pendingReviews.length + openDoubts.length;
 
   return (
-    <div className="w-full py-5 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6">
 
         {/* 1. MENTOR GREETING & PRIORITY ATTENTION */}
         <section
           aria-labelledby="mentor-greeting"
-          className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-6 space-y-3.5 sm:space-y-4"
+          className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 space-y-2.5 sm:space-y-4"
         >
           {/* Top Row: Greeting & Meta */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-brand-dark pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
             <div>
-              <h1 id="mentor-greeting" className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
+              <h1 id="mentor-greeting" className="text-lg sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
                 Welcome, {mentorName}
               </h1>
-              <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-brand-muted mt-0.5">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono text-brand-muted mt-0.5">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-brand-teal" />
                   {currentDate}
@@ -156,14 +156,14 @@ export const MentorDashboardPage: React.FC = () => {
           </div>
 
           {/* Actionable Priority Banner */}
-          <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-gold-light text-brand-dark">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-gold-light text-brand-dark">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
               <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-brand-navy uppercase">
-                  <Sparkles className="w-4 h-4 text-brand-navy shrink-0" />
+                <div className="flex items-center gap-1.5 font-mono text-[10px] sm:text-xs font-bold text-brand-navy uppercase">
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy shrink-0" />
                   <span>Action Needed Today</span>
                 </div>
-                <p className="text-xs font-sans text-brand-dark/90 leading-relaxed">
+                <p className="text-[11px] sm:text-xs font-sans text-brand-dark/90 leading-relaxed">
                   {loading ? (
                     'Checking student submissions and doubt inquiries...'
                   ) : students.length === 0 ? (
@@ -194,7 +194,7 @@ export const MentorDashboardPage: React.FC = () => {
                 {pendingReviews.length > 0 && (
                   <Link
                     to="/mentor/reviews"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-navy text-brand-bg text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-dark transition-colors"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-navy text-brand-bg text-[11px] sm:text-xs font-mono font-bold shadow-none sm:shadow-brutal-xs hover:bg-brand-dark transition-colors"
                   >
                     <span>Review Queue ({pendingReviews.length})</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -203,7 +203,7 @@ export const MentorDashboardPage: React.FC = () => {
                 {openDoubts.length > 0 && (
                   <Link
                     to="/mentor/doubts"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-brand-dark text-xs font-mono font-bold shadow-brutal-xs hover:bg-brand-paper-tint transition-colors"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-paper text-brand-dark text-[11px] sm:text-xs font-mono font-bold shadow-none sm:shadow-brutal-xs hover:bg-brand-paper-tint transition-colors"
                   >
                     <span>Answer Doubts ({openDoubts.length})</span>
                   </Link>
@@ -214,27 +214,27 @@ export const MentorDashboardPage: React.FC = () => {
         </section>
 
         {/* 2. OVERVIEW STATUS METRICS */}
-        <section aria-labelledby="mentor-metrics-title" className="space-y-3">
+        <section aria-labelledby="mentor-metrics-title" className="space-y-2 sm:space-y-3">
           <div className="flex items-center justify-between">
-            <h2 id="mentor-metrics-title" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy flex items-center gap-2">
-              <Award className="w-4 h-4 text-brand-gold stroke-[2.5]" />
+            <h2 id="mentor-metrics-title" className="font-heading font-extrabold text-xs sm:text-base text-brand-navy flex items-center gap-1.5 sm:gap-2">
+              <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold stroke-[2.5]" />
               Mentor Overview
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
             {/* Metric 1: Assigned Students */}
-            <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[11px] sm:text-xs font-bold text-brand-muted">
+            <div className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-1 sm:mb-2">
+                <span className="font-mono text-[9px] sm:text-xs font-bold text-brand-muted">
                   Assigned Students
                 </span>
                 <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal" />
               </div>
-              <div className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
-                {loading ? '--' : students.length} <span className="text-[11px] sm:text-xs font-mono font-normal text-brand-muted">Active</span>
+              <div className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
+                {loading ? '--' : students.length} <span className="text-[9px] sm:text-xs font-mono font-normal text-brand-muted">Active</span>
               </div>
-              <span className="text-[11px] font-mono text-brand-teal font-bold mt-1">
+              <span className="text-[9px] sm:text-[11px] font-mono text-brand-teal font-bold mt-0.5 sm:mt-1">
                 {students.length > 0 ? `${students.length} on roster` : 'Roster empty'}
               </span>
             </div>
@@ -242,18 +242,18 @@ export const MentorDashboardPage: React.FC = () => {
             {/* Metric 2: Pending Reviews */}
             <Link
               to="/mentor/reviews"
-              className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[11px] sm:text-xs font-bold text-brand-muted">
+              <div className="flex items-center justify-between mb-1 sm:mb-2">
+                <span className="font-mono text-[9px] sm:text-xs font-bold text-brand-muted">
                   Pending Reviews
                 </span>
                 <FileCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold" />
               </div>
-              <div className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
-                {pendingReviews.length} <span className="text-[11px] sm:text-xs font-mono font-normal text-brand-muted">Queue</span>
+              <div className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
+                {pendingReviews.length} <span className="text-[9px] sm:text-xs font-mono font-normal text-brand-muted">Queue</span>
               </div>
-              <span className="text-[11px] font-mono text-brand-muted mt-1">
+              <span className="text-[9px] sm:text-[11px] font-mono text-brand-muted mt-0.5 sm:mt-1">
                 {pendingReviews.length > 0 ? 'Awaiting feedback' : 'Queue clear'}
               </span>
             </Link>
@@ -261,18 +261,18 @@ export const MentorDashboardPage: React.FC = () => {
             {/* Metric 3: Open Doubts */}
             <Link
               to="/mentor/doubts"
-              className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[11px] sm:text-xs font-bold text-brand-muted">
+              <div className="flex items-center justify-between mb-1 sm:mb-2">
+                <span className="font-mono text-[9px] sm:text-xs font-bold text-brand-muted">
                   Open Doubts
                 </span>
                 <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal" />
               </div>
-              <div className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
-                {openDoubts.length} <span className="text-[11px] sm:text-xs font-mono font-normal text-brand-muted">Pending</span>
+              <div className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
+                {openDoubts.length} <span className="text-[9px] sm:text-xs font-mono font-normal text-brand-muted">Pending</span>
               </div>
-              <span className="text-[11px] font-mono text-brand-teal font-bold mt-1">
+              <span className="text-[9px] sm:text-[11px] font-mono text-brand-teal font-bold mt-0.5 sm:mt-1">
                 {doubts.length - openDoubts.length} answered
               </span>
             </Link>
@@ -280,18 +280,18 @@ export const MentorDashboardPage: React.FC = () => {
             {/* Metric 4: Scheduled Evaluations */}
             <Link
               to="/mentor/evaluations"
-              className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[11px] sm:text-xs font-bold text-brand-muted">
+              <div className="flex items-center justify-between mb-1 sm:mb-2">
+                <span className="font-mono text-[9px] sm:text-xs font-bold text-brand-muted">
                   Evaluations
                 </span>
                 <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy" />
               </div>
-              <div className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
-                {scheduledEvaluations.length} <span className="text-[11px] sm:text-xs font-mono font-normal text-brand-muted">Scheduled</span>
+              <div className="font-heading font-extrabold text-lg sm:text-2xl text-brand-navy">
+                {scheduledEvaluations.length} <span className="text-[9px] sm:text-xs font-mono font-normal text-brand-muted">Scheduled</span>
               </div>
-              <span className="text-[11px] font-mono text-brand-muted mt-1">
+              <span className="text-[9px] sm:text-[11px] font-mono text-brand-muted mt-0.5 sm:mt-1">
                 {evaluations.filter((e) => e.status === 'completed').length} conducted
               </span>
             </Link>
@@ -299,18 +299,18 @@ export const MentorDashboardPage: React.FC = () => {
         </section>
 
         {/* 3. DUAL ACTION PANELS: REVIEW QUEUE & UPCOMING EVALUATIONS */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 min-w-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-6 min-w-0">
           
           {/* Submission Review Queue Card */}
           <section
             aria-labelledby="reviews-title"
-            className="min-w-0 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-6 flex flex-col justify-between space-y-3.5 sm:space-y-4"
+            className="min-w-0 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 flex flex-col justify-between space-y-2.5 sm:space-y-4"
           >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
-                <div className="flex items-center gap-2">
-                  <FileCheck className="w-5 h-5 text-brand-gold stroke-[2.5]" />
-                  <h2 id="reviews-title" className="font-heading font-extrabold text-base text-brand-navy">
+            <div className="space-y-2 sm:space-y-3">
+              <div className="flex items-center justify-between border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <FileCheck className="w-4 h-4 sm:w-5 sm:h-5 text-brand-gold stroke-[2.5]" />
+                  <h2 id="reviews-title" className="font-heading font-extrabold text-xs sm:text-base text-brand-navy">
                     Review Queue
                   </h2>
                 </div>
@@ -320,34 +320,34 @@ export const MentorDashboardPage: React.FC = () => {
               </div>
 
               {pendingReviews.length === 0 ? (
-                <div className="p-4 sm:p-5 border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center space-y-2 my-2">
-                  <div className="w-9 h-9 border-2 border-brand-dark bg-brand-gold-light mx-auto flex items-center justify-center">
-                    <FileCheck className="w-4 h-4 text-brand-dark" />
+                <div className="p-3 sm:p-5 border sm:border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center space-y-1.5 sm:space-y-2 my-1 sm:my-2">
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 border sm:border-2 border-brand-dark bg-brand-gold-light mx-auto flex items-center justify-center">
+                    <FileCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-dark" />
                   </div>
-                  <h3 className="font-heading font-bold text-sm text-brand-navy">
+                  <h3 className="font-heading font-bold text-xs sm:text-sm text-brand-navy">
                     Review Queue Clear
                   </h3>
-                  <p className="text-xs text-brand-muted font-sans leading-relaxed">
+                  <p className="text-[11px] sm:text-xs text-brand-muted font-sans leading-relaxed">
                     No submissions awaiting review. Newly submitted student work will appear here.
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2 my-2">
+                <div className="space-y-1.5 sm:space-y-2 my-1 sm:my-2">
                   {pendingReviews.slice(0, 3).map((sub) => (
                     <div
                       key={sub.id}
-                      className="p-3 border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-between"
+                      className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-between"
                     >
                       <div>
-                        <h4 className="font-heading font-bold text-sm text-brand-navy">
+                        <h4 className="font-heading font-bold text-xs sm:text-sm text-brand-navy">
                           {sub.assignment_title || 'Assignment Submission'}
                         </h4>
-                        <span className="font-mono text-[11px] text-brand-muted">
+                        <span className="font-mono text-[10px] sm:text-[11px] text-brand-muted">
                           Student ID: {sub.student_id}
                         </span>
                       </div>
                       <Link to="/mentor/reviews">
-                        <Button variant="outline" size="sm" className="text-xs">
+                        <Button variant="outline" size="sm" className="text-[11px] sm:text-xs">
                           Review
                         </Button>
                       </Link>
@@ -357,7 +357,7 @@ export const MentorDashboardPage: React.FC = () => {
               )}
             </div>
 
-            <div className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono text-brand-muted">
+            <div className="pt-2 sm:pt-3 border-t border-brand-dark/20 flex items-center justify-between text-[11px] sm:text-xs font-mono text-brand-muted">
               <span>Practice Submissions</span>
               <Link
                 to="/mentor/reviews"
@@ -372,13 +372,13 @@ export const MentorDashboardPage: React.FC = () => {
           {/* Upcoming Evaluations Card */}
           <section
             aria-labelledby="evaluations-title"
-            className="min-w-0 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-6 flex flex-col justify-between space-y-3.5 sm:space-y-4"
+            className="min-w-0 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 flex flex-col justify-between space-y-2.5 sm:space-y-4"
           >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-brand-teal stroke-[2.5]" />
-                  <h2 id="evaluations-title" className="font-heading font-extrabold text-base text-brand-navy">
+            <div className="space-y-2 sm:space-y-3">
+              <div className="flex items-center justify-between border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal stroke-[2.5]" />
+                  <h2 id="evaluations-title" className="font-heading font-extrabold text-xs sm:text-base text-brand-navy">
                     Upcoming Evaluations
                   </h2>
                 </div>
@@ -388,34 +388,34 @@ export const MentorDashboardPage: React.FC = () => {
               </div>
 
               {scheduledEvaluations.length === 0 ? (
-                <div className="p-4 sm:p-5 border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center space-y-2 my-2">
-                  <div className="w-9 h-9 border-2 border-brand-dark bg-brand-teal-light mx-auto flex items-center justify-center">
-                    <Clock className="w-4 h-4 text-brand-teal" />
+                <div className="p-3 sm:p-5 border sm:border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center space-y-1.5 sm:space-y-2 my-1 sm:my-2">
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 border sm:border-2 border-brand-dark bg-brand-teal-light mx-auto flex items-center justify-center">
+                    <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal" />
                   </div>
-                  <h3 className="font-heading font-bold text-sm text-brand-navy">
+                  <h3 className="font-heading font-bold text-xs sm:text-sm text-brand-navy">
                     No Evaluations Scheduled
                   </h3>
-                  <p className="text-xs text-brand-muted font-sans leading-relaxed">
+                  <p className="text-[11px] sm:text-xs text-brand-muted font-sans leading-relaxed">
                     Evaluations are periodic reviews to calibrate student retention and upcoming study plans.
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2 my-2">
+                <div className="space-y-1.5 sm:space-y-2 my-1 sm:my-2">
                   {scheduledEvaluations.slice(0, 3).map((ev) => (
                     <div
                       key={ev.id}
-                      className="p-3 border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-between"
+                      className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-between"
                     >
                       <div>
-                        <h4 className="font-heading font-bold text-sm text-brand-navy">
+                        <h4 className="font-heading font-bold text-xs sm:text-sm text-brand-navy">
                           {ev.title}
                         </h4>
-                        <span className="font-mono text-[11px] text-brand-muted">
+                        <span className="font-mono text-[10px] sm:text-[11px] text-brand-muted">
                           {ev.scheduled_date ? new Date(ev.scheduled_date).toLocaleDateString() : 'Date pending'}
                         </span>
                       </div>
                       <Link to="/mentor/evaluations">
-                        <Button variant="outline" size="sm" className="text-xs">
+                        <Button variant="outline" size="sm" className="text-[11px] sm:text-xs">
                           Manage
                         </Button>
                       </Link>
@@ -425,7 +425,7 @@ export const MentorDashboardPage: React.FC = () => {
               )}
             </div>
 
-            <div className="pt-3 border-t border-brand-dark/20 flex items-center justify-between text-xs font-mono text-brand-muted">
+            <div className="pt-2 sm:pt-3 border-t border-brand-dark/20 flex items-center justify-between text-[11px] sm:text-xs font-mono text-brand-muted">
               <span>Oral &amp; Written Reviews</span>
               <Link
                 to="/mentor/evaluations"
@@ -443,12 +443,12 @@ export const MentorDashboardPage: React.FC = () => {
         <section
           id="roster"
           aria-labelledby="roster-title"
-          className="min-w-0 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-6 space-y-3.5 sm:space-y-4"
+          className="min-w-0 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 space-y-2.5 sm:space-y-4"
         >
-          <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
-            <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-brand-navy stroke-[2.5]" />
-              <h2 id="roster-title" className="font-heading font-extrabold text-base text-brand-navy">
+          <div className="flex items-center justify-between border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-brand-navy stroke-[2.5]" />
+              <h2 id="roster-title" className="font-heading font-extrabold text-xs sm:text-base text-brand-navy">
                 Assigned Students
               </h2>
             </div>

@@ -185,41 +185,41 @@ export const SubjectDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="w-full py-5 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6">
 
         {/* Top Header Banner */}
         <section
           aria-labelledby="subject-detail-heading"
-          className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-4 sm:p-7 shadow-brutal-sm sm:shadow-brutal space-y-3.5 sm:space-y-4"
+          className="border sm:border-2 border-brand-dark bg-brand-navy text-brand-bg p-2.5 sm:p-7 shadow-none sm:shadow-brutal space-y-2.5 sm:space-y-4"
         >
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
+          <div className="space-y-1 sm:space-y-1.5">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Link
                 to={backUrl}
-                className="inline-flex items-center gap-1 font-mono text-xs uppercase font-bold text-brand-gold hover:underline"
+                className="inline-flex items-center gap-1 font-mono text-[11px] sm:text-xs uppercase font-bold text-brand-gold hover:underline"
               >
                 <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
                 {isMentor ? 'Curriculum Management' : 'Study Areas'}
               </Link>
               <span className="text-brand-bg/50 font-mono text-xs">/</span>
               {subject.code && (
-                <span className="font-mono text-xs uppercase text-brand-teal font-bold">
+                <span className="font-mono text-[10px] sm:text-xs uppercase text-brand-teal font-bold">
                   {subject.code}
                 </span>
               )}
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 p-1 border-2 border-brand-dark bg-brand-teal-light text-brand-navy flex items-center justify-center shadow-brutal-xs shrink-0">
-                  <BookOpen className="w-6 h-6 stroke-[2.2]" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pt-1">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 p-0.5 sm:p-1 border sm:border-2 border-brand-dark bg-brand-teal-light text-brand-navy flex items-center justify-center shadow-none sm:shadow-brutal-xs shrink-0">
+                  <BookOpen className="w-4 h-4 sm:w-6 sm:h-6 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h1 id="subject-detail-heading" className="text-xl sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
+                  <h1 id="subject-detail-heading" className="text-lg sm:text-2xl md:text-3xl font-extrabold font-heading text-brand-bg tracking-tight">
                     {subject.name}
                   </h1>
-                  <span className="text-xs font-mono text-brand-bg/75">
+                  <span className="text-[11px] sm:text-xs font-mono text-brand-bg/75">
                     Course Status: <strong className="text-brand-gold uppercase">{subject.status}</strong>
                   </span>
                 </div>
@@ -234,21 +234,21 @@ export const SubjectDetailPage: React.FC = () => {
           </div>
 
           {/* Academic Attribution Ribbon */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-brand-bg/20 text-xs font-mono">
-            <div className="p-2.5 border border-brand-dark bg-brand-paper text-brand-dark flex items-center gap-2 shadow-brutal-xs">
-              <GraduationCap className="w-4 h-4 text-brand-teal shrink-0" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 pt-2 border-t border-brand-bg/20 text-[11px] sm:text-xs font-mono">
+            <div className="p-2 sm:p-2.5 border sm:border-2 border-brand-dark bg-brand-paper text-brand-dark flex items-center gap-2 shadow-none sm:shadow-brutal-xs">
+              <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal shrink-0" />
               <div>
-                <span className="text-[10px] text-brand-muted block uppercase">Enrolled Student</span>
+                <span className="text-[9px] sm:text-[10px] text-brand-muted block uppercase">Enrolled Student</span>
                 <span className="font-bold text-brand-navy">
                   {studentProfile ? `${studentProfile.full_name}${studentProfile.poraplan_id ? ` (${studentProfile.poraplan_id})` : ''}` : 'Student'}
                 </span>
               </div>
             </div>
 
-            <div className="p-2.5 border border-brand-dark bg-brand-paper text-brand-dark flex items-center gap-2 shadow-brutal-xs">
-              <Users className="w-4 h-4 text-brand-gold shrink-0" />
+            <div className="p-2 sm:p-2.5 border sm:border-2 border-brand-dark bg-brand-paper text-brand-dark flex items-center gap-2 shadow-none sm:shadow-brutal-xs">
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold shrink-0" />
               <div>
-                <span className="text-[10px] text-brand-muted block uppercase">Curriculum Mentor</span>
+                <span className="text-[9px] sm:text-[10px] text-brand-muted block uppercase">Curriculum Mentor</span>
                 <span className="font-bold text-brand-navy">
                   {mentorProfile ? `${mentorProfile.full_name}${mentorProfile.poraplan_id ? ` (${mentorProfile.poraplan_id})` : ''}` : 'Assigned Mentor'}
                 </span>
@@ -258,57 +258,57 @@ export const SubjectDetailPage: React.FC = () => {
         </section>
 
         {/* Syllabus Overview Card */}
-        <section aria-labelledby="syllabus-overview-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-6 space-y-3">
-          <div className="flex items-center justify-between border-b-2 border-brand-dark pb-2.5">
-            <h2 id="syllabus-overview-title" className="font-heading font-extrabold text-base text-brand-navy flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-brand-teal stroke-[2.5]" />
+        <section aria-labelledby="syllabus-overview-title" className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-between border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-2.5">
+            <h2 id="syllabus-overview-title" className="font-heading font-extrabold text-xs sm:text-base text-brand-navy flex items-center gap-1.5 sm:gap-2">
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal stroke-[2.5]" />
               Syllabus Overview &amp; Learning Objectives
             </h2>
-            <div className="flex items-center gap-1.5 text-xs font-mono text-brand-muted">
-              <Calendar className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1 text-[10px] sm:text-xs font-mono text-brand-muted">
+              <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               <span>
                 Registered {subject.created_at ? new Date(subject.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
               </span>
             </div>
           </div>
 
-          <p className="text-xs sm:text-sm text-brand-dark/90 font-sans leading-relaxed">
+          <p className="text-[11px] sm:text-sm text-brand-dark/90 font-sans leading-relaxed">
             {subject.description || 'No detailed syllabus summary provided. Study tasks and problem sets assigned to this subject follow the standardized term curriculum.'}
           </p>
         </section>
 
         {/* Downstream Academic Modules Status (Honest Previews) */}
-        <section aria-labelledby="downstream-modules-title" className="space-y-3">
+        <section aria-labelledby="downstream-modules-title" className="space-y-2 sm:space-y-3">
           <div className="flex items-center justify-between">
-            <h2 id="downstream-modules-title" className="font-heading font-extrabold text-sm sm:text-base text-brand-navy">
+            <h2 id="downstream-modules-title" className="font-heading font-extrabold text-xs sm:text-base text-brand-navy">
               Academic Components in this Study Area
             </h2>
-            <span className="font-mono text-[10px] uppercase font-bold text-brand-muted bg-brand-paper border border-brand-dark px-2 py-0.5 shadow-brutal-xs">
+            <span className="font-mono text-[9px] sm:text-[10px] uppercase font-bold text-brand-muted bg-brand-paper border border-brand-dark px-1.5 sm:px-2 py-0.2 sm:py-0.5 shadow-none sm:shadow-brutal-xs">
               7-STEP WORKFLOW
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             {/* Component 1: Topics & Study Plans */}
             <Link
               to={isMentor ? '/mentor/plans' : '/student/plans'}
-              className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
+              className="p-2.5 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal space-y-1.5 sm:space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
             >
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-teal">
+                  <span className="font-mono text-[9px] sm:text-[10px] uppercase font-bold text-brand-teal">
                     STEP 1 • PLAN
                   </span>
-                  <CheckCircle2 className="w-4 h-4 text-brand-teal stroke-[2.2]" />
+                  <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal stroke-[2.2]" />
                 </div>
-                <h3 className="font-heading font-bold text-sm text-brand-navy group-hover:text-brand-teal transition-colors">
+                <h3 className="font-heading font-bold text-xs sm:text-sm text-brand-navy group-hover:text-brand-teal transition-colors">
                   Topics &amp; Study Plans
                 </h3>
-                <p className="text-xs text-brand-muted font-sans leading-relaxed">
+                <p className="text-[11px] sm:text-xs text-brand-muted font-sans leading-relaxed">
                   Sequenced chapter milestones and study roadmaps calibrated by mentors.
                 </p>
               </div>
-              <div className="pt-2 border-t border-brand-dark/20 font-mono text-[11px] text-brand-teal font-bold flex items-center justify-between">
+              <div className="pt-1.5 sm:pt-2 border-t border-brand-dark/20 font-mono text-[10px] sm:text-[11px] text-brand-teal font-bold flex items-center justify-between">
                 <span>Active Milestone</span>
                 <span>→</span>
               </div>
@@ -317,23 +317,23 @@ export const SubjectDetailPage: React.FC = () => {
             {/* Component 2: Tasks */}
             <Link
               to={isMentor ? '/mentor/tasks' : '/student/tasks'}
-              className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
+              className="p-2.5 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal space-y-1.5 sm:space-y-2 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between group"
             >
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-gold">
+                  <span className="font-mono text-[9px] sm:text-[10px] uppercase font-bold text-brand-gold">
                     STEP 2 • STUDY
                   </span>
-                  <ListTodo className="w-4 h-4 text-brand-gold stroke-[2.2]" />
+                  <ListTodo className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold stroke-[2.2]" />
                 </div>
-                <h3 className="font-heading font-bold text-sm text-brand-navy group-hover:text-brand-gold transition-colors">
+                <h3 className="font-heading font-bold text-xs sm:text-sm text-brand-navy group-hover:text-brand-gold transition-colors">
                   Daily Study Tasks
                 </h3>
-                <p className="text-xs text-brand-muted font-sans leading-relaxed">
+                <p className="text-[11px] sm:text-xs text-brand-muted font-sans leading-relaxed">
                   Disciplined 50-minute study blocks and activity checkpoints.
                 </p>
               </div>
-              <div className="pt-2 border-t border-brand-dark/20 font-mono text-[11px] text-brand-gold font-bold flex items-center justify-between">
+              <div className="pt-1.5 sm:pt-2 border-t border-brand-dark/20 font-mono text-[10px] sm:text-[11px] text-brand-gold font-bold flex items-center justify-between">
                 <span>Active Milestone</span>
                 <span>→</span>
               </div>

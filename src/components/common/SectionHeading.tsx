@@ -22,7 +22,7 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
   return (
     <div
       className={cn(
-        'mb-4 sm:mb-8 md:mb-12',
+        'mb-2.5 sm:mb-8 md:mb-12',
         align === 'center' ? 'text-center mx-auto max-w-2xl' : 'max-w-2xl',
         className
       )}
@@ -30,25 +30,25 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
       {(eyebrow || badge) && (
         <div
           className={cn(
-            'flex flex-wrap items-center gap-2 mb-2 sm:mb-2.5',
+            'flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2.5',
             align === 'center' ? 'justify-center' : 'justify-start'
           )}
         >
           {badge && <Badge variant="teal" size="sm">{badge}</Badge>}
           {eyebrow && (
-            <span className="font-mono text-[11px] sm:text-xs uppercase tracking-wider text-brand-muted font-bold">
+            <span className="font-mono text-[10px] sm:text-xs uppercase tracking-wider text-brand-muted font-bold">
               {eyebrow}
             </span>
           )}
         </div>
       )}
 
-      <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-brand-navy tracking-tight leading-snug">
+      <h2 className="text-base sm:text-2xl md:text-3xl font-extrabold text-brand-navy tracking-tight leading-snug">
         {title}
       </h2>
 
       {description && (
-        <p className="mt-2 sm:mt-2.5 text-xs sm:text-sm md:text-base text-brand-dark/85 leading-relaxed font-normal">
+        <p className="mt-1 sm:mt-2.5 text-[11px] sm:text-sm md:text-base text-brand-dark/85 leading-relaxed font-normal">
           {description}
         </p>
       )}

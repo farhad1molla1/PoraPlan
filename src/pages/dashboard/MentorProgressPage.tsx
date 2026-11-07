@@ -127,24 +127,24 @@ export const MentorProgressPage: React.FC = () => {
   const totalCompletedEvaluations = scholars.reduce((acc, s) => acc + s.evaluations.completed, 0);
 
   return (
-    <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-fadeIn pb-12">
+    <div className="space-y-3 sm:space-y-6 md:space-y-8 animate-fadeIn pb-12">
       {/* ========================================================================= */}
       {/* 1. PAGE HEADER                                                            */}
       {/* ========================================================================= */}
-      <section className="p-3.5 sm:p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section className="p-2.5 sm:p-6 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div>
-          <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            <span className="font-mono text-xs uppercase font-bold text-brand-muted bg-brand-bg px-2 py-0.5 border border-brand-dark">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1.5">
+            <span className="font-mono text-[10px] sm:text-xs uppercase font-bold text-brand-muted bg-brand-bg px-1.5 sm:px-2 py-0.5 border border-brand-dark">
               MENTORSHIP CONSOLE
             </span>
             <Badge variant="gold" size="sm">
               STUDENTS PROGRESS
             </Badge>
           </div>
-          <h1 className="font-heading font-extrabold text-xl sm:text-2xl md:text-3xl text-brand-navy tracking-tight">
+          <h1 className="font-heading font-extrabold text-lg sm:text-2xl md:text-3xl text-brand-navy tracking-tight">
             Student Progress Overview
           </h1>
-          <p className="font-sans text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl">
+          <p className="font-sans text-[11px] sm:text-sm text-brand-muted mt-0.5 sm:mt-1 max-w-2xl">
             Monitor study activity, task completion, practice submissions, and evaluations for students paired with your mentor account.
           </p>
         </div>
@@ -157,9 +157,9 @@ export const MentorProgressPage: React.FC = () => {
             disabled={loading || refreshing}
             leftIcon={
               refreshing ? (
-                <Loader2 className="w-4 h-4 animate-spin text-brand-navy" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-navy" />
               ) : (
-                <RefreshCw className="w-4 h-4 text-brand-navy" />
+                <RefreshCw className="w-3.5 h-3.5 text-brand-navy" />
               )
             }
           >
@@ -175,11 +175,11 @@ export const MentorProgressPage: React.FC = () => {
 
       {/* Error Alert */}
       {errorMessage && (
-        <div className="p-4 border-2 border-red-600 bg-red-50 text-red-900 shadow-brutal flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+        <div className="p-2.5 sm:p-4 border sm:border-2 border-red-600 bg-red-50 text-red-900 shadow-none sm:shadow-brutal flex items-start gap-2.5 sm:gap-3">
+          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h4 className="font-heading font-bold text-sm">Failed to Load Student Progress</h4>
-            <p className="font-mono text-xs mt-1 text-red-800">{errorMessage}</p>
+            <h4 className="font-heading font-bold text-xs sm:text-sm">Failed to Load Student Progress</h4>
+            <p className="font-mono text-[11px] sm:text-xs mt-0.5 sm:mt-1 text-red-800">{errorMessage}</p>
           </div>
         </div>
       )}
@@ -187,65 +187,65 @@ export const MentorProgressPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 2. AGGREGATE KPI CARDS                                                    */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+        <div className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1 sm:mb-2">
+            <span className="font-mono text-[9px] sm:text-xs uppercase font-extrabold text-brand-muted">
               ASSIGNED STUDENTS
             </span>
-            <Users className="w-4 h-4 text-brand-navy stroke-[2.5]" />
+            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy stroke-[2.5]" />
           </div>
-          <div className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">
+          <div className="font-heading font-extrabold text-lg sm:text-3xl text-brand-navy">
             {totalAssignedScholars}
           </div>
-          <span className="text-[11px] font-mono text-brand-muted mt-1">
+          <span className="text-[9px] sm:text-[11px] font-mono text-brand-muted mt-0.5 sm:mt-1">
             Active students
           </span>
         </div>
 
-        <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
+        <div className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1 sm:mb-2">
+            <span className="font-mono text-[9px] sm:text-xs uppercase font-extrabold text-brand-muted">
               ACTIVE TASKS TRACK
             </span>
-            <ListTodo className="w-4 h-4 text-brand-teal stroke-[2.5]" />
+            <ListTodo className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal stroke-[2.5]" />
           </div>
-          <div className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">
+          <div className="font-heading font-extrabold text-lg sm:text-3xl text-brand-navy">
             {scholarsWithActiveTasks}
           </div>
-          <span className="text-[11px] font-mono text-brand-teal font-bold mt-1">
+          <span className="text-[9px] sm:text-[11px] font-mono text-brand-teal font-bold mt-0.5 sm:mt-1">
             Students with study tasks
           </span>
         </div>
 
-        <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
+        <div className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1 sm:mb-2">
+            <span className="font-mono text-[9px] sm:text-xs uppercase font-extrabold text-brand-muted">
               PENDING REVIEWS
             </span>
-            <FileText className="w-4 h-4 text-brand-gold stroke-[2.5]" />
+            <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold stroke-[2.5]" />
           </div>
-          <div className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">
+          <div className="font-heading font-extrabold text-lg sm:text-3xl text-brand-navy">
             {totalPendingReviews}
           </div>
-          <span className="text-[11px] font-mono text-brand-gold font-bold mt-1">
+          <span className="text-[9px] sm:text-[11px] font-mono text-brand-gold font-bold mt-0.5 sm:mt-1">
             <Link to="/mentor/reviews" className="underline hover:text-brand-dark">
               In review queue
             </Link>
           </span>
         </div>
 
-        <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
+        <div className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1 sm:mb-2">
+            <span className="font-mono text-[9px] sm:text-xs uppercase font-extrabold text-brand-muted">
               COMPLETED EVALS
             </span>
-            <Calendar className="w-4 h-4 text-brand-teal stroke-[2.5]" />
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal stroke-[2.5]" />
           </div>
-          <div className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">
+          <div className="font-heading font-extrabold text-lg sm:text-3xl text-brand-navy">
             {totalCompletedEvaluations}
           </div>
-          <span className="text-[11px] font-mono text-brand-muted mt-1">
+          <span className="text-[9px] sm:text-[11px] font-mono text-brand-muted mt-0.5 sm:mt-1">
             Milestones evaluated
           </span>
         </div>
@@ -254,64 +254,64 @@ export const MentorProgressPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 3. SCHOLARS PROGRESS ROSTER & SEARCH                                      */}
       {/* ========================================================================= */}
-      <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <section className="space-y-2.5 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
           <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
             <input
               type="text"
               placeholder="Search by student name or PoraPlan ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+              className="w-full pl-9 pr-3 py-1.5 sm:py-2 text-base sm:text-xs min-h-[36px] sm:min-h-0 font-mono border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
             />
           </div>
-          <span className="font-mono text-xs text-brand-muted">
+          <span className="font-mono text-[10px] sm:text-xs text-brand-muted">
             Showing {filteredScholars.length} of {scholars.length} assigned students
           </span>
         </div>
 
         {loading ? (
-          <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal text-center flex flex-col items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin motion-reduce:animate-none text-brand-teal mb-3" />
-            <p className="font-heading font-extrabold text-base text-brand-navy">
+          <div className="p-6 sm:p-12 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal text-center flex flex-col items-center justify-center">
+            <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin motion-reduce:animate-none text-brand-teal mb-2 sm:mb-3" />
+            <p className="font-heading font-extrabold text-xs sm:text-base text-brand-navy">
               LOADING STUDENTS...
             </p>
-            <span className="font-mono text-xs text-brand-muted mt-1">
+            <span className="font-mono text-[10px] sm:text-xs text-brand-muted mt-0.5 sm:mt-1">
               Fetching assigned student metrics...
             </span>
           </div>
         ) : scholars.length === 0 ? (
           /* Empty State: No assigned students */
-          <div className="p-8 sm:p-12 border-2 border-dashed border-brand-dark bg-brand-paper text-center shadow-brutal-sm">
-            <div className="w-12 h-12 mx-auto mb-4 bg-brand-paper-tint border-2 border-brand-dark flex items-center justify-center shadow-brutal-xs">
-              <Users className="w-6 h-6 text-brand-gold" />
+          <div className="p-6 sm:p-12 border sm:border-2 border-dashed border-brand-dark bg-brand-paper text-center shadow-none sm:shadow-brutal-sm">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2.5 sm:mb-4 bg-brand-paper-tint border sm:border-2 border-brand-dark flex items-center justify-center shadow-none sm:shadow-brutal-xs">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-brand-gold" />
             </div>
-            <h3 className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy">
+            <h3 className="font-heading font-extrabold text-base sm:text-xl text-brand-navy">
               No Students Currently Assigned
             </h3>
-            <p className="font-sans text-xs sm:text-sm text-brand-muted mt-2 max-w-lg mx-auto">
+            <p className="font-sans text-[11px] sm:text-sm text-brand-muted mt-1 sm:mt-2 max-w-lg mx-auto">
               You currently have 0 assigned students in the database. When students are paired with your mentor account, their progress tracking and study metrics will appear here automatically.
             </p>
           </div>
         ) : filteredScholars.length === 0 ? (
-          <div className="p-8 border-2 border-brand-dark bg-brand-paper text-center shadow-brutal-xs">
-            <p className="font-heading font-bold text-sm text-brand-navy">
+          <div className="p-6 sm:p-8 border sm:border-2 border-brand-dark bg-brand-paper text-center shadow-none sm:shadow-brutal-xs">
+            <p className="font-heading font-bold text-xs sm:text-sm text-brand-navy">
               No students matching "{searchQuery}"
             </p>
             <button
               onClick={() => setSearchQuery('')}
-              className="mt-2 text-xs font-mono text-brand-teal underline font-bold"
+              className="mt-2 text-[11px] sm:text-xs font-mono text-brand-teal underline font-bold"
             >
               Clear search query
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-4">
             {filteredScholars.map((scholar) => (
               <div
                 key={scholar.studentId}
-                className="p-3.5 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal flex flex-col justify-between"
+                className="p-2.5 sm:p-5 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-3 min-w-0">
