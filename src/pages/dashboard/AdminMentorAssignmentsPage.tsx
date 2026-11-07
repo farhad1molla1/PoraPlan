@@ -1020,7 +1020,71 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
           </div>
 
           <div className="border-3 border-brand-dark bg-brand-paper shadow-brutal overflow-hidden">
-            <div className="overflow-x-auto">
+            {/* Compact Responsive Table (< lg: 1024px) */}
+            <div className="lg:hidden">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b-2 border-brand-dark bg-brand-bg text-[10.5px] font-black uppercase text-brand-navy tracking-wider">
+                    <th scope="col" className="py-2.5 px-3">Mentor &amp; Contact</th>
+                    <th scope="col" className="py-2.5 px-2 text-center">Workload Allocation</th>
+                    <th scope="col" className="py-2.5 px-3 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#082B4C]/10">
+                  {workload.map((w) => (
+                    <tr key={w.mentor.id} className="hover:bg-brand-bg/50 transition-colors">
+                      {/* Column 1: Mentor & Contact */}
+                      <td className="py-2.5 px-3 align-top">
+                        <div className="font-black text-brand-navy leading-snug">
+                          {w.mentor.full_name}
+                        </div>
+                        {w.mentor.poraplan_id && (
+                          <div className="font-mono text-[10px] text-brand-teal font-bold mt-0.5">
+                            {w.mentor.poraplan_id}
+                          </div>
+                        )}
+                        <div className="text-[11px] text-brand-navy/70 font-medium mt-0.5 line-clamp-1">
+                          {w.mentor.academic_background || w.mentor.expertise || 'Mentor'}
+                        </div>
+                        <div className="font-mono text-[10.5px] text-brand-muted mt-1 break-all">
+                          {w.mentor.email}
+                        </div>
+                        {w.mentor.whatsapp_number && (
+                          <div className="text-brand-teal flex items-center gap-1 mt-0.5 font-mono text-[10.5px]">
+                            <Phone className="w-2.5 h-2.5 shrink-0" />
+                            <span>{w.mentor.whatsapp_number}</span>
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Column 2: Workload Breakdown */}
+                      <td className="py-2.5 px-2 text-center align-top whitespace-nowrap">
+                        <div className="inline-block px-2 py-0.5 bg-[#0BA7B4]/20 border border-[#0BA7B4] font-black text-xs sm:text-sm text-brand-navy">
+                          {w.totalEffectiveMenteesCount} Mentees
+                        </div>
+                        <div className="text-[10px] font-mono text-brand-muted mt-1 space-y-0.5">
+                          <div>Cohorts: <strong className="text-brand-navy">{w.activeCohortsCount}</strong></div>
+                          <div>Overrides: <strong className="text-brand-navy">{w.individualOverridesCount}</strong></div>
+                        </div>
+                      </td>
+
+                      {/* Column 3: Status */}
+                      <td className="py-2.5 px-3 text-right align-top">
+                        <Badge
+                          variant={w.mentor.status === 'active' ? 'teal' : 'paper'}
+                          size="sm"
+                        >
+                          {w.mentor.status?.toUpperCase() || 'ACTIVE'}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Desktop Table (>= lg: 1024px) */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b-3 border-brand-dark bg-brand-bg text-xs font-black uppercase text-brand-navy tracking-wider">

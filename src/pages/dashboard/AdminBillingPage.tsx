@@ -1502,43 +1502,88 @@ export const AdminBillingPage: React.FC = () => {
               No audit logs recorded yet.
             </div>
           ) : (
-            <div className="border border-brand-dark/30 bg-brand-paper overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-brand-bg border-b border-brand-dark/20 font-heading uppercase text-[11px] text-brand-muted">
-                  <tr>
-                    <th className="p-2.5">Date</th>
-                    <th className="p-2.5">Enrollment / Scholar</th>
-                    <th className="p-2.5">Previous Anchor</th>
-                    <th className="p-2.5">New Anchor</th>
-                    <th className="p-2.5">Reason</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-brand-dark/10 font-mono text-[11px]">
-                  {auditLogs.map((log) => {
-                    const enrollment = enrollmentsMap.get(log.enrollment_id);
-                    const student = enrollment ? studentsMap.get(enrollment.student_id) : null;
-                    return (
-                      <tr key={log.id} className="hover:bg-brand-paper-tint/60">
-                        <td className="p-2.5 text-brand-muted">
-                          {log.created_at ? formatLocalDate(new Date(log.created_at)) : '—'}
-                        </td>
-                        <td className="p-2.5 font-sans font-bold text-brand-navy">
-                          {student?.full_name || log.enrollment_id.slice(0, 8)}
-                        </td>
-                        <td className="p-2.5">
-                          {log.old_billing_start_date ? formatCalendarDate(log.old_billing_start_date) : 'Default'}
-                        </td>
-                        <td className="p-2.5 font-bold text-teal-700">
-                          {formatCalendarDate(log.new_billing_start_date)}
-                        </td>
-                        <td className="p-2.5 font-sans text-brand-dark">
-                          {log.reason}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="border border-brand-dark/30 bg-brand-paper overflow-hidden">
+              {/* Compact Responsive Table (< lg: 1024px) */}
+              <div className="lg:hidden">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead className="bg-brand-bg border-b border-brand-dark/20 font-heading uppercase text-[10px] sm:text-[11px] text-brand-muted">
+                    <tr>
+                      <th scope="col" className="p-2 sm:p-2.5">Date &amp; Scholar</th>
+                      <th scope="col" className="p-2 sm:p-2.5">Anchor Shift</th>
+                      <th scope="col" className="p-2 sm:p-2.5">Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-brand-dark/10 text-[11px]">
+                    {auditLogs.map((log) => {
+                      const enrollment = enrollmentsMap.get(log.enrollment_id);
+                      const student = enrollment ? studentsMap.get(enrollment.student_id) : null;
+                      return (
+                        <tr key={log.id} className="hover:bg-brand-paper-tint/60 transition-colors">
+                          <td className="p-2 sm:p-2.5 align-top">
+                            <div className="font-sans font-bold text-brand-navy leading-snug">
+                              {student?.full_name || log.enrollment_id.slice(0, 8)}
+                            </div>
+                            <div className="font-mono text-[10px] text-brand-muted mt-0.5">
+                              {log.created_at ? formatLocalDate(new Date(log.created_at)) : '—'}
+                            </div>
+                          </td>
+                          <td className="p-2 sm:p-2.5 align-top font-mono">
+                            <div className="text-teal-700 dark:text-brand-teal font-bold">
+                              {formatCalendarDate(log.new_billing_start_date)}
+                            </div>
+                            <div className="text-[10px] text-brand-muted mt-0.5">
+                              was: {log.old_billing_start_date ? formatCalendarDate(log.old_billing_start_date) : 'Default'}
+                            </div>
+                          </td>
+                          <td className="p-2 sm:p-2.5 align-top font-sans text-brand-dark break-words">
+                            {log.reason}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Desktop Table (>= lg: 1024px) */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-brand-bg border-b border-brand-dark/20 font-heading uppercase text-[11px] text-brand-muted">
+                    <tr>
+                      <th className="p-2.5">Date</th>
+                      <th className="p-2.5">Enrollment / Scholar</th>
+                      <th className="p-2.5">Previous Anchor</th>
+                      <th className="p-2.5">New Anchor</th>
+                      <th className="p-2.5">Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-brand-dark/10 font-mono text-[11px]">
+                    {auditLogs.map((log) => {
+                      const enrollment = enrollmentsMap.get(log.enrollment_id);
+                      const student = enrollment ? studentsMap.get(enrollment.student_id) : null;
+                      return (
+                        <tr key={log.id} className="hover:bg-brand-paper-tint/60">
+                          <td className="p-2.5 text-brand-muted">
+                            {log.created_at ? formatLocalDate(new Date(log.created_at)) : '—'}
+                          </td>
+                          <td className="p-2.5 font-sans font-bold text-brand-navy">
+                            {student?.full_name || log.enrollment_id.slice(0, 8)}
+                          </td>
+                          <td className="p-2.5">
+                            {log.old_billing_start_date ? formatCalendarDate(log.old_billing_start_date) : 'Default'}
+                          </td>
+                          <td className="p-2.5 font-bold text-teal-700">
+                            {formatCalendarDate(log.new_billing_start_date)}
+                          </td>
+                          <td className="p-2.5 font-sans text-brand-dark">
+                            {log.reason}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

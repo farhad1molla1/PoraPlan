@@ -505,103 +505,208 @@ export const StudentReportPage: React.FC = () => {
                 </span>
               </div>
 
-              <div className="border-2 border-brand-dark overflow-x-auto bg-brand-paper">
-                <table className="w-full text-left border-collapse text-xs academic-sans">
-                  <thead>
-                    <tr className="bg-brand-paper-tint border-b-2 border-brand-dark text-brand-navy">
-                      <th className="p-2.5 font-bold">Subject</th>
-                      <th className="p-2.5 font-bold text-center">Weighted Score</th>
-                      <th className="p-2.5 font-bold text-center">Exams</th>
-                      <th className="p-2.5 font-bold text-center">Tasks Completed</th>
-                      <th className="p-2.5 font-bold text-center">Practice Submitted</th>
-                      <th className="p-2.5 font-bold text-right">Academic Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-brand-dark/10">
-                    {report.subjectBreakdown.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="p-4 text-center text-brand-muted italic">
-                          No subjects assigned or active in this audit cycle.
-                        </td>
+              <div className="border-2 border-brand-dark overflow-hidden bg-brand-paper">
+                {/* Compact Responsive Table (< lg: 1024px) */}
+                <div className="lg:hidden">
+                  <table className="w-full text-left border-collapse text-xs academic-sans">
+                    <thead>
+                      <tr className="bg-brand-paper-tint border-b-2 border-brand-dark text-brand-navy text-[10.5px]">
+                        <th scope="col" className="p-2 sm:p-2.5 font-bold">Subject &amp; Status</th>
+                        <th scope="col" className="p-2 sm:p-2.5 font-bold text-center">Score &amp; Exams</th>
+                        <th scope="col" className="p-2 sm:p-2.5 font-bold text-right">Tasks &amp; Practice</th>
                       </tr>
-                    ) : (
-                      report.subjectBreakdown.map((subj) => (
-                        <tr key={subj.subjectId} className="hover:bg-brand-paper-tint/50">
-                          <td className="p-2.5 font-bold text-brand-navy">
-                            <div>{subj.subjectName}</div>
-                            {subj.subjectCode && (
-                              <span className="text-[10px] text-brand-muted font-normal">
-                                {subj.subjectCode}
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-2.5 text-center">
-                            {subj.evaluationsAverageScore !== null ? (
-                              <span
-                                className={`font-bold ${
-                                  subj.evaluationsAverageScore >= REPORT_THRESHOLDS.MASTERY_SCORE_MIN
-                                    ? 'text-emerald-700'
-                                    : subj.evaluationsAverageScore < REPORT_THRESHOLDS.ATTENTION_SCORE_MAX
-                                    ? 'text-red-700'
-                                    : 'text-brand-navy'
-                                }`}
-                              >
-                                {subj.evaluationsAverageScore}%
-                              </span>
-                            ) : (
-                              <span className="text-brand-muted">N/A</span>
-                            )}
-                          </td>
-                          <td className="p-2.5 text-center">
-                            {subj.evaluationsScoredCount > 0 ? (
-                              <span>
-                                {subj.evaluationsScoredCount} scored ({subj.evaluationsEarnedPoints}/{subj.evaluationsPossiblePoints} pts)
-                              </span>
-                            ) : subj.evaluationsCompleted > 0 ? (
-                              <span className="text-brand-muted">{subj.evaluationsCompleted} oral/unscored</span>
-                            ) : (
-                              <span className="text-brand-muted">0</span>
-                            )}
-                          </td>
-                          <td className="p-2.5 text-center">
-                            {subj.tasksTotal > 0 ? (
-                              <span>
-                                {subj.tasksCompleted}/{subj.tasksTotal} ({subj.tasksCompletionRate}%)
-                              </span>
-                            ) : (
-                              <span className="text-brand-muted">No tasks due</span>
-                            )}
-                          </td>
-                          <td className="p-2.5 text-center">
-                            {subj.assignmentsTotal > 0 ? (
-                              <span>
-                                {subj.assignmentsSubmitted}/{subj.assignmentsTotal}
-                                {subj.assignmentsReviewed > 0 && ` (${subj.assignmentsReviewed} reviewed)`}
-                              </span>
-                            ) : (
-                              <span className="text-brand-muted">No problem sets</span>
-                            )}
-                          </td>
-                          <td className="p-2.5 text-right">
-                            <span
-                              className={`px-2 py-0.5 border text-[10px] font-bold inline-block ${
-                                subj.performanceStatus === 'mastery'
-                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-700'
-                                  : subj.performanceStatus === 'attention_required'
-                                  ? 'bg-red-50 text-red-800 border-red-700'
-                                  : subj.performanceStatus === 'insufficient_evidence'
-                                  ? 'bg-gray-100 text-gray-700 border-gray-400'
-                                  : 'bg-blue-50 text-blue-800 border-blue-700'
-                              }`}
-                            >
-                              {subj.performanceStatusLabel}
-                            </span>
+                    </thead>
+                    <tbody className="divide-y divide-brand-dark/10">
+                      {report.subjectBreakdown.length === 0 ? (
+                        <tr>
+                          <td colSpan={3} className="p-4 text-center text-brand-muted italic">
+                            No subjects assigned or active in this audit cycle.
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      ) : (
+                        report.subjectBreakdown.map((subj) => (
+                          <tr key={subj.subjectId} className="hover:bg-brand-paper-tint/50 transition-colors">
+                            {/* Column 1: Subject & Academic Status */}
+                            <td className="p-2 sm:p-2.5 align-top">
+                              <div className="font-bold text-brand-navy leading-snug">
+                                {subj.subjectName}
+                              </div>
+                              {subj.subjectCode && (
+                                <div className="text-[10px] text-brand-muted font-mono">
+                                  {subj.subjectCode}
+                                </div>
+                              )}
+                              <div className="mt-1">
+                                <span
+                                  className={`px-1.5 py-0.5 border text-[9.5px] font-bold inline-block ${
+                                    subj.performanceStatus === 'mastery'
+                                      ? 'bg-emerald-50 text-emerald-800 border-emerald-700'
+                                      : subj.performanceStatus === 'attention_required'
+                                      ? 'bg-red-50 text-red-800 border-red-700'
+                                      : subj.performanceStatus === 'insufficient_evidence'
+                                      ? 'bg-gray-100 text-gray-700 border-gray-400'
+                                      : 'bg-blue-50 text-blue-800 border-blue-700'
+                                  }`}
+                                >
+                                  {subj.performanceStatusLabel}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Column 2: Weighted Score & Exams */}
+                            <td className="p-2 sm:p-2.5 text-center align-top whitespace-nowrap">
+                              <div>
+                                {subj.evaluationsAverageScore !== null ? (
+                                  <span
+                                    className={`font-bold text-sm ${
+                                      subj.evaluationsAverageScore >= REPORT_THRESHOLDS.MASTERY_SCORE_MIN
+                                        ? 'text-emerald-700 dark:text-emerald-400'
+                                        : subj.evaluationsAverageScore < REPORT_THRESHOLDS.ATTENTION_SCORE_MAX
+                                        ? 'text-red-700 dark:text-red-400'
+                                        : 'text-brand-navy'
+                                    }`}
+                                  >
+                                    {subj.evaluationsAverageScore}%
+                                  </span>
+                                ) : (
+                                  <span className="text-brand-muted font-bold text-sm">N/A</span>
+                                )}
+                              </div>
+                              <div className="text-[10px] text-brand-muted font-mono mt-0.5">
+                                {subj.evaluationsScoredCount > 0 ? (
+                                  <span>{subj.evaluationsScoredCount} scored</span>
+                                ) : subj.evaluationsCompleted > 0 ? (
+                                  <span>{subj.evaluationsCompleted} oral</span>
+                                ) : (
+                                  <span>0 exams</span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* Column 3: Tasks & Practice */}
+                            <td className="p-2 sm:p-2.5 text-right align-top text-[11px] font-mono">
+                              <div className="text-brand-dark">
+                                {subj.tasksTotal > 0 ? (
+                                  <span>Tasks: <strong className="text-brand-navy">{subj.tasksCompleted}/{subj.tasksTotal}</strong></span>
+                                ) : (
+                                  <span className="text-brand-muted">No tasks</span>
+                                )}
+                              </div>
+                              <div className="text-[10px] text-brand-muted mt-0.5">
+                                {subj.assignmentsTotal > 0 ? (
+                                  <span>{subj.assignmentsSubmitted}/{subj.assignmentsTotal} p-sets</span>
+                                ) : (
+                                  <span>No p-sets</span>
+                                )}
+                                {subj.tasksTotal > 0 && ` (${subj.tasksCompletionRate}%)`}
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Desktop Table (>= lg: 1024px) */}
+                <div className="hidden lg:block overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs academic-sans">
+                    <thead>
+                      <tr className="bg-brand-paper-tint border-b-2 border-brand-dark text-brand-navy">
+                        <th className="p-2.5 font-bold">Subject</th>
+                        <th className="p-2.5 font-bold text-center">Weighted Score</th>
+                        <th className="p-2.5 font-bold text-center">Exams</th>
+                        <th className="p-2.5 font-bold text-center">Tasks Completed</th>
+                        <th className="p-2.5 font-bold text-center">Practice Submitted</th>
+                        <th className="p-2.5 font-bold text-right">Academic Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-brand-dark/10">
+                      {report.subjectBreakdown.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="p-4 text-center text-brand-muted italic">
+                            No subjects assigned or active in this audit cycle.
+                          </td>
+                        </tr>
+                      ) : (
+                        report.subjectBreakdown.map((subj) => (
+                          <tr key={subj.subjectId} className="hover:bg-brand-paper-tint/50">
+                            <td className="p-2.5 font-bold text-brand-navy">
+                              <div>{subj.subjectName}</div>
+                              {subj.subjectCode && (
+                                <span className="text-[10px] text-brand-muted font-normal">
+                                  {subj.subjectCode}
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-2.5 text-center">
+                              {subj.evaluationsAverageScore !== null ? (
+                                <span
+                                  className={`font-bold ${
+                                    subj.evaluationsAverageScore >= REPORT_THRESHOLDS.MASTERY_SCORE_MIN
+                                      ? 'text-emerald-700'
+                                      : subj.evaluationsAverageScore < REPORT_THRESHOLDS.ATTENTION_SCORE_MAX
+                                      ? 'text-red-700'
+                                      : 'text-brand-navy'
+                                  }`}
+                                >
+                                  {subj.evaluationsAverageScore}%
+                                </span>
+                              ) : (
+                                <span className="text-brand-muted">N/A</span>
+                              )}
+                            </td>
+                            <td className="p-2.5 text-center">
+                              {subj.evaluationsScoredCount > 0 ? (
+                                <span>
+                                  {subj.evaluationsScoredCount} scored ({subj.evaluationsEarnedPoints}/{subj.evaluationsPossiblePoints} pts)
+                                </span>
+                              ) : subj.evaluationsCompleted > 0 ? (
+                                <span className="text-brand-muted">{subj.evaluationsCompleted} oral/unscored</span>
+                              ) : (
+                                <span className="text-brand-muted">0</span>
+                              )}
+                            </td>
+                            <td className="p-2.5 text-center">
+                              {subj.tasksTotal > 0 ? (
+                                <span>
+                                  {subj.tasksCompleted}/{subj.tasksTotal} ({subj.tasksCompletionRate}%)
+                                </span>
+                              ) : (
+                                <span className="text-brand-muted">No tasks due</span>
+                              )}
+                            </td>
+                            <td className="p-2.5 text-center">
+                              {subj.assignmentsTotal > 0 ? (
+                                <span>
+                                  {subj.assignmentsSubmitted}/{subj.assignmentsTotal}
+                                  {subj.assignmentsReviewed > 0 && ` (${subj.assignmentsReviewed} reviewed)`}
+                                </span>
+                              ) : (
+                                <span className="text-brand-muted">No problem sets</span>
+                              )}
+                            </td>
+                            <td className="p-2.5 text-right">
+                              <span
+                                className={`px-2 py-0.5 border text-[10px] font-bold inline-block ${
+                                  subj.performanceStatus === 'mastery'
+                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-700'
+                                    : subj.performanceStatus === 'attention_required'
+                                    ? 'bg-red-50 text-red-800 border-red-700'
+                                    : subj.performanceStatus === 'insufficient_evidence'
+                                    ? 'bg-gray-100 text-gray-700 border-gray-400'
+                                    : 'bg-blue-50 text-blue-800 border-blue-700'
+                                }`}
+                              >
+                                {subj.performanceStatusLabel}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
 
