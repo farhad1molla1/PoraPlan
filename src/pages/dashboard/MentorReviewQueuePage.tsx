@@ -388,7 +388,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search student or assignment..."
-            className="w-full bg-brand-paper border-2 border-brand-dark px-3 py-1.5 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+            className="w-full bg-brand-paper border-2 border-brand-dark px-3 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
           />
         </div>
       </div>
@@ -740,7 +740,7 @@ export const MentorReviewQueuePage: React.FC = () => {
                       value={reviewFeedback}
                       onChange={(e) => setReviewFeedback(e.target.value)}
                       placeholder="Identify mathematical derivation errors, explain missing intermediate steps, or praise sound reasoning..."
-                      className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       required
                     />
                   </div>
@@ -758,7 +758,7 @@ export const MentorReviewQueuePage: React.FC = () => {
                         value={reviewScore}
                         onChange={(e) => setReviewScore(e.target.value)}
                         placeholder="e.g. 85"
-                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       />
                     </div>
 
@@ -769,7 +769,7 @@ export const MentorReviewQueuePage: React.FC = () => {
                       <select
                         value={reviewStatus}
                         onChange={(e) => setReviewStatus(e.target.value as SubmissionStatus)}
-                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       >
                         <option value="reviewed">Reviewed &amp; Approved</option>
                         <option value="needs_revision">Needs Revision (Request Redo)</option>

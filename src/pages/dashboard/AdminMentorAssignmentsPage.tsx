@@ -526,7 +526,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
               <select
                 value={programFilter}
                 onChange={(e) => setProgramFilter(e.target.value)}
-                className="w-full sm:w-auto max-w-full px-3 py-1.5 text-xs sm:text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal truncate"
+                className="w-full sm:w-auto max-w-full px-3 py-2 sm:py-1.5 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal truncate"
               >
                 <option value="all">All Programs ({programs.length})</option>
                 {programs.map((p) => (
@@ -708,7 +708,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                   value={studentSearch}
                   onChange={(e) => setStudentSearch(e.target.value)}
                   placeholder="Search student, PoraPlan ID, university..."
-                  className="w-full pl-9 pr-3 py-2 text-sm border-2 border-brand-dark font-medium placeholder-[#082B4C]/40 focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full pl-9 pr-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-medium placeholder-[#082B4C]/40 focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 />
               </div>
 
@@ -719,7 +719,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                     setProgramFilter(e.target.value);
                     setCohortFilter('all');
                   }}
-                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
                   <option value="all">All Programs ({programs.length})</option>
                   {programs.map((p) => (
@@ -734,7 +734,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 <select
                   value={cohortFilter}
                   onChange={(e) => setCohortFilter(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
                   <option value="all">All Cohorts</option>
                   {cohorts
@@ -1250,7 +1250,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                   <select
                     value={selectedMentorId}
                     onChange={(e) => setSelectedMentorId(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   >
                     {eligibleMentorsForCohort.map((m) => (
                       <option key={m.id} value={m.id}>
@@ -1271,7 +1271,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                   onChange={(e) => setAssignmentNotes(e.target.value)}
                   placeholder="e.g. Lead academic mentor for undergraduate batch curriculum."
                   rows={2}
-                  className="w-full p-2.5 text-xs border-2 border-brand-dark font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full p-2.5 text-base sm:text-xs border-2 border-brand-dark font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 />
               </div>
             </div>
@@ -1376,7 +1376,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                   <select
                     value={selectedIndividualMentorId}
                     onChange={(e) => setSelectedIndividualMentorId(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   >
                     {eligibleMentorsForStudent.map((m) => (
                       <option key={m.id} value={m.id}>
@@ -1397,7 +1397,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                   onChange={(e) => setIndividualNotes(e.target.value)}
                   placeholder="e.g. Student requested specialized 1-on-1 algorithm pacing."
                   rows={2}
-                  className="w-full p-2.5 text-xs border-2 border-brand-dark font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full p-2.5 text-base sm:text-xs border-2 border-brand-dark font-medium focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 />
               </div>
             </div>

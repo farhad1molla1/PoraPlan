@@ -358,7 +358,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="bg-brand-paper border-2 border-brand-dark px-2.5 py-1 text-xs font-mono font-bold text-brand-navy shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+            className="bg-brand-paper border-2 border-brand-dark px-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono font-bold text-brand-navy shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal cursor-pointer"
             aria-label="Filter notifications by category"
           >
             <option value="all">All Categories</option>

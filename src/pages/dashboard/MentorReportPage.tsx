@@ -289,7 +289,7 @@ export const MentorReportPage: React.FC = () => {
                 type="date"
                 value={customStart}
                 onChange={(e) => setCustomStart(e.target.value)}
-                className="px-2 py-1 border-2 border-brand-dark bg-brand-bg text-xs font-mono"
+                className="px-2 py-2 sm:py-1 border-2 border-brand-dark bg-brand-bg text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono"
                 aria-label="Start Date"
               />
               <span className="font-bold text-brand-muted">to</span>
@@ -297,7 +297,7 @@ export const MentorReportPage: React.FC = () => {
                 type="date"
                 value={customEnd}
                 onChange={(e) => setCustomEnd(e.target.value)}
-                className="px-2 py-1 border-2 border-brand-dark bg-brand-bg text-xs font-mono"
+                className="px-2 py-2 sm:py-1 border-2 border-brand-dark bg-brand-bg text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono"
                 aria-label="End Date"
               />
             </div>
@@ -311,7 +311,7 @@ export const MentorReportPage: React.FC = () => {
             aria-label="Filter by assigned scholar"
             value={selectedStudentId}
             onChange={(e) => setSelectedStudentId(e.target.value)}
-            className="px-3 py-1.5 border-2 border-brand-dark bg-brand-bg font-mono text-xs font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
+            className="px-3 py-2 sm:py-1.5 border-2 border-brand-dark bg-brand-bg font-mono text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
           >
             <option value="all">Full Mentee Roster ({assignedStudents.length})</option>
             {assignedStudents.map((s) => (

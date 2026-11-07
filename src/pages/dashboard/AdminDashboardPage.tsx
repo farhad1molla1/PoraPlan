@@ -310,7 +310,7 @@ export const AdminDashboardPage: React.FC = () => {
                 value={newId}
                 onChange={(e) => setNewId(e.target.value.toUpperCase())}
                 placeholder="e.g. PP004"
-                className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans uppercase"
+                className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans uppercase"
               />
             </div>
 
@@ -325,7 +325,7 @@ export const AdminDashboardPage: React.FC = () => {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Member full name"
-                className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
               />
             </div>
 
@@ -340,7 +340,7 @@ export const AdminDashboardPage: React.FC = () => {
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="member@example.com"
-                className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
               />
             </div>
 
@@ -352,7 +352,7 @@ export const AdminDashboardPage: React.FC = () => {
                 id="provision-role"
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value as UserRole)}
-                className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
               >
                 <option value="student">Student (PP...)</option>
                 <option value="mentor">Mentor (PPM...)</option>

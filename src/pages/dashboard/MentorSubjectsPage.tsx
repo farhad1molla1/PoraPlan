@@ -338,7 +338,7 @@ export const MentorSubjectsPage: React.FC = () => {
                 id="student-selector"
                 value={selectedStudentId}
                 onChange={(e) => setSelectedStudentId(e.target.value)}
-                className="w-full sm:w-auto px-3 py-1.5 border-2 border-brand-dark bg-brand-paper text-xs font-bold font-sans text-brand-dark focus:bg-brand-teal-light focus:outline-none"
+                className="w-full sm:w-auto px-3 py-2 sm:py-1.5 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold font-sans text-brand-dark focus:bg-brand-teal-light focus:outline-none"
               >
                 {students.map((student) => (
                   <option key={student.id} value={student.id}>
@@ -552,7 +552,7 @@ export const MentorSubjectsPage: React.FC = () => {
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="e.g. Physics, Higher Mathematics, Chemistry"
-                  className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans focus:bg-brand-teal-light focus:outline-none"
+                  className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans focus:bg-brand-teal-light focus:outline-none"
                   autoFocus
                 />
               </div>
@@ -568,7 +568,7 @@ export const MentorSubjectsPage: React.FC = () => {
                   value={formCode}
                   onChange={(e) => setFormCode(e.target.value)}
                   placeholder="e.g. PHY-101, MATH-102"
-                  className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans uppercase focus:bg-brand-teal-light focus:outline-none"
+                  className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans uppercase focus:bg-brand-teal-light focus:outline-none"
                 />
               </div>
 
@@ -583,7 +583,7 @@ export const MentorSubjectsPage: React.FC = () => {
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
                   placeholder="e.g. Mechanics, thermodynamics, wave optics, and problem sets."
-                  className="w-full p-2.5 text-xs border-2 border-brand-dark bg-brand-paper font-sans focus:bg-brand-teal-light focus:outline-none"
+                  className="w-full p-2.5 text-base sm:text-xs border-2 border-brand-dark bg-brand-paper font-sans focus:bg-brand-teal-light focus:outline-none"
                 />
               </div>
 
@@ -664,7 +664,7 @@ export const MentorSubjectsPage: React.FC = () => {
                   required
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans focus:bg-brand-teal-light focus:outline-none"
+                  className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans focus:bg-brand-teal-light focus:outline-none"
                 />
               </div>
 
@@ -677,7 +677,7 @@ export const MentorSubjectsPage: React.FC = () => {
                   type="text"
                   value={formCode}
                   onChange={(e) => setFormCode(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans uppercase focus:bg-brand-teal-light focus:outline-none"
+                  className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans uppercase focus:bg-brand-teal-light focus:outline-none"
                 />
               </div>
 
@@ -690,7 +690,7 @@ export const MentorSubjectsPage: React.FC = () => {
                   rows={3}
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
-                  className="w-full p-2.5 text-xs border-2 border-brand-dark bg-brand-paper font-sans focus:bg-brand-teal-light focus:outline-none"
+                  className="w-full p-2.5 text-base sm:text-xs border-2 border-brand-dark bg-brand-paper font-sans focus:bg-brand-teal-light focus:outline-none"
                 />
               </div>
 
@@ -702,7 +702,7 @@ export const MentorSubjectsPage: React.FC = () => {
                   id="edit-subject-status"
                   value={formStatus}
                   onChange={(e) => setFormStatus(e.target.value as SubjectStatus)}
-                  className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans focus:bg-brand-teal-light focus:outline-none"
+                  className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans focus:bg-brand-teal-light focus:outline-none"
                 >
                   <option value="active">Active (Enrolled in Current Term)</option>
                   <option value="archived">Archived (Term Completed)</option>

@@ -515,7 +515,7 @@ export const MentorEvaluationsPage: React.FC = () => {
               aria-label="Filter by assigned student"
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="p-1.5 border-2 border-brand-dark bg-brand-paper text-xs font-mono font-bold text-brand-navy shadow-brutal-xs focus:outline-none"
+              className="px-3 py-2 sm:py-1.5 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono font-bold text-brand-navy shadow-brutal-xs focus:outline-none"
             >
               <option value="all">All Assigned Students ({students.length})</option>
               {students.map((s) => (
@@ -536,7 +536,7 @@ export const MentorEvaluationsPage: React.FC = () => {
               placeholder="Search by evaluation title, subject, or student name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 border-2 border-brand-dark bg-brand-bg text-xs font-sans text-brand-dark focus:outline-none"
+              className="w-full pl-9 pr-3 py-2 sm:py-1.5 border-2 border-brand-dark bg-brand-bg text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark focus:outline-none"
             />
           </div>
 
@@ -546,7 +546,7 @@ export const MentorEvaluationsPage: React.FC = () => {
               aria-label="Filter by evaluation format"
               value={formatFilter}
               onChange={(e) => setFormatFilter(e.target.value as any)}
-              className="p-1 border border-brand-dark bg-brand-paper text-xs font-mono font-bold"
+              className="px-2.5 py-2 sm:py-1 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono font-bold"
             >
               <option value="all">All Formats</option>
               <option value="oral">Oral Walkthrough</option>
@@ -813,7 +813,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                   value={targetStudentId}
                   onChange={(e) => setTargetStudentId(e.target.value)}
                   required
-                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
+                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
                 >
                   {students.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -834,7 +834,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                   placeholder="e.g. Mechanics Milestone Oral Review & Problem Solving"
                   value={evalTitle}
                   onChange={(e) => setEvalTitle(e.target.value)}
-                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
+                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
                 />
               </div>
 
@@ -847,7 +847,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                   <select
                     value={evalFormat}
                     onChange={(e) => setEvalFormat(e.target.value as EvaluationFormat)}
-                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
+                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
                   >
                     <option value="oral">Oral Concept Walkthrough</option>
                     <option value="written">Written Problem Set</option>
@@ -865,7 +865,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                     max="1000"
                     value={totalPoints}
                     onChange={(e) => setTotalPoints(Number(e.target.value))}
-                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
+                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
                   />
                 </div>
               </div>
@@ -879,7 +879,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                   <select
                     value={targetSubjectId}
                     onChange={(e) => setTargetSubjectId(e.target.value)}
-                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
+                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
                   >
                     <option value="">None / General</option>
                     {availableSubjects.map((s) => (
@@ -897,7 +897,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                   <select
                     value={targetPlanId}
                     onChange={(e) => setTargetPlanId(e.target.value)}
-                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
+                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
                   >
                     <option value="">None / Milestone Checkpoint</option>
                     {availablePlans.map((p) => (
@@ -920,7 +920,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                     required
                     value={scheduledDate}
                     onChange={(e) => setScheduledDate(e.target.value)}
-                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
+                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
                   />
                 </div>
 
@@ -932,7 +932,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                     type="time"
                     value={scheduledTime}
                     onChange={(e) => setScheduledTime(e.target.value)}
-                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
+                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
                   />
                 </div>
 
@@ -947,7 +947,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                     step="5"
                     value={durationMinutes}
                     onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
+                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
                   />
                 </div>
               </div>
@@ -962,7 +962,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                   placeholder="Specific topics, chapters, and question types the student will be evaluated on..."
                   value={evalDescription}
                   onChange={(e) => setEvalDescription(e.target.value)}
-                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none resize-none"
+                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none resize-none"
                 />
               </div>
 
@@ -1046,7 +1046,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                   placeholder={`e.g. 88.5`}
                   value={gradingScore}
                   onChange={(e) => setGradingScore(e.target.value)}
-                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-sm font-mono font-bold text-brand-navy shadow-brutal-xs focus:outline-none"
+                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-sm min-h-[44px] sm:min-h-0 font-mono font-bold text-brand-navy shadow-brutal-xs focus:outline-none"
                 />
               </div>
 
@@ -1061,7 +1061,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                   placeholder="Detail the student's performance, strengths, areas needing improvement, and next steps..."
                   value={gradingFeedback}
                   onChange={(e) => setGradingFeedback(e.target.value)}
-                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none resize-none"
+                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none resize-none"
                 />
               </div>
 
@@ -1075,7 +1075,7 @@ export const MentorEvaluationsPage: React.FC = () => {
                   placeholder="e.g. Proceed to Work-Energy Theorem. Revisit inclined plane friction before Chapter 5."
                   value={gradingRecommendation}
                   onChange={(e) => setGradingRecommendation(e.target.value)}
-                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-xs font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
+                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans text-brand-dark shadow-brutal-xs focus:outline-none"
                 />
               </div>
 

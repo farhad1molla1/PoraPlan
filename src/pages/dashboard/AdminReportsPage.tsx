@@ -286,14 +286,14 @@ export const AdminReportsPage: React.FC = () => {
                 type="date"
                 value={customStart}
                 onChange={(e) => setCustomStart(e.target.value)}
-                className="px-2 py-0.5 border border-brand-dark bg-brand-paper text-xs font-bold"
+                className="px-2 py-1.5 sm:py-0.5 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold"
               />
               <span>to</span>
               <input
                 type="date"
                 value={customEnd}
                 onChange={(e) => setCustomEnd(e.target.value)}
-                className="px-2 py-0.5 border border-brand-dark bg-brand-paper text-xs font-bold"
+                className="px-2 py-1.5 sm:py-0.5 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold"
               />
             </div>
           )}
@@ -633,14 +633,14 @@ export const AdminReportsPage: React.FC = () => {
             <div className="space-y-4">
               {/* Directory Filter Bar */}
               <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs font-mono">
-                <div className="flex-1 flex items-center gap-2 border-2 border-brand-dark bg-brand-paper px-3 py-1.5 shadow-xs">
+                <div className="flex-1 flex items-center gap-2 border-2 border-brand-dark bg-brand-paper px-3 py-2 sm:py-1.5 min-h-[44px] sm:min-h-0 shadow-xs">
                   <Search className="w-4 h-4 text-brand-muted shrink-0" />
                   <input
                     type="text"
                     value={studentSearch}
                     onChange={(e) => setStudentSearch(e.target.value)}
                     placeholder="Search by student name, ID, university, department, or mentor..."
-                    className="w-full bg-transparent text-xs text-brand-dark focus:outline-none"
+                    className="w-full bg-transparent text-base sm:text-xs text-brand-dark focus:outline-none"
                   />
                   {studentSearch && (
                     <button type="button" onClick={() => setStudentSearch('')} className="text-brand-muted hover:text-brand-dark" aria-label="Clear student search">
@@ -655,7 +655,7 @@ export const AdminReportsPage: React.FC = () => {
                     <select
                       value={studentStatusFilter}
                       onChange={(e) => setStudentStatusFilter(e.target.value)}
-                      className="px-2 py-1 border-2 border-brand-dark bg-brand-paper text-xs font-bold"
+                      className="px-2.5 py-2 sm:py-1 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold"
                     >
                       <option value="all">All ({report.students.length})</option>
                       <option value="active">Active Only</option>
@@ -670,7 +670,7 @@ export const AdminReportsPage: React.FC = () => {
                     <select
                       value={studentAttentionFilter}
                       onChange={(e) => setStudentAttentionFilter(e.target.value)}
-                      className="px-2 py-1 border-2 border-brand-dark bg-brand-paper text-xs font-bold"
+                      className="px-2.5 py-2 sm:py-1 border-2 border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold"
                     >
                       <option value="all">All Levels</option>
                       <option value="critical">Critical Attention</option>
@@ -839,14 +839,14 @@ export const AdminReportsPage: React.FC = () => {
             <div className="space-y-4">
               {/* Mentor Search Bar */}
               <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex items-center justify-between gap-3 text-xs font-mono">
-                <div className="flex-1 flex items-center gap-2 border-2 border-brand-dark bg-brand-paper px-3 py-1.5 shadow-xs">
+                <div className="flex-1 flex items-center gap-2 border-2 border-brand-dark bg-brand-paper px-3 py-2 sm:py-1.5 min-h-[44px] sm:min-h-0 shadow-xs">
                   <Search className="w-4 h-4 text-brand-muted shrink-0" />
                   <input
                     type="text"
                     value={mentorSearch}
                     onChange={(e) => setMentorSearch(e.target.value)}
                     placeholder="Search by mentor name, ID, or expertise subjects..."
-                    className="w-full bg-transparent text-xs text-brand-dark focus:outline-none"
+                    className="w-full bg-transparent text-base sm:text-xs text-brand-dark focus:outline-none"
                   />
                   {mentorSearch && (
                     <button type="button" onClick={() => setMentorSearch('')} className="text-brand-muted hover:text-brand-dark" aria-label="Clear mentor search">

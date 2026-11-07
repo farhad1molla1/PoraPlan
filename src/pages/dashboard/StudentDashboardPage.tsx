@@ -511,7 +511,7 @@ export const StudentDashboardPage: React.FC = () => {
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
                 placeholder="yourname@gmail.com"
-                className="px-2.5 py-1.5 text-xs border-2 border-brand-dark bg-brand-paper font-sans"
+                className="px-3 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
               />
               <button
                 type="button"

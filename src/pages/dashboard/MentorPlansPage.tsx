@@ -635,7 +635,7 @@ export const MentorPlansPage: React.FC = () => {
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
                     placeholder="e.g. Newtonian Dynamics & Friction Fundamentals"
-                    className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                   />
                 </div>
 
@@ -649,7 +649,7 @@ export const MentorPlansPage: React.FC = () => {
                       id="plan-subject-select"
                       value={formSubjectId}
                       onChange={(e) => setFormSubjectId(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                      className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                     >
                       <option value="">General (No Specific Subject)</option>
                       {subjects.map((s) => (
@@ -669,7 +669,7 @@ export const MentorPlansPage: React.FC = () => {
                         id="plan-status-select"
                         value={formStatus}
                         onChange={(e) => setFormStatus(e.target.value as StudyPlanStatus)}
-                        className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                        className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                       >
                         <option value="active">ACTIVE</option>
                         <option value="completed">COMPLETED</option>
@@ -690,7 +690,7 @@ export const MentorPlansPage: React.FC = () => {
                     value={formDescription}
                     onChange={(e) => setFormDescription(e.target.value)}
                     placeholder="Briefly state the academic learning goals and syllabus target for this plan..."
-                    className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                    className="w-full px-3 py-2 text-base sm:text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                   />
                 </div>
 
@@ -769,7 +769,7 @@ export const MentorPlansPage: React.FC = () => {
                               value={item.title}
                               onChange={(e) => handleItemChange(idx, 'title', e.target.value)}
                               placeholder="Topic title (e.g. Newton's Second Law & Free Body Diagrams)"
-                              className="w-full px-2.5 py-1.5 text-xs font-heading font-bold border border-brand-dark bg-brand-paper focus:outline-none"
+                              className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-heading font-bold border border-brand-dark bg-brand-paper focus:outline-none"
                             />
                           </div>
 
@@ -779,7 +779,7 @@ export const MentorPlansPage: React.FC = () => {
                               value={item.instructions}
                               onChange={(e) => handleItemChange(idx, 'instructions', e.target.value)}
                               placeholder="Instructions / Source (e.g. Read Giancoli Ch. 4)"
-                              className="w-full px-2.5 py-1.5 text-xs font-sans border border-brand-dark bg-brand-paper focus:outline-none"
+                              className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans border border-brand-dark bg-brand-paper focus:outline-none"
                             />
 
                             <div className="flex items-center gap-2">
@@ -790,13 +790,13 @@ export const MentorPlansPage: React.FC = () => {
                                 value={item.estimated_minutes}
                                 onChange={(e) => handleItemChange(idx, 'estimated_minutes', e.target.value)}
                                 placeholder="Mins (e.g. 60)"
-                                className="w-24 px-2 py-1.5 text-xs font-mono border border-brand-dark bg-brand-paper focus:outline-none"
+                                className="w-24 px-2 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border border-brand-dark bg-brand-paper focus:outline-none"
                               />
                               <input
                                 type="date"
                                 value={item.target_date}
                                 onChange={(e) => handleItemChange(idx, 'target_date', e.target.value)}
-                                className="flex-1 px-2 py-1.5 text-xs font-mono border border-brand-dark bg-brand-paper focus:outline-none"
+                                className="flex-1 px-2 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border border-brand-dark bg-brand-paper focus:outline-none"
                               />
                             </div>
                           </div>

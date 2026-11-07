@@ -1015,7 +1015,7 @@ export const AdminProgramsPage: React.FC = () => {
                     value={programForm.name}
                     onChange={(e) => handleProgramNameChange(e.target.value)}
                     placeholder="e.g. Academic Mentorship 0.1 (Beta)"
-                    className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans"
                   />
                 </div>
 
@@ -1029,7 +1029,7 @@ export const AdminProgramsPage: React.FC = () => {
                     value={programForm.slug}
                     onChange={(e) => setProgramForm((prev) => ({ ...prev, slug: e.target.value }))}
                     placeholder="e.g. academic-program-beta"
-                    className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-mono"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-mono"
                   />
                 </div>
               </div>
@@ -1042,7 +1042,7 @@ export const AdminProgramsPage: React.FC = () => {
                     onChange={(e) =>
                       setProgramForm((prev) => ({ ...prev, category: e.target.value as ProgramCategory }))
                     }
-                    className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans"
                   >
                     <option value="academic_mentorship">Academic Program (Academic Mentorship Cohorts)</option>
                     <option value="skillsprint">Upskilling Program (SkillSprint Courses)</option>
@@ -1059,7 +1059,7 @@ export const AdminProgramsPage: React.FC = () => {
                         publication_status: e.target.value as ProgramPublicationStatus,
                       }))
                     }
-                    className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans"
                   >
                     <option value="draft">Draft (Hidden)</option>
                     <option value="published">Published (Visible)</option>
@@ -1077,7 +1077,7 @@ export const AdminProgramsPage: React.FC = () => {
                         enrollment_status: e.target.value as ProgramEnrollmentStatus,
                       }))
                     }
-                    className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans"
                   >
                     <option value="open">Open</option>
                     <option value="closed">Closed</option>
@@ -1164,7 +1164,7 @@ export const AdminProgramsPage: React.FC = () => {
                   value={programForm.short_description}
                   onChange={(e) => setProgramForm((prev) => ({ ...prev, short_description: e.target.value }))}
                   placeholder="Summary for catalog card preview..."
-                  className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans"
+                  className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans"
                 />
               </div>
 
@@ -1175,7 +1175,7 @@ export const AdminProgramsPage: React.FC = () => {
                   value={programForm.description || ''}
                   onChange={(e) => setProgramForm((prev) => ({ ...prev, description: e.target.value }))}
                   placeholder="In-depth description of the mentoring or sprint structure..."
-                  className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans leading-relaxed"
+                  className="w-full px-3 py-2 text-base sm:text-xs border-2 border-brand-dark bg-brand-paper font-sans leading-relaxed"
                 />
               </div>
 
@@ -1187,7 +1187,7 @@ export const AdminProgramsPage: React.FC = () => {
                     value={programForm.duration || ''}
                     onChange={(e) => setProgramForm((prev) => ({ ...prev, duration: e.target.value }))}
                     placeholder="e.g. 4 Months (Full Semester)"
-                    className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans"
                   />
                 </div>
 
@@ -1198,7 +1198,7 @@ export const AdminProgramsPage: React.FC = () => {
                     value={programForm.delivery_mode || ''}
                     onChange={(e) => setProgramForm((prev) => ({ ...prev, delivery_mode: e.target.value }))}
                     placeholder="e.g. Hybrid Mentorship & Tracking"
-                    className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-paper font-sans"
                   />
                 </div>
               </div>
@@ -1212,7 +1212,7 @@ export const AdminProgramsPage: React.FC = () => {
                   value={objectivesInput}
                   onChange={(e) => setObjectivesInput(e.target.value)}
                   placeholder="Master core topics&#10;Systematic syllabus coverage&#10;Weekly doubt clearing"
-                  className="w-full px-3 py-2 text-xs border-2 border-brand-dark bg-brand-paper font-sans font-mono"
+                  className="w-full px-3 py-2 text-base sm:text-xs border-2 border-brand-dark bg-brand-paper font-sans font-mono"
                 />
               </div>
 
@@ -1356,7 +1356,7 @@ export const AdminProgramsPage: React.FC = () => {
                     value={cohortForm.name}
                     onChange={(e) => setCohortForm((prev) => ({ ...prev, name: e.target.value }))}
                     placeholder="e.g. UU CSE Batch 67 — Fall 2026"
-                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-paper font-sans"
                   />
                 </div>
 
@@ -1370,7 +1370,7 @@ export const AdminProgramsPage: React.FC = () => {
                     value={cohortForm.code}
                     onChange={(e) => setCohortForm((prev) => ({ ...prev, code: e.target.value.toUpperCase() }))}
                     placeholder="e.g. UU-CSE-B67-F26"
-                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-mono uppercase"
+                    className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-paper font-mono uppercase"
                   />
                 </div>
               </div>
@@ -1384,7 +1384,7 @@ export const AdminProgramsPage: React.FC = () => {
                   value={cohortForm.description || ''}
                   onChange={(e) => setCohortForm((prev) => ({ ...prev, description: e.target.value }))}
                   placeholder="Brief description of this cohort or course run..."
-                  className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                  className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs border border-brand-dark bg-brand-paper font-sans"
                 />
               </div>
 
@@ -1463,7 +1463,7 @@ export const AdminProgramsPage: React.FC = () => {
                     type="date"
                     value={cohortForm.start_date || ''}
                     onChange={(e) => setCohortForm((prev) => ({ ...prev, start_date: e.target.value }))}
-                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-mono"
+                    className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-paper font-mono"
                   />
                 </div>
 
@@ -1473,7 +1473,7 @@ export const AdminProgramsPage: React.FC = () => {
                     type="date"
                     value={cohortForm.end_date || ''}
                     onChange={(e) => setCohortForm((prev) => ({ ...prev, end_date: e.target.value }))}
-                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-mono"
+                    className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-paper font-mono"
                   />
                 </div>
 
@@ -1482,7 +1482,7 @@ export const AdminProgramsPage: React.FC = () => {
                   <select
                     value={cohortForm.status}
                     onChange={(e) => setCohortForm((prev) => ({ ...prev, status: e.target.value as CohortStatus }))}
-                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-paper font-sans"
                   >
                     <option value="planned">Planned</option>
                     <option value="active">Active</option>
@@ -1500,7 +1500,7 @@ export const AdminProgramsPage: React.FC = () => {
                         publication_status: e.target.value as CohortPublicationStatus,
                       }))
                     }
-                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-paper font-sans"
                   >
                     <option value="draft">Draft (Private)</option>
                     <option value="published">Published (Public)</option>
@@ -1748,7 +1748,7 @@ export const AdminProgramsPage: React.FC = () => {
                     value={sectionForm.title}
                     onChange={(e) => setSectionForm((prev) => ({ ...prev, title: e.target.value }))}
                     placeholder="e.g. Phase 1: Academic Diagnostic & Setup"
-                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-paper font-sans"
                   />
                 </div>
 
@@ -1761,7 +1761,7 @@ export const AdminProgramsPage: React.FC = () => {
                     value={sectionForm.description}
                     onChange={(e) => setSectionForm((prev) => ({ ...prev, description: e.target.value }))}
                     placeholder="Outline the scope of this learning block..."
-                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs border border-brand-dark bg-brand-paper font-sans"
                   />
                 </div>
               </div>
@@ -1822,7 +1822,7 @@ export const AdminProgramsPage: React.FC = () => {
                     value={topicForm.title}
                     onChange={(e) => setTopicForm((prev) => ({ ...prev, title: e.target.value }))}
                     placeholder="e.g. 1-on-1 Academic Diagnostic Session"
-                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-paper font-sans"
                   />
                 </div>
 
@@ -1835,7 +1835,7 @@ export const AdminProgramsPage: React.FC = () => {
                     value={topicForm.description}
                     onChange={(e) => setTopicForm((prev) => ({ ...prev, description: e.target.value }))}
                     placeholder="Specific learning outcome or required activity..."
-                    className="w-full px-2.5 py-1.5 text-xs border border-brand-dark bg-brand-paper font-sans"
+                    className="w-full px-2.5 py-2 sm:py-1.5 text-base sm:text-xs border border-brand-dark bg-brand-paper font-sans"
                   />
                 </div>
               </div>

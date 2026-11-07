@@ -716,7 +716,7 @@ export const DashboardLayout: React.FC = () => {
                         value={emailToLink}
                         onChange={(e) => setEmailToLink(e.target.value)}
                         placeholder="your.email@example.com"
-                        className="flex-1 px-2.5 py-1 text-xs border border-brand-dark bg-brand-paper font-sans"
+                        className="flex-1 px-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-paper font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
                       />
                       <Button
                         type="button"

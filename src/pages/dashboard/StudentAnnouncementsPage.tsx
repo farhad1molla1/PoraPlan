@@ -390,7 +390,7 @@ export const StudentAnnouncementsPage: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search announcements by title, content, author, or study area..."
-              className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="w-full pl-9 pr-3 py-2.5 sm:py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
             />
             {searchQuery && (
               <button
@@ -449,7 +449,7 @@ export const StudentAnnouncementsPage: React.FC = () => {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value as any)}
-              className="px-2 py-1 border border-brand-dark bg-brand-bg font-sans text-xs focus:outline-none"
+              className="px-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-bg font-sans focus:outline-none cursor-pointer"
             >
               <option value="all">All Priorities</option>
               <option value="urgent">Urgent</option>
@@ -463,7 +463,7 @@ export const StudentAnnouncementsPage: React.FC = () => {
             <select
               value={scopeFilter}
               onChange={(e) => setScopeFilter(e.target.value as any)}
-              className="px-2 py-1 border border-brand-dark bg-brand-bg font-sans text-xs focus:outline-none"
+              className="px-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-bg font-sans focus:outline-none cursor-pointer"
             >
               <option value="all">All Scopes</option>
               <option value="platform">Platform Wide</option>

@@ -434,7 +434,7 @@ export const MentorAssignmentsPage: React.FC = () => {
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="bg-brand-paper border-2 border-brand-dark px-3 py-1.5 text-xs font-mono font-bold text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="bg-brand-paper border-2 border-brand-dark px-3 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono font-bold text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
               aria-label="Filter by assigned student"
             >
               {students.map((student) => (
@@ -737,7 +737,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   placeholder="e.g. Newtonian Mechanics: Inclined Plane Dynamics"
-                  className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-base sm:text-sm min-h-[44px] sm:min-h-0 text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   required
                 />
               </div>
@@ -751,7 +751,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                   <select
                     value={formSubjectId}
                     onChange={(e) => setFormSubjectId(e.target.value)}
-                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   >
                     <option value="">-- None / General --</option>
                     {subjects.map((s) => (
@@ -769,7 +769,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                   <select
                     value={formPlanId}
                     onChange={(e) => setFormPlanId(e.target.value)}
-                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   >
                     <option value="">-- None / Standalone --</option>
                     {plans.map((p) => (
@@ -793,7 +793,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                     max="1000"
                     value={formTotalPoints}
                     onChange={(e) => setFormTotalPoints(e.target.value)}
-                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   />
                 </div>
 
@@ -805,7 +805,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                     type="date"
                     value={formDueDate}
                     onChange={(e) => setFormDueDate(e.target.value)}
-                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   />
                 </div>
               </div>
@@ -820,7 +820,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                   value={formInstructions}
                   onChange={(e) => setFormInstructions(e.target.value)}
                   placeholder="Detail the specific questions, page numbers, or derivation criteria required from the student..."
-                  className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 />
               </div>
 
@@ -832,7 +832,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                 <select
                   value={formStatus}
                   onChange={(e) => setFormStatus(e.target.value as AssignmentStatus)}
-                  className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
                   <option value="published">Published (Visible to Student)</option>
                   <option value="draft">Draft (Saved only for Mentor)</option>
@@ -1003,7 +1003,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                       value={reviewFeedback}
                       onChange={(e) => setReviewFeedback(e.target.value)}
                       placeholder="Detail calculation errors, conceptual gaps, notation advice, or commend strong derivation steps..."
-                      className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       required
                     />
                   </div>
@@ -1021,7 +1021,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                         value={reviewScore}
                         onChange={(e) => setReviewScore(e.target.value)}
                         placeholder="e.g. 85"
-                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       />
                     </div>
 
@@ -1032,7 +1032,7 @@ export const MentorAssignmentsPage: React.FC = () => {
                       <select
                         value={reviewStatus}
                         onChange={(e) => setReviewStatus(e.target.value as SubmissionStatus)}
-                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                       >
                         <option value="reviewed">Reviewed &amp; Approved</option>
                         <option value="needs_revision">Needs Revision (Request Redo)</option>

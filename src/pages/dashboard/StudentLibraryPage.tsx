@@ -897,7 +897,7 @@ export const StudentLibraryPage: React.FC = () => {
                   placeholder="Search resources by title, description, or notes..."
                   value={resourceSearch}
                   onChange={(e) => setResourceSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full pl-9 pr-4 py-2 border-2 border-brand-dark font-mono text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 />
               </div>
 
@@ -905,7 +905,7 @@ export const StudentLibraryPage: React.FC = () => {
               <select
                 value={resourceSubjectFilter}
                 onChange={(e) => setResourceSubjectFilter(e.target.value)}
-                className="px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                className="px-3 py-2 border-2 border-brand-dark font-mono text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-teal"
               >
                 <option value="all">All Subjects ({subjects.length})</option>
                 {subjects.map((sub) => (
@@ -919,7 +919,7 @@ export const StudentLibraryPage: React.FC = () => {
               <select
                 value={resourceTypeFilter}
                 onChange={(e) => setResourceTypeFilter(e.target.value)}
-                className="px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                className="px-3 py-2 border-2 border-brand-dark font-mono text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-teal"
               >
                 <option value="all">All Resource Types</option>
                 <option value="note">Notes & Cheat Sheets</option>
@@ -1165,7 +1165,7 @@ export const StudentLibraryPage: React.FC = () => {
                     type="date"
                     value={selectedSpecificDate}
                     onChange={(e) => setSelectedSpecificDate(e.target.value)}
-                    className="px-3 py-1.5 border-2 border-brand-dark font-mono text-xs bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
+                    className="px-3 py-2 sm:py-1.5 border-2 border-brand-dark font-mono text-base sm:text-xs min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
                   />
                 </div>
               )}
@@ -1178,7 +1178,7 @@ export const StudentLibraryPage: React.FC = () => {
                       type="date"
                       value={customStartDate}
                       onChange={(e) => setCustomStartDate(e.target.value)}
-                      className="px-3 py-1.5 border-2 border-brand-dark font-mono text-xs bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
+                      className="px-3 py-2 sm:py-1.5 border-2 border-brand-dark font-mono text-base sm:text-xs min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
                     />
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -1187,7 +1187,7 @@ export const StudentLibraryPage: React.FC = () => {
                       type="date"
                       value={customEndDate}
                       onChange={(e) => setCustomEndDate(e.target.value)}
-                      className="px-3 py-1.5 border-2 border-brand-dark font-mono text-xs bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
+                      className="px-3 py-2 sm:py-1.5 border-2 border-brand-dark font-mono text-base sm:text-xs min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
                     />
                   </div>
                 </div>
@@ -1204,7 +1204,7 @@ export const StudentLibraryPage: React.FC = () => {
                   placeholder="Search task title, description, or subject..."
                   value={taskSearch}
                   onChange={(e) => setTaskSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
+                  className="w-full pl-9 pr-4 py-2 border-2 border-brand-dark font-mono text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
                 />
               </div>
 
@@ -1212,7 +1212,7 @@ export const StudentLibraryPage: React.FC = () => {
               <select
                 value={taskSubjectFilter}
                 onChange={(e) => setTaskSubjectFilter(e.target.value)}
-                className="px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
+                className="px-3 py-2 border-2 border-brand-dark font-mono text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
               >
                 <option value="all">All Subjects ({subjects.length})</option>
                 {subjects.map((sub) => (
@@ -1230,7 +1230,7 @@ export const StudentLibraryPage: React.FC = () => {
                     e.target.value as 'all' | 'pending' | 'in_progress' | 'completed' | 'overdue'
                   )
                 }
-                className="px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
+                className="px-3 py-2 border-2 border-brand-dark font-mono text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-coral"
               >
                 <option value="all">All Statuses</option>
                 <option value="pending">Pending</option>
@@ -1611,7 +1611,7 @@ export const StudentLibraryPage: React.FC = () => {
                   placeholder="Search assignments by title, instructions, subject, or content..."
                   value={assignmentSearch}
                   onChange={(e) => setAssignmentSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
+                  className="w-full pl-9 pr-4 py-2 border-2 border-brand-dark font-mono text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
                 />
               </div>
 
@@ -1619,7 +1619,7 @@ export const StudentLibraryPage: React.FC = () => {
               <select
                 value={assignmentSubjectFilter}
                 onChange={(e) => setAssignmentSubjectFilter(e.target.value)}
-                className="px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
+                className="px-3 py-2 border-2 border-brand-dark font-mono text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
               >
                 <option value="all">All Subjects ({subjects.length})</option>
                 {subjects.map((sub) => (
@@ -1643,7 +1643,7 @@ export const StudentLibraryPage: React.FC = () => {
                       | 'needs_revision'
                   )
                 }
-                className="px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
+                className="px-3 py-2 border-2 border-brand-dark font-mono text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
               >
                 <option value="all">All Statuses ({assignments.length})</option>
                 <option value="pending">To Submit ({assignmentStats.pending})</option>
@@ -1659,7 +1659,7 @@ export const StudentLibraryPage: React.FC = () => {
                 onChange={(e) =>
                   setAssignmentDateFilter(e.target.value as 'all' | 'upcoming' | 'past_due')
                 }
-                className="px-3 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
+                className="px-3 py-2 border-2 border-brand-dark font-mono text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-brand-bg focus:outline-none focus:ring-2 focus:ring-brand-gold"
               >
                 <option value="all">All Due Dates</option>
                 <option value="upcoming">Upcoming &amp; Current</option>
@@ -2173,7 +2173,7 @@ export const StudentLibraryPage: React.FC = () => {
                   placeholder="Search evaluations, mentor feedback, recommendations..."
                   value={evaluationSearch}
                   onChange={(e) => setEvaluationSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full pl-9 pr-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-base sm:text-xs min-h-[44px] sm:min-h-0 focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 />
               </div>
 
@@ -2183,7 +2183,7 @@ export const StudentLibraryPage: React.FC = () => {
                   aria-label="Filter evaluations by subject"
                   value={evaluationSubjectFilter}
                   onChange={(e) => setEvaluationSubjectFilter(e.target.value)}
-                  className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-xs font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 >
                   <option value="all">All Study Areas ({evaluations.length})</option>
                   {subjects.map((s) => (
@@ -2200,7 +2200,7 @@ export const StudentLibraryPage: React.FC = () => {
                   aria-label="Filter evaluations by status"
                   value={evaluationStatusFilter}
                   onChange={(e) => setEvaluationStatusFilter(e.target.value as any)}
-                  className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-xs font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 >
                   <option value="all">All Statuses</option>
                   <option value="scheduled">Scheduled Check-ins</option>
@@ -2215,7 +2215,7 @@ export const StudentLibraryPage: React.FC = () => {
                   aria-label="Filter evaluations by format"
                   value={evaluationFormatFilter}
                   onChange={(e) => setEvaluationFormatFilter(e.target.value as any)}
-                  className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-xs font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 border-2 border-brand-dark bg-brand-bg font-mono text-base sm:text-xs min-h-[44px] sm:min-h-0 font-bold text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 >
                   <option value="all">All Formats</option>
                   <option value="oral">Oral Walkthrough</option>
@@ -2258,7 +2258,7 @@ export const StudentLibraryPage: React.FC = () => {
                     type="date"
                     value={evaluationCustomStartDate}
                     onChange={(e) => setEvaluationCustomStartDate(e.target.value)}
-                    className="px-2 py-0.5 border border-brand-dark bg-brand-bg text-xs font-mono"
+                    className="px-2 py-1.5 sm:py-0.5 border border-brand-dark bg-brand-bg text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono"
                     aria-label="Custom Start Date"
                   />
                   <span>to</span>
@@ -2266,7 +2266,7 @@ export const StudentLibraryPage: React.FC = () => {
                     type="date"
                     value={evaluationCustomEndDate}
                     onChange={(e) => setEvaluationCustomEndDate(e.target.value)}
-                    className="px-2 py-0.5 border border-brand-dark bg-brand-bg text-xs font-mono"
+                    className="px-2 py-1.5 sm:py-0.5 border border-brand-dark bg-brand-bg text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono"
                     aria-label="Custom End Date"
                   />
                 </div>

@@ -751,7 +751,7 @@ export const AdminBillingPage: React.FC = () => {
                     setStudentSearch(e.target.value);
                     setStudentPage(1);
                   }}
-                  className="pl-8 pr-2 py-1 text-xs border border-brand-dark/30 bg-brand-paper focus:outline-none w-44 sm:w-56"
+                  className="pl-8 pr-2 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper focus:outline-none w-full sm:w-56"
                 />
                 {studentSearch && (
                   <button
@@ -770,7 +770,7 @@ export const AdminBillingPage: React.FC = () => {
                   setStudentStatusFilter(e.target.value as 'all' | StudentPaymentStatus);
                   setStudentPage(1);
                 }}
-                className="py-1 px-2 border border-brand-dark/30 bg-brand-paper"
+                className="py-2 sm:py-1 px-2.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="all">All Statuses</option>
                 <option value="pending">Pending</option>
@@ -786,7 +786,7 @@ export const AdminBillingPage: React.FC = () => {
                   setStudentMethodFilter(e.target.value as 'all' | PaymentMethod);
                   setStudentPage(1);
                 }}
-                className="py-1 px-2 border border-brand-dark/30 bg-brand-paper"
+                className="py-2 sm:py-1 px-2.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="all">All Methods</option>
                 <option value="bkash">bKash</option>
@@ -1062,7 +1062,7 @@ export const AdminBillingPage: React.FC = () => {
                     setMentorSearch(e.target.value);
                     setMentorPage(1);
                   }}
-                  className="pl-8 pr-2 py-1 text-xs border border-brand-dark/30 bg-brand-paper focus:outline-none w-44 sm:w-56"
+                  className="pl-8 pr-2 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper focus:outline-none w-full sm:w-56"
                 />
                 {mentorSearch && (
                   <button
@@ -1081,7 +1081,7 @@ export const AdminBillingPage: React.FC = () => {
                   setMentorStatusFilter(e.target.value as 'all' | MentorPaymentStatus);
                   setMentorPage(1);
                 }}
-                className="py-1 px-2 border border-brand-dark/30 bg-brand-paper"
+                className="py-2 sm:py-1 px-2.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="all">All Statuses</option>
                 <option value="pending">Pending</option>
@@ -1095,7 +1095,7 @@ export const AdminBillingPage: React.FC = () => {
                   setMentorMethodFilter(e.target.value as 'all' | PaymentMethod);
                   setMentorPage(1);
                 }}
-                className="py-1 px-2 border border-brand-dark/30 bg-brand-paper"
+                className="py-2 sm:py-1 px-2.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="all">All Methods</option>
                 <option value="bkash">bKash</option>
@@ -2069,7 +2069,7 @@ const CreateStudentPaymentModal: React.FC<CreateStudentPaymentModalProps> = ({
             <select
               value={enrollmentId}
               onChange={(e) => setEnrollmentId(e.target.value)}
-              className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               required
             >
               {enrollments.map((en) => {
@@ -2091,7 +2091,7 @@ const CreateStudentPaymentModal: React.FC<CreateStudentPaymentModalProps> = ({
                 type="date"
                 value={cycleStart}
                 onChange={(e) => setCycleStart(e.target.value)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
                 required
               />
             </div>
@@ -2101,7 +2101,7 @@ const CreateStudentPaymentModal: React.FC<CreateStudentPaymentModalProps> = ({
                 type="date"
                 value={cycleEnd}
                 onChange={(e) => setCycleEnd(e.target.value)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
                 required
               />
             </div>
@@ -2113,7 +2113,7 @@ const CreateStudentPaymentModal: React.FC<CreateStudentPaymentModalProps> = ({
               type="date"
               value={nextDue}
               onChange={(e) => setNextDue(e.target.value)}
-              className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               required
             />
           </div>
@@ -2124,7 +2124,7 @@ const CreateStudentPaymentModal: React.FC<CreateStudentPaymentModalProps> = ({
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as StudentPaymentStatus)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="pending">Pending</option>
                 <option value="paid">Paid</option>
@@ -2138,7 +2138,7 @@ const CreateStudentPaymentModal: React.FC<CreateStudentPaymentModalProps> = ({
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value as PaymentMethod)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="bkash">bKash</option>
                 <option value="nagad">Nagad</option>
@@ -2157,7 +2157,7 @@ const CreateStudentPaymentModal: React.FC<CreateStudentPaymentModalProps> = ({
                 placeholder="e.g. bKash TrxID"
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               />
             </div>
             <div>
@@ -2166,7 +2166,7 @@ const CreateStudentPaymentModal: React.FC<CreateStudentPaymentModalProps> = ({
                 type="date"
                 value={paymentDate}
                 onChange={(e) => setPaymentDate(e.target.value)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               />
             </div>
           </div>
@@ -2276,7 +2276,7 @@ const EditStudentPaymentModal: React.FC<EditStudentPaymentModalProps> = ({
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as StudentPaymentStatus)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="pending">Pending</option>
                 <option value="paid">Paid</option>
@@ -2290,7 +2290,7 @@ const EditStudentPaymentModal: React.FC<EditStudentPaymentModalProps> = ({
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value as PaymentMethod)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="bkash">bKash</option>
                 <option value="nagad">Nagad</option>
@@ -2307,7 +2307,7 @@ const EditStudentPaymentModal: React.FC<EditStudentPaymentModalProps> = ({
               type="text"
               value={reference}
               onChange={(e) => setReference(e.target.value)}
-              className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
             />
           </div>
 
@@ -2317,7 +2317,7 @@ const EditStudentPaymentModal: React.FC<EditStudentPaymentModalProps> = ({
               type="date"
               value={paymentDate}
               onChange={(e) => setPaymentDate(e.target.value)}
-              className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
             />
           </div>
 
@@ -2327,7 +2327,7 @@ const EditStudentPaymentModal: React.FC<EditStudentPaymentModalProps> = ({
               <textarea
                 value={waivedReason}
                 onChange={(e) => setWaivedReason(e.target.value)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper h-16"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs border border-brand-dark/30 bg-brand-paper h-16"
                 required
               />
             </div>
@@ -2444,7 +2444,7 @@ const CreateMentorPayoutModal: React.FC<CreateMentorPayoutModalProps> = ({
             <select
               value={mentorId}
               onChange={(e) => setMentorId(e.target.value)}
-              className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               required
             >
               {mentors.map((m) => (
@@ -2460,7 +2460,7 @@ const CreateMentorPayoutModal: React.FC<CreateMentorPayoutModalProps> = ({
             <select
               value={relatedStudentId}
               onChange={(e) => setRelatedStudentId(e.target.value)}
-              className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
             >
               <option value="">Platform Mentorship Pool</option>
               {students.map((s) => (
@@ -2478,7 +2478,7 @@ const CreateMentorPayoutModal: React.FC<CreateMentorPayoutModalProps> = ({
                 type="month"
                 value={billingMonth}
                 onChange={(e) => setBillingMonth(e.target.value)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
                 required
               />
             </div>
@@ -2487,7 +2487,7 @@ const CreateMentorPayoutModal: React.FC<CreateMentorPayoutModalProps> = ({
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as MentorPaymentStatus)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="pending">Pending</option>
                 <option value="paid">Paid</option>
@@ -2502,7 +2502,7 @@ const CreateMentorPayoutModal: React.FC<CreateMentorPayoutModalProps> = ({
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value as PaymentMethod)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="bkash">bKash</option>
                 <option value="nagad">Nagad</option>
@@ -2517,7 +2517,7 @@ const CreateMentorPayoutModal: React.FC<CreateMentorPayoutModalProps> = ({
                 type="date"
                 value={payoutDate}
                 onChange={(e) => setPayoutDate(e.target.value)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               />
             </div>
           </div>
@@ -2529,7 +2529,7 @@ const CreateMentorPayoutModal: React.FC<CreateMentorPayoutModalProps> = ({
               placeholder="e.g. Bank Transfer ID"
               value={reference}
               onChange={(e) => setReference(e.target.value)}
-              className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
             />
           </div>
 
@@ -2637,7 +2637,7 @@ const EditMentorPayoutModal: React.FC<EditMentorPayoutModalProps> = ({
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as MentorPaymentStatus)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="pending">Pending</option>
                 <option value="paid">Paid</option>
@@ -2649,7 +2649,7 @@ const EditMentorPayoutModal: React.FC<EditMentorPayoutModalProps> = ({
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value as PaymentMethod)}
-                className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="bkash">bKash</option>
                 <option value="nagad">Nagad</option>
@@ -2666,7 +2666,7 @@ const EditMentorPayoutModal: React.FC<EditMentorPayoutModalProps> = ({
               type="text"
               value={reference}
               onChange={(e) => setReference(e.target.value)}
-              className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
             />
           </div>
 
@@ -2676,7 +2676,7 @@ const EditMentorPayoutModal: React.FC<EditMentorPayoutModalProps> = ({
               type="date"
               value={payoutDate}
               onChange={(e) => setPayoutDate(e.target.value)}
-              className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
             />
           </div>
 
@@ -2829,7 +2829,7 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value as PaymentMethod)}
-                className="w-full p-1 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               >
                 <option value="bkash">bKash</option>
                 <option value="nagad">Nagad</option>
@@ -2844,7 +2844,7 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
                 type="date"
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
-                className="w-full p-1 border border-brand-dark/30 bg-brand-paper"
+                className="w-full p-2 sm:p-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
                 required
               />
             </div>
@@ -2857,7 +2857,7 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
               value={reference}
               onChange={(e) => setReference(e.target.value)}
               placeholder="e.g. TrxID"
-              className="w-full p-1 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
             />
           </div>
 
@@ -2868,7 +2868,7 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Optional admin note"
-              className="w-full p-1 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
             />
           </div>
 
@@ -3009,7 +3009,7 @@ const PrivateAdminNotesModal: React.FC<PrivateAdminNotesModalProps> = ({
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
             placeholder="Add internal confidential note..."
-            className="w-full p-2 border border-brand-dark/30 bg-brand-paper h-16"
+            className="w-full p-2 text-base sm:text-xs border border-brand-dark/30 bg-brand-paper h-16"
             required
           />
 
@@ -3125,7 +3125,7 @@ const ManageBillingAnchorModal: React.FC<ManageBillingAnchorModalProps> = ({
               type="date"
               value={newAnchor}
               onChange={(e) => setNewAnchor(e.target.value)}
-              className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper"
+              className="w-full p-2 sm:p-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper"
               required
             />
           </div>
@@ -3136,7 +3136,7 @@ const ManageBillingAnchorModal: React.FC<ManageBillingAnchorModalProps> = ({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. Scholar requested alignment with 1st of month"
-              className="w-full p-1.5 border border-brand-dark/30 bg-brand-paper h-16"
+              className="w-full p-2 sm:p-1.5 text-base sm:text-xs border border-brand-dark/30 bg-brand-paper h-16"
               required
             />
           </div>

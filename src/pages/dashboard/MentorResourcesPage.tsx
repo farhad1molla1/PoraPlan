@@ -354,7 +354,7 @@ export const MentorResourcesPage: React.FC = () => {
               placeholder="Search resource title, student, subject..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+              className="w-full pl-9 pr-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
             />
           </div>
 
@@ -364,7 +364,7 @@ export const MentorResourcesPage: React.FC = () => {
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="px-2.5 py-1.5 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+              className="px-2.5 py-2 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
             >
               <option value="all">All Assigned Students ({students.length})</option>
               {students.map((s) => (
@@ -604,7 +604,7 @@ export const MentorResourcesPage: React.FC = () => {
                 <select
                   value={targetStudentId}
                   onChange={(e) => setTargetStudentId(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   required
                 >
                   {students.map((s) => (
@@ -624,7 +624,7 @@ export const MentorResourcesPage: React.FC = () => {
                   <select
                     value={targetSubjectId}
                     onChange={(e) => setTargetSubjectId(e.target.value)}
-                    className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   >
                     <option value="">General / None</option>
                     {availableSubjects.map((s) => (
@@ -642,7 +642,7 @@ export const MentorResourcesPage: React.FC = () => {
                   <select
                     value={targetPlanId}
                     onChange={(e) => setTargetPlanId(e.target.value)}
-                    className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   >
                     <option value="">None / General</option>
                     {availablePlans.map((p) => (
@@ -664,7 +664,7 @@ export const MentorResourcesPage: React.FC = () => {
                   placeholder="e.g. Halliday Ch. 4 Mechanics Formula Cheatsheet"
                   value={resourceTitle}
                   onChange={(e) => setResourceTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   required
                 />
               </div>
@@ -713,7 +713,7 @@ export const MentorResourcesPage: React.FC = () => {
                     placeholder="https://example.com/materials/cheatsheet.pdf"
                     value={resourceUrl}
                     onChange={(e) => setResourceUrl(e.target.value)}
-                    className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                     required
                   />
                   <span className="font-mono text-[10px] text-brand-muted mt-0.5 block">
@@ -732,7 +732,7 @@ export const MentorResourcesPage: React.FC = () => {
                     placeholder="Write key equations, derivations, or concept bullet points..."
                     value={resourceContent}
                     onChange={(e) => setResourceContent(e.target.value)}
-                    className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal leading-relaxed"
+                    className="w-full px-3 py-2 text-base sm:text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal leading-relaxed"
                     required
                   />
                 </div>
@@ -749,7 +749,7 @@ export const MentorResourcesPage: React.FC = () => {
                       placeholder="e.g. Giancoli_Chapter_04_Exercises.pdf"
                       value={resourceFileName}
                       onChange={(e) => setResourceFileName(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                      className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                     />
                   </div>
                   <div>
@@ -761,7 +761,7 @@ export const MentorResourcesPage: React.FC = () => {
                       placeholder="https://storage.googleapis.com/... or Google Drive link"
                       value={resourceUrl}
                       onChange={(e) => setResourceUrl(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                      className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                     />
                   </div>
                 </div>
@@ -777,7 +777,7 @@ export const MentorResourcesPage: React.FC = () => {
                   placeholder="Provide instructions or syllabus context for the student..."
                   value={resourceDescription}
                   onChange={(e) => setResourceDescription(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-xs font-sans border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 />
               </div>
 
@@ -851,7 +851,7 @@ export const MentorResourcesPage: React.FC = () => {
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   required
                 />
               </div>
@@ -865,7 +865,7 @@ export const MentorResourcesPage: React.FC = () => {
                     type="url"
                     value={editUrl}
                     onChange={(e) => setEditUrl(e.target.value)}
-                    className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   />
                 </div>
               )}
@@ -879,7 +879,7 @@ export const MentorResourcesPage: React.FC = () => {
                     rows={6}
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
-                    className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal leading-relaxed"
+                    className="w-full px-3 py-2 text-base sm:text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal leading-relaxed"
                   />
                 </div>
               )}
@@ -892,7 +892,7 @@ export const MentorResourcesPage: React.FC = () => {
                   rows={2}
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-xs font-sans border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 />
               </div>
 
@@ -903,7 +903,7 @@ export const MentorResourcesPage: React.FC = () => {
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value as ResourceStatus)}
-                  className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 >
                   <option value="active">Active (Visible to Student)</option>
                   <option value="archived">Archived (Hidden)</option>

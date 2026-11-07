@@ -402,7 +402,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search student, ID, university..."
-              className="w-full pl-9 pr-3 py-2 text-sm border-2 border-brand-dark font-medium placeholder-[#082B4C]/40 focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="w-full pl-9 pr-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-medium placeholder-[#082B4C]/40 focus:outline-none focus:ring-2 focus:ring-brand-teal"
             />
           </div>
 
@@ -414,7 +414,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
                 setProgramFilter(e.target.value);
                 setCohortFilter('all');
               }}
-              className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Programs</option>
               {programs.map((p) => (
@@ -430,7 +430,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
             <select
               value={cohortFilter}
               onChange={(e) => setCohortFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Cohorts</option>
               {filteredCohorts.map((c) => (
@@ -446,7 +446,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
@@ -889,7 +889,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
                     value={selectedStudentId}
                     onChange={(e) => setSelectedStudentId(e.target.value)}
                     required
-                    className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   >
                     <option value="">-- Choose Student --</option>
                     {studentsList.map((s) => (
@@ -910,7 +910,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
                   value={selectedProgramId}
                   onChange={(e) => handleProgramSelection(e.target.value)}
                   required
-                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
                   <option value="">-- Choose Program --</option>
                   {programs.map((p) => (
@@ -931,7 +931,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
                   onChange={(e) => setSelectedCohortId(e.target.value)}
                   required
                   disabled={!selectedProgramId}
-                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal disabled:bg-gray-100 disabled:text-gray-400"
+                  className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal disabled:bg-gray-100 disabled:text-gray-400"
                 >
                   <option value="">
                     {!selectedProgramId ? '-- Select Program First --' : '-- Choose Cohort --'}
@@ -967,7 +967,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
                   value={selectedMentorId}
                   onChange={(e) => setSelectedMentorId(e.target.value)}
                   disabled={!selectedProgramId || loadingMentors}
-                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal disabled:bg-gray-100 disabled:text-gray-400"
+                  className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal disabled:bg-gray-100 disabled:text-gray-400"
                 >
                   <option value="">-- No Direct Mentor (Use Cohort Default) --</option>
                   {eligibleMentors.map((m) => (
@@ -991,7 +991,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
                   onChange={(e) => setEnrollmentNotes(e.target.value)}
                   rows={2}
                   placeholder="Optional intake rationale, sponsorship details, or special terms..."
-                  className="w-full px-3 py-2 text-sm border-2 border-brand-dark font-medium bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-sm border-2 border-brand-dark font-medium bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 />
               </div>
 

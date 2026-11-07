@@ -549,7 +549,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search notices by title, content, or targeted student..."
-              className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+              className="w-full pl-9 pr-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
             />
             {searchQuery && (
               <button
@@ -606,7 +606,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value as any)}
-              className="px-2 py-1 border border-brand-dark bg-brand-bg font-sans text-xs focus:outline-none"
+              className="px-2.5 py-2 sm:py-1 border border-brand-dark bg-brand-bg font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 focus:outline-none"
             >
               <option value="all">All Priorities</option>
               <option value="urgent">Urgent</option>
@@ -840,7 +840,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
                   value={createTitle}
                   onChange={(e) => setCreateTitle(e.target.value)}
                   placeholder="e.g. Physics Lab & Advanced Problem Set 3 Consultation Hours"
-                  className="w-full px-3 py-2 text-xs sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   required
                 />
               </div>
@@ -936,7 +936,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
                     <select
                       value={createStudentId}
                       onChange={(e) => setCreateStudentId(e.target.value)}
-                      className="w-full px-3 py-2 text-xs sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none"
+                      className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none"
                       required
                     >
                       <option value="">-- Choose Assigned Student --</option>
@@ -987,7 +987,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
                   onChange={(e) => setCreateContent(e.target.value)}
                   placeholder="Write your announcement or study guidance here..."
                   rows={5}
-                  className="w-full px-3 py-2 text-xs sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   required
                 />
               </div>
@@ -1066,7 +1066,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-xs sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   required
                 />
               </div>
@@ -1101,7 +1101,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                   rows={5}
-                  className="w-full px-3 py-2 text-xs sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                  className="w-full px-3 py-2 text-base sm:text-sm border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                   required
                 />
               </div>

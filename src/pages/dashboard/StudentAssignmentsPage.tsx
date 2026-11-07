@@ -974,7 +974,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                               value={textContent}
                               onChange={(e) => setTextContent(e.target.value)}
                               placeholder="Write out your mathematical derivation, proof steps, or chapter review answers here..."
-                              className="w-full bg-brand-paper border-2 border-brand-dark p-3 text-xs sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                              className="w-full bg-brand-paper border-2 border-brand-dark p-3 text-base sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                               required
                             />
                             <p className="text-[11px] font-mono text-brand-muted mt-1">
@@ -994,7 +994,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                 value={linkUrl}
                                 onChange={(e) => setLinkUrl(e.target.value)}
                                 placeholder="https://drive.google.com/... or https://github.com/..."
-                                className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs sm:text-sm text-brand-dark font-mono focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                                className="w-full bg-brand-paper border-2 border-brand-dark px-3 py-2.5 sm:py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 text-brand-dark font-mono focus:outline-none focus:ring-2 focus:ring-brand-teal"
                                 required
                               />
                               <p className="text-[11px] font-mono text-brand-muted mt-1">
@@ -1010,7 +1010,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                 value={textContent}
                                 onChange={(e) => setTextContent(e.target.value)}
                                 placeholder="Any specific questions or areas where you encountered difficulty..."
-                                className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                                className="w-full bg-brand-paper border-2 border-brand-dark p-3 sm:p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                               />
                             </div>
                           </div>
@@ -1154,7 +1154,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                     type="file"
                                     onChange={handleFileSelect}
                                     accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
-                                    className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-xs font-mono focus:outline-none"
+                                    className="w-full bg-brand-paper border-2 border-brand-dark px-3 py-2 sm:p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono focus:outline-none"
                                     required={!existingFilePath && !fileName}
                                   />
                                   <p className="text-[11px] font-mono text-brand-muted">
@@ -1183,7 +1183,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                 value={textContent}
                                 onChange={(e) => setTextContent(e.target.value)}
                                 placeholder="Summary of attached exercise solutions, questions, or derivation notes..."
-                                className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                                className="w-full bg-brand-paper border-2 border-brand-dark p-3 sm:p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
                                 required
                               />
                             </div>

@@ -560,7 +560,7 @@ export const StudentDoubtsPage: React.FC = () => {
             placeholder="Search doubts by title, question, or study area..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+            className="w-full pl-9 pr-3 py-2 sm:py-1.5 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
           />
         </div>
 
@@ -791,7 +791,7 @@ export const StudentDoubtsPage: React.FC = () => {
                   placeholder="e.g. Incline Atwood machine normal force vs friction"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full p-2 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full px-3 py-2.5 sm:py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 />
               </div>
 
@@ -804,7 +804,7 @@ export const StudentDoubtsPage: React.FC = () => {
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value as DoubtPriority)}
-                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="w-full px-3 py-2.5 sm:py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal cursor-pointer"
                   >
                     <option value="normal">Normal</option>
                     <option value="low">Low</option>
@@ -825,7 +825,7 @@ export const StudentDoubtsPage: React.FC = () => {
                       setSelectedPlanId('');
                       setSelectedTaskId('');
                     }}
-                    className="w-full p-2 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="w-full px-3 py-2.5 sm:py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal cursor-pointer"
                   >
                     <option value="">General (No Specific Subject)</option>
                     {subjects.map((s) => (
@@ -847,7 +847,7 @@ export const StudentDoubtsPage: React.FC = () => {
                     <select
                       value={selectedPlanId}
                       onChange={(e) => setSelectedPlanId(e.target.value)}
-                      className="w-full p-1.5 border border-brand-dark bg-brand-paper text-xs text-brand-navy focus:outline-none"
+                      className="w-full px-3 py-2.5 sm:py-1.5 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none cursor-pointer"
                     >
                       <option value="">None</option>
                       {filteredPlansForSubject.map((p) => (
@@ -865,7 +865,7 @@ export const StudentDoubtsPage: React.FC = () => {
                     <select
                       value={selectedTaskId}
                       onChange={(e) => setSelectedTaskId(e.target.value)}
-                      className="w-full p-1.5 border border-brand-dark bg-brand-paper text-xs text-brand-navy focus:outline-none"
+                      className="w-full px-3 py-2.5 sm:py-1.5 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none cursor-pointer"
                     >
                       <option value="">None</option>
                       {filteredTasksForSubject.map((t) => (
@@ -889,7 +889,7 @@ export const StudentDoubtsPage: React.FC = () => {
                   placeholder="Explain exactly what you understand, what formula or step is confusing, and what answer you arrived at..."
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
-                  className="w-full p-2.5 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  className="w-full p-3 sm:p-2.5 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
                 />
               </div>
 
@@ -1157,7 +1157,7 @@ export const StudentDoubtsPage: React.FC = () => {
                     placeholder="Type a follow-up inquiry or clarification..."
                     value={replyMessage}
                     onChange={(e) => setReplyMessage(e.target.value)}
-                    className="flex-1 p-2 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="flex-1 px-3 py-2.5 sm:py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   />
                   <Button
                     type="button"

@@ -250,7 +250,7 @@ export const StudentReportPage: React.FC = () => {
               type="date"
               value={customStart}
               onChange={(e) => setCustomStart(e.target.value)}
-              className="px-2.5 py-1 border-2 border-brand-dark bg-brand-bg text-xs font-mono"
+              className="px-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-bg font-mono"
               aria-label="Start Date"
             />
             <span className="font-bold text-brand-muted">to</span>
@@ -258,7 +258,7 @@ export const StudentReportPage: React.FC = () => {
               type="date"
               value={customEnd}
               onChange={(e) => setCustomEnd(e.target.value)}
-              className="px-2.5 py-1 border-2 border-brand-dark bg-brand-bg text-xs font-mono"
+              className="px-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border-2 border-brand-dark bg-brand-bg font-mono"
               aria-label="End Date"
             />
           </div>

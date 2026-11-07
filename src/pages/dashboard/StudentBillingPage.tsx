@@ -482,7 +482,7 @@ export const StudentBillingPage: React.FC = () => {
                       setSearchQuery(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="pl-8 pr-2 py-1 text-xs border border-brand-dark/30 bg-brand-paper focus:outline-none w-36 sm:w-44"
+                    className="pl-8 pr-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark/30 bg-brand-paper focus:outline-none focus:ring-1 focus:ring-brand-teal w-full sm:w-44"
                   />
                   {searchQuery && (
                     <button

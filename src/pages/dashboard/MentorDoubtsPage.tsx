@@ -442,18 +442,18 @@ export const MentorDoubtsPage: React.FC = () => {
             placeholder="Search by student name, question title, or content..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+            className="w-full pl-9 pr-3 py-2 sm:py-1.5 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Student Filter */}
-          <div className="flex items-center gap-1.5 border-2 border-brand-dark bg-brand-paper px-2.5 py-1.5 sm:py-1 min-h-[42px] sm:min-h-0 text-xs shadow-brutal-xs">
+          <div className="flex items-center gap-1.5 border-2 border-brand-dark bg-brand-paper px-2.5 py-1.5 sm:py-1 min-h-[44px] sm:min-h-0 text-xs shadow-brutal-xs">
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">Student:</span>
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="font-sans text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[36px] sm:min-h-0 py-1"
+              className="font-sans text-base sm:text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[40px] sm:min-h-0 py-1"
               aria-label="Filter doubts by assigned student"
             >
               <option value="all">All Assigned Students</option>
@@ -466,12 +466,12 @@ export const MentorDoubtsPage: React.FC = () => {
           </div>
 
           {/* Status Filter */}
-          <div className="flex items-center gap-1.5 border-2 border-brand-dark bg-brand-paper px-2.5 py-1.5 sm:py-1 min-h-[42px] sm:min-h-0 text-xs shadow-brutal-xs">
+          <div className="flex items-center gap-1.5 border-2 border-brand-dark bg-brand-paper px-2.5 py-1.5 sm:py-1 min-h-[44px] sm:min-h-0 text-xs shadow-brutal-xs">
             <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">Status:</span>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value as any)}
-              className="font-sans text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[36px] sm:min-h-0 py-1"
+              className="font-sans text-base sm:text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[40px] sm:min-h-0 py-1"
               aria-label="Filter doubts by status"
             >
               <option value="all">All Statuses</option>
@@ -797,7 +797,7 @@ export const MentorDoubtsPage: React.FC = () => {
                     placeholder="Provide conceptual clarification, formula proof, step-by-step guidance..."
                     value={replyMessage}
                     onChange={(e) => setReplyMessage(e.target.value)}
-                    className="flex-1 p-2.5 border-2 border-brand-dark bg-brand-paper font-sans text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="flex-1 p-2.5 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   />
                   <div className="flex flex-col justify-start">
                     <Button

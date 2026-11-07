@@ -308,7 +308,7 @@ export const AdminUsersPage: React.FC = () => {
             placeholder="Search by name, email, or PoraPlan ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 focus:border-transparent text-text-primary"
+            className="w-full pl-10 pr-4 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 focus:border-transparent text-text-primary"
           />
         </div>
 
@@ -319,7 +319,7 @@ export const AdminUsersPage: React.FC = () => {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value as any)}
-              className="py-2 px-3 text-sm bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 text-text-primary w-full sm:w-auto"
+              className="py-2 px-3 text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 text-text-primary w-full sm:w-auto"
             >
               <option value="all">All Roles</option>
               <option value="student">Students</option>
@@ -332,7 +332,7 @@ export const AdminUsersPage: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="py-2 px-3 text-sm bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 text-text-primary flex-1 sm:flex-none w-full sm:w-auto"
+            className="py-2 px-3 text-base sm:text-sm min-h-[44px] sm:min-h-0 bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 text-text-primary flex-1 sm:flex-none w-full sm:w-auto"
           >
             <option value="all">All Statuses</option>
             <option value="active">Active</option>

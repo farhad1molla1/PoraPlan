@@ -976,7 +976,7 @@ export const MentorTasksPage: React.FC = () => {
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
                     placeholder="e.g. Read Giancoli Ch. 4 & Solve Friction Problems"
-                    className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                    className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                   />
                 </div>
 
@@ -990,7 +990,7 @@ export const MentorTasksPage: React.FC = () => {
                       id="task-subject-select"
                       value={formSubjectId}
                       onChange={(e) => setFormSubjectId(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                      className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                     >
                       <option value="">General (No Subject)</option>
                       {subjects.map((s) => (
@@ -1009,7 +1009,7 @@ export const MentorTasksPage: React.FC = () => {
                       id="task-plan-select"
                       value={formPlanId}
                       onChange={(e) => setFormPlanId(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                      className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                     >
                       <option value="">No Plan Linked</option>
                       {plans.map((p) => (
@@ -1031,7 +1031,7 @@ export const MentorTasksPage: React.FC = () => {
                       id="task-priority-select"
                       value={formPriority}
                       onChange={(e) => setFormPriority(e.target.value as TaskPriority)}
-                      className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                      className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                     >
                       <option value="low">LOW</option>
                       <option value="medium">MEDIUM</option>
@@ -1048,7 +1048,7 @@ export const MentorTasksPage: React.FC = () => {
                         id="task-status-select"
                         value={formStatus}
                         onChange={(e) => setFormStatus(e.target.value as TaskStatus)}
-                        className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                        className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                       >
                         <option value="pending">PENDING</option>
                         <option value="in_progress">IN PROGRESS</option>
@@ -1072,7 +1072,7 @@ export const MentorTasksPage: React.FC = () => {
                       value={formEstimatedMinutes}
                       onChange={(e) => setFormEstimatedMinutes(e.target.value)}
                       placeholder="e.g. 50"
-                      className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                      className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                     />
                   </div>
 
@@ -1085,7 +1085,7 @@ export const MentorTasksPage: React.FC = () => {
                       type="date"
                       value={formDueDate}
                       onChange={(e) => setFormDueDate(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-mono border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                      className="w-full px-3 py-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                     />
                   </div>
                 </div>
@@ -1101,7 +1101,7 @@ export const MentorTasksPage: React.FC = () => {
                     value={formDescription}
                     onChange={(e) => setFormDescription(e.target.value)}
                     placeholder="Specific reading chapters, practice problems, or study checkpoints..."
-                    className="w-full px-3 py-2 text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
+                    className="w-full px-3 py-2 text-base sm:text-xs font-sans border-2 border-brand-dark bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-brutal-xs"
                   />
                 </div>
 
