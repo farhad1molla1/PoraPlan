@@ -17,6 +17,7 @@ import {
   getAcademicFileSignedUrl,
 } from '../../lib/storage';
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
+import { MobileBottomSheet } from '../../components/common/MobileBottomSheet';
 import type { Profile, Subject, TaskPriority, TaskStatus, StudyPlan } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
@@ -32,7 +33,6 @@ import {
   ListTodo,
   Calendar,
   Clock,
-  X,
   CheckCircle,
   Circle,
   CheckCircle2,
@@ -931,32 +931,45 @@ export const MentorTasksPage: React.FC = () => {
           </section>
         )}
 
-        {/* Modal: Create or Edit Task */}
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 bg-brand-dark/60 backdrop-blur-xs flex items-center justify-center p-3.5 sm:p-6 overflow-y-auto">
-            <div className="max-w-lg w-full border-2 border-brand-dark bg-brand-paper shadow-brutal my-8 flex flex-col max-h-[90vh]">
-              {/* Modal Header */}
-              <div className="p-4 sm:p-5 border-b-2 border-brand-dark bg-brand-navy text-brand-paper flex items-center justify-between">
-                <div>
-                  <span className="font-mono text-[10px] uppercase font-bold text-brand-gold block">
-                    {editingTaskId ? 'EDIT TASK ITEM' : 'NEW TASK ALLOCATION'}
-                  </span>
-                  <h2 className="font-heading font-extrabold text-base sm:text-lg text-brand-bg">
-                    {editingTaskId ? 'Update Scheduled Activity' : `Allocate Task for ${activeStudent?.full_name}`}
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center border border-brand-paper/40 hover:bg-brand-paper/10 text-brand-paper cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold"
-                  aria-label="Close modal"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Modal Form */}
-              <form onSubmit={handleSubmitTask} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
+        {/* Modal / Bottom Sheet: Create or Edit Task */}
+        <MobileBottomSheet
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title={editingTaskId ? 'Update Scheduled Activity' : 'Allocate Task'}
+          subtitle={
+            editingTaskId
+              ? 'Edit Task Item'
+              : activeStudent
+              ? `Allocate Task for ${activeStudent.full_name}`
+              : undefined
+          }
+          maxWidth="lg"
+          footer={
+            <div className="flex items-center justify-end gap-2 w-full">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsModalOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                form="mentor-task-allocation-form"
+                variant="primary"
+                size="sm"
+                disabled={isSubmitting}
+                className="shadow-brutal"
+                leftIcon={isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : undefined}
+              >
+                {isSubmitting ? 'Saving Task...' : editingTaskId ? 'Update Task' : 'Allocate Task'}
+              </Button>
+            </div>
+          }
+        >
+          <form id="mentor-task-allocation-form" onSubmit={handleSubmitTask} className="space-y-4">
                 {formError && (
                   <div className="p-3 border-2 border-brand-dark bg-red-50 text-red-700 text-xs font-sans flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
@@ -1207,31 +1220,8 @@ export const MentorTasksPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Footer Buttons */}
-                <div className="pt-3 border-t-2 border-brand-dark flex items-center justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsModalOpen(false)}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="sm"
-                    disabled={isSubmitting}
-                    leftIcon={isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : undefined}
-                  >
-                    {isSubmitting ? 'Saving Task...' : editingTaskId ? 'Update Task' : 'Allocate Task'}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+          </form>
+        </MobileBottomSheet>
 
         {/* Modal: Delete Confirmation */}
         {deleteTargetTask && (
@@ -1289,6 +1279,19 @@ export const MentorTasksPage: React.FC = () => {
             })
           }
         />
+
+        {/* Mobile Floating Action Button to Allocate Task */}
+        {activeStudent && (
+          <button
+            type="button"
+            onClick={openCreateModal}
+            aria-label="Allocate Task"
+            className="sm:hidden fixed bottom-6 right-5 z-40 flex items-center gap-2 px-4 py-3 bg-brand-teal text-white border-2 border-brand-dark shadow-brutal font-heading font-extrabold text-sm active:translate-x-0.5 active:translate-y-0.5 transition-transform"
+          >
+            <Plus className="w-5 h-5 stroke-[2.5]" />
+            <span>Allocate Task</span>
+          </button>
+        )}
 
       </div>
     </div>

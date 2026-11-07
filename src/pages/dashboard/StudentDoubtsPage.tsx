@@ -16,6 +16,7 @@ import {
   getAcademicFileSignedUrl,
 } from '../../lib/storage';
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
+import { MobileBottomSheet } from '../../components/common/MobileBottomSheet';
 import type { Subject, StudyPlan, Task, DoubtStatus, DoubtPriority } from '../../types/database';
 import { Button } from '../../components/common/Button';
 import {
@@ -753,370 +754,228 @@ export const StudentDoubtsPage: React.FC = () => {
       )}
 
       {/* ===================================================================== */}
-      {/* 5. CREATE DOUBT MODAL                                                 */}
+      {/* 5. CREATE DOUBT MODAL / BOTTOM SHEET                                  */}
       {/* ===================================================================== */}
-      {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/60 backdrop-blur-xs">
-          <div className="bg-brand-paper border-2 border-brand-dark shadow-brutal max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3 mb-4">
-              <div className="flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-brand-teal" />
-                <h2 className="font-heading font-extrabold text-lg text-brand-navy">
-                  Submit Academic Doubt
-                </h2>
-              </div>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="text-brand-dark hover:text-brand-teal"
+      <MobileBottomSheet
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Submit Academic Doubt"
+        maxWidth="xl"
+        footer={
+          <div className="flex justify-end gap-2 w-full">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowCreateModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="create-doubt-form"
+              variant="primary"
+              disabled={submittingCreate}
+              className="shadow-brutal flex items-center gap-1.5"
+            >
+              {submittingCreate ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Sending...</span>
+                </>
+              ) : (
+                <span>Submit Inquiry</span>
+              )}
+            </Button>
+          </div>
+        }
+      >
+        {createError && (
+          <div className="p-3 mb-4 border-2 border-red-600 bg-red-50 text-red-900 text-xs font-mono">
+            {createError}
+          </div>
+        )}
+
+        <form id="create-doubt-form" onSubmit={handleCreateDoubt} className="space-y-4">
+          {/* Title */}
+          <div>
+            <label className="block font-mono text-[11px] font-bold uppercase text-brand-navy mb-1">
+              Inquiry Title *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Incline Atwood machine normal force vs friction"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-3 py-2.5 sm:py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+            />
+          </div>
+
+          {/* Priority */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-mono text-[11px] font-bold uppercase text-brand-navy mb-1">
+                Priority Level
+              </label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as DoubtPriority)}
+                className="w-full px-3 py-2.5 sm:py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal cursor-pointer"
               >
-                <X className="w-5 h-5" />
-              </button>
+                <option value="normal">Normal</option>
+                <option value="low">Low</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
             </div>
 
-            {createError && (
-              <div className="p-3 mb-4 border-2 border-red-600 bg-red-50 text-red-900 text-xs font-mono">
-                {createError}
+            {/* Subject Selector */}
+            <div>
+              <label className="block font-mono text-[11px] font-bold uppercase text-brand-navy mb-1">
+                Associated Study Area
+              </label>
+              <select
+                value={selectedSubjectId}
+                onChange={(e) => {
+                  setSelectedSubjectId(e.target.value);
+                  setSelectedPlanId('');
+                  setSelectedTaskId('');
+                }}
+                className="w-full px-3 py-2.5 sm:py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal cursor-pointer"
+              >
+                <option value="">General (No Specific Subject)</option>
+                {subjects.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.code || 'AREA'})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Optional Plan & Task selectors */}
+          {selectedSubjectId && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-brand-light/50 p-3 border border-brand-dark/30">
+              <div>
+                <label className="block font-mono text-[10px] font-bold uppercase text-brand-navy mb-1">
+                  Related Study Plan (Optional)
+                </label>
+                <select
+                  value={selectedPlanId}
+                  onChange={(e) => setSelectedPlanId(e.target.value)}
+                  className="w-full px-3 py-2.5 sm:py-1.5 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none cursor-pointer"
+                >
+                  <option value="">None</option>
+                  {filteredPlansForSubject.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title}
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              <div>
+                <label className="block font-mono text-[10px] font-bold uppercase text-brand-navy mb-1">
+                  Related Task (Optional)
+                </label>
+                <select
+                  value={selectedTaskId}
+                  onChange={(e) => setSelectedTaskId(e.target.value)}
+                  className="w-full px-3 py-2.5 sm:py-1.5 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none cursor-pointer"
+                >
+                  <option value="">None</option>
+                  {filteredTasksForSubject.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Question Body */}
+          <div>
+            <label className="block font-mono text-[11px] font-bold uppercase text-brand-navy mb-1">
+              Your Question Details *
+            </label>
+            <textarea
+              required
+              rows={5}
+              placeholder="Explain exactly what you understand, what formula or step is confusing, and what answer you arrived at..."
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              className="w-full p-3 sm:p-2.5 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+            />
+          </div>
+
+          {/* Attachment Picker */}
+          <div>
+            <label className="block font-mono text-[11px] font-bold uppercase text-brand-navy mb-1">
+              Attachment (Optional)
+            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+
+            {selectedFileError && (
+              <p className="font-mono text-[11px] text-red-600 mb-2 font-bold">
+                {selectedFileError}
+              </p>
             )}
 
-            <form onSubmit={handleCreateDoubt} className="space-y-4">
-              {/* Title */}
-              <div>
-                <label className="block font-mono text-[11px] font-bold uppercase text-brand-navy mb-1">
-                  Inquiry Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Incline Atwood machine normal force vs friction"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2.5 sm:py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
-                />
-              </div>
-
-              {/* Priority */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-mono text-[11px] font-bold uppercase text-brand-navy mb-1">
-                    Priority Level
-                  </label>
-                  <select
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value as DoubtPriority)}
-                    className="w-full px-3 py-2.5 sm:py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal cursor-pointer"
-                  >
-                    <option value="normal">Normal</option>
-                    <option value="low">Low</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
-                  </select>
-                </div>
-
-                {/* Subject Selector */}
-                <div>
-                  <label className="block font-mono text-[11px] font-bold uppercase text-brand-navy mb-1">
-                    Associated Study Area
-                  </label>
-                  <select
-                    value={selectedSubjectId}
-                    onChange={(e) => {
-                      setSelectedSubjectId(e.target.value);
-                      setSelectedPlanId('');
-                      setSelectedTaskId('');
-                    }}
-                    className="w-full px-3 py-2.5 sm:py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal cursor-pointer"
-                  >
-                    <option value="">General (No Specific Subject)</option>
-                    {subjects.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} ({s.code || 'AREA'})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Optional Plan & Task selectors */}
-              {selectedSubjectId && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-brand-light/50 p-3 border border-brand-dark/30">
-                  <div>
-                    <label className="block font-mono text-[10px] font-bold uppercase text-brand-navy mb-1">
-                      Related Study Plan (Optional)
-                    </label>
-                    <select
-                      value={selectedPlanId}
-                      onChange={(e) => setSelectedPlanId(e.target.value)}
-                      className="w-full px-3 py-2.5 sm:py-1.5 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none cursor-pointer"
-                    >
-                      <option value="">None</option>
-                      {filteredPlansForSubject.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block font-mono text-[10px] font-bold uppercase text-brand-navy mb-1">
-                      Related Task (Optional)
-                    </label>
-                    <select
-                      value={selectedTaskId}
-                      onChange={(e) => setSelectedTaskId(e.target.value)}
-                      className="w-full px-3 py-2.5 sm:py-1.5 border border-brand-dark bg-brand-paper text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none cursor-pointer"
-                    >
-                      <option value="">None</option>
-                      {filteredTasksForSubject.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              {/* Question Body */}
-              <div>
-                <label className="block font-mono text-[11px] font-bold uppercase text-brand-navy mb-1">
-                  Your Question Details *
-                </label>
-                <textarea
-                  required
-                  rows={5}
-                  placeholder="Explain exactly what you understand, what formula or step is confusing, and what answer you arrived at..."
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  className="w-full p-3 sm:p-2.5 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
-                />
-              </div>
-
-              {/* Attachment Picker */}
-              <div>
-                <label className="block font-mono text-[11px] font-bold uppercase text-brand-navy mb-1">
-                  Attachment (Optional)
-                </label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-
-                {selectedFileError && (
-                  <p className="font-mono text-[11px] text-red-600 mb-2 font-bold">
-                    {selectedFileError}
-                  </p>
-                )}
-
-                {selectedFile ? (
-                  <div className="p-2.5 border-2 border-brand-dark bg-brand-paper flex items-center justify-between gap-2 shadow-brutal-xs">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <FileText className="w-4 h-4 text-brand-teal shrink-0" />
-                      <div className="min-w-0">
-                        <p className="font-heading font-bold text-xs text-brand-navy truncate">
-                          {selectedFile.name}
-                        </p>
-                        <span className="font-mono text-[10px] text-brand-muted">
-                          {formatFileSize(selectedFile.size)}
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleRemoveSelectedFile}
-                      className="px-2 py-0.5 border border-red-500 bg-red-50 hover:bg-red-100 text-red-700 text-[11px] font-mono font-bold"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full border-2 border-dashed border-brand-dark/60 bg-brand-paper hover:bg-brand-paper p-3 text-center transition-colors shadow-brutal-xs flex items-center justify-center gap-2"
-                  >
-                    <Paperclip className="w-4 h-4 text-brand-teal" />
-                    <span className="font-heading font-bold text-xs text-brand-navy">
-                      Attach Reference File (PDF, DOCX, PNG, JPG, WebP — Max 10MB)
+            {selectedFile ? (
+              <div className="p-2.5 border-2 border-brand-dark bg-brand-paper flex items-center justify-between gap-2 shadow-brutal-xs">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText className="w-4 h-4 text-brand-teal shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-heading font-bold text-xs text-brand-navy truncate">
+                      {selectedFile.name}
+                    </p>
+                    <span className="font-mono text-[10px] text-brand-muted">
+                      {formatFileSize(selectedFile.size)}
                     </span>
-                  </button>
-                )}
-              </div>
-
-              <div className="pt-2 flex justify-end gap-2 border-t border-brand-dark/20">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  disabled={submittingCreate}
-                  className="shadow-brutal flex items-center gap-1.5"
-                >
-                  {submittingCreate ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Sending...</span>
-                    </>
-                  ) : (
-                    <span>Submit Inquiry</span>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ===================================================================== */}
-      {/* 6. DOUBT DETAIL / THREAD MODAL                                        */}
-      {/* ===================================================================== */}
-      {activeDoubt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/60 backdrop-blur-xs">
-          <div className="bg-brand-paper border-2 border-brand-dark shadow-brutal max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto flex flex-col justify-between">
-            {/* Header */}
-            <div>
-              <div className="flex items-start justify-between border-b-2 border-brand-dark pb-3 mb-4">
-                <div>
-                  <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
-                    {activeDoubt.status === 'resolved' ? (
-                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-emerald-600 bg-emerald-100 text-emerald-800 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Resolved
-                      </span>
-                    ) : activeDoubt.status === 'answered' ? (
-                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-teal-600 bg-teal-100 text-teal-800 flex items-center gap-1">
-                        <MessageSquare className="w-3 h-3" />
-                        Answered
-                      </span>
-                    ) : (
-                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-amber-600 bg-amber-100 text-amber-900 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        Awaiting Response
-                      </span>
-                    )}
-
-                    {activeDoubt.subject_name && (
-                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/30 bg-brand-paper text-brand-navy">
-                        {activeDoubt.subject_name}
-                      </span>
-                    )}
                   </div>
-                  <h2 className="font-heading font-extrabold text-lg text-brand-navy">
-                    {activeDoubt.title}
-                  </h2>
                 </div>
-
                 <button
-                  onClick={() => setActiveDoubt(null)}
-                  className="text-brand-dark hover:text-brand-teal p-1"
+                  type="button"
+                  onClick={handleRemoveSelectedFile}
+                  className="px-2 py-0.5 border border-red-500 bg-red-50 hover:bg-red-100 text-red-700 text-[11px] font-mono font-bold"
                 >
-                  <X className="w-5 h-5" />
+                  Remove
                 </button>
               </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full border-2 border-dashed border-brand-dark/60 bg-brand-paper hover:bg-brand-paper p-3 text-center transition-colors shadow-brutal-xs flex items-center justify-center gap-2"
+              >
+                <Paperclip className="w-4 h-4 text-brand-teal" />
+                <span className="font-heading font-bold text-xs text-brand-navy">
+                  Attach Reference File (PDF, DOCX, PNG, JPG, WebP — Max 10MB)
+                </span>
+              </button>
+            )}
+          </div>
+        </form>
+      </MobileBottomSheet>
 
-              {/* Original Question Card */}
-              <div className="p-4 border-2 border-brand-dark bg-brand-paper mb-4">
-                <div className="flex items-center justify-between text-[11px] font-mono text-brand-muted mb-2 border-b border-brand-dark/10 pb-1.5">
-                  <span className="font-bold text-brand-navy">Your Question:</span>
-                  <span>{new Date(activeDoubt.created_at || '').toLocaleString()}</span>
-                </div>
-                <p className="font-sans text-xs text-brand-navy whitespace-pre-wrap leading-relaxed">
-                  {activeDoubt.question}
-                </p>
-
-                {/* Question attachment if present */}
-                {activeDoubt.attachment_path && (
-                  renderAttachmentCard({
-                    name: activeDoubt.attachment_name || 'attachment',
-                    path: activeDoubt.attachment_path,
-                    size: activeDoubt.attachment_size,
-                  })
-                )}
-
-                {/* Context associations */}
-                {(activeDoubt.plan_title || activeDoubt.task_title || activeDoubt.assignment_title) && (
-                  <div className="mt-3 pt-2 border-t border-brand-dark/10 flex flex-wrap gap-2 text-[10px] font-mono text-brand-muted">
-                    {activeDoubt.plan_title && <span>Plan: {activeDoubt.plan_title}</span>}
-                    {activeDoubt.task_title && <span>Task: {activeDoubt.task_title}</span>}
-                    {activeDoubt.assignment_title && <span>Assignment: {activeDoubt.assignment_title}</span>}
-                  </div>
-                )}
-              </div>
-
-              {/* Replies Thread */}
-              <div className="space-y-3 mb-4">
-                <h4 className="font-mono text-xs font-bold uppercase text-brand-navy flex items-center gap-1.5">
-                  <MessageSquare className="w-3.5 h-3.5 text-brand-teal" />
-                  Conversation Thread ({activeDoubt.responses?.length || 0})
-                </h4>
-
-                {(!activeDoubt.responses || activeDoubt.responses.length === 0) ? (
-                  <div className="p-4 border border-dashed border-brand-dark/30 bg-brand-light/40 text-center font-mono text-xs text-brand-muted">
-                    No mentor responses recorded yet. Your mentor will reply directly to this thread.
-                  </div>
-                ) : (
-                  activeDoubt.responses.map((resp) => {
-                    const isMentor = resp.author_role === 'mentor' || resp.author_role === 'admin';
-
-                    return (
-                      <div
-                        key={resp.id}
-                        className={`p-3.5 border-2 border-brand-dark ${
-                          isMentor ? 'bg-brand-teal/10 border-l-4 border-l-brand-teal' : 'bg-brand-paper'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
-                          <div className="flex items-center gap-1.5">
-                            {resp.author_id ? (
-                              <Link
-                                to={`/profile/${resp.author_id}`}
-                                className="font-bold text-brand-navy hover:text-brand-teal transition-colors underline decoration-brand-dark/30 hover:decoration-brand-teal"
-                              >
-                                {resp.author_name}
-                              </Link>
-                            ) : (
-                              <span className="font-bold text-brand-navy">{resp.author_name}</span>
-                            )}
-                            {isMentor && (
-                              <span className="px-1.5 py-0.2 font-mono text-[9px] uppercase font-bold bg-brand-teal text-white">
-                                Mentor
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-brand-muted">
-                            {new Date(resp.created_at || '').toLocaleString()}
-                          </span>
-                        </div>
-                        <p className="font-sans text-xs text-brand-navy whitespace-pre-wrap leading-relaxed">
-                          {resp.message}
-                        </p>
-
-                        {/* Response attachment if present */}
-                        {resp.attachment_path && (
-                          renderAttachmentCard({
-                            name: resp.attachment_name || 'attachment',
-                            path: resp.attachment_path,
-                            size: resp.attachment_size,
-                          })
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
-            {/* Bottom: Send Follow-up & Toggle Resolved */}
-            <div className="pt-3 border-t-2 border-brand-dark space-y-3">
+      {/* ===================================================================== */}
+      {/* 6. DOUBT DETAIL / THREAD MODAL / BOTTOM SHEET                         */}
+      {/* ===================================================================== */}
+      <MobileBottomSheet
+        isOpen={!!activeDoubt}
+        onClose={() => setActiveDoubt(null)}
+        title={activeDoubt?.title || 'Doubt Thread'}
+        maxWidth="2xl"
+        footer={
+          activeDoubt ? (
+            <div className="w-full space-y-2">
               {replyError && (
                 <div className="p-2 border border-red-600 bg-red-50 text-red-900 text-xs font-mono">
                   {replyError}
@@ -1134,7 +993,7 @@ export const StudentDoubtsPage: React.FC = () => {
 
                 {replyFile && (
                   <div className="p-2 border border-brand-dark bg-brand-paper flex items-center justify-between text-xs font-mono">
-                    <span className="truncate max-w-[300px]">
+                    <span className="truncate max-w-[220px] sm:max-w-[300px]">
                       Attached: <strong>{replyFile.name}</strong> ({formatFileSize(replyFile.size)})
                     </span>
                     <button
@@ -1157,14 +1016,14 @@ export const StudentDoubtsPage: React.FC = () => {
                     placeholder="Type a follow-up inquiry or clarification..."
                     value={replyMessage}
                     onChange={(e) => setReplyMessage(e.target.value)}
-                    className="flex-1 px-3 py-2.5 sm:py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="flex-1 px-3 py-2 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[44px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
                   />
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => replyFileInputRef.current?.click()}
                     title="Attach file to reply"
-                    className="px-2.5"
+                    className="px-2.5 min-h-[44px] sm:min-h-0"
                   >
                     <Paperclip className="w-3.5 h-3.5 text-brand-teal" />
                   </Button>
@@ -1172,14 +1031,14 @@ export const StudentDoubtsPage: React.FC = () => {
                     type="submit"
                     variant="primary"
                     disabled={submittingReply}
-                    className="flex items-center gap-1 shadow-brutal px-3"
+                    className="flex items-center gap-1 shadow-brutal px-3 min-h-[44px] sm:min-h-0"
                   >
                     {submittingReply ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <>
                         <Send className="w-3.5 h-3.5" />
-                        <span>Reply</span>
+                        <span className="hidden sm:inline">Reply</span>
                       </>
                     )}
                   </Button>
@@ -1224,9 +1083,140 @@ export const StudentDoubtsPage: React.FC = () => {
                 </Button>
               </div>
             </div>
+          ) : undefined
+        }
+      >
+        {activeDoubt && (
+          <div>
+            <div className="flex flex-wrap items-center gap-1.5 mb-3">
+              {activeDoubt.status === 'resolved' ? (
+                <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-emerald-600 bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  Resolved
+                </span>
+              ) : activeDoubt.status === 'answered' ? (
+                <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-teal-600 bg-teal-100 text-teal-800 flex items-center gap-1">
+                  <MessageSquare className="w-3 h-3" />
+                  Answered
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-amber-600 bg-amber-100 text-amber-900 flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  Awaiting Response
+                </span>
+              )}
+
+              {activeDoubt.subject_name && (
+                <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/30 bg-brand-paper text-brand-navy">
+                  {activeDoubt.subject_name}
+                </span>
+              )}
+            </div>
+
+            {/* Original Question Card */}
+            <div className="p-4 border-2 border-brand-dark bg-brand-paper mb-4">
+              <div className="flex items-center justify-between text-[11px] font-mono text-brand-muted mb-2 border-b border-brand-dark/10 pb-1.5">
+                <span className="font-bold text-brand-navy">Your Question:</span>
+                <span>{new Date(activeDoubt.created_at || '').toLocaleString()}</span>
+              </div>
+              <p className="font-sans text-xs text-brand-navy whitespace-pre-wrap leading-relaxed">
+                {activeDoubt.question}
+              </p>
+
+              {/* Question attachment if present */}
+              {activeDoubt.attachment_path && (
+                renderAttachmentCard({
+                  name: activeDoubt.attachment_name || 'attachment',
+                  path: activeDoubt.attachment_path,
+                  size: activeDoubt.attachment_size,
+                })
+              )}
+
+              {/* Context associations */}
+              {(activeDoubt.plan_title || activeDoubt.task_title || activeDoubt.assignment_title) && (
+                <div className="mt-3 pt-2 border-t border-brand-dark/10 flex flex-wrap gap-2 text-[10px] font-mono text-brand-muted">
+                  {activeDoubt.plan_title && <span>Plan: {activeDoubt.plan_title}</span>}
+                  {activeDoubt.task_title && <span>Task: {activeDoubt.task_title}</span>}
+                  {activeDoubt.assignment_title && <span>Assignment: {activeDoubt.assignment_title}</span>}
+                </div>
+              )}
+            </div>
+
+            {/* Replies Thread */}
+            <div className="space-y-3 mb-2">
+              <h4 className="font-mono text-xs font-bold uppercase text-brand-navy flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-brand-teal" />
+                Conversation Thread ({activeDoubt.responses?.length || 0})
+              </h4>
+
+              {(!activeDoubt.responses || activeDoubt.responses.length === 0) ? (
+                <div className="p-4 border border-dashed border-brand-dark/30 bg-brand-light/40 text-center font-mono text-xs text-brand-muted">
+                  No mentor responses recorded yet. Your mentor will reply directly to this thread.
+                </div>
+              ) : (
+                activeDoubt.responses.map((resp) => {
+                  const isMentor = resp.author_role === 'mentor' || resp.author_role === 'admin';
+
+                  return (
+                    <div
+                      key={resp.id}
+                      className={`p-3.5 border-2 border-brand-dark ${
+                        isMentor ? 'bg-brand-teal/10 border-l-4 border-l-brand-teal' : 'bg-brand-paper'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
+                        <div className="flex items-center gap-1.5">
+                          {resp.author_id ? (
+                            <Link
+                              to={`/profile/${resp.author_id}`}
+                              className="font-bold text-brand-navy hover:text-brand-teal transition-colors underline decoration-brand-dark/30 hover:decoration-brand-teal"
+                            >
+                              {resp.author_name}
+                            </Link>
+                          ) : (
+                            <span className="font-bold text-brand-navy">{resp.author_name}</span>
+                          )}
+                          {isMentor && (
+                            <span className="px-1.5 py-0.2 font-mono text-[9px] uppercase font-bold bg-brand-teal text-white">
+                              Mentor
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-brand-muted">
+                          {new Date(resp.created_at || '').toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="font-sans text-xs text-brand-navy whitespace-pre-wrap leading-relaxed">
+                        {resp.message}
+                      </p>
+
+                      {/* Response attachment if present */}
+                      {resp.attachment_path && (
+                        renderAttachmentCard({
+                          name: resp.attachment_name || 'attachment',
+                          path: resp.attachment_path,
+                          size: resp.attachment_size,
+                        })
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </MobileBottomSheet>
+
+      {/* Mobile Floating Action Button */}
+      <button
+        type="button"
+        onClick={() => setShowCreateModal(true)}
+        aria-label="Ask A Doubt"
+        className="sm:hidden fixed bottom-6 right-5 z-40 flex items-center gap-2 px-4 py-3 bg-brand-teal text-white border-2 border-brand-dark shadow-brutal font-heading font-extrabold text-sm active:translate-x-0.5 active:translate-y-0.5 transition-transform"
+      >
+        <Plus className="w-5 h-5 stroke-[2.5]" />
+        <span>Ask Doubt</span>
+      </button>
 
       {/* Attachment Viewer Modal */}
       <AttachmentViewerModal

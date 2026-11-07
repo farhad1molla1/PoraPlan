@@ -10,6 +10,7 @@ import type { SubmissionStatus } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
+import { MobileBottomSheet } from '../../components/common/MobileBottomSheet';
 import { getAcademicFileSignedUrl } from '../../lib/storage';
 import {
   FileCheck,
@@ -24,7 +25,6 @@ import {
   Paperclip,
   Eye,
   Download,
-  X,
   MessageSquare,
   ArrowRight,
   RotateCcw,
@@ -585,234 +585,234 @@ export const MentorReviewQueuePage: React.FC = () => {
         </div>
       )}
 
-      {/* EVALUATION & FEEDBACK MODAL */}
-      {reviewTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/60 backdrop-blur-xs">
-          <div className="bg-brand-paper border-4 border-brand-dark p-6 max-w-xl w-full shadow-brutal max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b-2 border-brand-dark mb-4">
-              <div>
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-brand-teal">
-                  Evaluation &amp; Feedback Console
-                </div>
-                <h3 className="font-heading font-black text-lg text-brand-navy">
-                  {reviewTarget.assignment_title}
-                </h3>
-              </div>
-              <button
+      {/* EVALUATION & FEEDBACK BOTTOM SHEET / MODAL */}
+      <MobileBottomSheet
+        isOpen={!!reviewTarget}
+        onClose={() => setReviewTarget(null)}
+        title={reviewTarget?.assignment_title || 'Evaluation & Feedback'}
+        subtitle={
+          reviewTarget
+            ? `Student: ${reviewTarget.student_name} (${reviewTarget.student_poraplan_id})`
+            : undefined
+        }
+        maxWidth="xl"
+        footer={
+          reviewTarget ? (
+            <div className="flex items-center justify-end gap-2 w-full">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setReviewTarget(null)}
-                className="text-brand-muted hover:text-brand-dark p-1"
-                aria-label="Close modal"
               >
-                <X className="w-5 h-5" />
-              </button>
+                Close
+              </Button>
+              <Button
+                type="submit"
+                form="mentor-review-form"
+                variant="primary"
+                size="sm"
+                disabled={isSubmittingReview}
+                className="flex items-center gap-1.5 shadow-brutal"
+              >
+                {isSubmittingReview ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Save Assessment &amp; Feedback</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : undefined
+        }
+      >
+        {reviewTarget && (
+          <div className="space-y-4">
+            {/* Submission Meta */}
+            <div className="bg-brand-paper p-3 border-2 border-brand-dark flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+              <div>
+                <span className="text-brand-muted">Student:</span>{' '}
+                <strong>{reviewTarget.student_name}</strong> ({reviewTarget.student_poraplan_id})
+              </div>
+              <div>
+                <span className="text-brand-muted">Submitted:</span>{' '}
+                <strong>
+                  {reviewTarget.submitted_at
+                    ? new Date(reviewTarget.submitted_at).toLocaleString()
+                    : 'N/A'}
+                </strong>
+              </div>
+              <div>
+                <Badge
+                  variant={
+                    reviewTarget.status === 'reviewed'
+                      ? 'teal'
+                      : reviewTarget.status === 'needs_revision'
+                      ? 'danger'
+                      : 'gold'
+                  }
+                  size="sm"
+                >
+                  STATUS: {reviewTarget.status.toUpperCase()}
+                </Badge>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              {/* Submission Meta */}
-              <div className="bg-brand-paper p-3 border-2 border-brand-dark flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
-                <div>
-                  <span className="text-brand-muted">Student:</span>{' '}
-                  <strong>{reviewTarget.student_name}</strong> ({reviewTarget.student_poraplan_id})
-                </div>
-                <div>
-                  <span className="text-brand-muted">Submitted:</span>{' '}
-                  <strong>
-                    {reviewTarget.submitted_at
-                      ? new Date(reviewTarget.submitted_at).toLocaleString()
-                      : 'N/A'}
-                  </strong>
-                </div>
-                <div>
-                  <Badge
-                    variant={reviewTarget.status === 'reviewed' ? 'teal' : reviewTarget.status === 'needs_revision' ? 'danger' : 'gold'}
-                    size="sm"
-                  >
-                    STATUS: {reviewTarget.status.toUpperCase()}
-                  </Badge>
-                </div>
-              </div>
+            {/* Student Submission Display */}
+            <div>
+              <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                Submitted Work ({reviewTarget.submission_type.toUpperCase()})
+              </label>
 
-              {/* Student Submission Display */}
-              <div>
-                <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
-                  Submitted Work ({reviewTarget.submission_type.toUpperCase()})
-                </label>
+              {reviewTarget.submission_type === 'link' ? (
+                <div className="p-4 bg-brand-paper border-2 border-brand-dark space-y-2">
+                  <div className="flex items-center gap-2 text-brand-teal font-mono text-xs">
+                    <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                    <a
+                      href={reviewTarget.link_url || reviewTarget.content}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-brand-navy break-all"
+                    >
+                      {reviewTarget.link_url || reviewTarget.content}
+                    </a>
+                  </div>
+                  {reviewTarget.content !== reviewTarget.link_url && (
+                    <p className="text-xs text-brand-muted font-sans mt-2">
+                      {reviewTarget.content}
+                    </p>
+                  )}
+                </div>
+              ) : reviewTarget.submission_type === 'file' ? (
+                <div className="p-4 bg-brand-paper border-2 border-brand-dark space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 font-mono text-xs text-brand-navy min-w-0">
+                      <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                      <strong className="truncate">{reviewTarget.file_name || 'Attached File'}</strong>
+                      {reviewTarget.file_size && (
+                        <span className="text-brand-muted flex-shrink-0">
+                          ({reviewTarget.file_size < 1024 * 1024
+                            ? `${Math.round(reviewTarget.file_size / 1024)} KB`
+                            : `${(reviewTarget.file_size / (1024 * 1024)).toFixed(2)} MB`})
+                        </span>
+                      )}
+                    </div>
 
-                {reviewTarget.submission_type === 'link' ? (
-                  <div className="p-4 bg-brand-paper border-2 border-brand-dark space-y-2">
-                    <div className="flex items-center gap-2 text-brand-teal font-mono text-xs">
-                      <ExternalLink className="w-4 h-4 flex-shrink-0" />
-                      <a
-                        href={reviewTarget.link_url || reviewTarget.content}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline hover:text-brand-navy break-all"
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePreviewAttachment(reviewTarget)}
+                        className="flex items-center gap-1 text-xs"
                       >
-                        {reviewTarget.link_url || reviewTarget.content}
-                      </a>
+                        <Eye className="w-3.5 h-3.5" />
+                        Preview
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleDownloadAttachment(reviewTarget)}
+                        className="flex items-center gap-1 text-xs"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Download
+                      </Button>
                     </div>
-                    {reviewTarget.content !== reviewTarget.link_url && (
-                      <p className="text-xs text-brand-muted font-sans mt-2">
-                        {reviewTarget.content}
-                      </p>
-                    )}
                   </div>
-                ) : reviewTarget.submission_type === 'file' ? (
-                  <div className="p-4 bg-brand-paper border-2 border-brand-dark space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 font-mono text-xs text-brand-navy min-w-0">
-                        <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
-                        <strong className="truncate">{reviewTarget.file_name || 'Attached File'}</strong>
-                        {reviewTarget.file_size && (
-                          <span className="text-brand-muted flex-shrink-0">
-                            ({reviewTarget.file_size < 1024 * 1024
-                              ? `${Math.round(reviewTarget.file_size / 1024)} KB`
-                              : `${(reviewTarget.file_size / (1024 * 1024)).toFixed(2)} MB`})
-                          </span>
-                        )}
-                      </div>
 
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePreviewAttachment(reviewTarget)}
-                          className="flex items-center gap-1 text-xs"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          Preview
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleDownloadAttachment(reviewTarget)}
-                          className="flex items-center gap-1 text-xs"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Download
-                        </Button>
-                      </div>
-                    </div>
+                  {reviewTarget.content && (
+                    <p className="text-xs text-brand-dark font-sans whitespace-pre-wrap border-t border-brand-dark/10 pt-2">
+                      {reviewTarget.content}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4 bg-brand-paper border-2 border-brand-dark text-xs sm:text-sm font-sans whitespace-pre-wrap text-brand-dark leading-relaxed max-h-60 overflow-y-auto">
+                  {reviewTarget.content}
+                </div>
+              )}
+            </div>
 
-                    {reviewTarget.content && (
-                      <p className="text-xs text-brand-dark font-sans whitespace-pre-wrap border-t border-brand-dark/10 pt-2">
-                        {reviewTarget.content}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="p-4 bg-brand-paper border-2 border-brand-dark text-xs sm:text-sm font-sans whitespace-pre-wrap text-brand-dark leading-relaxed max-h-60 overflow-y-auto">
-                    {reviewTarget.content}
-                  </div>
-                )}
-              </div>
+            {/* Review Evaluation Form */}
+            <div className="border-t-2 border-brand-dark pt-4">
+              <h4 className="font-heading font-black text-sm text-brand-navy uppercase mb-3 flex items-center gap-1.5">
+                <FileCheck className="w-4 h-4 text-brand-teal" />
+                Assessment &amp; Feedback Form
+              </h4>
 
-              {/* Review Evaluation Form */}
-              <div className="border-t-2 border-brand-dark pt-4">
-                <h4 className="font-heading font-black text-sm text-brand-navy uppercase mb-3 flex items-center gap-1.5">
-                  <FileCheck className="w-4 h-4 text-brand-teal" />
-                  Assessment &amp; Feedback Form
-                </h4>
+              {reviewModalError && (
+                <div className="bg-red-50 border-2 border-red-500 p-2.5 text-red-700 text-xs mb-3 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{reviewModalError}</span>
+                </div>
+              )}
 
-                {reviewModalError && (
-                  <div className="bg-red-50 border-2 border-red-500 p-2.5 text-red-700 text-xs mb-3 flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    <span>{reviewModalError}</span>
-                  </div>
-                )}
+              {reviewModalSuccess && (
+                <div className="bg-teal-50 border-2 border-brand-teal p-2.5 text-brand-dark text-xs mb-3 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                  <span>{reviewModalSuccess}</span>
+                </div>
+              )}
 
-                {reviewModalSuccess && (
-                  <div className="bg-teal-50 border-2 border-brand-teal p-2.5 text-brand-dark text-xs mb-3 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-brand-teal flex-shrink-0" />
-                    <span>{reviewModalSuccess}</span>
-                  </div>
-                )}
+              <form id="mentor-review-form" onSubmit={handleSaveReview} className="space-y-3">
+                <div>
+                  <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                    Mentor Written Feedback *
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={reviewFeedback}
+                    onChange={(e) => setReviewFeedback(e.target.value)}
+                    placeholder="Identify mathematical derivation errors, explain missing intermediate steps, or praise sound reasoning..."
+                    className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    required
+                  />
+                </div>
 
-                <form onSubmit={handleSaveReview} className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
-                      Mentor Written Feedback *
+                      Score / Points (Max {reviewTarget.assignment_total_points || 100})
                     </label>
-                    <textarea
-                      rows={4}
-                      value={reviewFeedback}
-                      onChange={(e) => setReviewFeedback(e.target.value)}
-                      placeholder="Identify mathematical derivation errors, explain missing intermediate steps, or praise sound reasoning..."
-                      className="w-full bg-brand-paper border-2 border-brand-dark p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
-                      required
+                    <input
+                      type="number"
+                      min="0"
+                      max={reviewTarget.assignment_total_points || 1000}
+                      step="0.5"
+                      value={reviewScore}
+                      onChange={(e) => setReviewScore(e.target.value)}
+                      placeholder="e.g. 85"
+                      className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
-                        Score / Points (Max {reviewTarget.assignment_total_points || 100})
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max={reviewTarget.assignment_total_points || 1000}
-                        step="0.5"
-                        value={reviewScore}
-                        onChange={(e) => setReviewScore(e.target.value)}
-                        placeholder="e.g. 85"
-                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
-                        Evaluation Status Decision
-                      </label>
-                      <select
-                        value={reviewStatus}
-                        onChange={(e) => setReviewStatus(e.target.value as SubmissionStatus)}
-                        className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
-                      >
-                        <option value="reviewed">Reviewed &amp; Approved</option>
-                        <option value="needs_revision">Needs Revision (Request Redo)</option>
-                        <option value="under_review">Keep Under Review</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-brand-dark/20">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setReviewTarget(null)}
+                  <div>
+                    <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                      Evaluation Status Decision
+                    </label>
+                    <select
+                      value={reviewStatus}
+                      onChange={(e) => setReviewStatus(e.target.value as SubmissionStatus)}
+                      className="w-full bg-brand-paper border-2 border-brand-dark p-2 text-base sm:text-xs min-h-[44px] sm:min-h-0 font-mono text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal"
                     >
-                      Close
-                    </Button>
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      size="sm"
-                      disabled={isSubmittingReview}
-                      className="flex items-center gap-1.5"
-                    >
-                      {isSubmittingReview ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          Saving Evaluation...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Save Assessment &amp; Feedback
-                        </>
-                      )}
-                    </Button>
+                      <option value="reviewed">Reviewed &amp; Approved</option>
+                      <option value="needs_revision">Needs Revision (Request Redo)</option>
+                      <option value="under_review">Keep Under Review</option>
+                    </select>
                   </div>
-                </form>
-              </div>
+                </div>
+              </form>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </MobileBottomSheet>
 
       {/* Attachment Preview Modal */}
       <AttachmentViewerModal

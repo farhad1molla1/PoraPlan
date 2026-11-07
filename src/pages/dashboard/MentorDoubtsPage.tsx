@@ -13,6 +13,7 @@ import {
   getAcademicFileSignedUrl,
 } from '../../lib/storage';
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
+import { MobileBottomSheet } from '../../components/common/MobileBottomSheet';
 import type { Profile, DoubtStatus } from '../../types/database';
 import { Button } from '../../components/common/Button';
 import {
@@ -618,145 +619,21 @@ export const MentorDoubtsPage: React.FC = () => {
       )}
 
       {/* ===================================================================== */}
-      {/* 5. MENTOR DOUBT DETAIL / REPLY MODAL                                  */}
+      {/* 5. MENTOR DOUBT DETAIL / REPLY BOTTOM SHEET / MODAL                   */}
       {/* ===================================================================== */}
-      {activeDoubt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-navy/60 backdrop-blur-xs">
-          <div className="bg-brand-paper border-2 border-brand-dark shadow-brutal max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto flex flex-col justify-between">
-            <div>
-              {/* Header */}
-              <div className="flex items-start justify-between border-b-2 border-brand-dark pb-3 mb-4">
-                <div>
-                  <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
-                    {activeDoubt.student_id ? (
-                      <Link
-                        to={`/profile/${activeDoubt.student_id}`}
-                        className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-brand-paper text-brand-navy hover:text-brand-teal hover:border-brand-teal transition-colors"
-                      >
-                        Student: {activeDoubt.student_name}{activeDoubt.student_poraplan_id ? ` (${activeDoubt.student_poraplan_id})` : ''}
-                      </Link>
-                    ) : (
-                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-brand-paper text-brand-navy">
-                        Student: {activeDoubt.student_name}{activeDoubt.student_poraplan_id ? ` (${activeDoubt.student_poraplan_id})` : ''}
-                      </span>
-                    )}
-
-                    {activeDoubt.subject_name && (
-                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/30 bg-brand-paper text-brand-navy">
-                        {activeDoubt.subject_name}
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="font-heading font-extrabold text-lg text-brand-navy">
-                    {activeDoubt.title}
-                  </h2>
-                </div>
-
-                <button
-                  onClick={() => setActiveDoubt(null)}
-                  className="text-brand-dark hover:text-brand-teal p-1"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Scholar Question Box */}
-              <div className="p-4 border-2 border-brand-dark bg-brand-paper mb-4">
-                <div className="flex items-center justify-between text-[11px] font-mono text-brand-muted mb-2 border-b border-brand-dark/10 pb-1.5">
-                  <span className="font-bold text-brand-navy">Question from Student:</span>
-                  <span>{new Date(activeDoubt.created_at || '').toLocaleString()}</span>
-                </div>
-                <p className="font-sans text-xs text-brand-navy whitespace-pre-wrap leading-relaxed">
-                  {activeDoubt.question}
-                </p>
-
-                {/* Question attachment if present */}
-                {activeDoubt.attachment_path && (
-                  renderAttachmentCard({
-                    name: activeDoubt.attachment_name || 'attachment',
-                    path: activeDoubt.attachment_path,
-                    size: activeDoubt.attachment_size,
-                  })
-                )}
-
-                {(activeDoubt.plan_title || activeDoubt.task_title || activeDoubt.assignment_title) && (
-                  <div className="mt-3 pt-2 border-t border-brand-dark/10 flex flex-wrap gap-2 text-[10px] font-mono text-brand-muted">
-                    {activeDoubt.plan_title && <span>Study Plan: {activeDoubt.plan_title}</span>}
-                    {activeDoubt.task_title && <span>Task: {activeDoubt.task_title}</span>}
-                    {activeDoubt.assignment_title && <span>Assignment: {activeDoubt.assignment_title}</span>}
-                  </div>
-                )}
-              </div>
-
-              {/* Conversation Thread */}
-              <div className="space-y-3 mb-4">
-                <h4 className="font-mono text-xs font-bold uppercase text-brand-navy flex items-center gap-1.5">
-                  <MessageSquare className="w-3.5 h-3.5 text-brand-teal" />
-                  Dialogue Thread ({activeDoubt.responses?.length || 0})
-                </h4>
-
-                {(!activeDoubt.responses || activeDoubt.responses.length === 0) ? (
-                  <div className="p-4 border border-dashed border-brand-dark/30 bg-brand-light/40 text-center font-mono text-xs text-brand-muted">
-                    No replies sent yet. Provide an explanation or guiding hint below to answer this question.
-                  </div>
-                ) : (
-                  activeDoubt.responses.map((resp) => {
-                    const isMentor = resp.author_role === 'mentor' || resp.author_role === 'admin';
-
-                    return (
-                      <div
-                        key={resp.id}
-                        className={`p-3.5 border-2 border-brand-dark ${
-                          isMentor ? 'bg-brand-teal/10 border-l-4 border-l-brand-teal' : 'bg-brand-paper'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
-                          <div className="flex items-center gap-1.5">
-                            {resp.author_id ? (
-                              <Link
-                                to={`/profile/${resp.author_id}`}
-                                className="font-bold text-brand-navy hover:text-brand-teal transition-colors underline decoration-brand-dark/30 hover:decoration-brand-teal"
-                              >
-                                {resp.author_name}
-                              </Link>
-                            ) : (
-                              <span className="font-bold text-brand-navy">{resp.author_name}</span>
-                            )}
-                            {isMentor ? (
-                              <span className="px-1.5 py-0.2 font-mono text-[9px] uppercase font-bold bg-brand-teal text-white">
-                                Mentor (You)
-                              </span>
-                            ) : (
-                              <span className="px-1.5 py-0.2 font-mono text-[9px] uppercase font-bold bg-brand-navy text-white">
-                                Student
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-brand-muted">
-                            {new Date(resp.created_at || '').toLocaleString()}
-                          </span>
-                        </div>
-                        <p className="font-sans text-xs text-brand-navy whitespace-pre-wrap leading-relaxed">
-                          {resp.message}
-                        </p>
-
-                        {/* Response attachment if present */}
-                        {resp.attachment_path && (
-                          renderAttachmentCard({
-                            name: resp.attachment_name || 'attachment',
-                            path: resp.attachment_path,
-                            size: resp.attachment_size,
-                          })
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
-            {/* Response Form */}
-            <div className="pt-3 border-t-2 border-brand-dark space-y-3">
+      <MobileBottomSheet
+        isOpen={!!activeDoubt}
+        onClose={() => setActiveDoubt(null)}
+        title={activeDoubt?.title || 'Academic Doubt Dialogue'}
+        subtitle={
+          activeDoubt
+            ? `Student: ${activeDoubt.student_name}${activeDoubt.subject_name ? ` • ${activeDoubt.subject_name}` : ''}`
+            : undefined
+        }
+        maxWidth="2xl"
+        footer={
+          activeDoubt ? (
+            <div className="w-full space-y-2">
               {replyError && (
                 <div className="p-2 border border-red-600 bg-red-50 text-red-900 text-xs font-mono">
                   {replyError}
@@ -774,7 +651,7 @@ export const MentorDoubtsPage: React.FC = () => {
 
                 {replyFile && (
                   <div className="p-2 border border-brand-dark bg-brand-paper flex items-center justify-between text-xs font-mono">
-                    <span className="truncate max-w-[300px]">
+                    <span className="truncate max-w-[220px] sm:max-w-[300px]">
                       Attached: <strong>{replyFile.name}</strong> ({formatFileSize(replyFile.size)})
                     </span>
                     <button
@@ -793,11 +670,11 @@ export const MentorDoubtsPage: React.FC = () => {
 
                 <div className="flex gap-2">
                   <textarea
-                    rows={3}
+                    rows={2}
                     placeholder="Provide conceptual clarification, formula proof, step-by-step guidance..."
                     value={replyMessage}
                     onChange={(e) => setReplyMessage(e.target.value)}
-                    className="flex-1 p-2.5 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                    className="flex-1 p-2 sm:p-2.5 border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal resize-none"
                   />
                   <div className="flex flex-col justify-start">
                     <Button
@@ -805,14 +682,14 @@ export const MentorDoubtsPage: React.FC = () => {
                       variant="outline"
                       onClick={() => replyFileInputRef.current?.click()}
                       title="Attach reference file"
-                      className="p-2 flex items-center justify-center"
+                      className="p-2 flex items-center justify-center min-h-[44px] sm:min-h-0"
                     >
                       <Paperclip className="w-4 h-4 text-brand-teal" />
                     </Button>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pt-1">
                   <Button
                     type="button"
                     variant="outline"
@@ -869,9 +746,138 @@ export const MentorDoubtsPage: React.FC = () => {
                 </div>
               </form>
             </div>
+          ) : undefined
+        }
+      >
+        {activeDoubt && (
+          <div>
+            <div className="flex flex-wrap items-center gap-1.5 mb-3">
+              {activeDoubt.student_id ? (
+                <Link
+                  to={`/profile/${activeDoubt.student_id}`}
+                  className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-brand-paper text-brand-navy hover:text-brand-teal hover:border-brand-teal transition-colors"
+                >
+                  Student: {activeDoubt.student_name}{activeDoubt.student_poraplan_id ? ` (${activeDoubt.student_poraplan_id})` : ''}
+                </Link>
+              ) : (
+                <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-brand-paper text-brand-navy">
+                  Student: {activeDoubt.student_name}{activeDoubt.student_poraplan_id ? ` (${activeDoubt.student_poraplan_id})` : ''}
+                </span>
+              )}
+
+              {activeDoubt.subject_name && (
+                <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/30 bg-brand-paper text-brand-navy">
+                  {activeDoubt.subject_name}
+                </span>
+              )}
+
+              <span className={`px-2 py-0.5 font-mono text-[10px] uppercase font-bold border ${
+                activeDoubt.status === 'resolved'
+                  ? 'border-emerald-600 bg-emerald-100 text-emerald-800'
+                  : activeDoubt.status === 'answered'
+                  ? 'border-teal-600 bg-teal-100 text-teal-800'
+                  : 'border-amber-600 bg-amber-100 text-amber-900'
+              }`}>
+                {activeDoubt.status === 'resolved' ? 'Resolved' : activeDoubt.status === 'answered' ? 'Answered' : 'Awaiting Reply'}
+              </span>
+            </div>
+
+            {/* Scholar Question Box */}
+            <div className="p-4 border-2 border-brand-dark bg-brand-paper mb-4">
+              <div className="flex items-center justify-between text-[11px] font-mono text-brand-muted mb-2 border-b border-brand-dark/10 pb-1.5">
+                <span className="font-bold text-brand-navy">Question from Student:</span>
+                <span>{new Date(activeDoubt.created_at || '').toLocaleString()}</span>
+              </div>
+              <p className="font-sans text-xs text-brand-navy whitespace-pre-wrap leading-relaxed">
+                {activeDoubt.question}
+              </p>
+
+              {/* Question attachment if present */}
+              {activeDoubt.attachment_path && (
+                renderAttachmentCard({
+                  name: activeDoubt.attachment_name || 'attachment',
+                  path: activeDoubt.attachment_path,
+                  size: activeDoubt.attachment_size,
+                })
+              )}
+
+              {(activeDoubt.plan_title || activeDoubt.task_title || activeDoubt.assignment_title) && (
+                <div className="mt-3 pt-2 border-t border-brand-dark/10 flex flex-wrap gap-2 text-[10px] font-mono text-brand-muted">
+                  {activeDoubt.plan_title && <span>Study Plan: {activeDoubt.plan_title}</span>}
+                  {activeDoubt.task_title && <span>Task: {activeDoubt.task_title}</span>}
+                  {activeDoubt.assignment_title && <span>Assignment: {activeDoubt.assignment_title}</span>}
+                </div>
+              )}
+            </div>
+
+            {/* Conversation Thread */}
+            <div className="space-y-3 mb-2">
+              <h4 className="font-mono text-xs font-bold uppercase text-brand-navy flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-brand-teal" />
+                Dialogue Thread ({activeDoubt.responses?.length || 0})
+              </h4>
+
+              {(!activeDoubt.responses || activeDoubt.responses.length === 0) ? (
+                <div className="p-4 border border-dashed border-brand-dark/30 bg-brand-light/40 text-center font-mono text-xs text-brand-muted">
+                  No replies sent yet. Provide an explanation or guiding hint below to answer this question.
+                </div>
+              ) : (
+                activeDoubt.responses.map((resp) => {
+                  const isMentor = resp.author_role === 'mentor' || resp.author_role === 'admin';
+
+                  return (
+                    <div
+                      key={resp.id}
+                      className={`p-3.5 border-2 border-brand-dark ${
+                        isMentor ? 'bg-brand-teal/10 border-l-4 border-l-brand-teal' : 'bg-brand-paper'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
+                        <div className="flex items-center gap-1.5">
+                          {resp.author_id ? (
+                            <Link
+                              to={`/profile/${resp.author_id}`}
+                              className="font-bold text-brand-navy hover:text-brand-teal transition-colors underline decoration-brand-dark/30 hover:decoration-brand-teal"
+                            >
+                              {resp.author_name}
+                            </Link>
+                          ) : (
+                            <span className="font-bold text-brand-navy">{resp.author_name}</span>
+                          )}
+                          {isMentor ? (
+                            <span className="px-1.5 py-0.2 font-mono text-[9px] uppercase font-bold bg-brand-teal text-white">
+                              Mentor (You)
+                            </span>
+                          ) : (
+                            <span className="px-1.5 py-0.2 font-mono text-[9px] uppercase font-bold bg-brand-navy text-white">
+                              Student
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-brand-muted">
+                          {new Date(resp.created_at || '').toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="font-sans text-xs text-brand-navy whitespace-pre-wrap leading-relaxed">
+                        {resp.message}
+                      </p>
+
+                      {/* Response attachment if present */}
+                      {resp.attachment_path && (
+                        renderAttachmentCard({
+                          name: resp.attachment_name || 'attachment',
+                          path: resp.attachment_path,
+                          size: resp.attachment_size,
+                        })
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </MobileBottomSheet>
 
       {/* Attachment Viewer Modal */}
       <AttachmentViewerModal

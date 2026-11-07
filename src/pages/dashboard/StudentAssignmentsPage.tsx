@@ -17,6 +17,7 @@ import type { Profile, SubmissionType } from '../../types/database';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
+import { MobileBottomSheet } from '../../components/common/MobileBottomSheet';
 import {
   FileText,
   Calendar,
@@ -65,6 +66,7 @@ export const StudentAssignmentsPage: React.FC = () => {
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mobileFileInputRef = useRef<HTMLInputElement>(null);
 
   // Attachment preview viewer modal state
   const [viewerModal, setViewerModal] = useState<{
@@ -882,9 +884,9 @@ export const StudentAssignmentsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Inline Submission Form Accordion */}
+                {/* Inline Submission Form Accordion (Desktop) */}
                 {isSelected && !isLocked && (
-                  <div className="border-t-3 border-brand-dark bg-brand-bg p-5 sm:p-6">
+                  <div className="hidden sm:block border-t-3 border-brand-dark bg-brand-bg p-5 sm:p-6">
                     <div className="max-w-2xl mx-auto">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="font-heading font-black text-base text-brand-navy flex items-center gap-2">
@@ -1248,6 +1250,357 @@ export const StudentAssignmentsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile Submission Bottom Sheet */}
+      {(() => {
+        const activeAssignment = assignments.find((a) => a.id === activeAssignmentId);
+        const isClosed = activeAssignment ? (activeAssignment.status === 'closed' || activeAssignment.status === 'archived') : false;
+        const subStatus = activeAssignment?.submission?.status;
+        const isLocked = isClosed || (subStatus === 'under_review' || subStatus === 'reviewed');
+        const isMobileOpen = !!activeAssignment && !isLocked;
+        const mobileHasSubmission = !!activeAssignment?.submission;
+
+        return (
+          <div className="sm:hidden">
+            <MobileBottomSheet
+              isOpen={isMobileOpen}
+              onClose={() => {
+                setActiveAssignmentId(null);
+                setSelectedFile(null);
+              }}
+              title={mobileHasSubmission ? 'Update Your Submission' : 'Submit Assignment Work'}
+              subtitle={activeAssignment?.title}
+              maxWidth="xl"
+              footer={
+                <div className="flex items-center justify-end gap-2 w-full">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setActiveAssignmentId(null);
+                      setSelectedFile(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    form="mobile-assignment-submission-form"
+                    variant="primary"
+                    size="sm"
+                    disabled={submitting}
+                    className="flex items-center gap-1.5 shadow-brutal"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        {submissionType === 'file' && selectedFile
+                          ? 'Uploading File & Saving...'
+                          : 'Saving Submission...'}
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-3.5 h-3.5" />
+                        {mobileHasSubmission ? 'Update Work' : 'Submit for Review'}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              }
+            >
+              {/* Submission Type Switcher */}
+              <div className="flex flex-wrap items-center gap-2 mb-4 border-b-2 border-brand-dark pb-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmissionType('text');
+                    setFormError(null);
+                  }}
+                  className={`font-mono text-xs font-bold uppercase px-3.5 py-2.5 min-h-[44px] border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
+                    submissionType === 'text'
+                      ? 'bg-brand-navy text-white shadow-brutal-xs'
+                      : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
+                  }`}
+                >
+                  <FileText className="w-4 h-4" />
+                  Written Text
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmissionType('link');
+                    setFormError(null);
+                  }}
+                  className={`font-mono text-xs font-bold uppercase px-3.5 py-2.5 min-h-[44px] border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
+                    submissionType === 'link'
+                      ? 'bg-brand-navy text-white shadow-brutal-xs'
+                      : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
+                  }`}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Cloud Link
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmissionType('file');
+                    setFormError(null);
+                  }}
+                  className={`font-mono text-xs font-bold uppercase px-3.5 py-2.5 min-h-[44px] border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
+                    submissionType === 'file'
+                      ? 'bg-brand-navy text-white shadow-brutal-xs'
+                      : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
+                  }`}
+                >
+                  <Paperclip className="w-4 h-4" />
+                  Document / Scan
+                </button>
+              </div>
+
+              {formError && (
+                <div className="bg-red-50 border-2 border-red-500 p-3 text-red-700 text-xs mb-3 flex items-center gap-2 shadow-brutal-xs">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
+              {formSuccess && (
+                <div className="bg-teal-50 border-2 border-brand-teal p-3 text-brand-dark text-xs mb-3 flex items-center gap-2 shadow-brutal-xs">
+                  <CheckCircle2 className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                  <span>{formSuccess}</span>
+                </div>
+              )}
+
+              <form id="mobile-assignment-submission-form" onSubmit={handleSubmitWork} className="space-y-4">
+                {submissionType === 'text' && (
+                  <div>
+                    <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                      Solution Steps &amp; Theoretical Reasoning *
+                    </label>
+                    <textarea
+                      rows={5}
+                      value={textContent}
+                      onChange={(e) => setTextContent(e.target.value)}
+                      placeholder="Write out your mathematical derivation, proof steps, or chapter review answers here..."
+                      className="w-full bg-brand-paper border-2 border-brand-dark p-3 text-base sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      required
+                    />
+                    <p className="text-[11px] font-mono text-brand-muted mt-1">
+                      Be explicit with formulas, coordinate choices, and intermediate steps.
+                    </p>
+                  </div>
+                )}
+
+                {submissionType === 'link' && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                        External Cloud Document URL *
+                      </label>
+                      <input
+                        type="url"
+                        value={linkUrl}
+                        onChange={(e) => setLinkUrl(e.target.value)}
+                        placeholder="https://drive.google.com/... or https://github.com/..."
+                        className="w-full bg-brand-paper border-2 border-brand-dark px-3 py-2.5 sm:py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 text-brand-dark font-mono focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        required
+                      />
+                      <p className="text-[11px] font-mono text-brand-muted mt-1">
+                        Ensure your link permissions allow viewing by your mentor.
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                        Notes for Mentor (Optional)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={textContent}
+                        onChange={(e) => setTextContent(e.target.value)}
+                        placeholder="Any specific questions or areas where you encountered difficulty..."
+                        className="w-full bg-brand-paper border-2 border-brand-dark p-3 sm:p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {submissionType === 'file' && (
+                  <div className="space-y-4">
+                    {/* File Upload Box */}
+                    <div className="bg-brand-paper border-2 border-brand-dark p-4 space-y-3 shadow-brutal-xs">
+                      <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
+                        Attach Solution Document (PDF, PNG, JPG, WebP, DOCX — Max 10MB) *
+                      </label>
+
+                      {/* Case 1: A new file is currently selected */}
+                      {selectedFile ? (
+                        <div className="space-y-3">
+                          <div className="p-3 bg-teal-50 border-2 border-brand-teal flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                              <div className="min-w-0">
+                                <span className="font-mono text-xs font-bold text-brand-navy truncate block">
+                                  {selectedFile.name}
+                                </span>
+                                <span className="font-mono text-[11px] text-brand-muted">
+                                  {selectedFile.size < 1024 * 1024
+                                    ? `${Math.round(selectedFile.size / 1024)} KB`
+                                    : `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB`}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              {['png', 'jpg', 'jpeg', 'webp', 'pdf'].includes(
+                                selectedFile.name.split('.').pop()?.toLowerCase() || ''
+                              ) && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={handlePreviewSelectedFile}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  Preview
+                                </Button>
+                              )}
+
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleRemoveSelectedFile}
+                                className="text-red-600 hover:text-red-700 flex items-center gap-1"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+
+                          {selectedFileObjectUrl &&
+                            ['png', 'jpg', 'jpeg', 'webp'].includes(
+                              selectedFile.name.split('.').pop()?.toLowerCase() || ''
+                            ) && (
+                              <div className="p-2 bg-brand-bg border border-brand-dark flex items-center gap-3">
+                                <img
+                                  src={selectedFileObjectUrl}
+                                  alt="Preview thumbnail"
+                                  className="w-16 h-16 object-cover border border-brand-dark shadow-brutal-xs flex-shrink-0"
+                                />
+                                <div className="text-xs font-mono text-brand-muted">
+                                  <span className="font-bold text-brand-navy block flex items-center gap-1">
+                                    <ImageIcon className="w-3.5 h-3.5 text-brand-teal" />
+                                    Image preview ready
+                                  </span>
+                                  Click "Preview" above to inspect in full size before submitting.
+                                </div>
+                              </div>
+                            )}
+                        </div>
+                      ) : existingFilePath || fileName ? (
+                        /* Case 2: Editing existing submission without choosing new file yet */
+                        <div className="space-y-2">
+                          <div className="p-3 bg-brand-paper border-2 border-brand-dark flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Paperclip className="w-4 h-4 text-brand-navy flex-shrink-0" />
+                              <div className="min-w-0">
+                                <span className="font-mono text-xs font-bold text-brand-navy truncate block">
+                                  Currently Attached: {fileName}
+                                </span>
+                                {fileSize && (
+                                  <span className="font-mono text-[11px] text-brand-muted">
+                                    {fileSize < 1024 * 1024
+                                      ? `${Math.round(fileSize / 1024)} KB`
+                                      : `${(fileSize / (1024 * 1024)).toFixed(2)} MB`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              {existingFilePath && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    handlePreviewExistingAttachment({
+                                      file_name: fileName,
+                                      file_size: fileSize,
+                                      file_path: existingFilePath,
+                                    })
+                                  }
+                                  className="flex items-center gap-1"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  Preview
+                                </Button>
+                              )}
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => mobileFileInputRef.current?.click()}
+                              >
+                                Replace File
+                              </Button>
+                            </div>
+                          </div>
+                          <p className="text-[11px] font-mono text-brand-muted">
+                            Your previously submitted file is retained unless you choose a new file to replace it.
+                          </p>
+                        </div>
+                      ) : (
+                        /* Case 3: Initial file selection */
+                        <div className="space-y-2">
+                          <input
+                            ref={mobileFileInputRef}
+                            type="file"
+                            onChange={handleFileSelect}
+                            accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+                            className="w-full bg-brand-paper border-2 border-brand-dark px-3 py-2 text-base sm:text-xs min-h-[44px] font-mono focus:outline-none"
+                            required={!existingFilePath && !fileName}
+                          />
+                          <p className="text-[11px] font-mono text-brand-muted">
+                            Supported formats: PDF documents, PNG/JPG/WebP scan images, and DOCX files up to 10MB.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Hidden file input for Replace action */}
+                      <input
+                        ref={mobileFileInputRef}
+                        type="file"
+                        onChange={handleFileSelect}
+                        accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+                        className="hidden"
+                      />
+                    </div>
+
+                    {/* Solution Notes */}
+                    <div>
+                      <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                        Accompanying Solution Notes *
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={textContent}
+                        onChange={(e) => setTextContent(e.target.value)}
+                        placeholder="Summary of attached exercise solutions, questions, or derivation notes..."
+                        className="w-full bg-brand-paper border-2 border-brand-dark p-3 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+              </form>
+            </MobileBottomSheet>
+          </div>
+        );
+      })()}
 
       {/* Attachment Preview Viewer Modal */}
       <AttachmentViewerModal
