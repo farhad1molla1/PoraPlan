@@ -8,6 +8,8 @@
   --brand-teal: 11 167 180;
   --brand-gold: 245 166 35;
   --brand-bg: 246 250 251;
+  --brand-header: 246 250 251;
+  --brand-sidebar: 255 255 255;
   --brand-dark: 23 43 58;
   --brand-muted: 74 98 119;
   --brand-paper: 255 255 255;
@@ -15,7 +17,7 @@
   --brand-gold-light: 254 247 236;
   --brand-teal-light: 237 249 250;
   --brand-navy-light: 237 243 247;
-  --brand-border: #172B3A;
+  --brand-border: 23 43 58;
   --brand-shadow: #172B3A;
   --brand-heading: rgb(8 43 76);
   --pattern-navy-fade: rgba(8, 43, 76, 0.045);
@@ -24,24 +26,26 @@
 }
 
 .dark {
-  /* Premium Academic Dark Theme tokens */
-  --brand-navy: 240 244 249;
-  --brand-teal: 32 184 181;
-  --brand-gold: 245 184 75;
-  --brand-bg: 11 18 32;
-  --brand-dark: 232 238 246;
-  --brand-muted: 165 180 199;
-  --brand-paper: 23 36 56;
-  --brand-paper-tint: 30 45 68;
-  --brand-gold-light: 61 44 20;
-  --brand-teal-light: 19 51 66;
-  --brand-navy-light: 30 45 68;
-  --brand-border: #29384D;
-  --brand-shadow: #05080E;
-  --brand-heading: rgb(240 244 249);
-  --pattern-navy-fade: rgba(232, 238, 246, 0.045);
-  --pattern-dots-fade: rgba(232, 238, 246, 0.12);
-  --pattern-rule-fade: rgba(232, 238, 246, 0.08);
+  /* Premium Midnight Dark Theme tokens */
+  --brand-navy: 232 237 244;
+  --brand-teal: 69 200 192;
+  --brand-gold: 232 182 92;
+  --brand-bg: 5 7 10;
+  --brand-header: 11 17 26;
+  --brand-sidebar: 11 17 26;
+  --brand-dark: 232 237 244;
+  --brand-muted: 137 151 168;
+  --brand-paper: 16 25 37;
+  --brand-paper-tint: 22 34 49;
+  --brand-gold-light: 48 39 24;
+  --brand-teal-light: 16 43 48;
+  --brand-navy-light: 22 34 49;
+  --brand-border: 38 52 69;
+  --brand-shadow: #020305;
+  --brand-heading: rgb(232 237 244);
+  --pattern-navy-fade: rgba(232, 237, 244, 0.015);
+  --pattern-dots-fade: rgba(232, 237, 244, 0.03);
+  --pattern-rule-fade: rgba(232, 237, 244, 0.02);
 }
 
 @layer base {

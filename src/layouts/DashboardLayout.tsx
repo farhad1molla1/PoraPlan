@@ -203,7 +203,7 @@ export const DashboardLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-brand-bg text-brand-dark flex flex-col font-sans">
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-30 bg-brand-bg border-b-2 border-brand-dark px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shadow-sm print:hidden">
+      <header className="sticky top-0 z-30 bg-brand-header border-b-2 border-brand-dark px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shadow-sm print:hidden">
         {/* Brand identity & Role Indicator */}
         <div className="flex items-center gap-2.5 sm:gap-3">
           <Link
@@ -293,7 +293,7 @@ export const DashboardLayout: React.FC = () => {
               <div
                 role="menu"
                 aria-orientation="vertical"
-                className="absolute right-0 mt-2 w-64 sm:w-72 bg-brand-paper border-2 border-brand-dark shadow-brutal-md py-2 z-50 animate-in fade-in zoom-in-95 duration-100"
+                className="absolute right-0 mt-2 w-64 sm:w-72 bg-brand-paper dark:bg-brand-paper-tint border-2 border-brand-dark shadow-brutal-md py-2 z-50 animate-in fade-in zoom-in-95 duration-100"
               >
                 {/* Account Details Header */}
                 <div className="px-3.5 py-2 border-b-2 border-brand-dark/15 mb-1.5">
@@ -468,7 +468,7 @@ export const DashboardLayout: React.FC = () => {
       {/* Main Workspace Body with Responsive Shell */}
       <div className="flex-1 flex w-full">
         {/* Desktop Sidebar (md: 768px+) */}
-        <aside className="hidden md:flex flex-col w-60 lg:w-64 border-r-2 border-brand-dark bg-brand-paper shrink-0 justify-between print:hidden">
+        <aside className="hidden md:flex flex-col w-60 lg:w-64 border-r-2 border-brand-dark bg-brand-sidebar shrink-0 justify-between print:hidden">
           <div className="p-4 space-y-4">
             <div className="border-b-2 border-brand-dark/20 pb-3">
               <span className="font-mono text-[10px] uppercase font-bold text-brand-muted tracking-wider block">
@@ -545,7 +545,7 @@ export const DashboardLayout: React.FC = () => {
 
       {/* Mobile Bottom Navigation Bar (< 768px, optimized for 360px-430px) */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-paper border-t-2 border-brand-dark h-14 flex items-stretch justify-around shadow-brutal-xs print:hidden"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-header border-t-2 border-brand-dark h-14 flex items-stretch justify-around shadow-brutal-xs print:hidden"
         aria-label="Mobile Bottom Navigation"
       >
         {mobileNavItems.map((item) => {
@@ -599,7 +599,7 @@ export const DashboardLayout: React.FC = () => {
           aria-modal="true"
           aria-labelledby="profile-modal-title"
         >
-          <div className="w-full max-w-md bg-brand-paper border-3 border-brand-dark shadow-brutal-lg p-5 sm:p-6 space-y-4">
+          <div className="w-full max-w-md bg-brand-paper dark:bg-brand-paper-tint border-3 border-brand-dark shadow-brutal-lg p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-brand-gold stroke-[2.5]" />

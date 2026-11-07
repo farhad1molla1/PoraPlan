@@ -223,9 +223,11 @@ console.log('================================================================\n'
   assert(css.includes('--brand-navy: 8 43 76;'), 'Light theme --brand-navy is exactly 8 43 76 (#082B4C)');
   assert(css.includes('--brand-bg: 246 250 251;'), 'Light theme --brand-bg is exactly 246 250 251 (#F6FAFB)');
   assert(css.includes('--brand-dark: 23 43 58;'), 'Light theme --brand-dark is exactly 23 43 58 (#172B3A)');
-  assert(css.includes('--brand-bg: 11 18 32;'), 'Dark theme --brand-bg is 11 18 32 (#0B1220)');
-  assert(css.includes('--brand-paper: 23 36 56;'), 'Dark theme --brand-paper is 23 36 56 (#172438)');
-  assert(css.includes('--brand-border: #29384D;'), 'Dark theme --brand-border is #29384D');
+  assert(css.includes('--brand-bg: 5 7 10;'), 'Midnight Dark theme --brand-bg is 5 7 10 (#05070A)');
+  assert(css.includes('--brand-paper: 16 25 37;'), 'Midnight Dark theme --brand-paper is 16 25 37 (#101925)');
+  assert(css.includes('--brand-border: 38 52 69;'), 'Midnight Dark theme --brand-border is 38 52 69 (#263445)');
+  assert(css.includes('--brand-teal: 69 200 192;'), 'Midnight Dark theme --brand-teal is 69 200 192 (#45C8C0)');
+  assert(css.includes('--brand-gold: 232 182 92;'), 'Midnight Dark theme --brand-gold is 232 182 92 (#E8B65C)');
 }
 
 // 9. Anti-flash inline script in index.html

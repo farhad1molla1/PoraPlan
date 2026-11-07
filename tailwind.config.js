@@ -13,6 +13,8 @@ export default {
           teal: 'rgb(var(--brand-teal) / <alpha-value>)',
           gold: 'rgb(var(--brand-gold) / <alpha-value>)',
           bg: 'rgb(var(--brand-bg) / <alpha-value>)',
+          header: 'rgb(var(--brand-header) / <alpha-value>)',
+          sidebar: 'rgb(var(--brand-sidebar) / <alpha-value>)',
           dark: 'rgb(var(--brand-dark) / <alpha-value>)',
           muted: 'rgb(var(--brand-muted) / <alpha-value>)',
           paper: 'rgb(var(--brand-paper) / <alpha-value>)',
@@ -23,7 +25,7 @@ export default {
         },
       },
       borderColor: {
-        'brand-dark': 'rgb(var(--brand-dark) / <alpha-value>)',
+        'brand-dark': 'rgb(var(--brand-border) / <alpha-value>)',
       },
       boxShadow: {
         'brutal-xs': '2px 2px 0px 0px var(--brand-shadow)',
