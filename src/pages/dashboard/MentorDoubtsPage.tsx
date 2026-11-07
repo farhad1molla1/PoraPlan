@@ -390,34 +390,34 @@ export const MentorDoubtsPage: React.FC = () => {
       </div>
 
       {/* 2. Metrics Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
-          <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">Total Questions</span>
-          <span className="text-2xl font-heading font-extrabold text-brand-navy mt-1">{totalCount}</span>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+        <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
+          <span className="font-mono text-[11px] uppercase font-bold text-brand-muted">Total Questions</span>
+          <span className="text-xl sm:text-2xl font-heading font-extrabold text-brand-navy mt-1">{totalCount}</span>
         </div>
 
-        <div className="p-3 border-2 border-brand-dark bg-brand-gold/15 shadow-brutal flex flex-col justify-between">
+        <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-gold/15 shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase font-bold text-amber-800">Awaiting Reply</span>
+            <span className="font-mono text-[11px] uppercase font-bold text-amber-800">Awaiting Reply</span>
             <Clock className="w-3.5 h-3.5 text-amber-700" />
           </div>
-          <span className="text-2xl font-heading font-extrabold text-amber-900 mt-1">{awaitingCount}</span>
+          <span className="text-xl sm:text-2xl font-heading font-extrabold text-amber-900 mt-1">{awaitingCount}</span>
         </div>
 
-        <div className="p-3 border-2 border-brand-dark bg-brand-teal/15 shadow-brutal flex flex-col justify-between">
+        <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-teal/15 shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase font-bold text-teal-800">Answered</span>
+            <span className="font-mono text-[11px] uppercase font-bold text-teal-800">Answered</span>
             <MessageSquare className="w-3.5 h-3.5 text-brand-teal" />
           </div>
-          <span className="text-2xl font-heading font-extrabold text-teal-900 mt-1">{answeredCount}</span>
+          <span className="text-xl sm:text-2xl font-heading font-extrabold text-teal-900 mt-1">{answeredCount}</span>
         </div>
 
-        <div className="p-3 border-2 border-brand-dark bg-emerald-50 shadow-brutal flex flex-col justify-between">
+        <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-emerald-50 shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase font-bold text-emerald-800">Resolved</span>
+            <span className="font-mono text-[11px] uppercase font-bold text-emerald-800">Resolved</span>
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
           </div>
-          <span className="text-2xl font-heading font-extrabold text-emerald-900 mt-1">{resolvedCount}</span>
+          <span className="text-xl sm:text-2xl font-heading font-extrabold text-emerald-900 mt-1">{resolvedCount}</span>
         </div>
       </div>
 
@@ -435,7 +435,7 @@ export const MentorDoubtsPage: React.FC = () => {
       )}
 
       {/* 3. Filter Bar */}
-      <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row items-stretch md:items-center gap-3">
+      <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row items-stretch md:items-center gap-3">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
           <input
@@ -450,7 +450,7 @@ export const MentorDoubtsPage: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2">
           {/* Student Filter */}
           <div className="flex items-center gap-1.5 border-2 border-brand-dark bg-brand-paper px-2.5 py-1.5 sm:py-1 min-h-[44px] sm:min-h-0 text-xs shadow-brutal-xs">
-            <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">Student:</span>
+            <span className="font-mono text-[11px] uppercase font-bold text-brand-muted">Student:</span>
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
@@ -468,7 +468,7 @@ export const MentorDoubtsPage: React.FC = () => {
 
           {/* Status Filter */}
           <div className="flex items-center gap-1.5 border-2 border-brand-dark bg-brand-paper px-2.5 py-1.5 sm:py-1 min-h-[44px] sm:min-h-0 text-xs shadow-brutal-xs">
-            <span className="font-mono text-[10px] uppercase font-bold text-brand-muted">Status:</span>
+            <span className="font-mono text-[11px] uppercase font-bold text-brand-muted">Status:</span>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value as any)}
@@ -524,7 +524,7 @@ export const MentorDoubtsPage: React.FC = () => {
               <div
                 key={doubt.id}
                 onClick={() => setActiveDoubt(doubt)}
-                className={`p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform cursor-pointer flex flex-col justify-between group ${
+                className={`p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform cursor-pointer flex flex-col justify-between group ${
                   doubt.status === 'open' ? 'border-l-4 border-l-brand-gold bg-amber-50/15' : ''
                 }`}
               >
@@ -533,24 +533,24 @@ export const MentorDoubtsPage: React.FC = () => {
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                     <div className="flex flex-wrap items-center gap-1.5">
                       {/* Scholar Badge */}
-                      <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/40 bg-brand-paper text-brand-navy flex items-center gap-1">
+                      <span className="px-1.5 sm:px-2 py-0.5 font-mono text-[11px] uppercase font-bold border border-brand-dark/40 bg-brand-paper text-brand-navy flex items-center gap-1">
                         <User className="w-3 h-3 text-brand-teal" />
                         {doubt.student_name}{doubt.student_poraplan_id ? ` (${doubt.student_poraplan_id})` : ''}
                       </span>
 
                       {/* Status Badge */}
                       {isResolved ? (
-                        <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-emerald-600 bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                        <span className="px-1.5 sm:px-2 py-0.5 font-mono text-[11px] uppercase font-bold border border-emerald-600 bg-emerald-100 text-emerald-800 flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3" />
                           Resolved
                         </span>
                       ) : isAnswered ? (
-                        <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-teal-600 bg-teal-100 text-teal-800 flex items-center gap-1">
+                        <span className="px-1.5 sm:px-2 py-0.5 font-mono text-[11px] uppercase font-bold border border-teal-600 bg-teal-100 text-teal-800 flex items-center gap-1">
                           <MessageSquare className="w-3 h-3" />
                           Answered
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-amber-600 bg-amber-100 text-amber-900 flex items-center gap-1">
+                        <span className="px-1.5 sm:px-2 py-0.5 font-mono text-[11px] uppercase font-bold border border-amber-600 bg-amber-100 text-amber-900 flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           Needs Response
                         </span>
@@ -558,18 +558,18 @@ export const MentorDoubtsPage: React.FC = () => {
 
                       {/* Priority */}
                       {doubt.priority === 'urgent' && (
-                        <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-red-600 bg-red-100 text-red-800">
+                        <span className="px-1.5 sm:px-2 py-0.5 font-mono text-[11px] uppercase font-bold border border-red-600 bg-red-100 text-red-800">
                           Urgent
                         </span>
                       )}
                       {doubt.priority === 'high' && (
-                        <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-amber-600 bg-amber-100 text-amber-800">
+                        <span className="px-1.5 sm:px-2 py-0.5 font-mono text-[11px] uppercase font-bold border border-amber-600 bg-amber-100 text-amber-800">
                           High
                         </span>
                       )}
 
                       {doubt.subject_name && (
-                        <span className="px-2 py-0.5 font-mono text-[10px] uppercase font-bold border border-brand-dark/20 bg-brand-light/70 text-brand-navy">
+                        <span className="px-1.5 sm:px-2 py-0.5 font-mono text-[11px] uppercase font-bold border border-brand-dark/20 bg-brand-light/70 text-brand-navy">
                           {doubt.subject_name}
                         </span>
                       )}

@@ -311,11 +311,11 @@ export const ProfilePage: React.FC = () => {
       )}
 
       {/* Main Dossier Card (Identity & Core Information) */}
-      <div className="p-5 sm:p-7 border-3 border-brand-dark bg-brand-paper shadow-brutal space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 border-b-2 border-brand-dark pb-6">
+      <div className="p-4 sm:p-7 border-2 sm:border-3 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 border-b-2 border-brand-dark pb-4 sm:pb-6">
           {/* Avatar with Upload Control */}
           <div className="relative group shrink-0">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 border-3 border-brand-dark bg-brand-navy text-white flex items-center justify-center font-heading font-extrabold text-3xl shadow-brutal-sm overflow-hidden">
+            <div className="w-20 h-20 sm:w-28 sm:h-28 border-2 sm:border-3 border-brand-dark bg-brand-navy text-white flex items-center justify-center font-heading font-extrabold text-2xl sm:text-3xl shadow-brutal-xs sm:shadow-brutal-sm overflow-hidden">
               {profile?.avatar_url ? (
                 <img
                   src={profile.avatar_url}
@@ -345,7 +345,7 @@ export const ProfilePage: React.FC = () => {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
-              className="absolute -bottom-2 -right-2 p-2 bg-brand-gold text-brand-dark border-2 border-brand-dark shadow-brutal-xs hover:bg-[#e89a1c] transition-all cursor-pointer disabled:opacity-50"
+              className="absolute -bottom-2 -right-2 p-1.5 sm:p-2 bg-brand-gold text-brand-dark border-2 border-brand-dark shadow-brutal-xs hover:bg-[#e89a1c] transition-all cursor-pointer disabled:opacity-50"
               title="Change profile photo"
               aria-label="Change profile photo"
             >
@@ -359,14 +359,14 @@ export const ProfilePage: React.FC = () => {
 
           {/* Identity Meta */}
           <div className="flex-1 space-y-2 min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <Badge variant={roleBadgeVariant} size="sm">
                 {roleLabel}
               </Badge>
               <Badge variant="paper" size="sm" className="font-mono">
                 ID: {poraplanId || profile?.poraplan_id || 'PENDING'}
               </Badge>
-              <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase font-bold text-brand-teal px-2 py-0.5 border-2 border-brand-dark bg-brand-paper-tint shadow-brutal-xs">
+              <span className="inline-flex items-center gap-1 font-mono text-[11px] uppercase font-bold text-brand-teal px-1.5 sm:px-2 py-0.5 border-2 border-brand-dark bg-brand-paper-tint shadow-brutal-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
                 {profile?.status === 'not_activated' ? 'Activating' : 'Active Member'}
               </span>

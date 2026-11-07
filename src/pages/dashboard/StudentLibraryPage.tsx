@@ -734,7 +734,7 @@ export const StudentLibraryPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 1. HEADER SECTION                                                         */}
       {/* ========================================================================= */}
-      <section className="p-6 sm:p-8 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-4">
+      <section className="p-4 sm:p-8 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-3.5 sm:space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -777,7 +777,7 @@ export const StudentLibraryPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabChange('resources')}
-            className={`px-4 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-2 ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-2 ${
               activeTab === 'resources'
                 ? 'bg-brand-teal text-white shadow-brutal-sm -translate-y-0.5'
                 : 'bg-brand-bg text-brand-dark hover:bg-brand-paper-tint'
@@ -786,7 +786,7 @@ export const StudentLibraryPage: React.FC = () => {
             <BookOpen className="w-4 h-4" />
             <span>Study Resources</span>
             <span
-              className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
+              className={`ml-1 text-[11px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
                 activeTab === 'resources' ? 'bg-brand-paper text-brand-dark' : 'bg-brand-paper text-brand-muted'
               }`}
             >
@@ -803,7 +803,7 @@ export const StudentLibraryPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabChange('tasks')}
-            className={`px-4 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-2 ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-2 ${
               activeTab === 'tasks'
                 ? 'bg-brand-coral text-white shadow-brutal-sm -translate-y-0.5'
                 : 'bg-brand-bg text-brand-dark hover:bg-brand-paper-tint'
@@ -812,7 +812,7 @@ export const StudentLibraryPage: React.FC = () => {
             <ListTodo className="w-4 h-4" />
             <span>Tasks & Study History</span>
             <span
-              className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
+              className={`ml-1 text-[11px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
                 activeTab === 'tasks' ? 'bg-brand-paper text-brand-dark' : 'bg-brand-paper text-brand-muted'
               }`}
             >
@@ -829,7 +829,7 @@ export const StudentLibraryPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabChange('assignments')}
-            className={`px-4 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-2 ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-2 ${
               activeTab === 'assignments'
                 ? 'bg-brand-gold text-brand-dark shadow-brutal-sm -translate-y-0.5'
                 : 'bg-brand-bg text-brand-dark hover:bg-brand-paper-tint'
@@ -838,7 +838,7 @@ export const StudentLibraryPage: React.FC = () => {
             <Layers className="w-4 h-4" />
             <span>Assignments & Submissions</span>
             <span
-              className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
+              className={`ml-1 text-[11px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
                 activeTab === 'assignments' ? 'bg-brand-navy text-white' : 'bg-brand-paper text-brand-muted'
               }`}
             >
@@ -855,7 +855,7 @@ export const StudentLibraryPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabChange('evaluations')}
-            className={`px-4 py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-2 ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 border-2 border-brand-dark font-mono text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-2 ${
               activeTab === 'evaluations'
                 ? 'bg-brand-navy text-white shadow-brutal-sm -translate-y-0.5'
                 : 'bg-brand-bg text-brand-dark hover:bg-brand-paper-tint'
@@ -865,7 +865,7 @@ export const StudentLibraryPage: React.FC = () => {
             <Calendar className="w-4 h-4" />
             <span>Evaluations</span>
             <span
-              className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
+              className={`ml-1 text-[11px] px-1.5 py-0.2 rounded-full border border-brand-dark ${
                 activeTab === 'evaluations' ? 'bg-brand-gold text-brand-dark font-bold' : 'bg-brand-paper text-brand-muted'
               }`}
             >
@@ -887,7 +887,7 @@ export const StudentLibraryPage: React.FC = () => {
       {activeTab === 'resources' && (
         <div className="space-y-6 animate-fadeIn">
           {/* Filter Bar */}
-          <section className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-4">
+          <section className="p-3 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-3 sm:space-y-4">
             <div className="flex flex-col md:flex-row gap-3">
               {/* Search */}
               <div className="relative flex-1">
@@ -958,10 +958,10 @@ export const StudentLibraryPage: React.FC = () => {
               </Button>
             </div>
           ) : filteredResources.length === 0 ? (
-            <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center space-y-4">
-              <BookOpen className="w-12 h-12 text-brand-muted mx-auto stroke-1" />
+            <div className="p-6 sm:p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal text-center space-y-4">
+              <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-brand-muted mx-auto stroke-1" />
               <div className="space-y-1">
-                <h3 className="font-heading font-extrabold text-lg text-brand-navy">
+                <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy">
                   No study resources found
                 </h3>
                 <p className="font-sans text-xs sm:text-sm text-brand-muted max-w-md mx-auto">
@@ -985,13 +985,13 @@ export const StudentLibraryPage: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
               {filteredResources.map((res) => (
                 <div
                   key={res.id}
-                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal hover:shadow-brutal-md transition-shadow flex flex-col justify-between"
+                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal hover:shadow-brutal-md transition-shadow flex flex-col justify-between"
                 >
-                  <div className="p-5 space-y-3">
+                  <div className="p-3.5 sm:p-5 space-y-2.5 sm:space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <Badge
@@ -1015,18 +1015,18 @@ export const StudentLibraryPage: React.FC = () => {
                     </div>
 
                     <div>
-                      <h3 className="font-heading font-bold text-base text-brand-navy line-clamp-2">
+                      <h3 className="font-heading font-bold text-sm sm:text-base text-brand-navy line-clamp-2">
                         {res.title}
                       </h3>
                       {res.description && (
-                        <p className="mt-1 font-sans text-xs text-brand-muted line-clamp-3">
+                        <p className="mt-1 font-sans text-xs text-brand-muted line-clamp-3 leading-relaxed">
                           {res.description}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  <div className="p-4 border-t-2 border-brand-dark bg-brand-bg flex items-center justify-between gap-2">
+                  <div className="p-3 sm:p-4 border-t-2 border-brand-dark bg-brand-bg flex items-center justify-between gap-2">
                     {res.resource_type === 'note' ? (
                       <Button
                         variant="outline"

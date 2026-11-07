@@ -159,7 +159,7 @@ export const AdminDashboardPage: React.FC = () => {
         {/* Header / Admin Identity Card */}
         <section
           aria-labelledby="admin-header-title"
-          className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-4"
+          className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-6 space-y-3.5 sm:space-y-4"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-brand-dark pb-3">
             <div>
@@ -227,9 +227,9 @@ export const AdminDashboardPage: React.FC = () => {
               return (
                 <div
                   key={desk.id}
-                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 flex flex-col justify-between space-y-3 hover:-translate-y-0.5 transition-transform"
+                  className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3 sm:p-4 flex flex-col justify-between space-y-2.5 sm:space-y-3 hover:-translate-y-0.5 transition-transform"
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex items-center gap-2">
                       <IconComponent className={`w-4 h-4 ${iconColorClass} stroke-[2.5]`} />
                       <h3 className="font-heading font-extrabold text-sm text-brand-navy">
@@ -261,7 +261,7 @@ export const AdminDashboardPage: React.FC = () => {
         {/* Controlled Member Account Provisioning Card */}
         <section
           aria-labelledby="member-provisioning-title"
-          className="border-2 border-brand-dark bg-brand-paper p-5 sm:p-6 shadow-brutal space-y-5"
+          className="border-2 border-brand-dark bg-brand-paper p-3.5 sm:p-6 shadow-brutal-sm sm:shadow-brutal space-y-4 sm:space-y-5"
         >
           <div className="border-b-2 border-brand-dark pb-3 flex items-center justify-between">
             <div>

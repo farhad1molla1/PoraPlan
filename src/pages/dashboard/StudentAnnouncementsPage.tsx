@@ -221,21 +221,21 @@ export const StudentAnnouncementsPage: React.FC = () => {
     switch (scope) {
       case 'platform':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-brand-navy bg-brand-navy text-white font-mono text-[10px] font-bold uppercase tracking-wider">
+          <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 border border-brand-navy bg-brand-navy text-white font-mono text-[11px] font-bold uppercase tracking-wider">
             <ShieldCheck className="w-2.5 h-2.5" />
             Platform Wide
           </span>
         );
       case 'assigned_students':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-blue-700 bg-blue-50 text-blue-900 font-mono text-[10px] font-bold uppercase tracking-wider">
+          <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 border border-blue-700 bg-blue-50 text-blue-900 font-mono text-[11px] font-bold uppercase tracking-wider">
             <User className="w-2.5 h-2.5" />
             Mentor Cohort
           </span>
         );
       case 'individual':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-purple-700 bg-purple-50 text-purple-900 font-mono text-[10px] font-bold uppercase tracking-wider">
+          <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 border border-purple-700 bg-purple-50 text-purple-900 font-mono text-[11px] font-bold uppercase tracking-wider">
             <Sparkles className="w-2.5 h-2.5" />
             Targeted To You
           </span>
@@ -246,13 +246,13 @@ export const StudentAnnouncementsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-12">
+    <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6 pb-12">
       {/* 1. Header & Actions */}
-      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-9 h-9 border-2 border-brand-dark bg-brand-gold text-brand-dark flex items-center justify-center shadow-brutal-xs">
-              <Megaphone className="w-5 h-5 stroke-[2.5]" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 border-2 border-brand-dark bg-brand-gold text-brand-dark flex items-center justify-center shadow-brutal-xs">
+              <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
             </div>
             <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
               Announcements
@@ -280,7 +280,7 @@ export const StudentAnnouncementsPage: React.FC = () => {
 
       {/* 2. Success Banner */}
       {ackSuccessMessage && (
-        <div className="border-2 border-green-700 bg-green-50 p-4 shadow-brutal flex items-center justify-between">
+        <div className="border-2 border-green-700 bg-green-50 p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between">
           <div className="flex items-center gap-2 text-green-900 font-sans text-xs sm:text-sm font-semibold">
             <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />
             <span>{ackSuccessMessage}</span>
@@ -297,7 +297,7 @@ export const StudentAnnouncementsPage: React.FC = () => {
 
       {/* 3. Error Banner */}
       {errorMessage && (
-        <div className="border-2 border-red-700 bg-red-50 p-4 shadow-brutal flex items-center justify-between">
+        <div className="border-2 border-red-700 bg-red-50 p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between">
           <div className="flex items-center gap-2 text-red-900 font-sans text-xs sm:text-sm font-semibold">
             <AlertTriangle className="w-5 h-5 text-red-700 shrink-0" />
             <span>{errorMessage}</span>
@@ -313,19 +313,19 @@ export const StudentAnnouncementsPage: React.FC = () => {
       )}
 
       {/* 4. Statistics Dashboard Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
         {/* Total Bulletins */}
-        <div className="border-2 border-brand-dark bg-brand-paper p-4 shadow-brutal flex items-center justify-between">
+        <div className="border-2 border-brand-dark bg-brand-paper p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between">
           <div>
-            <span className="font-mono text-[10px] uppercase font-bold text-brand-muted block">
+            <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-muted block">
               TOTAL DIRECTIVES
             </span>
-            <span className="font-heading font-extrabold text-2xl text-brand-navy">
+            <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
               {totalCount}
             </span>
           </div>
-          <div className="w-10 h-10 border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-center">
-            <Megaphone className="w-5 h-5 text-brand-navy" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-center">
+            <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 text-brand-navy" />
           </div>
         </div>
 
@@ -333,16 +333,16 @@ export const StudentAnnouncementsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setAckFilter('unacknowledged')}
-          className={`border-2 border-brand-dark p-4 shadow-brutal flex items-center justify-between text-left transition-transform hover:-translate-y-0.5 ${
+          className={`border-2 border-brand-dark p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between text-left transition-transform hover:-translate-y-0.5 ${
             ackFilter === 'unacknowledged' ? 'ring-2 ring-brand-navy bg-amber-50' : 'bg-brand-paper'
           }`}
         >
           <div>
-            <span className="font-mono text-[10px] uppercase font-bold text-amber-800 block">
+            <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-amber-800 block">
               PENDING ACKNOWLEDGMENT
             </span>
             <div className="flex items-center gap-2">
-              <span className="font-heading font-extrabold text-2xl text-amber-900">
+              <span className="font-heading font-extrabold text-xl sm:text-2xl text-amber-900">
                 {unackCount}
               </span>
               {unackCount > 0 && (
@@ -352,8 +352,8 @@ export const StudentAnnouncementsPage: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="w-10 h-10 border-2 border-brand-dark bg-amber-100 flex items-center justify-center">
-            <Clock className="w-5 h-5 text-amber-800" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 border-2 border-brand-dark bg-amber-100 flex items-center justify-center">
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-800" />
           </div>
         </button>
 
@@ -361,26 +361,26 @@ export const StudentAnnouncementsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setAckFilter('acknowledged')}
-          className={`border-2 border-brand-dark p-4 shadow-brutal flex items-center justify-between text-left transition-transform hover:-translate-y-0.5 ${
+          className={`border-2 border-brand-dark p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between text-left transition-transform hover:-translate-y-0.5 ${
             ackFilter === 'acknowledged' ? 'ring-2 ring-brand-navy bg-teal-50' : 'bg-brand-paper'
           }`}
         >
           <div>
-            <span className="font-mono text-[10px] uppercase font-bold text-brand-teal block">
+            <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-teal block">
               ACKNOWLEDGED
             </span>
-            <span className="font-heading font-extrabold text-2xl text-brand-navy">
+            <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
               {ackCount}
             </span>
           </div>
-          <div className="w-10 h-10 border-2 border-brand-dark bg-teal-100 flex items-center justify-center">
-            <CheckCircle2 className="w-5 h-5 text-brand-teal" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 border-2 border-brand-dark bg-teal-100 flex items-center justify-center">
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal" />
           </div>
         </button>
       </div>
 
       {/* 5. Filter Controls */}
-      <div className="border-2 border-brand-dark bg-brand-paper p-4 shadow-brutal space-y-3">
+      <div className="border-2 border-brand-dark bg-brand-paper p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal space-y-2.5 sm:space-y-3">
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
           {/* Search box */}
           <div className="relative flex-1">
@@ -544,17 +544,17 @@ export const StudentAnnouncementsPage: React.FC = () => {
             return (
               <article
                 key={announcement.id}
-                className={`border-2 border-brand-dark p-5 sm:p-6 shadow-brutal transition-all flex flex-col justify-between gap-4 ${
+                className={`border-2 border-brand-dark p-3.5 sm:p-6 shadow-brutal-sm sm:shadow-brutal transition-all flex flex-col justify-between gap-3 sm:gap-4 ${
                   isUnack ? 'bg-brand-paper ring-1 ring-amber-400' : 'bg-brand-paper-tint/60'
                 }`}
               >
                 {/* Announcement Card Top Header */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-dark/15 pb-3">
-                  <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-dark/15 pb-2.5 sm:pb-3">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                     {getPriorityBadge(announcement.priority)}
                     {getScopeBadge(announcement.target_scope)}
                     {announcement.subject_name && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-brand-dark/30 bg-brand-paper font-mono text-[10px] text-brand-dark font-bold">
+                      <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 border border-brand-dark/30 bg-brand-paper font-mono text-[11px] text-brand-dark font-bold">
                         <BookOpen className="w-2.5 h-2.5 text-brand-teal" />
                         {announcement.subject_code ? `${announcement.subject_code}: ` : ''}
                         {announcement.subject_name}

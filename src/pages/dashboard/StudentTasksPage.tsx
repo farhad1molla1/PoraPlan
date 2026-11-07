@@ -220,11 +220,11 @@ export const StudentTasksPage: React.FC = () => {
       <div className="max-w-5xl mx-auto space-y-6">
 
         {/* Top Header Banner */}
-        <section aria-labelledby="tasks-heading" className="border-2 border-brand-dark bg-brand-navy text-brand-paper shadow-brutal p-5 sm:p-7">
+        <section aria-labelledby="tasks-heading" className="border-2 border-brand-dark bg-brand-navy text-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-7">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[10px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-2 py-0.5 shadow-brutal-xs">
+                <span className="font-mono text-[11px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-2 py-0.5 shadow-brutal-xs">
                   DAILY TARGETS
                 </span>
               </div>
@@ -237,14 +237,14 @@ export const StudentTasksPage: React.FC = () => {
             </div>
 
             {/* Quick Stats Banner */}
-            <div className="flex items-center gap-2.5 self-start sm:self-center">
-              <div className="border border-brand-paper/30 bg-brand-navy p-2.5 text-center min-w-[75px] shadow-brutal-xs">
-                <span className="text-[10px] font-mono text-brand-paper/70 block uppercase">Pending</span>
-                <span className="text-lg font-heading font-extrabold text-brand-gold">{pendingCount + inProgressCount}</span>
+            <div className="flex items-center gap-2 self-start sm:self-center">
+              <div className="border border-brand-paper/30 bg-brand-navy p-2 sm:p-2.5 text-center min-w-[65px] sm:min-w-[75px] shadow-brutal-xs">
+                <span className="text-[10px] sm:text-[11px] font-mono text-brand-paper/70 block uppercase">Pending</span>
+                <span className="text-base sm:text-lg font-heading font-extrabold text-brand-gold">{pendingCount + inProgressCount}</span>
               </div>
-              <div className="border border-brand-paper/30 bg-brand-navy p-2.5 text-center min-w-[75px] shadow-brutal-xs">
-                <span className="text-[10px] font-mono text-brand-paper/70 block uppercase">Completed</span>
-                <span className="text-lg font-heading font-extrabold text-brand-teal-light">{completedCount}</span>
+              <div className="border border-brand-paper/30 bg-brand-navy p-2 sm:p-2.5 text-center min-w-[65px] sm:min-w-[75px] shadow-brutal-xs">
+                <span className="text-[10px] sm:text-[11px] font-mono text-brand-paper/70 block uppercase">Completed</span>
+                <span className="text-base sm:text-lg font-heading font-extrabold text-brand-teal-light">{completedCount}</span>
               </div>
             </div>
           </div>
@@ -350,7 +350,7 @@ export const StudentTasksPage: React.FC = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center space-y-3">
+          <div className="p-8 sm:p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal text-center space-y-3">
             <Loader2 className="w-8 h-8 animate-spin text-brand-teal mx-auto" />
             <h2 className="font-heading font-extrabold text-sm text-brand-navy">
               RETRIEVING SCHEDULED TASKS
@@ -363,12 +363,12 @@ export const StudentTasksPage: React.FC = () => {
 
         {/* Empty State */}
         {!loading && !error && filteredTasks.length === 0 && (
-          <section aria-labelledby="empty-tasks-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-8 text-center space-y-4">
-            <div className="w-14 h-14 bg-brand-gold-light border-2 border-brand-dark mx-auto flex items-center justify-center shadow-brutal-xs">
-              <ListTodo className="w-8 h-8 text-brand-dark stroke-[2.2]" />
+          <section aria-labelledby="empty-tasks-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-5 sm:p-8 text-center space-y-4">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-brand-gold-light border-2 border-brand-dark mx-auto flex items-center justify-center shadow-brutal-xs">
+              <ListTodo className="w-6 h-6 sm:w-8 sm:h-8 text-brand-dark stroke-[2.2]" />
             </div>
             <div className="max-w-md mx-auto space-y-1.5">
-              <h2 id="empty-tasks-title" className="font-heading font-extrabold text-lg text-brand-navy">
+              <h2 id="empty-tasks-title" className="font-heading font-extrabold text-base sm:text-lg text-brand-navy">
                 NO TASKS IN THIS QUEUE
               </h2>
               <p className="text-xs text-brand-dark/80 font-sans leading-relaxed">
@@ -403,11 +403,11 @@ export const StudentTasksPage: React.FC = () => {
               return (
                 <article
                   key={task.id}
-                  className={`border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 transition-all ${
+                  className={`border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 transition-all ${
                     isCompleted ? 'opacity-80 bg-brand-paper-tint' : ''
                   }`}
                 >
-                  <div className="flex items-start gap-3.5 flex-1">
+                  <div className="flex items-start gap-3 sm:gap-3.5 flex-1">
                     {/* Completion Checkbox Button */}
                     <button
                       type="button"
@@ -433,18 +433,18 @@ export const StudentTasksPage: React.FC = () => {
                       </span>
                     </button>
 
-                    <div className="space-y-2 flex-1">
+                    <div className="space-y-1.5 sm:space-y-2 flex-1 min-w-0">
                       {/* Tags & Badges */}
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {task.subject_name && (
-                          <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-brand-teal-light border border-brand-dark px-2 py-0.5 text-brand-navy flex items-center gap-1">
+                          <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-teal-light border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-navy flex items-center gap-1">
                             <BookOpen className="w-3 h-3 text-brand-navy" />
                             {task.subject_name}
                           </span>
                         )}
 
                         {task.plan_title && (
-                          <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-2 py-0.5 text-brand-muted flex items-center gap-1">
+                          <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-muted flex items-center gap-1">
                             <Compass className="w-3 h-3 text-brand-muted" />
                             {task.plan_title}
                           </span>
@@ -468,7 +468,7 @@ export const StudentTasksPage: React.FC = () => {
                       {/* Title & Description */}
                       <div>
                         <h2
-                          className={`font-heading font-extrabold text-base text-brand-navy ${
+                          className={`font-heading font-extrabold text-sm sm:text-base text-brand-navy leading-snug ${
                             isCompleted ? 'line-through text-brand-dark/60' : ''
                           }`}
                         >
@@ -484,7 +484,7 @@ export const StudentTasksPage: React.FC = () => {
 
                       {/* Mentor Reference Attachment */}
                       {task.attachment_path && (
-                        <div className="mt-2 p-2.5 bg-brand-bg border-2 border-brand-dark flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div className="mt-2 p-2 sm:p-2.5 bg-brand-bg border-2 border-brand-dark flex flex-wrap items-center justify-between gap-2 text-xs">
                           <div className="flex items-center gap-2 min-w-0">
                             <Paperclip className="w-3.5 h-3.5 text-brand-teal shrink-0" />
                             <span className="font-mono font-bold text-brand-navy truncate max-w-[200px] sm:max-w-xs">
@@ -560,10 +560,10 @@ export const StudentTasksPage: React.FC = () => {
         )}
 
         {/* Academic Workflow Guidance Footer */}
-        <section aria-labelledby="task-workflow-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <section aria-labelledby="task-workflow-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 border-2 border-brand-dark bg-brand-teal-light flex items-center justify-center shrink-0 shadow-brutal-xs">
-              <Sparkles className="w-5 h-5 text-brand-navy stroke-[2.2]" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 border-2 border-brand-dark bg-brand-teal-light flex items-center justify-center shrink-0 shadow-brutal-xs">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-brand-navy stroke-[2.2]" />
             </div>
             <div>
               <h2 id="task-workflow-title" className="font-heading font-bold text-xs sm:text-sm text-brand-navy">

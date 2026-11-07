@@ -384,7 +384,7 @@ export const MentorAssignmentsPage: React.FC = () => {
       </div>
 
       {/* Student Selector Card */}
-      <div className="bg-brand-paper border-3 border-brand-dark p-4 sm:p-5 shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-5 shadow-brutal-xs sm:shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-brand-gold/20 border-2 border-brand-dark flex items-center justify-center font-bold text-brand-navy">
             <Users className="w-5 h-5 text-brand-navy" />
@@ -561,21 +561,21 @@ export const MentorAssignmentsPage: React.FC = () => {
             return (
               <div
                 key={assignment.id}
-                className="bg-brand-paper border-3 border-brand-dark p-5 sm:p-6 shadow-brutal-sm hover:shadow-brutal transition-all"
+                className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3.5 sm:p-6 shadow-brutal-xs sm:shadow-brutal-sm hover:shadow-brutal transition-all"
               >
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 sm:gap-4">
                   <div className="space-y-2 flex-1">
                     {/* Meta Badges */}
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                       {assignment.subject_name && (
-                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-brand-paper-tint border border-brand-dark px-2 py-0.5 text-brand-navy flex items-center gap-1">
+                        <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-paper-tint border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-navy flex items-center gap-1">
                           <BookOpen className="w-3 h-3 text-brand-teal" />
                           {assignment.subject_name}
                         </span>
                       )}
 
                       {assignment.plan_title && (
-                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-2 py-0.5 text-brand-muted flex items-center gap-1">
+                        <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-muted flex items-center gap-1">
                           <Compass className="w-3 h-3 text-brand-muted" />
                           {assignment.plan_title}
                         </span>
@@ -591,27 +591,27 @@ export const MentorAssignmentsPage: React.FC = () => {
                       </Badge>
 
                       {assignment.total_points && (
-                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-brand-paper border border-brand-dark px-2 py-0.5 text-brand-dark">
+                        <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-paper border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-dark">
                           {assignment.total_points} PTS
                         </span>
                       )}
                     </div>
 
                     {/* Title */}
-                    <h3 className="font-heading font-bold text-lg text-brand-navy">
+                    <h3 className="font-heading font-bold text-base sm:text-lg text-brand-navy leading-snug">
                       {assignment.title}
                     </h3>
 
                     {/* Instructions */}
                     {assignment.instructions && (
-                      <p className="text-xs sm:text-sm text-brand-muted font-sans leading-relaxed line-clamp-3 bg-brand-paper p-3 border border-brand-dark/30">
+                      <p className="text-xs sm:text-sm text-brand-muted font-sans leading-relaxed line-clamp-3 bg-brand-paper p-2.5 sm:p-3 border border-brand-dark/30">
                         {assignment.instructions}
                       </p>
                     )}
 
                     {/* Submission Preview Banner if submitted */}
                     {hasSubmission && (
-                      <div className="mt-3 p-3 bg-teal-50/70 border border-brand-teal flex items-center justify-between gap-2">
+                      <div className="mt-2.5 sm:mt-3 p-2.5 sm:p-3 bg-teal-50/70 border border-brand-teal flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2 text-xs">
                           <CheckCircle2 className="w-4 h-4 text-brand-teal flex-shrink-0" />
                           <span className="font-mono font-bold text-brand-navy">

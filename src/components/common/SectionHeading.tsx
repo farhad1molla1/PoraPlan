@@ -22,7 +22,7 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
   return (
     <div
       className={cn(
-        'mb-6 sm:mb-10 md:mb-12',
+        'mb-4 sm:mb-8 md:mb-12',
         align === 'center' ? 'text-center mx-auto max-w-2xl' : 'max-w-2xl',
         className
       )}

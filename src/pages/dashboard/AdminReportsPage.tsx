@@ -225,7 +225,7 @@ export const AdminReportsPage: React.FC = () => {
       </div>
 
       {/* Filter Row: Period Selector & Section Tabs (Hidden in Print) */}
-      <div className="print:hidden p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="print:hidden p-3 sm:p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {/* Navigation Tabs */}
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -332,9 +332,9 @@ export const AdminReportsPage: React.FC = () => {
           {activeTab === 'overview' && (
             <div className="space-y-6">
               {/* Executive Printable Summary Card */}
-              <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-6 print:border-none print:shadow-none print:p-0 print:space-y-4">
+              <article className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-8 space-y-5 sm:space-y-6 print:border-none print:shadow-none print:p-0 print:space-y-4">
                 {/* Official Institutional Header */}
-                <header className="border-b-2 border-brand-dark pb-4 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <header className="border-b-2 border-brand-dark pb-3.5 sm:pb-4 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex items-start gap-3.5">
                     <img
                       src="/poraplan-logo.png"
@@ -343,7 +343,7 @@ export const AdminReportsPage: React.FC = () => {
                         const target = e.target as HTMLImageElement;
                         target.src = '/assets/poraplan-logo.png';
                       }}
-                      className="w-12 h-12 object-contain rounded border border-brand-dark/20 bg-brand-paper p-1 shrink-0"
+                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded border border-brand-dark/20 bg-brand-paper p-1 shrink-0"
                     />
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
@@ -354,7 +354,7 @@ export const AdminReportsPage: React.FC = () => {
                           CONFIDENTIAL • PLATFORM OPERATIONAL ARCHIVE
                         </span>
                       </div>
-                      <h2 className="academic-heading text-xl sm:text-2xl font-bold text-brand-navy tracking-tight">
+                      <h2 className="academic-heading text-lg sm:text-2xl font-bold text-brand-navy tracking-tight">
                         Executive Operations &amp; Academic Overview
                       </h2>
                       <p className="academic-sans text-xs text-brand-muted">
@@ -378,98 +378,98 @@ export const AdminReportsPage: React.FC = () => {
                 </header>
 
                 {/* 6 Core KPI Indicators (Distinguishes Registered vs Active Users) */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 break-inside-avoid">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 break-inside-avoid">
                   {/* 1. Students */}
-                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[9.5px] uppercase font-bold academic-sans">Students</span>
+                      <span className="text-[11px] uppercase font-bold academic-sans">Students</span>
                       <Users className="w-3.5 h-3.5 text-brand-teal" />
                     </div>
                     <div>
-                      <div className="academic-heading text-2xl font-bold text-brand-navy">
+                      <div className="academic-heading text-xl sm:text-2xl font-bold text-brand-navy">
                         {report.overview.activeStudents}
                       </div>
-                      <div className="text-[9.5px] academic-sans text-brand-muted mt-0.5">
+                      <div className="text-[11px] academic-sans text-brand-muted mt-0.5">
                         Active of {report.overview.totalRegisteredStudents} registered
                       </div>
                     </div>
                   </div>
 
                   {/* 2. Mentors */}
-                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[9.5px] uppercase font-bold academic-sans">Mentors</span>
+                      <span className="text-[11px] uppercase font-bold academic-sans">Mentors</span>
                       <ShieldCheck className="w-3.5 h-3.5 text-brand-navy" />
                     </div>
                     <div>
-                      <div className="academic-heading text-2xl font-bold text-brand-navy">
+                      <div className="academic-heading text-xl sm:text-2xl font-bold text-brand-navy">
                         {report.overview.activeMentors}
                       </div>
-                      <div className="text-[9.5px] academic-sans text-brand-muted mt-0.5">
+                      <div className="text-[11px] academic-sans text-brand-muted mt-0.5">
                         Active of {report.overview.totalMentors} registered
                       </div>
                     </div>
                   </div>
 
                   {/* 3. Enrollments */}
-                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[9.5px] uppercase font-bold academic-sans">Enrollments</span>
+                      <span className="text-[11px] uppercase font-bold academic-sans">Enrollments</span>
                       <GraduationCap className="w-3.5 h-3.5 text-brand-teal" />
                     </div>
                     <div>
-                      <div className="academic-heading text-2xl font-bold text-brand-navy">
+                      <div className="academic-heading text-xl sm:text-2xl font-bold text-brand-navy">
                         {report.overview.activeEnrollments}
                       </div>
-                      <div className="text-[9.5px] academic-sans text-brand-muted mt-0.5">
+                      <div className="text-[11px] academic-sans text-brand-muted mt-0.5">
                         Active program seats
                       </div>
                     </div>
                   </div>
 
                   {/* 4. Attention Radar */}
-                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[9.5px] uppercase font-bold academic-sans">Attention</span>
+                      <span className="text-[11px] uppercase font-bold academic-sans">Attention</span>
                       <AlertTriangle className="w-3.5 h-3.5 text-red-700" />
                     </div>
                     <div>
-                      <div className={`academic-heading text-2xl font-bold ${report.overview.scholarsNeedingAttentionCount > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
+                      <div className={`academic-heading text-xl sm:text-2xl font-bold ${report.overview.scholarsNeedingAttentionCount > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
                         {report.overview.scholarsNeedingAttentionCount}
                       </div>
-                      <div className="text-[9.5px] academic-sans text-brand-muted mt-0.5">
+                      <div className="text-[11px] academic-sans text-brand-muted mt-0.5">
                         Scholars flagged
                       </div>
                     </div>
                   </div>
 
                   {/* 5. Pending Reviews */}
-                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[9.5px] uppercase font-bold academic-sans">Review Queue</span>
+                      <span className="text-[11px] uppercase font-bold academic-sans">Review Queue</span>
                       <FileCheck className="w-3.5 h-3.5 text-amber-700" />
                     </div>
                     <div>
-                      <div className={`academic-heading text-2xl font-bold ${report.overview.totalSubmissionsPendingReview > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
+                      <div className={`academic-heading text-xl sm:text-2xl font-bold ${report.overview.totalSubmissionsPendingReview > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
                         {report.overview.totalSubmissionsPendingReview}
                       </div>
-                      <div className="text-[9.5px] academic-sans text-brand-muted mt-0.5">
+                      <div className="text-[11px] academic-sans text-brand-muted mt-0.5">
                         Submissions to grade
                       </div>
                     </div>
                   </div>
 
                   {/* 6. Overdue Tasks */}
-                  <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
+                  <div className="p-2.5 sm:p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-brand-muted mb-1">
-                      <span className="text-[9.5px] uppercase font-bold academic-sans">Task Backlog</span>
+                      <span className="text-[11px] uppercase font-bold academic-sans">Task Backlog</span>
                       <Clock className="w-3.5 h-3.5 text-brand-gold" />
                     </div>
                     <div>
-                      <div className={`academic-heading text-2xl font-bold ${report.overview.totalOverdueTasks > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
+                      <div className={`academic-heading text-xl sm:text-2xl font-bold ${report.overview.totalOverdueTasks > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
                         {report.overview.totalOverdueTasks}
                       </div>
-                      <div className="text-[9.5px] academic-sans text-brand-muted mt-0.5">
+                      <div className="text-[11px] academic-sans text-brand-muted mt-0.5">
                         Overdue tasks total
                       </div>
                     </div>

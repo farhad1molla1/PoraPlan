@@ -271,36 +271,36 @@ export const AdminUsersPage: React.FC = () => {
       )}
 
       {/* Stat Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
-          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Total Members</p>
-          <p className="text-2xl font-bold font-serif text-text-primary mt-1">{stats.total}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="p-3 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
+          <p className="text-[11px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Total Members</p>
+          <p className="text-xl sm:text-2xl font-bold font-serif text-text-primary mt-1">{stats.total}</p>
         </div>
-        <div className="p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
+        <div className="p-3 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Scholars</p>
-            <GraduationCap className="w-4 h-4 text-forest-700" />
+            <p className="text-[11px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Scholars</p>
+            <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-forest-700" />
           </div>
-          <p className="text-2xl font-bold font-serif text-forest-900 dark:text-forest-100 mt-1">{stats.students}</p>
+          <p className="text-xl sm:text-2xl font-bold font-serif text-forest-900 dark:text-forest-100 mt-1">{stats.students}</p>
         </div>
-        <div className="p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
+        <div className="p-3 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Mentors</p>
-            <BookOpen className="w-4 h-4 text-teal-700" />
+            <p className="text-[11px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Mentors</p>
+            <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-700" />
           </div>
-          <p className="text-2xl font-bold font-serif text-teal-900 dark:text-teal-100 mt-1">{stats.mentors}</p>
+          <p className="text-xl sm:text-2xl font-bold font-serif text-teal-900 dark:text-teal-100 mt-1">{stats.mentors}</p>
         </div>
-        <div className="p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
+        <div className="p-3 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Admins</p>
-            <Shield className="w-4 h-4 text-amber-700" />
+            <p className="text-[11px] sm:text-xs font-medium text-text-muted uppercase tracking-wider">Admins</p>
+            <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-700" />
           </div>
-          <p className="text-2xl font-bold font-serif text-amber-900 dark:text-amber-100 mt-1">{stats.admins}</p>
+          <p className="text-xl sm:text-2xl font-bold font-serif text-amber-900 dark:text-amber-100 mt-1">{stats.admins}</p>
         </div>
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="p-4 rounded-xl border border-border-default bg-surface-card shadow-sm flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
+      <div className="p-3 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-sm flex flex-col md:flex-row gap-3 sm:gap-4 justify-between items-stretch md:items-center">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
@@ -382,7 +382,7 @@ export const AdminUsersPage: React.FC = () => {
       ) : (
         <div className="rounded-xl border border-border-default bg-surface-card shadow-sm overflow-hidden">
           {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
-          <div className="lg:hidden p-3 sm:p-4 space-y-3 bg-surface-base/30">
+          <div className="lg:hidden p-2.5 sm:p-4 space-y-2.5 sm:space-y-3 bg-surface-base/30">
             {filteredUsers.map((u) => {
               const initial = u.full_name ? u.full_name.charAt(0).toUpperCase() : '?';
               const isSelected = selectedUser?.id === u.id;
@@ -391,7 +391,7 @@ export const AdminUsersPage: React.FC = () => {
                 <div
                   key={u.id}
                   onClick={() => setSelectedUser(u)}
-                  className={`p-4 rounded-xl border border-border-default bg-surface-card shadow-xs hover:border-forest-600 transition-all cursor-pointer space-y-3 ${
+                  className={`p-3.5 sm:p-4 rounded-xl border border-border-default bg-surface-card shadow-xs hover:border-forest-600 transition-all cursor-pointer space-y-2.5 sm:space-y-3 ${
                     isSelected ? 'ring-2 ring-forest-600 bg-forest-900/5 dark:bg-forest-100/5' : ''
                   }`}
                 >

@@ -607,11 +607,11 @@ export const MentorTasksPage: React.FC = () => {
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Top Header Banner */}
-        <section aria-labelledby="mentor-tasks-title" className="border-2 border-brand-dark bg-brand-navy text-brand-paper shadow-brutal p-5 sm:p-7">
+        <section aria-labelledby="mentor-tasks-title" className="border-2 border-brand-dark bg-brand-navy text-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-7">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[10px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-2 py-0.5 shadow-brutal-xs">
+                <span className="font-mono text-[11px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-2 py-0.5 shadow-brutal-xs">
                   Daily Targets
                 </span>
               </div>
@@ -637,7 +637,7 @@ export const MentorTasksPage: React.FC = () => {
 
         {/* Error Banner */}
         {errorMessage && (
-          <div className="p-4 border-2 border-brand-dark bg-red-50 text-brand-dark shadow-brutal flex items-start gap-3">
+          <div className="p-3 sm:p-4 border-2 border-brand-dark bg-red-50 text-brand-dark shadow-brutal-sm sm:shadow-brutal flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
             <div className="space-y-1">
               <h3 className="font-heading font-extrabold text-sm text-red-900">
@@ -649,7 +649,7 @@ export const MentorTasksPage: React.FC = () => {
         )}
 
         {/* Student Roster Selector */}
-        <section aria-labelledby="roster-tasks-heading" className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 sm:p-5 space-y-3">
+        <section aria-labelledby="roster-tasks-heading" className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-brand-dark pb-3">
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-brand-teal stroke-[2.2]" />
@@ -760,11 +760,11 @@ export const MentorTasksPage: React.FC = () => {
                   return (
                     <article
                       key={task.id}
-                      className={`border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 transition-all ${
+                      className={`border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 transition-all ${
                         isCompleted ? 'opacity-80 bg-brand-paper-tint' : ''
                       }`}
                     >
-                      <div className="flex items-start gap-3.5 flex-1">
+                      <div className="flex items-start gap-3 sm:gap-3.5 flex-1">
                         {/* Status Checkbox Button */}
                         <button
                           type="button"
@@ -783,18 +783,18 @@ export const MentorTasksPage: React.FC = () => {
                           </span>
                         </button>
 
-                        <div className="space-y-2 flex-1">
+                        <div className="space-y-1.5 sm:space-y-2 flex-1">
                           {/* Badges Strip */}
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {task.subject_name && (
-                              <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-brand-teal-light border border-brand-dark px-2 py-0.5 text-brand-navy flex items-center gap-1">
+                              <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-teal-light border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-navy flex items-center gap-1">
                                 <BookOpen className="w-3 h-3 text-brand-navy" />
                                 {task.subject_name}
                               </span>
                             )}
 
                             {task.plan_title && (
-                              <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-2 py-0.5 text-brand-muted flex items-center gap-1">
+                              <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-muted flex items-center gap-1">
                                 <Compass className="w-3 h-3 text-brand-muted" />
                                 {task.plan_title}
                               </span>
@@ -818,7 +818,7 @@ export const MentorTasksPage: React.FC = () => {
                           {/* Title & Description */}
                           <div>
                             <h3
-                              className={`font-heading font-extrabold text-base text-brand-navy ${
+                              className={`font-heading font-extrabold text-sm sm:text-base text-brand-navy leading-snug ${
                                 isCompleted ? 'line-through text-brand-dark/60' : ''
                               }`}
                             >

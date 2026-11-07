@@ -390,17 +390,17 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 1. HEADER & DESK SUMMARY */}
-      <div className="border-3 border-brand-dark bg-brand-paper p-6 shadow-brutal">
+      <div className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-4 sm:p-6 shadow-brutal-sm sm:shadow-brutal">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-brand-bg text-brand-navy border border-brand-dark mb-2">
               <Users className="w-3.5 h-3.5 text-brand-teal" />
               Mentorship Allocations
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-brand-navy">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-brand-navy">
               Mentor Assignment &amp; Matching Desk
             </h1>
-            <p className="text-sm text-brand-navy/70 mt-1 max-w-2xl font-medium">
+            <p className="text-xs sm:text-sm text-brand-navy/70 mt-1 max-w-2xl font-medium">
               Allocate default mentors to cohort groups, set individual student overrides,
               and manage mentor workload allocations with strict precedence resolution.
             </p>
@@ -424,33 +424,33 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
         </div>
 
         {/* Quick Stat Ribbon */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-6 pt-6 border-t-2 border-brand-dark/10">
-          <div className="p-3 bg-[#0BA7B4]/10 border-2 border-[#0BA7B4]">
-            <p className="text-xs font-bold text-brand-navy/70 uppercase">Cohort Mentors</p>
-            <p className="text-2xl font-black text-brand-navy mt-0.5">{activeCohortAssignmentsCount}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t-2 border-brand-dark/10">
+          <div className="p-2.5 sm:p-3 bg-[#0BA7B4]/10 border-2 border-[#0BA7B4]">
+            <p className="text-[10px] sm:text-xs font-bold text-brand-navy/70 uppercase">Cohort Mentors</p>
+            <p className="text-xl sm:text-2xl font-black text-brand-navy mt-0.5">{activeCohortAssignmentsCount}</p>
           </div>
-          <div className="p-3 bg-[#F5A623]/10 border-2 border-[#F5A623]">
-            <p className="text-xs font-bold text-brand-navy/70 uppercase">Individual Overrides</p>
-            <p className="text-2xl font-black text-brand-navy mt-0.5">{activeIndividualOverridesCount}</p>
+          <div className="p-2.5 sm:p-3 bg-[#F5A623]/10 border-2 border-[#F5A623]">
+            <p className="text-[10px] sm:text-xs font-bold text-brand-navy/70 uppercase">Individual Overrides</p>
+            <p className="text-xl sm:text-2xl font-black text-brand-navy mt-0.5">{activeIndividualOverridesCount}</p>
           </div>
-          <div className="p-3 bg-brand-navy/10 border-2 border-brand-dark">
-            <p className="text-xs font-bold text-brand-navy/70 uppercase">Students Paired</p>
-            <p className="text-2xl font-black text-brand-navy mt-0.5">{studentsWithMentorCount}</p>
+          <div className="p-2.5 sm:p-3 bg-brand-navy/10 border-2 border-brand-dark">
+            <p className="text-[10px] sm:text-xs font-bold text-brand-navy/70 uppercase">Students Paired</p>
+            <p className="text-xl sm:text-2xl font-black text-brand-navy mt-0.5">{studentsWithMentorCount}</p>
           </div>
-          <div className="p-3 bg-red-50 border-2 border-red-300">
-            <p className="text-xs font-bold text-red-700 uppercase">Unassigned Students</p>
-            <p className="text-2xl font-black text-red-800 mt-0.5">{studentsWithoutMentorCount}</p>
+          <div className="p-2.5 sm:p-3 bg-red-50 border-2 border-red-300">
+            <p className="text-[10px] sm:text-xs font-bold text-red-700 uppercase">Unassigned Students</p>
+            <p className="text-xl sm:text-2xl font-black text-red-800 mt-0.5">{studentsWithoutMentorCount}</p>
           </div>
-          <div className="p-3 bg-brand-bg border-2 border-brand-dark">
-            <p className="text-xs font-bold text-brand-navy/60 uppercase">Available Mentors</p>
-            <p className="text-2xl font-black text-brand-navy mt-0.5">{mentorsCount}</p>
+          <div className="p-2.5 sm:p-3 bg-brand-bg border-2 border-brand-dark col-span-2 sm:col-span-1">
+            <p className="text-[10px] sm:text-xs font-bold text-brand-navy/60 uppercase">Available Mentors</p>
+            <p className="text-xl sm:text-2xl font-black text-brand-navy mt-0.5">{mentorsCount}</p>
           </div>
         </div>
       </div>
 
       {/* Notifications / Alerts */}
       {error && (
-        <div className="p-4 bg-red-50 border-3 border-red-500 shadow-[4px_4px_0_0_#ef4444] flex items-center justify-between">
+        <div className="p-3 sm:p-4 bg-red-50 border-2 sm:border-3 border-red-500 shadow-[4px_4px_0_0_#ef4444] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
             <p className="text-sm font-bold text-red-800">{error}</p>
@@ -462,7 +462,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       )}
 
       {successMessage && (
-        <div className="p-4 bg-teal-50 border-3 border-[#0BA7B4] shadow-[4px_4px_0_0_#0BA7B4] flex items-center justify-between">
+        <div className="p-3 sm:p-4 bg-teal-50 border-2 sm:border-3 border-[#0BA7B4] shadow-[4px_4px_0_0_#0BA7B4] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <CheckCircle2 className="w-5 h-5 text-brand-teal flex-shrink-0" />
             <p className="text-sm font-bold text-brand-navy">{successMessage}</p>
@@ -474,7 +474,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       )}
 
       {/* 2. TAB CONTROLS */}
-      <div className="flex flex-col lg:flex-row border-3 border-brand-dark bg-brand-paper shadow-brutal">
+      <div className="flex flex-col lg:flex-row border-2 sm:border-3 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal">
         <button
           onClick={() => setActiveTab('cohorts')}
           className={`flex-1 py-3 px-4 sm:px-6 text-xs sm:text-sm font-black border-b-2 lg:border-b-0 lg:border-r-2 border-brand-dark transition-colors flex items-center justify-center gap-2 text-center ${
@@ -518,7 +518,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       {activeTab === 'cohorts' && (
         <div className="space-y-4">
           {/* Program Filter Bar */}
-          <div className="border-3 border-brand-dark bg-brand-paper p-4 shadow-brutal flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-3.5 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
               <span className="text-xs font-black uppercase text-brand-navy tracking-wider shrink-0">
                 Filter by Program:
@@ -543,20 +543,20 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
 
           {/* Cohorts Grid */}
           {loading ? (
-            <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
+            <div className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-8 sm:p-12 text-center shadow-brutal-sm sm:shadow-brutal">
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
               <p className="text-sm font-bold text-brand-navy">Loading cohort allocations...</p>
             </div>
           ) : filteredCohorts.length === 0 ? (
-            <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
-              <GraduationCap className="w-12 h-12 text-brand-navy/30 mx-auto mb-3" />
-              <h3 className="text-lg font-black text-brand-navy">No Cohorts Found</h3>
-              <p className="text-sm text-brand-navy/70 mt-1">
+            <div className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-8 sm:p-12 text-center shadow-brutal-sm sm:shadow-brutal">
+              <GraduationCap className="w-10 h-10 sm:w-12 sm:h-12 text-brand-navy/30 mx-auto mb-3" />
+              <h3 className="text-base sm:text-lg font-black text-brand-navy">No Cohorts Found</h3>
+              <p className="text-xs sm:text-sm text-brand-navy/70 mt-1">
                 No cohorts match the selected program filter.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
               {filteredCohorts.map((cohort) => {
                 const program = programs.find((p) => p.id === cohort.program_id);
                 const activeAssignment = cohortMentors.find(
@@ -569,7 +569,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 return (
                   <div
                     key={cohort.id}
-                    className="border-3 border-brand-dark bg-brand-paper p-5 shadow-brutal flex flex-col justify-between space-y-4"
+                    className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-3.5 sm:p-5 shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between space-y-3 sm:space-y-4"
                   >
                     <div>
                       {/* Program & Status Badges */}

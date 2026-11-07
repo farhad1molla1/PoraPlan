@@ -490,41 +490,41 @@ export const StudentAssignmentsPage: React.FC = () => {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
-            <span className="font-mono text-xs uppercase font-bold tracking-wider">Total</span>
-            <FileText className="w-4 h-4 text-brand-navy" />
+            <span className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-wider">Total</span>
+            <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy" />
           </div>
-          <div className="font-heading font-black text-2xl text-brand-navy">{totalCount}</div>
-          <div className="text-[11px] text-brand-muted mt-0.5">Assigned sets</div>
+          <div className="font-heading font-black text-xl sm:text-2xl text-brand-navy">{totalCount}</div>
+          <div className="text-[10px] sm:text-[11px] text-brand-muted mt-0.5">Assigned sets</div>
         </div>
 
-        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
-            <span className="font-mono text-xs uppercase font-bold tracking-wider">Pending</span>
-            <Clock className="w-4 h-4 text-brand-gold" />
+            <span className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-wider">Pending</span>
+            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold" />
           </div>
-          <div className="font-heading font-black text-2xl text-brand-gold">{pendingCount}</div>
-          <div className="text-[11px] text-brand-muted mt-0.5">To be submitted</div>
+          <div className="font-heading font-black text-xl sm:text-2xl text-brand-gold">{pendingCount}</div>
+          <div className="text-[10px] sm:text-[11px] text-brand-muted mt-0.5">To be submitted</div>
         </div>
 
-        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
-            <span className="font-mono text-xs uppercase font-bold tracking-wider">Submitted</span>
-            <Send className="w-4 h-4 text-brand-teal" />
+            <span className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-wider">Submitted</span>
+            <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal" />
           </div>
-          <div className="font-heading font-black text-2xl text-brand-teal">{submittedCount}</div>
-          <div className="text-[11px] text-brand-muted mt-0.5">Awaiting review</div>
+          <div className="font-heading font-black text-xl sm:text-2xl text-brand-teal">{submittedCount}</div>
+          <div className="text-[10px] sm:text-[11px] text-brand-muted mt-0.5">Awaiting review</div>
         </div>
 
-        <div className="bg-brand-paper border-3 border-brand-dark p-4 shadow-brutal-sm">
+        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-3 sm:p-4 shadow-brutal-xs sm:shadow-brutal-sm">
           <div className="flex items-center justify-between text-brand-muted mb-1">
-            <span className="font-mono text-xs uppercase font-bold tracking-wider">Reviewed</span>
-            <CheckCircle2 className="w-4 h-4 text-brand-navy" />
+            <span className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-wider">Reviewed</span>
+            <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy" />
           </div>
-          <div className="font-heading font-black text-2xl text-brand-navy">{reviewedCount}</div>
-          <div className="text-[11px] text-brand-muted mt-0.5">Evaluated work</div>
+          <div className="font-heading font-black text-xl sm:text-2xl text-brand-navy">{reviewedCount}</div>
+          <div className="text-[10px] sm:text-[11px] text-brand-muted mt-0.5">Evaluated work</div>
         </div>
       </div>
 
@@ -594,23 +594,23 @@ export const StudentAssignmentsPage: React.FC = () => {
 
       {/* Main Content Area */}
       {loading ? (
-        <div className="bg-brand-paper border-3 border-brand-dark p-12 text-center shadow-brutal">
+        <div className="bg-brand-paper border-2 sm:border-3 border-brand-dark p-8 sm:p-12 text-center shadow-brutal-sm sm:shadow-brutal">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
-          <p className="font-mono text-sm text-brand-muted font-bold uppercase tracking-wider">
+          <p className="font-mono text-xs sm:text-sm text-brand-muted font-bold uppercase tracking-wider">
             Loading assignment roster...
           </p>
         </div>
       ) : filteredAssignments.length === 0 ? (
-        <div className="bg-brand-paper border-4 border-brand-dark p-8 md:p-12 text-center shadow-brutal">
-          <div className="w-16 h-16 bg-brand-paper-tint border-3 border-brand-dark rounded-none flex items-center justify-center mx-auto mb-4 shadow-brutal-sm">
-            <FileText className="w-8 h-8 text-brand-muted" />
+        <div className="bg-brand-paper border-2 sm:border-4 border-brand-dark p-6 sm:p-8 md:p-12 text-center shadow-brutal-sm sm:shadow-brutal">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-brand-paper-tint border-2 sm:border-3 border-brand-dark rounded-none flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-brutal-xs sm:shadow-brutal-sm">
+            <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-brand-muted" />
           </div>
-          <h3 className="font-heading font-black text-xl text-brand-navy mb-2">
+          <h3 className="font-heading font-black text-lg sm:text-xl text-brand-navy mb-2">
             {statusFilter === 'all'
               ? 'No Assignments Distributed Yet'
               : `No Assignments in "${statusFilter.toUpperCase()}" Status`}
           </h3>
-          <p className="text-sm text-brand-muted max-w-md mx-auto mb-6">
+          <p className="text-xs sm:text-sm text-brand-muted max-w-md mx-auto mb-5 sm:mb-6">
             {mentors.length > 0
               ? `Your dedicated mentor ${mentors[0].full_name} has not distributed any practice sets matching this filter. New assignments will appear here with instructions and due dates.`
               : 'You do not have an assigned mentor yet. When a mentor is assigned by administration, your practice assignments will appear here.'}
@@ -625,7 +625,7 @@ export const StudentAssignmentsPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3.5 sm:space-y-4">
           {filteredAssignments.map((assignment) => {
             const hasSubmission = !!assignment.submission;
             const isSelected = activeAssignmentId === assignment.id;
@@ -639,23 +639,23 @@ export const StudentAssignmentsPage: React.FC = () => {
             return (
               <div
                 key={assignment.id}
-                className={`bg-brand-paper border-3 border-brand-dark transition-all ${
-                  isSelected ? 'ring-2 ring-brand-navy shadow-brutal' : 'shadow-brutal-sm hover:shadow-brutal'
+                className={`bg-brand-paper border-2 sm:border-3 border-brand-dark transition-all ${
+                  isSelected ? 'ring-2 ring-brand-navy shadow-brutal-sm sm:shadow-brutal' : 'shadow-brutal-xs sm:shadow-brutal-sm hover:shadow-brutal'
                 }`}
               >
-                <div className="p-5 sm:p-6">
+                <div className="p-3.5 sm:p-6">
                   {/* Top Badges & Meta */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5 sm:mb-3">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                       {assignment.subject_name && (
-                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-brand-paper-tint border border-brand-dark px-2 py-0.5 text-brand-navy flex items-center gap-1">
+                        <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-paper-tint border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-navy flex items-center gap-1">
                           <BookOpen className="w-3 h-3 text-brand-teal" />
                           {assignment.subject_name}
                         </span>
                       )}
 
                       {assignment.plan_title && (
-                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-2 py-0.5 text-brand-muted flex items-center gap-1">
+                        <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-muted flex items-center gap-1">
                           <Compass className="w-3 h-3 text-brand-muted" />
                           {assignment.plan_title}
                         </span>
@@ -677,7 +677,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs text-brand-muted font-mono">
+                    <div className="flex items-center gap-2.5 sm:gap-3 text-xs text-brand-muted font-mono">
                       {assignment.total_points && (
                         <span className="font-bold text-brand-navy">
                           {assignment.total_points} PTS
@@ -694,22 +694,22 @@ export const StudentAssignmentsPage: React.FC = () => {
                   </div>
 
                   {/* Title & Instructions */}
-                  <h3 className="font-heading font-bold text-lg text-brand-navy mb-2">
+                  <h3 className="font-heading font-bold text-base sm:text-lg text-brand-navy mb-2 leading-snug">
                     {assignment.title}
                   </h3>
 
                   {assignment.instructions && (
-                    <div className="bg-brand-paper p-3.5 border border-brand-dark text-xs sm:text-sm text-brand-dark font-sans leading-relaxed whitespace-pre-wrap mb-4">
+                    <div className="bg-brand-paper p-3 sm:p-3.5 border border-brand-dark text-xs sm:text-sm text-brand-dark font-sans leading-relaxed whitespace-pre-wrap mb-3.5 sm:mb-4">
                       {assignment.instructions}
                     </div>
                   )}
 
                   {/* Existing Submission Display */}
                   {hasSubmission && (
-                    <div className="space-y-3 mb-4">
+                    <div className="space-y-2.5 sm:space-y-3 mb-3.5 sm:mb-4">
                       {/* Revision Requested Notice */}
                       {assignment.submission?.status === 'needs_revision' && (
-                        <div className="bg-red-50 border-2 border-red-500 p-3 text-red-800 text-xs flex items-start gap-2 shadow-brutal-xs">
+                        <div className="bg-red-50 border-2 border-red-500 p-2.5 sm:p-3 text-red-800 text-xs flex items-start gap-2 shadow-brutal-xs">
                           <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                           <div>
                             <strong className="block font-bold">Revision Requested by Mentor</strong>
@@ -719,7 +719,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                       )}
 
                       {/* Student's Submitted Content Box */}
-                      <div className="p-4 bg-teal-50 border-2 border-brand-teal text-brand-dark">
+                      <div className="p-3 sm:p-4 bg-teal-50 border-2 border-brand-teal text-brand-dark">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-mono text-xs font-bold text-brand-teal uppercase flex items-center gap-1.5">
                             <CheckCircle2 className="w-4 h-4 text-brand-teal" />

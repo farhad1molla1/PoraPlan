@@ -285,7 +285,7 @@ export const MentorResourcesPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 1. PAGE HEADER                                                            */}
       {/* ========================================================================= */}
-      <section className="p-4 sm:p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section className="p-3.5 sm:p-6 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="font-mono text-xs uppercase font-bold text-brand-muted bg-brand-bg px-2 py-0.5 border border-brand-dark">
@@ -332,7 +332,7 @@ export const MentorResourcesPage: React.FC = () => {
 
       {/* Error Alert */}
       {errorMessage && (
-        <div className="p-4 border-2 border-red-600 bg-red-50 text-red-900 shadow-brutal flex items-start gap-3">
+        <div className="p-3.5 sm:p-4 border-2 border-red-600 bg-red-50 text-red-900 shadow-brutal-sm sm:shadow-brutal flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
           <div className="flex-1">
             <h4 className="font-heading font-bold text-sm">Failed to Load Resources</h4>
@@ -344,7 +344,7 @@ export const MentorResourcesPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 2. FILTER TOOLBAR                                                         */}
       {/* ========================================================================= */}
-      <section className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-3">
+      <section className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-3">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           {/* Search Box */}
           <div className="relative flex-1 max-w-md">
@@ -449,17 +449,17 @@ export const MentorResourcesPage: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
           {filteredResources.map((res) => (
             <div
               key={res.id}
-              className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between"
+              className="p-3.5 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between"
             >
               <div>
                 {/* Scholar & Format Badges */}
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="font-mono text-[10px] font-bold text-brand-teal bg-brand-bg px-1.5 py-0.5 border border-brand-dark">
+                    <span className="font-mono text-[11px] font-bold text-brand-teal bg-brand-bg px-1.5 py-0.5 border border-brand-dark">
                       {res.student_poraplan_id || 'STUDENT'}
                     </span>
                     <Badge

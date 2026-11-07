@@ -137,7 +137,7 @@ export const StudentDashboardPage: React.FC = () => {
         {/* 1. GREETING & MENTOR SECTION */}
         <section
           aria-labelledby="student-greeting"
-          className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-4"
+          className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-6 space-y-3.5 sm:space-y-4"
         >
           {/* Top Row: Greeting & Meta */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-brand-dark pb-3">
@@ -243,7 +243,7 @@ export const StudentDashboardPage: React.FC = () => {
         {/* 2. TODAY'S STUDY & TASKS (PRIMARY FOCUS: "WHAT SHOULD I STUDY TODAY?") */}
         <section
           aria-labelledby="today-study-title"
-          className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 space-y-4"
+          className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-6 space-y-3.5 sm:space-y-4"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-brand-dark pb-3">
             <div>
@@ -415,7 +415,7 @@ export const StudentDashboardPage: React.FC = () => {
             {/* Card 1: Today's Tasks */}
             <Link
               to="/student/tasks"
-              className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-xs font-bold text-brand-muted">
@@ -434,7 +434,7 @@ export const StudentDashboardPage: React.FC = () => {
             {/* Card 2: Assignments */}
             <Link
               to="/student/assignments"
-              className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-xs font-bold text-brand-muted">
@@ -453,7 +453,7 @@ export const StudentDashboardPage: React.FC = () => {
             {/* Card 3: Doubts */}
             <Link
               to="/student/doubts"
-              className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-xs font-bold text-brand-muted">
@@ -472,7 +472,7 @@ export const StudentDashboardPage: React.FC = () => {
             {/* Card 4: Evaluation */}
             <Link
               to="/student/evaluations"
-              className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-xs font-bold text-brand-muted">

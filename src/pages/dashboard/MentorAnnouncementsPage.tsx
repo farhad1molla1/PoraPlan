@@ -411,11 +411,11 @@ export const MentorAnnouncementsPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* 1. Header & Actions */}
-      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-9 h-9 border-2 border-brand-dark bg-brand-gold text-brand-dark flex items-center justify-center shadow-brutal-xs">
-              <Megaphone className="w-5 h-5 stroke-[2.5]" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 border-2 border-brand-dark bg-brand-gold text-brand-dark flex items-center justify-center shadow-brutal-xs">
+              <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
             </div>
             <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
               Announcements
@@ -456,7 +456,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
 
       {/* 2. Success Banner */}
       {successMessage && (
-        <div className="border-2 border-green-700 bg-green-50 p-4 shadow-brutal flex items-center justify-between">
+        <div className="border-2 border-green-700 bg-green-50 p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between">
           <div className="flex items-center gap-2 text-green-900 font-sans text-xs sm:text-sm font-semibold">
             <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />
             <span>{successMessage}</span>
@@ -473,7 +473,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
 
       {/* 3. Error Banner */}
       {errorMessage && (
-        <div className="border-2 border-red-700 bg-red-50 p-4 shadow-brutal flex items-center justify-between">
+        <div className="border-2 border-red-700 bg-red-50 p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal flex items-center justify-between">
           <div className="flex items-center gap-2 text-red-900 font-sans text-xs sm:text-sm font-semibold">
             <AlertTriangle className="w-5 h-5 text-red-700 shrink-0" />
             <span>{errorMessage}</span>
@@ -489,12 +489,12 @@ export const MentorAnnouncementsPage: React.FC = () => {
       )}
 
       {/* 4. Statistics Dashboard Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="border-2 border-brand-dark bg-brand-paper p-4 shadow-brutal">
-          <span className="font-mono text-[10px] uppercase font-bold text-brand-muted block">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="border-2 border-brand-dark bg-brand-paper p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal">
+          <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-muted block">
             AUTHORED NOTICES
           </span>
-          <span className="font-heading font-extrabold text-2xl text-brand-navy">
+          <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
             {totalCount}
           </span>
         </div>
@@ -502,14 +502,14 @@ export const MentorAnnouncementsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setStatusFilter('published')}
-          className={`border-2 border-brand-dark p-4 shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${
+          className={`border-2 border-brand-dark p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${
             statusFilter === 'published' ? 'ring-2 ring-brand-navy bg-teal-50' : 'bg-brand-paper'
           }`}
         >
-          <span className="font-mono text-[10px] uppercase font-bold text-brand-teal block">
+          <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-teal block">
             PUBLISHED (ACTIVE)
           </span>
-          <span className="font-heading font-extrabold text-2xl text-brand-navy">
+          <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
             {publishedCount}
           </span>
         </button>
@@ -517,30 +517,30 @@ export const MentorAnnouncementsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setStatusFilter('archived')}
-          className={`border-2 border-brand-dark p-4 shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${
+          className={`border-2 border-brand-dark p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${
             statusFilter === 'archived' ? 'ring-2 ring-brand-navy bg-amber-50' : 'bg-brand-paper'
           }`}
         >
-          <span className="font-mono text-[10px] uppercase font-bold text-brand-muted block">
+          <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-muted block">
             ARCHIVED
           </span>
-          <span className="font-heading font-extrabold text-2xl text-brand-dark">
+          <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-dark">
             {archivedCount}
           </span>
         </button>
 
-        <div className="border-2 border-brand-dark bg-brand-paper p-4 shadow-brutal">
-          <span className="font-mono text-[10px] uppercase font-bold text-brand-gold block">
+        <div className="border-2 border-brand-dark bg-brand-paper p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal">
+          <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-gold block">
             TOTAL CONFIRMATIONS
           </span>
-          <span className="font-heading font-extrabold text-2xl text-brand-navy">
+          <span className="font-heading font-extrabold text-xl sm:text-2xl text-brand-navy">
             {totalAcksCount}
           </span>
         </div>
       </div>
 
       {/* 5. Filter & Search Controls */}
-      <div className="border-2 border-brand-dark bg-brand-paper p-4 shadow-brutal space-y-3">
+      <div className="border-2 border-brand-dark bg-brand-paper p-3 sm:p-4 shadow-brutal-sm sm:shadow-brutal space-y-2.5 sm:space-y-3">
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
           <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
@@ -690,17 +690,17 @@ export const MentorAnnouncementsPage: React.FC = () => {
             return (
               <article
                 key={announcement.id}
-                className={`border-2 border-brand-dark p-5 sm:p-6 shadow-brutal transition-all flex flex-col justify-between gap-4 ${
+                className={`border-2 border-brand-dark p-3.5 sm:p-6 shadow-brutal-sm sm:shadow-brutal transition-all flex flex-col justify-between gap-3 sm:gap-4 ${
                   isArchived ? 'bg-brand-bg/70 opacity-80' : 'bg-brand-paper'
                 }`}
               >
                 {/* Announcement Card Top Header */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-dark/15 pb-3">
-                  <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-dark/15 pb-2.5 sm:pb-3">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                     {getPriorityBadge(announcement.priority)}
                     {getScopeBadge(announcement)}
                     {announcement.subject_name && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-brand-dark/30 bg-brand-paper font-mono text-[10px] text-brand-dark font-bold">
+                      <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 border border-brand-dark/30 bg-brand-paper font-mono text-[11px] text-brand-dark font-bold">
                         <BookOpen className="w-2.5 h-2.5 text-brand-teal" />
                         {announcement.subject_name}
                       </span>

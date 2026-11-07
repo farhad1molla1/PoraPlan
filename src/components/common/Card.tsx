@@ -55,7 +55,7 @@ export const Card: React.FC<CardProps> = ({
           {headerBar}
         </div>
       )}
-      <div className={headerBar ? 'p-3.5 sm:p-5' : 'p-4 sm:p-6'}>{children}</div>
+      <div className={headerBar ? 'p-3 sm:p-5' : 'p-3.5 sm:p-6'}>{children}</div>
     </div>
   );
 };

@@ -317,7 +317,7 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
       )}
 
       {/* Filter Toolbar */}
-      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Status Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           <button
@@ -436,9 +436,9 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
               <div
                 key={notif.id}
                 onClick={() => handleCardClick(notif)}
-                className={`p-4 sm:p-5 border-2 border-brand-dark transition-all duration-100 ${
+                className={`p-3.5 sm:p-5 border-2 border-brand-dark transition-all duration-100 ${
                   !notif.read
-                    ? 'bg-amber-50/70 border-l-6 border-l-brand-gold shadow-brutal'
+                    ? 'bg-amber-50/70 border-l-4 sm:border-l-6 border-l-brand-gold shadow-brutal-sm sm:shadow-brutal'
                     : 'bg-brand-paper shadow-brutal-xs hover:bg-brand-paper-tint'
                 } ${hasLink ? 'cursor-pointer' : ''}`}
               >
