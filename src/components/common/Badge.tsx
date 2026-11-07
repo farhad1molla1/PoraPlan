@@ -17,11 +17,11 @@ export const Badge: React.FC<BadgeProps> = ({
   className,
 }) => {
   const baseClasses =
-    'inline-flex items-center gap-1.5 font-mono uppercase font-bold tracking-wider border-2 border-brand-dark select-none shadow-brutal-xs';
+    'inline-flex items-center gap-1.5 font-mono uppercase font-bold tracking-wider border-2 border-brand-dark select-none shadow-brutal-xs motion-reduce:transition-none';
 
   const sizeClasses = {
-    sm: 'text-[10px] px-2 py-0.5',
-    md: 'text-xs px-2.5 py-1',
+    sm: 'text-[11px] px-2 py-0.5 leading-tight',
+    md: 'text-xs px-2.5 py-1 leading-normal',
   };
 
   const variantClasses: Record<BadgeVariant, string> = {

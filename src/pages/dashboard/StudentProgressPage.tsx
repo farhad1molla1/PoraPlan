@@ -217,86 +217,86 @@ export const StudentProgressPage: React.FC = () => {
               {/* ========================================================================= */}
               <div className="md:hidden space-y-4">
                 {/* Segmented Control */}
-                <div className="flex border-2 border-brand-dark bg-brand-paper shadow-brutal p-1 gap-1">
+                <div className="flex border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal-sm p-1 gap-1">
                   <button
                     type="button"
                     onClick={() => setMobileTab('overview')}
-                    className={`flex-1 min-h-[44px] py-2 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1.5 ${
+                    className={`flex-1 min-h-[44px] py-2 px-1 text-[11px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
                       mobileTab === 'overview'
                         ? 'bg-brand-navy text-white shadow-brutal-xs'
                         : 'text-brand-dark hover:bg-brand-paper-tint'
                     }`}
                   >
-                    <TrendingUp className="w-3.5 h-3.5" />
+                    <TrendingUp className="w-3.5 h-3.5 shrink-0" />
                     <span>Overview</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setMobileTab('subjects')}
-                    className={`flex-1 min-h-[44px] py-2 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1.5 ${
+                    className={`flex-1 min-h-[44px] py-2 px-1 text-[11px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
                       mobileTab === 'subjects'
                         ? 'bg-brand-navy text-white shadow-brutal-xs'
                         : 'text-brand-dark hover:bg-brand-paper-tint'
                     }`}
                   >
-                    <BookOpen className="w-3.5 h-3.5" />
+                    <BookOpen className="w-3.5 h-3.5 shrink-0" />
                     <span>Subjects</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setMobileTab('activity')}
-                    className={`flex-1 min-h-[44px] py-2 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1.5 ${
+                    className={`flex-1 min-h-[44px] py-2 px-1 text-[11px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
                       mobileTab === 'activity'
                         ? 'bg-brand-navy text-white shadow-brutal-xs'
                         : 'text-brand-dark hover:bg-brand-paper-tint'
                     }`}
                   >
-                    <Clock className="w-3.5 h-3.5" />
+                    <Clock className="w-3.5 h-3.5 shrink-0" />
                     <span>Activity</span>
                   </button>
                 </div>
 
                 {/* TAB 1: OVERVIEW */}
                 {mobileTab === 'overview' && (
-                  <div className="space-y-4 animate-fadeIn">
+                  <div className="space-y-4 animate-fadeIn motion-reduce:animate-none">
                     {/* Study Cycle Overview Compact Card */}
-                    <div className="p-3.5 border-2 border-brand-dark bg-brand-paper-tint shadow-brutal">
+                    <div className="p-3.5 border-2 border-brand-dark bg-brand-paper-tint shadow-brutal-xs sm:shadow-brutal">
                       <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-brand-dark/15">
                         <span className="font-mono text-xs uppercase font-extrabold text-brand-navy flex items-center gap-1.5">
                           <Sparkles className="w-3.5 h-3.5 text-brand-teal" />
                           Study Cycle Progression
                         </span>
-                        <span className="font-mono text-[10px] text-brand-teal font-bold uppercase">
+                        <span className="font-mono text-[11px] text-brand-teal font-bold uppercase">
                           7 Stages
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-center font-mono text-xs">
                         <div className="p-2 border border-brand-dark bg-brand-paper">
-                          <span className="text-[10px] text-brand-muted block uppercase">Step 1: Plan</span>
+                          <span className="text-[11px] text-brand-muted block uppercase font-bold">Step 1: Plan</span>
                           <span className="text-brand-navy font-bold">{progress.studyPlans.activePlans} Active Plans</span>
                         </div>
                         <div className="p-2 border border-brand-dark bg-brand-paper">
-                          <span className="text-[10px] text-brand-muted block uppercase">Step 2: Study</span>
+                          <span className="text-[11px] text-brand-muted block uppercase font-bold">Step 2: Study</span>
                           <span className="text-brand-navy font-bold">{progress.tasks.completed}/{progress.tasks.total} Tasks</span>
                         </div>
                         <div className="p-2 border border-brand-dark bg-brand-paper">
-                          <span className="text-[10px] text-brand-muted block uppercase">Step 3: Practice</span>
+                          <span className="text-[11px] text-brand-muted block uppercase font-bold">Step 3: Practice</span>
                           <span className="text-brand-navy font-bold">{progress.assignments.totalAssigned} Sets</span>
                         </div>
                         <div className="p-2 border border-brand-dark bg-brand-paper">
-                          <span className="text-[10px] text-brand-muted block uppercase">Step 4: Submit</span>
+                          <span className="text-[11px] text-brand-muted block uppercase font-bold">Step 4: Submit</span>
                           <span className="text-brand-navy font-bold">{progress.assignments.submitted} Submitted</span>
                         </div>
                         <div className="p-2 border border-brand-dark bg-brand-paper">
-                          <span className="text-[10px] text-brand-muted block uppercase">Step 5: Review</span>
+                          <span className="text-[11px] text-brand-muted block uppercase font-bold">Step 5: Review</span>
                           <span className="text-brand-gold font-bold">{progress.assignments.pendingReview} In Queue</span>
                         </div>
                         <div className="p-2 border border-brand-dark bg-brand-paper">
-                          <span className="text-[10px] text-brand-muted block uppercase">Step 6: Feedback</span>
+                          <span className="text-[11px] text-brand-muted block uppercase font-bold">Step 6: Feedback</span>
                           <span className="text-brand-teal font-bold">{progress.assignments.reviewed} Graded</span>
                         </div>
                         <div className="p-2 border-2 border-brand-dark bg-brand-teal text-white col-span-2 flex items-center justify-between px-3">
-                          <span className="text-[10px] uppercase font-bold text-brand-bg">Step 7: Mastery</span>
+                          <span className="text-[11px] uppercase font-bold text-brand-bg">Step 7: Mastery</span>
                           <span className="text-xs font-bold text-white flex items-center gap-1">
                             Verified Progress <Check className="w-3.5 h-3.5 stroke-[3]" />
                           </span>
@@ -307,17 +307,17 @@ export const StudentProgressPage: React.FC = () => {
                     {/* 4 Academic KPI Blocks */}
                     <div className="grid grid-cols-2 gap-3">
                       {/* Tasks */}
-                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal flex flex-col justify-between">
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="font-mono text-[10px] uppercase font-extrabold text-brand-muted">
+                            <span className="font-mono text-[11px] uppercase font-extrabold text-brand-muted">
                               Tasks
                             </span>
                             <ListTodo className="w-3.5 h-3.5 text-brand-teal stroke-[2.5]" />
                           </div>
                           <div className="font-heading font-extrabold text-xl text-brand-navy">
                             {progress.tasks.completed}{' '}
-                            <span className="text-[10px] font-mono font-normal text-brand-muted">
+                            <span className="text-[11px] font-mono font-normal text-brand-muted">
                               / {progress.tasks.total}
                             </span>
                           </div>
@@ -337,17 +337,17 @@ export const StudentProgressPage: React.FC = () => {
                       </div>
 
                       {/* Practice */}
-                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal flex flex-col justify-between">
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="font-mono text-[10px] uppercase font-extrabold text-brand-muted">
+                            <span className="font-mono text-[11px] uppercase font-extrabold text-brand-muted">
                               Practice
                             </span>
                             <FileText className="w-3.5 h-3.5 text-brand-navy stroke-[2.5]" />
                           </div>
                           <div className="font-heading font-extrabold text-xl text-brand-navy">
                             {progress.assignments.submitted}{' '}
-                            <span className="text-[10px] font-mono font-normal text-brand-muted">
+                            <span className="text-[11px] font-mono font-normal text-brand-muted">
                               / {progress.assignments.totalAssigned}
                             </span>
                           </div>
@@ -367,17 +367,17 @@ export const StudentProgressPage: React.FC = () => {
                       </div>
 
                       {/* Evaluations */}
-                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal flex flex-col justify-between">
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="font-mono text-[10px] uppercase font-extrabold text-brand-muted">
+                            <span className="font-mono text-[11px] uppercase font-extrabold text-brand-muted">
                               Evaluations
                             </span>
                             <Calendar className="w-3.5 h-3.5 text-brand-gold stroke-[2.5]" />
                           </div>
                           <div className="font-heading font-extrabold text-xl text-brand-navy">
                             {progress.evaluations.completed}{' '}
-                            <span className="text-[10px] font-mono font-normal text-brand-muted">
+                            <span className="text-[11px] font-mono font-normal text-brand-muted">
                               / {progress.evaluations.total}
                             </span>
                           </div>
@@ -401,17 +401,17 @@ export const StudentProgressPage: React.FC = () => {
                       </div>
 
                       {/* Study Plans */}
-                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+                      <div className="p-3.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal flex flex-col justify-between">
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="font-mono text-[10px] uppercase font-extrabold text-brand-muted">
+                            <span className="font-mono text-[11px] uppercase font-extrabold text-brand-muted">
                               Roadmaps
                             </span>
                             <Compass className="w-3.5 h-3.5 text-brand-teal stroke-[2.5]" />
                           </div>
                           <div className="font-heading font-extrabold text-xl text-brand-navy">
                             {progress.studyPlans.completedPlans}{' '}
-                            <span className="text-[10px] font-mono font-normal text-brand-muted">
+                            <span className="text-[11px] font-mono font-normal text-brand-muted">
                               / {progress.studyPlans.totalPlans}
                             </span>
                           </div>
@@ -435,11 +435,11 @@ export const StudentProgressPage: React.FC = () => {
 
                 {/* TAB 2: SUBJECTS */}
                 {mobileTab === 'subjects' && (
-                  <div className="space-y-3 animate-fadeIn">
+                  <div className="space-y-3 animate-fadeIn motion-reduce:animate-none">
                     {/* Subject Filter Picker */}
                     {progress.subjectsProgress.length > 0 && (
                       <div className="p-2.5 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs flex items-center gap-2">
-                        <span className="font-mono text-[10px] uppercase font-bold text-brand-muted shrink-0">
+                        <span className="font-mono text-[11px] uppercase font-bold text-brand-muted shrink-0">
                           Filter Area:
                         </span>
                         <select
@@ -468,11 +468,11 @@ export const StudentProgressPage: React.FC = () => {
                       filteredSubjectsOnMobile.map((subj) => (
                         <div
                           key={subj.subjectId}
-                          className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-3"
+                          className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs sm:shadow-brutal space-y-3"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <span className="font-mono text-[10px] font-bold text-brand-muted">
+                              <span className="font-mono text-[11px] font-bold text-brand-muted">
                                 {subj.subjectCode || 'ACADEMIC AREA'}
                               </span>
                               <h3 className="font-heading font-extrabold text-base text-brand-navy truncate">
@@ -533,13 +533,13 @@ export const StudentProgressPage: React.FC = () => {
 
                 {/* TAB 3: ACTIVITY */}
                 {mobileTab === 'activity' && (
-                  <div className="space-y-3 animate-fadeIn">
+                  <div className="space-y-3 animate-fadeIn motion-reduce:animate-none">
                     <div className="flex items-center justify-between pb-1">
                       <span className="font-heading font-extrabold text-sm text-brand-navy flex items-center gap-1.5">
                         <Clock className="w-4 h-4 text-brand-teal" />
                         Recent Activity
                       </span>
-                      <span className="font-mono text-[10px] text-brand-muted">
+                      <span className="font-mono text-[11px] text-brand-muted">
                         {progress.recentActivity.length} Events
                       </span>
                     </div>
@@ -577,7 +577,7 @@ export const StudentProgressPage: React.FC = () => {
                                   </Badge>
                                 )}
                                 {item.subjectName && (
-                                  <span className="font-mono text-[9px] text-brand-muted px-1 border border-brand-dark/30 bg-brand-paper-tint">
+                                  <span className="font-mono text-[11px] text-brand-muted px-1 border border-brand-dark/30 bg-brand-paper-tint">
                                     {item.subjectName}
                                   </span>
                                 )}
@@ -589,7 +589,7 @@ export const StudentProgressPage: React.FC = () => {
                               )}
                             </div>
                           </div>
-                          <div className="font-mono text-[10px] text-brand-muted text-right border-t border-brand-dark/10 pt-1">
+                          <div className="font-mono text-[11px] text-brand-muted text-right border-t border-brand-dark/10 pt-1">
                             {new Date(item.timestamp).toLocaleString(undefined, {
                               month: 'short',
                               day: 'numeric',

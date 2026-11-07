@@ -109,12 +109,12 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
         ref={sheetRef}
         tabIndex={-1}
         className={cn(
-          'w-full bg-brand-paper border-t-3 sm:border-2 border-brand-dark shadow-brutal-lg',
+          'w-full bg-brand-paper border-t-2 sm:border-2 border-brand-dark shadow-brutal-sm sm:shadow-brutal-lg',
           'rounded-t-2xl sm:rounded-none',
           'max-h-[92dvh] sm:max-h-[90vh]',
           'flex flex-col',
           'focus:outline-none',
-          'animate-in fade-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 duration-200',
+          'animate-in fade-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 duration-200 motion-reduce:animate-none motion-reduce:transition-none',
           maxWidthMap[maxWidth],
           className
         )}
@@ -140,7 +140,7 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
                 {title}
               </h2>
               {subtitle && (
-                <p className="font-mono text-xs text-brand-muted truncate mt-0.5">
+                <p className="font-mono text-[11px] sm:text-xs text-brand-muted truncate mt-0.5">
                   {subtitle}
                 </p>
               )}

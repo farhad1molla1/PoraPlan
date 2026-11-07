@@ -18,17 +18,17 @@ export const Card: React.FC<CardProps> = ({
   className,
   ...props
 }) => {
-  const baseClasses = 'relative border-2 border-brand-dark transition-all duration-150 rounded-none';
+  const baseClasses = 'relative border-2 border-brand-dark transition-all duration-150 rounded-none motion-reduce:transition-none';
 
   const shadowClasses = {
     none: '',
     sm: 'shadow-brutal-xs',
-    md: 'shadow-brutal-sm',
-    lg: 'shadow-brutal',
+    md: 'shadow-brutal-xs sm:shadow-brutal-sm',
+    lg: 'shadow-brutal-sm sm:shadow-brutal',
   };
 
   const hoverClasses = hoverable
-    ? 'hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal cursor-pointer'
+    ? 'hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal motion-reduce:hover:transform-none cursor-pointer'
     : '';
 
   const variantClasses: Record<CardVariant, string> = {
@@ -51,7 +51,7 @@ export const Card: React.FC<CardProps> = ({
       {...props}
     >
       {headerBar && (
-        <div className="border-b-2 border-brand-dark px-3 sm:px-4 py-1.5 sm:py-2 bg-black/[0.04] flex items-center justify-between font-mono text-[11px] sm:text-xs tracking-wider">
+        <div className="border-b-2 border-brand-dark px-3 sm:px-4 py-1.5 sm:py-2 bg-black/[0.04] dark:bg-white/[0.04] flex items-center justify-between font-mono text-[11px] sm:text-xs tracking-wider">
           {headerBar}
         </div>
       )}

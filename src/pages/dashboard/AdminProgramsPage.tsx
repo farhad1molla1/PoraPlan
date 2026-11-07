@@ -697,7 +697,7 @@ export const AdminProgramsPage: React.FC = () => {
   return (
     <div className="w-full py-6 sm:py-8 px-3.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-screen">
       <div className="max-w-6xl mx-auto space-y-6">
-        
+
         {/* Top Header Ribbon */}
         <div className="border-2 border-brand-dark bg-brand-navy text-brand-bg p-6 shadow-brutal flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -744,14 +744,14 @@ export const AdminProgramsPage: React.FC = () => {
         )}
 
         {/* Filters Bar */}
-        <div className="p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        <div className="p-3 sm:p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
           {/* Category Tabs */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span className="font-mono text-xs text-brand-muted uppercase font-bold mr-1">Category:</span>
             <button
               type="button"
               onClick={() => setCategoryFilter('all')}
-              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[36px] sm:min-h-0 font-mono text-xs border ${
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[38px] sm:min-h-0 font-mono text-xs border motion-reduce:transition-none ${
                 categoryFilter === 'all'
                   ? 'bg-brand-navy text-white border-brand-dark font-bold'
                   : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -762,7 +762,7 @@ export const AdminProgramsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setCategoryFilter('academic_mentorship')}
-              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[36px] sm:min-h-0 font-mono text-xs border ${
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[38px] sm:min-h-0 font-mono text-xs border motion-reduce:transition-none ${
                 categoryFilter === 'academic_mentorship'
                   ? 'bg-brand-gold text-brand-dark border-brand-dark font-bold'
                   : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -773,7 +773,7 @@ export const AdminProgramsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setCategoryFilter('skillsprint')}
-              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[36px] sm:min-h-0 font-mono text-xs border ${
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-1 min-h-[38px] sm:min-h-0 font-mono text-xs border motion-reduce:transition-none ${
                 categoryFilter === 'skillsprint'
                   ? 'bg-brand-teal text-white border-brand-dark font-bold'
                   : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -791,7 +791,7 @@ export const AdminProgramsPage: React.FC = () => {
                 key={st}
                 type="button"
                 onClick={() => setStatusFilter(st)}
-                className={`px-2.5 py-1.5 sm:py-1 min-h-[36px] sm:min-h-0 font-mono text-xs uppercase border ${
+                className={`px-2.5 py-1.5 sm:py-1 min-h-[38px] sm:min-h-0 font-mono text-xs uppercase border motion-reduce:transition-none ${
                   statusFilter === st
                     ? 'bg-brand-dark text-white border-brand-dark font-bold'
                     : 'bg-brand-paper-tint text-brand-dark border-brand-dark/40 hover:bg-brand-paper'
@@ -805,12 +805,12 @@ export const AdminProgramsPage: React.FC = () => {
 
         {/* Program Cards List */}
         {loading ? (
-          <div className="p-12 text-center border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-3">
-            <Loader2 className="w-8 h-8 animate-spin text-brand-teal mx-auto" />
+          <div className="p-12 text-center border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-3">
+            <Loader2 className="w-8 h-8 animate-spin motion-reduce:animate-none text-brand-teal mx-auto" />
             <p className="font-mono text-xs text-brand-muted">Loading programs...</p>
           </div>
         ) : filteredPrograms.length === 0 ? (
-          <div className="p-10 text-center border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-2">
+          <div className="p-10 text-center border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-2">
             <p className="font-heading font-extrabold text-brand-navy">No Programs Matching Filter</p>
             <p className="font-sans text-xs text-brand-muted">Click "Create New Program" to provision your first offering.</p>
           </div>
@@ -824,7 +824,7 @@ export const AdminProgramsPage: React.FC = () => {
               return (
                 <div
                   key={prog.id}
-                  className="p-5 sm:p-6 border-3 border-brand-dark bg-brand-paper shadow-brutal space-y-4"
+                  className="p-4 sm:p-6 border-2 sm:border-3 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-4"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-brand-dark pb-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -843,11 +843,10 @@ export const AdminProgramsPage: React.FC = () => {
                       </Badge>
 
                       <span
-                        className={`font-mono text-[10px] font-bold px-2 py-0.5 border ${
-                          isEnrollmentOpen
-                            ? 'bg-emerald-50 text-emerald-800 border-emerald-700'
-                            : 'bg-red-50 text-red-800 border-red-700'
-                        }`}
+                        className={`font-mono text-[11px] font-bold px-2 py-0.5 border ${isEnrollmentOpen
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-700'
+                          : 'bg-red-50 text-red-800 border-red-700'
+                          }`}
                       >
                         ENROLLMENT {prog.enrollment_status.toUpperCase()}
                       </span>
@@ -891,7 +890,7 @@ export const AdminProgramsPage: React.FC = () => {
                     ) : (
                       <div className="w-full sm:w-44 h-28 shrink-0 border-2 border-dashed border-brand-dark/30 bg-brand-paper-tint flex flex-col items-center justify-center gap-1 text-brand-muted">
                         <ImageIcon className="w-5 h-5 stroke-[1.5]" />
-                        <span className="font-mono text-[10px]">No Thumbnail</span>
+                        <span className="font-mono text-[11px]">No Thumbnail</span>
                       </div>
                     )}
                     <div className="space-y-1.5 flex-1 min-w-0">
@@ -987,8 +986,8 @@ export const AdminProgramsPage: React.FC = () => {
 
       {/* MODAL: Create / Edit Program */}
       {programModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto">
-          <div className="w-full max-w-2xl bg-brand-paper border-3 border-brand-dark shadow-brutal-lg p-6 space-y-5 my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto">
+          <div className="w-full max-w-2xl bg-brand-paper border-2 sm:border-3 border-brand-dark shadow-brutal-sm sm:shadow-brutal-lg p-5 sm:p-6 space-y-5 my-8">
             <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
               <h3 className="font-heading font-extrabold text-lg text-brand-navy">
                 {editingProgram ? 'Edit Program Offering' : 'Create New Program Offering'}
@@ -1232,10 +1231,10 @@ export const AdminProgramsPage: React.FC = () => {
       {/* MODAL: Manage Cohorts for Program */}
       {cohortModalOpen && selectedProgramForCohorts && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto">
-          <div className="w-full max-w-3xl bg-brand-paper border-3 border-brand-dark shadow-brutal-lg p-4 sm:p-6 space-y-4 sm:space-y-6 my-auto sm:my-8 max-h-[92dvh] flex flex-col">
+          <div className="w-full max-w-3xl bg-brand-paper border-2 sm:border-3 border-brand-dark shadow-brutal-sm sm:shadow-brutal-lg p-4 sm:p-6 space-y-4 sm:space-y-6 my-auto sm:my-8 max-h-[92dvh] flex flex-col">
             <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3 shrink-0">
               <div className="min-w-0 pr-2">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted block">
+                <span className="font-mono text-[11px] uppercase font-bold text-brand-muted block">
                   Cohort Desk
                 </span>
                 <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy truncate">
@@ -1535,10 +1534,10 @@ export const AdminProgramsPage: React.FC = () => {
       {/* MODAL: Curriculum Builder */}
       {curriculumModalOpen && selectedProgramForCurriculum && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-brand-dark/60 backdrop-blur-xs overflow-y-auto">
-          <div className="w-full max-w-3xl bg-brand-paper border-3 border-brand-dark shadow-brutal-lg p-4 sm:p-6 space-y-4 sm:space-y-6 my-auto sm:my-8 max-h-[92dvh] flex flex-col">
+          <div className="w-full max-w-3xl bg-brand-paper border-2 sm:border-3 border-brand-dark shadow-brutal-sm sm:shadow-brutal-lg p-4 sm:p-6 space-y-4 sm:space-y-6 my-auto sm:my-8 max-h-[92dvh] flex flex-col">
             <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3 shrink-0">
               <div className="min-w-0 pr-2">
-                <span className="font-mono text-[10px] uppercase font-bold text-brand-muted block">
+                <span className="font-mono text-[11px] uppercase font-bold text-brand-muted block">
                   Curriculum Builder
                 </span>
                 <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy truncate">
@@ -1726,7 +1725,7 @@ export const AdminProgramsPage: React.FC = () => {
           }}
         >
           <div
-            className="w-full max-w-md max-h-[90dvh] sm:max-h-[85dvh] flex flex-col bg-brand-paper border-t-3 sm:border-3 border-brand-dark rounded-t-2xl sm:rounded-none shadow-brutal p-4 sm:p-5 pb-[max(1rem,env(safe-area-inset-bottom))]"
+            className="w-full max-w-md max-h-[90dvh] sm:max-h-[85dvh] flex flex-col bg-brand-paper border-t-2 sm:border-3 border-brand-dark rounded-t-2xl sm:rounded-none shadow-brutal-sm sm:shadow-brutal p-4 sm:p-5 pb-[max(1rem,env(safe-area-inset-bottom))]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Mobile Drag Handle Affordance */}
@@ -1803,7 +1802,7 @@ export const AdminProgramsPage: React.FC = () => {
           }}
         >
           <div
-            className="w-full max-w-md max-h-[90dvh] sm:max-h-[85dvh] flex flex-col bg-brand-paper border-t-3 sm:border-3 border-brand-dark rounded-t-2xl sm:rounded-none shadow-brutal p-4 sm:p-5 pb-[max(1rem,env(safe-area-inset-bottom))]"
+            className="w-full max-w-md max-h-[90dvh] sm:max-h-[85dvh] flex flex-col bg-brand-paper border-t-2 sm:border-3 border-brand-dark rounded-t-2xl sm:rounded-none shadow-brutal-sm sm:shadow-brutal p-4 sm:p-5 pb-[max(1rem,env(safe-area-inset-bottom))]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Mobile Drag Handle Affordance */}

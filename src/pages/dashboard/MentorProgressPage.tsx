@@ -188,9 +188,9 @@ export const MentorProgressPage: React.FC = () => {
       {/* 2. AGGREGATE KPI CARDS                                                    */}
       {/* ========================================================================= */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[10px] sm:text-xs uppercase font-extrabold text-brand-muted">
+            <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
               ASSIGNED STUDENTS
             </span>
             <Users className="w-4 h-4 text-brand-navy stroke-[2.5]" />
@@ -198,14 +198,14 @@ export const MentorProgressPage: React.FC = () => {
           <div className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">
             {totalAssignedScholars}
           </div>
-          <span className="text-[10px] font-mono text-brand-muted mt-1">
+          <span className="text-[11px] font-mono text-brand-muted mt-1">
             Active students
           </span>
         </div>
 
-        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[10px] sm:text-xs uppercase font-extrabold text-brand-muted">
+            <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
               ACTIVE TASKS TRACK
             </span>
             <ListTodo className="w-4 h-4 text-brand-teal stroke-[2.5]" />
@@ -213,14 +213,14 @@ export const MentorProgressPage: React.FC = () => {
           <div className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">
             {scholarsWithActiveTasks}
           </div>
-          <span className="text-[10px] font-mono text-brand-teal font-bold mt-1">
+          <span className="text-[11px] font-mono text-brand-teal font-bold mt-1">
             Students with study tasks
           </span>
         </div>
 
-        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[10px] sm:text-xs uppercase font-extrabold text-brand-muted">
+            <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
               PENDING REVIEWS
             </span>
             <FileText className="w-4 h-4 text-brand-gold stroke-[2.5]" />
@@ -228,16 +228,16 @@ export const MentorProgressPage: React.FC = () => {
           <div className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">
             {totalPendingReviews}
           </div>
-          <span className="text-[10px] font-mono text-brand-gold font-bold mt-1">
+          <span className="text-[11px] font-mono text-brand-gold font-bold mt-1">
             <Link to="/mentor/reviews" className="underline hover:text-brand-dark">
               In review queue
             </Link>
           </span>
         </div>
 
-        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between">
+        <div className="p-4 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[10px] sm:text-xs uppercase font-extrabold text-brand-muted">
+            <span className="font-mono text-[11px] sm:text-xs uppercase font-extrabold text-brand-muted">
               COMPLETED EVALS
             </span>
             <Calendar className="w-4 h-4 text-brand-teal stroke-[2.5]" />
@@ -245,7 +245,7 @@ export const MentorProgressPage: React.FC = () => {
           <div className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">
             {totalCompletedEvaluations}
           </div>
-          <span className="text-[10px] font-mono text-brand-muted mt-1">
+          <span className="text-[11px] font-mono text-brand-muted mt-1">
             Milestones evaluated
           </span>
         </div>
@@ -272,8 +272,8 @@ export const MentorProgressPage: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal text-center flex flex-col items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-brand-teal mb-3" />
+          <div className="p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal text-center flex flex-col items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin motion-reduce:animate-none text-brand-teal mb-3" />
             <p className="font-heading font-extrabold text-base text-brand-navy">
               LOADING STUDENTS...
             </p>
@@ -311,12 +311,12 @@ export const MentorProgressPage: React.FC = () => {
             {filteredScholars.map((scholar) => (
               <div
                 key={scholar.studentId}
-                className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal flex flex-col justify-between"
+                className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-3 min-w-0">
                     <div className="min-w-0 flex-1">
-                      <span className="font-mono text-[10px] font-bold text-brand-teal bg-brand-bg px-1.5 py-0.5 border border-brand-dark">
+                      <span className="font-mono text-[11px] font-bold text-brand-teal bg-brand-bg px-1.5 py-0.5 border border-brand-dark">
                         {scholar.poraplanId}
                       </span>
                       <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-navy mt-1 truncate">
@@ -385,7 +385,7 @@ export const MentorProgressPage: React.FC = () => {
 
                     {/* Last Activity */}
                     {scholar.lastActiveTimestamp && (
-                      <div className="flex items-center justify-between pt-1 text-[10px] text-brand-muted">
+                      <div className="flex items-center justify-between pt-1 text-[11px] text-brand-muted">
                         <span>Last Active:</span>
                         <span>{new Date(scholar.lastActiveTimestamp).toLocaleDateString()}</span>
                       </div>
@@ -450,7 +450,7 @@ export const MentorProgressPage: React.FC = () => {
         <div className="p-1 sm:p-2 space-y-6">
               {loadingDetail ? (
                 <div className="py-12 text-center flex flex-col items-center justify-center">
-                  <Loader2 className="w-8 h-8 animate-spin text-brand-teal mb-3" />
+                  <Loader2 className="w-8 h-8 animate-spin motion-reduce:animate-none text-brand-teal mb-3" />
                   <p className="font-heading font-bold text-sm text-brand-navy">
                     LOADING STUDENT DETAILS...
                   </p>
@@ -466,37 +466,37 @@ export const MentorProgressPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setModalMobileTab('overview')}
-                      className={`flex-1 py-1.5 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 min-h-[40px] ${
+                      className={`flex-1 min-h-[44px] py-2 px-1 text-[11px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
                         modalMobileTab === 'overview'
                           ? 'bg-brand-navy text-white shadow-brutal-xs'
                           : 'text-brand-dark hover:bg-brand-paper-tint'
                       }`}
                     >
-                      <TrendingUp className="w-3.5 h-3.5" />
+                      <TrendingUp className="w-3.5 h-3.5 shrink-0" />
                       <span>Overview</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setModalMobileTab('subjects')}
-                      className={`flex-1 py-1.5 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 min-h-[40px] ${
+                      className={`flex-1 min-h-[44px] py-2 px-1 text-[11px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
                         modalMobileTab === 'subjects'
                           ? 'bg-brand-navy text-white shadow-brutal-xs'
                           : 'text-brand-dark hover:bg-brand-paper-tint'
                       }`}
                     >
-                      <BookOpen className="w-3.5 h-3.5" />
+                      <BookOpen className="w-3.5 h-3.5 shrink-0" />
                       <span>Subjects</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setModalMobileTab('activity')}
-                      className={`flex-1 py-1.5 px-1 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 min-h-[40px] ${
+                      className={`flex-1 min-h-[44px] py-2 px-1 text-[11px] sm:text-xs font-mono font-bold uppercase transition-all flex items-center justify-center gap-1 sm:gap-1.5 motion-reduce:transition-none ${
                         modalMobileTab === 'activity'
                           ? 'bg-brand-navy text-white shadow-brutal-xs'
                           : 'text-brand-dark hover:bg-brand-paper-tint'
                       }`}
                     >
-                      <Clock className="w-3.5 h-3.5" />
+                      <Clock className="w-3.5 h-3.5 shrink-0" />
                       <span>Activity</span>
                     </button>
                   </div>
@@ -504,28 +504,28 @@ export const MentorProgressPage: React.FC = () => {
                   {/* Mobile View Content */}
                   <div className="sm:hidden space-y-3">
                     {modalMobileTab === 'overview' && (
-                      <div className="space-y-3 animate-fadeIn">
+                      <div className="space-y-3 animate-fadeIn motion-reduce:animate-none">
                         <div className="grid grid-cols-2 gap-2">
                           <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs">
-                            <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                            <span className="text-[11px] font-mono text-brand-muted block uppercase">
                               Tasks Completed
                             </span>
                             <span className="font-heading font-extrabold text-base text-brand-navy">
                               {scholarDetail.tasks.completed}/{scholarDetail.tasks.total}
                             </span>
-                            <span className="text-[10px] font-mono text-brand-teal block font-bold mt-0.5">
+                            <span className="text-[11px] font-mono text-brand-teal block font-bold mt-0.5">
                               {scholarDetail.tasks.completionRate}% Done
                             </span>
                           </div>
 
                           <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs">
-                            <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                            <span className="text-[11px] font-mono text-brand-muted block uppercase">
                               Practice Sets
                             </span>
                             <span className="font-heading font-extrabold text-base text-brand-navy">
                               {scholarDetail.assignments.submitted}/{scholarDetail.assignments.totalAssigned}
                             </span>
-                            <span className="text-[10px] font-mono text-brand-gold block font-bold mt-0.5">
+                            <span className="text-[11px] font-mono text-brand-gold block font-bold mt-0.5">
                               {scholarDetail.assignments.pendingReview > 0
                                 ? `${scholarDetail.assignments.pendingReview} in queue`
                                 : `${scholarDetail.assignments.submissionRate}% Submitted`}
@@ -533,13 +533,13 @@ export const MentorProgressPage: React.FC = () => {
                           </div>
 
                           <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs">
-                            <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                            <span className="text-[11px] font-mono text-brand-muted block uppercase">
                               Evaluations
                             </span>
                             <span className="font-heading font-extrabold text-base text-brand-navy">
                               {scholarDetail.evaluations.completed}/{scholarDetail.evaluations.total}
                             </span>
-                            <span className="text-[10px] font-mono text-brand-navy block font-bold mt-0.5">
+                            <span className="text-[11px] font-mono text-brand-navy block font-bold mt-0.5">
                               {scholarDetail.evaluations.averageScorePercentage !== null
                                 ? `Avg: ${scholarDetail.evaluations.averageScorePercentage}%`
                                 : 'Pending'}
@@ -547,13 +547,13 @@ export const MentorProgressPage: React.FC = () => {
                           </div>
 
                           <div className="p-3 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs">
-                            <span className="text-[10px] font-mono text-brand-muted block uppercase">
+                            <span className="text-[11px] font-mono text-brand-muted block uppercase">
                               Study Plans
                             </span>
                             <span className="font-heading font-extrabold text-base text-brand-navy">
                               {scholarDetail.studyPlans.completedPlans}/{scholarDetail.studyPlans.totalPlans}
                             </span>
-                            <span className="text-[10px] font-mono text-brand-teal block font-bold mt-0.5">
+                            <span className="text-[11px] font-mono text-brand-teal block font-bold mt-0.5">
                               {scholarDetail.studyPlans.activePlans} Active Plans
                             </span>
                           </div>
@@ -562,7 +562,7 @@ export const MentorProgressPage: React.FC = () => {
                     )}
 
                     {modalMobileTab === 'subjects' && (
-                      <div className="space-y-2 animate-fadeIn">
+                      <div className="space-y-2 animate-fadeIn motion-reduce:animate-none">
                         {scholarDetail.subjectsProgress.length === 0 ? (
                           <p className="font-mono text-xs text-brand-muted text-center py-4">
                             No subjects assigned yet.
@@ -575,7 +575,7 @@ export const MentorProgressPage: React.FC = () => {
                             >
                               <div className="flex items-center justify-between">
                                 <span className="font-bold text-xs text-brand-navy">{subj.subjectName}</span>
-                                <span className="font-mono text-[10px] text-brand-muted">
+                                <span className="font-mono text-[11px] text-brand-muted">
                                   {subj.subjectCode || 'General'}
                                 </span>
                               </div>
@@ -596,7 +596,7 @@ export const MentorProgressPage: React.FC = () => {
                     )}
 
                     {modalMobileTab === 'activity' && (
-                      <div className="space-y-2 animate-fadeIn">
+                      <div className="space-y-2 animate-fadeIn motion-reduce:animate-none">
                         {scholarDetail.recentActivity.length === 0 ? (
                           <p className="font-mono text-xs text-brand-muted text-center py-4">
                             No activity logged yet.
@@ -610,10 +610,10 @@ export const MentorProgressPage: React.FC = () => {
                               <div className="min-w-0">
                                 <span className="font-bold text-brand-navy block truncate">{act.title}</span>
                                 {act.details && (
-                                  <span className="text-brand-muted text-[10px] block truncate">{act.details}</span>
+                                  <span className="text-brand-muted text-[11px] block truncate">{act.details}</span>
                                 )}
                               </div>
-                              <span className="font-mono text-[9px] text-brand-muted shrink-0">
+                              <span className="font-mono text-[11px] text-brand-muted shrink-0">
                                 {new Date(act.timestamp).toLocaleDateString()}
                               </span>
                             </div>

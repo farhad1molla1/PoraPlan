@@ -36,7 +36,7 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
         >
           {badge && <Badge variant="teal" size="sm">{badge}</Badge>}
           {eyebrow && (
-            <span className="font-mono text-[10px] sm:text-xs uppercase tracking-wider text-brand-muted font-bold">
+            <span className="font-mono text-[11px] sm:text-xs uppercase tracking-wider text-brand-muted font-bold">
               {eyebrow}
             </span>
           )}
