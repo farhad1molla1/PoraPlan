@@ -31,7 +31,9 @@ import {
   Sun,
   Moon,
   Monitor,
+  Menu,
 } from 'lucide-react';
+import { MobileNavDrawer } from '../components/common/MobileNavDrawer';
 import { getUnreadNotificationCount } from '../lib/notifications';
 
 export const DashboardLayout: React.FC = () => {
@@ -41,6 +43,7 @@ export const DashboardLayout: React.FC = () => {
   const location = useLocation();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const [emailToLink, setEmailToLink] = useState('');
   const [isLinkingEmail, setIsLinkingEmail] = useState(false);
@@ -172,13 +175,12 @@ export const DashboardLayout: React.FC = () => {
     { label: 'System Alerts', shortLabel: 'Alerts', to: '/admin/notifications', icon: Bell, badgeCount: unreadNotifCount },
   ];
 
-  // Mobile navigation: top essential daily actions
+  // Mobile navigation: 4 primary essential daily destinations per role
   const mobileStudentNavItems = [
     { label: 'Home', to: '/student/dashboard', icon: LayoutDashboard },
     { label: 'Tasks', to: '/student/tasks', icon: ListTodo },
     { label: 'Doubts', to: '/student/doubts', icon: HelpCircle },
     { label: 'Plans', to: '/student/plans', icon: Compass },
-    { label: 'Alerts', to: '/student/notifications', icon: Bell, badgeCount: unreadNotifCount },
   ];
 
   const mobileMentorNavItems = [
@@ -186,15 +188,13 @@ export const DashboardLayout: React.FC = () => {
     { label: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
     { label: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
     { label: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
-    { label: 'Alerts', to: '/mentor/notifications', icon: Bell, badgeCount: unreadNotifCount },
   ];
 
   const mobileAdminNavItems = [
     { label: 'Admin', to: '/admin/dashboard', icon: ShieldCheck },
-    { label: 'Enroll', to: '/admin/enrollments', icon: UserCheck },
+    { label: 'Enrollments', to: '/admin/enrollments', icon: UserCheck },
     { label: 'Mentors', to: '/admin/mentor-assignments', icon: Users },
     { label: 'Billing', to: '/admin/billing', icon: CreditCard },
-    { label: 'Alerts', to: '/admin/notifications', icon: Bell, badgeCount: unreadNotifCount },
   ];
 
   const navItems = isStudent ? studentNavItems : isMentor ? mentorNavItems : adminNavItems;
@@ -531,7 +531,10 @@ export const DashboardLayout: React.FC = () => {
         </aside>
 
         {/* Content Outlet Canvas */}
-        <main className="flex-1 min-w-0 pb-20 md:pb-8" id="workspace-content">
+        <main
+          className="flex-1 min-w-0 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-8"
+          id="workspace-content"
+        >
           <Outlet />
 
           {/* Clean App Footer */}
@@ -543,21 +546,23 @@ export const DashboardLayout: React.FC = () => {
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation Bar (< 768px, optimized for 360px-430px) */}
+      {/* Mobile Bottom Navigation Bar (< 768px, 4 primary destinations + More button) */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-header border-t-2 border-brand-dark h-14 flex items-stretch justify-around shadow-brutal-xs print:hidden"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-header border-t-2 border-brand-dark flex items-stretch justify-around shadow-brutal-xs print:hidden pb-[env(safe-area-inset-bottom,0px)] h-[calc(3.5rem+env(safe-area-inset-bottom,0px))]"
         aria-label="Mobile Bottom Navigation"
       >
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
-          const isExact = location.pathname === item.to || (location.pathname + location.hash) === item.to;
-          const isSubpath = item.to.includes('/subjects') && location.pathname.startsWith(item.to);
+          const isExact =
+            location.pathname === item.to || location.pathname + location.hash === item.to;
+          const isSubpath =
+            item.to.includes('/subjects') && location.pathname.startsWith(item.to);
           const isActive = isExact || isSubpath;
           return (
             <Link
               key={item.label}
               to={item.to}
-              className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors border-r last:border-r-0 border-brand-dark/20 relative ${
+              className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors border-r border-brand-dark/20 relative ${
                 isActive
                   ? 'bg-brand-teal-light text-brand-navy font-bold'
                   : 'text-brand-muted hover:text-brand-dark'
@@ -565,11 +570,6 @@ export const DashboardLayout: React.FC = () => {
             >
               <div className="relative">
                 <Icon className="w-4 h-4 stroke-[2.2]" />
-                {Boolean((item as any).badgeCount && (item as any).badgeCount > 0) && (
-                  <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px] px-0.5 bg-brand-coral text-white font-mono font-bold text-[8px] flex items-center justify-center rounded-full border border-brand-dark">
-                    {(item as any).badgeCount}
-                  </span>
-                )}
               </div>
               <span className="text-[10px] font-mono mt-0.5 leading-none truncate max-w-[70px]">
                 {item.label}
@@ -578,18 +578,60 @@ export const DashboardLayout: React.FC = () => {
           );
         })}
 
-        {/* Mobile Profile Trigger Item */}
-        <button
-          type="button"
-          onClick={() => setProfileModalOpen(true)}
-          className="flex-1 flex flex-col items-center justify-center py-1 text-brand-muted hover:text-brand-dark"
-        >
-          <UserIcon className="w-4 h-4 stroke-[2.2]" />
-          <span className="text-[10px] font-mono mt-0.5 leading-none">
-            Profile
-          </span>
-        </button>
+        {/* 5th Mobile Navigation Item: More Button (Triggers MobileNavDrawer) */}
+        {(() => {
+          const isPrimaryActive = mobileNavItems.some((item) => {
+            const isExact =
+              location.pathname === item.to || location.pathname + location.hash === item.to;
+            const isSubpath =
+              item.to.includes('/subjects') && location.pathname.startsWith(item.to);
+            return isExact || isSubpath;
+          });
+          const isMoreActive = !isPrimaryActive || mobileDrawerOpen;
+
+          return (
+            <button
+              type="button"
+              onClick={() => setMobileDrawerOpen((prev) => !prev)}
+              aria-expanded={mobileDrawerOpen}
+              aria-haspopup="dialog"
+              aria-label="More navigation options"
+              className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors relative cursor-pointer ${
+                isMoreActive
+                  ? 'bg-brand-teal-light text-brand-navy font-bold'
+                  : 'text-brand-muted hover:text-brand-dark'
+              }`}
+            >
+              <div className="relative">
+                <Menu className="w-4 h-4 stroke-[2.2]" />
+                {unreadNotifCount > 0 && (
+                  <span className="absolute -top-1 -right-1.5 w-2 h-2 bg-brand-coral rounded-full border border-brand-dark" />
+                )}
+              </div>
+              <span className="text-[10px] font-mono mt-0.5 leading-none">
+                More
+              </span>
+            </button>
+          );
+        })()}
       </nav>
+
+      {/* Role-Aware Mobile Navigation Slide-out Drawer (< 768px) */}
+      <MobileNavDrawer
+        isOpen={mobileDrawerOpen}
+        onClose={() => setMobileDrawerOpen(false)}
+        role={role}
+        userDisplayName={userDisplayName}
+        userInitials={userInitials}
+        userEmail={user?.email}
+        poraplanId={poraplanId || profile?.poraplan_id}
+        avatarUrl={profile?.avatar_url}
+        roleLabel={roleLabel}
+        roleBadgeVariant={roleBadgeVariant}
+        unreadNotifCount={unreadNotifCount}
+        onOpenProfileModal={() => setProfileModalOpen(true)}
+        onSignOut={handleSignOut}
+      />
 
       {/* Profile Details Modal Dossier */}
       {profileModalOpen && (
