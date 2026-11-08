@@ -451,211 +451,216 @@ export const StudentAssignmentsPage: React.FC = () => {
   const reviewedCount = assignments.filter((a) => a.submission && a.submission.status === 'reviewed').length;
 
   return (
-    <div className="space-y-3 sm:space-y-6">
-      {/* Page Header */}
-      <div className="bg-brand-bg border-2 sm:border-4 border-brand-dark p-2.5 sm:p-6 shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
-            <span className="font-mono text-[10px] sm:text-xs font-bold text-brand-teal uppercase tracking-wider">
-              Practice &amp; Submissions
-            </span>
-          </div>
-          <h1 className="font-heading font-black text-lg sm:text-2xl md:text-3xl text-brand-navy">
-            Assignments
-          </h1>
-          <p className="text-xs sm:text-sm text-brand-muted mt-0.5 sm:mt-1 max-w-2xl">
-            Practice tasks and problem sets assigned by your mentor to test your understanding.
-          </p>
-        </div>
+    <div className="w-full py-3 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6">
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={loadData}
-            disabled={loading}
-            className="flex items-center gap-1.5"
-            aria-label="Refresh assignments"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          <Link to="/student/tasks">
-            <Button variant="secondary" size="sm" className="flex items-center gap-1.5">
-              Study Tasks
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-        <div className="bg-brand-paper border sm:border-3 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal-sm">
-          <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
-            <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Total</span>
-            <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy" />
-          </div>
-          <div className="font-heading font-black text-lg sm:text-2xl text-brand-navy">{totalCount}</div>
-          <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5">Assigned sets</div>
-        </div>
-
-        <div className="bg-brand-paper border sm:border-3 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal-sm">
-          <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
-            <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Pending</span>
-            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold" />
-          </div>
-          <div className="font-heading font-black text-lg sm:text-2xl text-brand-gold">{pendingCount}</div>
-          <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5">To be submitted</div>
-        </div>
-
-        <div className="bg-brand-paper border sm:border-3 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal-sm">
-          <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
-            <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Submitted</span>
-            <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal" />
-          </div>
-          <div className="font-heading font-black text-lg sm:text-2xl text-brand-teal">{submittedCount}</div>
-          <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5">Awaiting review</div>
-        </div>
-
-        <div className="bg-brand-paper border sm:border-3 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal-sm">
-          <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
-            <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Reviewed</span>
-            <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy" />
-          </div>
-          <div className="font-heading font-black text-lg sm:text-2xl text-brand-navy">{reviewedCount}</div>
-          <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5">Evaluated work</div>
-        </div>
-      </div>
-
-      {/* Error Banner */}
-      {error && (
-        <div className="bg-red-50 border-3 border-red-500 p-4 text-red-700 flex items-start gap-3 shadow-brutal-sm">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        {/* Page Header */}
+        <section
+          aria-labelledby="assignments-heading"
+          className="bg-surface-card border sm:border-2 border-primary rounded-semantic-sm sm:rounded-semantic-md p-3 sm:p-6 shadow-micro sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4"
+        >
           <div>
-            <h4 className="font-bold text-sm">Failed to Load Assignments</h4>
-            <p className="text-xs mt-0.5">{error}</p>
+            <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
+              <span className="font-mono text-[10px] sm:text-xs font-bold text-brand-teal uppercase tracking-wider">
+                Practice &amp; Submissions
+              </span>
+            </div>
+            <h1 id="assignments-heading" className="font-heading font-black text-lg sm:text-2xl md:text-3xl text-brand-navy">
+              Assignments
+            </h1>
+            <p className="text-xs sm:text-sm text-brand-muted mt-0.5 sm:mt-1 max-w-2xl">
+              Practice tasks and problem sets assigned by your mentor to test your understanding.
+            </p>
           </div>
-        </div>
-      )}
 
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
-        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
-          <button
-            onClick={() => setStatusFilter('all')}
-            className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
-              statusFilter === 'all'
-                ? 'bg-brand-navy text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
-            }`}
-          >
-            All ({totalCount})
-          </button>
-          <button
-            onClick={() => setStatusFilter('pending')}
-            className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
-              statusFilter === 'pending'
-                ? 'bg-brand-gold text-brand-dark shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
-            }`}
-          >
-            To Submit ({pendingCount})
-          </button>
-          <button
-            onClick={() => setStatusFilter('submitted')}
-            className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
-              statusFilter === 'submitted'
-                ? 'bg-brand-teal text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
-            }`}
-          >
-            Submitted ({submittedCount})
-          </button>
-          <button
-            onClick={() => setStatusFilter('reviewed')}
-            className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
-              statusFilter === 'reviewed'
-                ? 'bg-brand-navy text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
-                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
-            }`}
-          >
-            Reviewed ({reviewedCount})
-          </button>
-        </div>
-
-        {mentors.length > 0 && (
-          <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-brand-muted font-mono">
-            <Users className="w-3.5 h-3.5 text-brand-teal" />
-            <span>Assigned Mentor: <strong>{mentors[0].full_name}</strong></span>
-          </div>
-        )}
-      </div>
-
-      {/* Main Content Area */}
-      {loading ? (
-        <div className="bg-brand-paper border sm:border-3 border-brand-dark p-6 sm:p-12 text-center shadow-none sm:shadow-brutal">
-          <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin mx-auto text-brand-teal mb-2 sm:mb-3" />
-          <p className="font-mono text-[10px] sm:text-sm text-brand-muted font-bold uppercase tracking-wider">
-            Loading assignment roster...
-          </p>
-        </div>
-      ) : filteredAssignments.length === 0 ? (
-        <div className="bg-brand-paper border sm:border-4 border-brand-dark p-4 sm:p-8 md:p-12 text-center shadow-none sm:shadow-brutal">
-          <div className="w-10 h-10 sm:w-16 sm:h-16 bg-brand-paper-tint border sm:border-3 border-brand-dark rounded-none flex items-center justify-center mx-auto mb-2.5 sm:mb-4 shadow-none sm:shadow-brutal-sm">
-            <FileText className="w-5 h-5 sm:w-8 sm:h-8 text-brand-muted" />
-          </div>
-          <h3 className="font-heading font-black text-base sm:text-xl text-brand-navy mb-1.5 sm:mb-2">
-            {statusFilter === 'all'
-              ? 'No Assignments Distributed Yet'
-              : `No Assignments in "${statusFilter.toUpperCase()}" Status`}
-          </h3>
-          <p className="text-[11px] sm:text-sm text-brand-muted max-w-md mx-auto mb-4 sm:mb-6">
-            {mentors.length > 0
-              ? `Your dedicated mentor ${mentors[0].full_name} has not distributed any practice sets matching this filter. New assignments will appear here with instructions and due dates.`
-              : 'You do not have an assigned mentor yet. When a mentor is assigned by administration, your practice assignments will appear here.'}
-          </p>
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadData}
+              disabled={loading}
+              className="flex items-center gap-1.5"
+              aria-label="Refresh assignments"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
             <Link to="/student/tasks">
-              <Button variant="primary" size="sm" className="flex items-center gap-1.5">
-                Go to Today's Tasks
+              <Button variant="secondary" size="sm" className="flex items-center gap-1.5">
+                Study Tasks
                 <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             </Link>
           </div>
-        </div>
-      ) : (
-        <div className="space-y-2.5 sm:space-y-4">
-          {filteredAssignments.map((assignment) => {
-            const hasSubmission = !!assignment.submission;
-            const isSelected = activeAssignmentId === assignment.id;
-            const isClosed = assignment.status === 'closed' || assignment.status === 'archived';
-            const submissionStatus = assignment.submission?.status;
-            const isLocked =
-              isClosed ||
-              (hasSubmission &&
-                (submissionStatus === 'under_review' || submissionStatus === 'reviewed'));
+        </section>
 
-            return (
-              <div
-                key={assignment.id}
-                className={`bg-brand-paper border sm:border-3 border-brand-dark transition-all ${
-                  isSelected ? 'ring-2 ring-brand-navy shadow-none sm:shadow-brutal' : 'shadow-none sm:shadow-brutal-sm hover:shadow-brutal'
-                }`}
-              >
-                <div className="p-2.5 sm:p-6">
-                  {/* Top Badges & Meta */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5 sm:mb-3">
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        {/* Metrics Row */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+          <div className="bg-surface-card border sm:border-2 border-primary rounded-semantic-sm sm:rounded-semantic-md p-2.5 sm:p-4 shadow-micro sm:shadow-brutal-sm hover:-translate-y-0.5 transition-transform">
+            <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+              <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Total</span>
+              <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy" />
+            </div>
+            <div className="font-heading font-black text-lg sm:text-2xl text-brand-navy">{totalCount}</div>
+            <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5 font-mono">Assigned sets</div>
+          </div>
+
+          <div className="bg-surface-card border sm:border-2 border-primary rounded-semantic-sm sm:rounded-semantic-md p-2.5 sm:p-4 shadow-micro sm:shadow-brutal-sm hover:-translate-y-0.5 transition-transform">
+            <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+              <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Pending</span>
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold" />
+            </div>
+            <div className="font-heading font-black text-lg sm:text-2xl text-brand-gold">{pendingCount}</div>
+            <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5 font-mono">To be submitted</div>
+          </div>
+
+          <div className="bg-surface-card border sm:border-2 border-primary rounded-semantic-sm sm:rounded-semantic-md p-2.5 sm:p-4 shadow-micro sm:shadow-brutal-sm hover:-translate-y-0.5 transition-transform">
+            <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+              <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Submitted</span>
+              <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal" />
+            </div>
+            <div className="font-heading font-black text-lg sm:text-2xl text-brand-teal">{submittedCount}</div>
+            <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5 font-mono">Awaiting review</div>
+          </div>
+
+          <div className="bg-surface-card border sm:border-2 border-primary rounded-semantic-sm sm:rounded-semantic-md p-2.5 sm:p-4 shadow-micro sm:shadow-brutal-sm hover:-translate-y-0.5 transition-transform">
+            <div className="flex items-center justify-between text-brand-muted mb-0.5 sm:mb-1">
+              <span className="font-mono text-[9px] sm:text-xs uppercase font-bold tracking-wider">Reviewed</span>
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy" />
+            </div>
+            <div className="font-heading font-black text-lg sm:text-2xl text-brand-navy">{reviewedCount}</div>
+            <div className="text-[9px] sm:text-[11px] text-brand-muted mt-0.5 font-mono">Evaluated work</div>
+          </div>
+        </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-red-50 border sm:border-2 border-red-500 rounded-semantic-sm p-3 sm:p-4 text-red-700 flex items-start gap-3 shadow-micro">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-bold text-sm">Failed to Load Assignments</h4>
+              <p className="text-xs mt-0.5">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 border-b sm:border-b-2 border-primary/20 pb-2 sm:pb-3">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
+            <button
+              onClick={() => setStatusFilter('all')}
+              className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-primary rounded-semantic-xs transition-all ${
+                statusFilter === 'all'
+                  ? 'bg-brand-navy text-white shadow-micro'
+                  : 'bg-surface-card text-brand-dark hover:bg-surface-inset'
+              }`}
+            >
+              All ({totalCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter('pending')}
+              className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-primary rounded-semantic-xs transition-all ${
+                statusFilter === 'pending'
+                  ? 'bg-brand-gold text-brand-dark shadow-micro'
+                  : 'bg-surface-card text-brand-dark hover:bg-surface-inset'
+              }`}
+            >
+              To Submit ({pendingCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter('submitted')}
+              className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-primary rounded-semantic-xs transition-all ${
+                statusFilter === 'submitted'
+                  ? 'bg-brand-teal text-white shadow-micro'
+                  : 'bg-surface-card text-brand-dark hover:bg-surface-inset'
+              }`}
+            >
+              Submitted ({submittedCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter('reviewed')}
+              className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-primary rounded-semantic-xs transition-all ${
+                statusFilter === 'reviewed'
+                  ? 'bg-brand-navy text-white shadow-micro'
+                  : 'bg-surface-card text-brand-dark hover:bg-surface-inset'
+              }`}
+            >
+              Reviewed ({reviewedCount})
+            </button>
+          </div>
+
+          {mentors.length > 0 && (
+            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-brand-muted font-mono">
+              <Users className="w-3.5 h-3.5 text-brand-teal" />
+              <span>Assigned Mentor: <strong>{mentors[0].full_name}</strong></span>
+            </div>
+          )}
+        </div>
+
+        {/* Main Content Area */}
+        {loading ? (
+          <div className="bg-surface-card border sm:border-2 border-primary rounded-semantic-sm sm:rounded-semantic-md p-6 sm:p-12 text-center shadow-micro sm:shadow-brutal">
+            <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin mx-auto text-brand-teal mb-2 sm:mb-3" />
+            <p className="font-mono text-[10px] sm:text-sm text-brand-muted font-bold uppercase tracking-wider">
+              Loading assignment roster...
+            </p>
+          </div>
+        ) : filteredAssignments.length === 0 ? (
+          <div className="bg-surface-card border sm:border-2 border-primary rounded-semantic-sm sm:rounded-semantic-md p-4 sm:p-8 md:p-12 text-center shadow-micro sm:shadow-brutal">
+            <div className="w-10 h-10 sm:w-16 sm:h-16 bg-surface-inset border sm:border-2 border-primary rounded-semantic-xs flex items-center justify-center mx-auto mb-2.5 sm:mb-4 shadow-micro">
+              <FileText className="w-5 h-5 sm:w-8 sm:h-8 text-brand-muted" />
+            </div>
+            <h3 className="font-heading font-black text-base sm:text-xl text-brand-navy mb-1.5 sm:mb-2">
+              {statusFilter === 'all'
+                ? 'No Assignments Distributed Yet'
+                : `No Assignments in "${statusFilter.toUpperCase()}" Status`}
+            </h3>
+            <p className="text-[11px] sm:text-sm text-brand-muted max-w-md mx-auto mb-4 sm:mb-6">
+              {mentors.length > 0
+                ? `Your dedicated mentor ${mentors[0].full_name} has not distributed any practice sets matching this filter. New assignments will appear here with instructions and due dates.`
+                : 'You do not have an assigned mentor yet. When a mentor is assigned by administration, your practice assignments will appear here.'}
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+              <Link to="/student/tasks">
+                <Button variant="primary" size="sm" className="flex items-center gap-1.5">
+                  Go to Today's Tasks
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2.5 sm:space-y-4">
+            {filteredAssignments.map((assignment) => {
+              const hasSubmission = !!assignment.submission;
+              const isSelected = activeAssignmentId === assignment.id;
+              const isClosed = assignment.status === 'closed' || assignment.status === 'archived';
+              const submissionStatus = assignment.submission?.status;
+              const isLocked =
+                isClosed ||
+                (hasSubmission &&
+                  (submissionStatus === 'under_review' || submissionStatus === 'reviewed'));
+
+              return (
+                <div
+                  key={assignment.id}
+                  className={`bg-surface-card border sm:border-2 border-primary rounded-semantic-sm sm:rounded-semantic-md transition-all ${
+                    isSelected ? 'ring-2 ring-brand-navy shadow-tactile sm:shadow-brutal' : 'shadow-micro sm:shadow-brutal hover:shadow-tactile'
+                  }`}
+                >
+                  <div className="p-3 sm:p-6">
+                    {/* Top Badges & Meta */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5 sm:mb-3">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                       {assignment.subject_name && (
-                        <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-paper-tint border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-navy flex items-center gap-1">
+                        <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-surface-inset border border-primary/30 px-1.5 sm:px-2 py-0.5 text-brand-navy rounded-semantic-xs flex items-center gap-1">
                           <BookOpen className="w-3 h-3 text-brand-teal" />
                           {assignment.subject_name}
                         </span>
                       )}
 
                       {assignment.plan_title && (
-                        <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-1.5 sm:px-2 py-0.5 text-brand-muted flex items-center gap-1">
+                        <span className="font-mono text-[11px] font-bold uppercase tracking-wider bg-surface-inset border border-primary/30 px-1.5 sm:px-2 py-0.5 text-brand-muted rounded-semantic-xs flex items-center gap-1">
                           <Compass className="w-3 h-3 text-brand-muted" />
                           {assignment.plan_title}
                         </span>
@@ -699,7 +704,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                   </h3>
 
                   {assignment.instructions && (
-                    <div className="bg-brand-paper p-3 sm:p-3.5 border border-brand-dark text-xs sm:text-sm text-brand-dark font-sans leading-relaxed whitespace-pre-wrap mb-3.5 sm:mb-4">
+                    <div className="bg-surface-inset p-3 sm:p-3.5 border border-primary/20 rounded-semantic-xs text-xs sm:text-sm text-brand-dark font-sans leading-relaxed whitespace-pre-wrap mb-3.5 sm:mb-4">
                       {assignment.instructions}
                     </div>
                   )}
@@ -709,7 +714,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                     <div className="space-y-2.5 sm:space-y-3 mb-3.5 sm:mb-4">
                       {/* Revision Requested Notice */}
                       {assignment.submission?.status === 'needs_revision' && (
-                        <div className="bg-red-50 border-2 border-red-500 p-2.5 sm:p-3 text-red-800 text-xs flex items-start gap-2 shadow-brutal-xs">
+                        <div className="bg-red-50 border sm:border-2 border-red-500 rounded-semantic-xs p-2.5 sm:p-3 text-red-800 text-xs flex items-start gap-2 shadow-micro">
                           <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                           <div>
                             <strong className="block font-bold">Revision Requested by Mentor</strong>
@@ -719,7 +724,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                       )}
 
                       {/* Student's Submitted Content Box */}
-                      <div className="p-3 sm:p-4 bg-teal-50 border-2 border-brand-teal text-brand-dark">
+                      <div className="p-3 sm:p-4 bg-surface-inset border border-brand-teal/50 rounded-semantic-xs text-brand-dark">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-mono text-xs font-bold text-brand-teal uppercase flex items-center gap-1.5">
                             <CheckCircle2 className="w-4 h-4 text-brand-teal" />
@@ -747,7 +752,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                           </div>
                         ) : assignment.submission?.submission_type === 'file' ? (
                           <div className="space-y-3 mt-1">
-                            <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-brand-paper border-2 border-brand-dark">
+                            <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-surface-card border sm:border-2 border-primary/30 rounded-semantic-xs">
                               <div className="flex items-center gap-2 min-w-0">
                                 <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
                                 <div className="min-w-0">
@@ -770,7 +775,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handlePreviewExistingAttachment(assignment.submission!)}
-                                  className="flex items-center gap-1.5"
+                                  className="flex items-center gap-1.5 rounded-semantic-xs"
                                 >
                                   <Eye className="w-3.5 h-3.5 text-brand-navy" />
                                   Preview
@@ -780,7 +785,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                   variant="secondary"
                                   size="sm"
                                   onClick={() => handleDownloadAttachment(assignment.submission!)}
-                                  className="flex items-center gap-1.5"
+                                  className="flex items-center gap-1.5 rounded-semantic-xs"
                                 >
                                   <Download className="w-3.5 h-3.5" />
                                   Download
@@ -803,8 +808,8 @@ export const StudentAssignmentsPage: React.FC = () => {
 
                       {/* Mentor Feedback & Score Display */}
                       {assignment.submission?.feedback ? (
-                        <div className="p-4 bg-brand-paper-tint border-3 border-brand-navy space-y-2">
-                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-navy/20 pb-2">
+                        <div className="p-3.5 sm:p-4 bg-surface-inset border sm:border-2 border-brand-navy rounded-semantic-xs space-y-2">
+                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-primary/20 pb-2">
                             <span className="font-mono text-xs font-bold text-brand-navy uppercase flex items-center gap-1.5">
                               <FileCheck className="w-4 h-4 text-brand-teal" />
                               Mentor Evaluation &amp; Corrections
@@ -827,7 +832,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                           </p>
                         </div>
                       ) : (
-                        <div className="p-3 bg-brand-paper border border-brand-dark/30 font-mono text-xs text-brand-muted flex items-center gap-2">
+                        <div className="p-3 bg-surface-inset border border-primary/20 rounded-semantic-xs font-mono text-xs text-brand-muted flex items-center gap-2">
                           <Clock className="w-3.5 h-3.5 text-brand-gold" />
                           <span>Status: <strong>Awaiting Mentor Review</strong> — your submission is in the mentor queue.</span>
                         </div>
@@ -836,7 +841,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                   )}
 
                   {/* Action Bar */}
-                  <div className="flex items-center justify-between pt-2 border-t border-brand-dark/20">
+                  <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-primary/20">
                     <div className="text-[11px] font-mono text-brand-muted">
                       Created: {assignment.created_at ? new Date(assignment.created_at).toLocaleDateString() : 'N/A'}
                     </div>
@@ -863,7 +868,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                           variant={hasSubmission ? 'outline' : 'primary'}
                           size="sm"
                           onClick={() => handleOpenSubmission(assignment)}
-                          className="flex items-center gap-1.5"
+                          className="flex items-center gap-1.5 rounded-semantic-xs"
                         >
                           {hasSubmission ? (
                             <>
@@ -886,7 +891,7 @@ export const StudentAssignmentsPage: React.FC = () => {
 
                 {/* Inline Submission Form Accordion (Desktop) */}
                 {isSelected && !isLocked && (
-                  <div className="hidden sm:block border-t-3 border-brand-dark bg-brand-bg p-5 sm:p-6">
+                  <div className="hidden sm:block border-t-2 border-primary bg-surface-inset p-4 sm:p-6 rounded-b-semantic-sm">
                     <div className="max-w-2xl mx-auto">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="font-heading font-black text-base text-brand-navy flex items-center gap-2">
@@ -903,17 +908,17 @@ export const StudentAssignmentsPage: React.FC = () => {
                       </div>
 
                       {/* Submission Type Switcher */}
-                      <div className="flex items-center gap-2 mb-4 border-b-2 border-brand-dark pb-3">
+                      <div className="flex items-center gap-2 mb-4 border-b border-primary/20 pb-3">
                         <button
                           type="button"
                           onClick={() => {
                             setSubmissionType('text');
                             setFormError(null);
                           }}
-                          className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
+                          className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border sm:border-2 border-primary rounded-semantic-xs flex items-center gap-1.5 transition-all ${
                             submissionType === 'text'
-                              ? 'bg-brand-navy text-white shadow-brutal-xs'
-                              : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
+                              ? 'bg-brand-navy text-white shadow-micro'
+                              : 'bg-surface-card text-brand-dark hover:bg-surface-elevated'
                           }`}
                         >
                           <FileText className="w-3.5 h-3.5" />
@@ -925,10 +930,10 @@ export const StudentAssignmentsPage: React.FC = () => {
                             setSubmissionType('link');
                             setFormError(null);
                           }}
-                          className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
+                          className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border sm:border-2 border-primary rounded-semantic-xs flex items-center gap-1.5 transition-all ${
                             submissionType === 'link'
-                              ? 'bg-brand-navy text-white shadow-brutal-xs'
-                              : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
+                              ? 'bg-brand-navy text-white shadow-micro'
+                              : 'bg-surface-card text-brand-dark hover:bg-surface-elevated'
                           }`}
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
@@ -940,10 +945,10 @@ export const StudentAssignmentsPage: React.FC = () => {
                             setSubmissionType('file');
                             setFormError(null);
                           }}
-                          className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
+                          className={`font-mono text-xs font-bold uppercase px-3 py-1.5 border sm:border-2 border-primary rounded-semantic-xs flex items-center gap-1.5 transition-all ${
                             submissionType === 'file'
-                              ? 'bg-brand-navy text-white shadow-brutal-xs'
-                              : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
+                              ? 'bg-brand-navy text-white shadow-micro'
+                              : 'bg-surface-card text-brand-dark hover:bg-surface-elevated'
                           }`}
                         >
                           <Paperclip className="w-3.5 h-3.5" />
@@ -952,14 +957,14 @@ export const StudentAssignmentsPage: React.FC = () => {
                       </div>
 
                       {formError && (
-                        <div className="bg-red-50 border-2 border-red-500 p-3 text-red-700 text-xs mb-3 flex items-center gap-2 shadow-brutal-xs">
+                        <div className="bg-red-50 border sm:border-2 border-red-500 rounded-semantic-xs p-3 text-red-700 text-xs mb-3 flex items-center gap-2 shadow-micro">
                           <AlertCircle className="w-4 h-4 flex-shrink-0" />
                           <span>{formError}</span>
                         </div>
                       )}
 
                       {formSuccess && (
-                        <div className="bg-teal-50 border-2 border-brand-teal p-3 text-brand-dark text-xs mb-3 flex items-center gap-2 shadow-brutal-xs">
+                        <div className="bg-teal-50 border sm:border-2 border-brand-teal rounded-semantic-xs p-3 text-brand-dark text-xs mb-3 flex items-center gap-2 shadow-micro">
                           <CheckCircle2 className="w-4 h-4 text-brand-teal flex-shrink-0" />
                           <span>{formSuccess}</span>
                         </div>
@@ -976,7 +981,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                               value={textContent}
                               onChange={(e) => setTextContent(e.target.value)}
                               placeholder="Write out your mathematical derivation, proof steps, or chapter review answers here..."
-                              className="w-full bg-brand-paper border-2 border-brand-dark p-3 text-base sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                              className="w-full bg-surface-card border sm:border-2 border-primary rounded-semantic-xs p-3 text-base sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
                               required
                             />
                             <p className="text-[11px] font-mono text-brand-muted mt-1">
@@ -996,7 +1001,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                 value={linkUrl}
                                 onChange={(e) => setLinkUrl(e.target.value)}
                                 placeholder="https://drive.google.com/... or https://github.com/..."
-                                className="w-full bg-brand-paper border-2 border-brand-dark px-3 py-2.5 sm:py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 text-brand-dark font-mono focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                                className="w-full bg-surface-card border sm:border-2 border-primary rounded-semantic-xs px-3 py-2.5 sm:py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 text-brand-dark font-mono focus:outline-none focus:ring-1 focus:ring-brand-teal"
                                 required
                               />
                               <p className="text-[11px] font-mono text-brand-muted mt-1">
@@ -1012,7 +1017,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                                 value={textContent}
                                 onChange={(e) => setTextContent(e.target.value)}
                                 placeholder="Any specific questions or areas where you encountered difficulty..."
-                                className="w-full bg-brand-paper border-2 border-brand-dark p-3 sm:p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                                className="w-full bg-surface-card border sm:border-2 border-primary rounded-semantic-xs p-3 sm:p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
                               />
                             </div>
                           </div>
@@ -1021,7 +1026,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                         {submissionType === 'file' && (
                           <div className="space-y-4">
                             {/* File Upload Box */}
-                            <div className="bg-brand-paper border-2 border-brand-dark p-4 space-y-3 shadow-brutal-xs">
+                            <div className="bg-surface-card border sm:border-2 border-primary rounded-semantic-xs p-4 space-y-3 shadow-micro">
                               <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
                                 Attach Solution Document (PDF, PNG, JPG, WebP, DOCX — Max 10MB) *
                               </label>
@@ -1029,7 +1034,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                               {/* Case 1: A new file is currently selected */}
                               {selectedFile ? (
                                 <div className="space-y-3">
-                                  <div className="p-3 bg-teal-50 border-2 border-brand-teal flex flex-wrap items-center justify-between gap-2">
+                                  <div className="p-3 bg-surface-inset border sm:border-2 border-brand-teal rounded-semantic-xs flex flex-wrap items-center justify-between gap-2">
                                     <div className="flex items-center gap-2 min-w-0">
                                       <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
                                       <div className="min-w-0">
@@ -1236,382 +1241,384 @@ export const StudentAssignmentsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Product Education Note */}
-      <div className="bg-brand-paper-tint border-3 border-brand-dark p-5 shadow-brutal-sm">
-        <div className="flex items-start gap-3">
-          <Sparkles className="w-5 h-5 text-brand-teal flex-shrink-0 mt-0.5" />
-          <div className="text-xs leading-relaxed text-brand-dark">
-            <strong className="font-heading font-black text-sm text-brand-navy block mb-1">
-              PoraPlan Academic Workflow: Tasks vs. Practice Assignments
-            </strong>
-            <p>
-              In PoraPlan, <strong>Tasks</strong> are daily disciplined study habits and reading sessions to complete. In contrast, <strong>Assignments</strong> require you to demonstrate problem-solving competency by submitting numerical derivation work, code, or handwritten scans for your mentor's detailed review.
-            </p>
+        {/* Product Education Note */}
+        <div className="bg-surface-card border sm:border-2 border-primary rounded-semantic-sm sm:rounded-semantic-md p-4 sm:p-5 shadow-micro sm:shadow-brutal-sm">
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-brand-teal flex-shrink-0 mt-0.5" />
+            <div className="text-xs leading-relaxed text-brand-dark">
+              <strong className="font-heading font-black text-sm text-brand-navy block mb-1">
+                PoraPlan Academic Workflow: Tasks vs. Practice Assignments
+              </strong>
+              <p>
+                In PoraPlan, <strong>Tasks</strong> are daily disciplined study habits and reading sessions to complete. In contrast, <strong>Assignments</strong> require you to demonstrate problem-solving competency by submitting numerical derivation work, code, or handwritten scans for your mentor's detailed review.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Mobile Submission Bottom Sheet */}
-      {(() => {
-        const activeAssignment = assignments.find((a) => a.id === activeAssignmentId);
-        const isClosed = activeAssignment ? (activeAssignment.status === 'closed' || activeAssignment.status === 'archived') : false;
-        const subStatus = activeAssignment?.submission?.status;
-        const isLocked = isClosed || (subStatus === 'under_review' || subStatus === 'reviewed');
-        const isMobileOpen = !!activeAssignment && !isLocked;
-        const mobileHasSubmission = !!activeAssignment?.submission;
+        {/* Mobile Submission Bottom Sheet */}
+        {(() => {
+          const activeAssignment = assignments.find((a) => a.id === activeAssignmentId);
+          const isClosed = activeAssignment ? (activeAssignment.status === 'closed' || activeAssignment.status === 'archived') : false;
+          const subStatus = activeAssignment?.submission?.status;
+          const isLocked = isClosed || (subStatus === 'under_review' || subStatus === 'reviewed');
+          const isMobileOpen = !!activeAssignment && !isLocked;
+          const mobileHasSubmission = !!activeAssignment?.submission;
 
-        return (
-          <div className="sm:hidden">
-            <MobileBottomSheet
-              isOpen={isMobileOpen}
-              onClose={() => {
-                setActiveAssignmentId(null);
-                setSelectedFile(null);
-              }}
-              title={mobileHasSubmission ? 'Update Your Submission' : 'Submit Assignment Work'}
-              subtitle={activeAssignment?.title}
-              maxWidth="xl"
-              footer={
-                <div className="flex items-center justify-end gap-2 w-full">
-                  <Button
+          return (
+            <div className="sm:hidden">
+              <MobileBottomSheet
+                isOpen={isMobileOpen}
+                onClose={() => {
+                  setActiveAssignmentId(null);
+                  setSelectedFile(null);
+                }}
+                title={mobileHasSubmission ? 'Update Your Submission' : 'Submit Assignment Work'}
+                subtitle={activeAssignment?.title}
+                maxWidth="xl"
+                footer={
+                  <div className="flex items-center justify-end gap-2 w-full">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setActiveAssignmentId(null);
+                        setSelectedFile(null);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      form="mobile-assignment-submission-form"
+                      variant="primary"
+                      size="sm"
+                      disabled={submitting}
+                      className="flex items-center gap-1.5 shadow-micro"
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          {submissionType === 'file' && selectedFile
+                            ? 'Uploading File & Saving...'
+                            : 'Saving Submission...'}
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          {mobileHasSubmission ? 'Update Work' : 'Submit for Review'}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                }
+              >
+                {/* Submission Type Switcher */}
+                <div className="flex flex-wrap items-center gap-2 mb-4 border-b border-primary/20 pb-3">
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="sm"
                     onClick={() => {
-                      setActiveAssignmentId(null);
-                      setSelectedFile(null);
+                      setSubmissionType('text');
+                      setFormError(null);
                     }}
+                    className={`font-mono text-xs font-bold uppercase px-3.5 py-2.5 min-h-[44px] border sm:border-2 border-primary rounded-semantic-xs flex items-center gap-1.5 transition-all ${
+                      submissionType === 'text'
+                        ? 'bg-brand-navy text-white shadow-micro'
+                        : 'bg-surface-card text-brand-dark hover:bg-surface-elevated'
+                    }`}
                   >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    form="mobile-assignment-submission-form"
-                    variant="primary"
-                    size="sm"
-                    disabled={submitting}
-                    className="flex items-center gap-1.5 shadow-brutal"
+                    <FileText className="w-4 h-4" />
+                    Written Text
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSubmissionType('link');
+                      setFormError(null);
+                    }}
+                    className={`font-mono text-xs font-bold uppercase px-3.5 py-2.5 min-h-[44px] border sm:border-2 border-primary rounded-semantic-xs flex items-center gap-1.5 transition-all ${
+                      submissionType === 'link'
+                        ? 'bg-brand-navy text-white shadow-micro'
+                        : 'bg-surface-card text-brand-dark hover:bg-surface-elevated'
+                    }`}
                   >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        {submissionType === 'file' && selectedFile
-                          ? 'Uploading File & Saving...'
-                          : 'Saving Submission...'}
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-3.5 h-3.5" />
-                        {mobileHasSubmission ? 'Update Work' : 'Submit for Review'}
-                      </>
-                    )}
-                  </Button>
+                    <ExternalLink className="w-4 h-4" />
+                    Cloud Link
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSubmissionType('file');
+                      setFormError(null);
+                    }}
+                    className={`font-mono text-xs font-bold uppercase px-3.5 py-2.5 min-h-[44px] border sm:border-2 border-primary rounded-semantic-xs flex items-center gap-1.5 transition-all ${
+                      submissionType === 'file'
+                        ? 'bg-brand-navy text-white shadow-micro'
+                        : 'bg-surface-card text-brand-dark hover:bg-surface-elevated'
+                    }`}
+                  >
+                    <Paperclip className="w-4 h-4" />
+                    Document / Scan
+                  </button>
                 </div>
-              }
-            >
-              {/* Submission Type Switcher */}
-              <div className="flex flex-wrap items-center gap-2 mb-4 border-b-2 border-brand-dark pb-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSubmissionType('text');
-                    setFormError(null);
-                  }}
-                  className={`font-mono text-xs font-bold uppercase px-3.5 py-2.5 min-h-[44px] border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
-                    submissionType === 'text'
-                      ? 'bg-brand-navy text-white shadow-brutal-xs'
-                      : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
-                  }`}
-                >
-                  <FileText className="w-4 h-4" />
-                  Written Text
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSubmissionType('link');
-                    setFormError(null);
-                  }}
-                  className={`font-mono text-xs font-bold uppercase px-3.5 py-2.5 min-h-[44px] border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
-                    submissionType === 'link'
-                      ? 'bg-brand-navy text-white shadow-brutal-xs'
-                      : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
-                  }`}
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Cloud Link
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSubmissionType('file');
-                    setFormError(null);
-                  }}
-                  className={`font-mono text-xs font-bold uppercase px-3.5 py-2.5 min-h-[44px] border-2 border-brand-dark flex items-center gap-1.5 transition-all ${
-                    submissionType === 'file'
-                      ? 'bg-brand-navy text-white shadow-brutal-xs'
-                      : 'bg-brand-paper text-brand-dark hover:bg-brand-paper'
-                  }`}
-                >
-                  <Paperclip className="w-4 h-4" />
-                  Document / Scan
-                </button>
-              </div>
 
-              {formError && (
-                <div className="bg-red-50 border-2 border-red-500 p-3 text-red-700 text-xs mb-3 flex items-center gap-2 shadow-brutal-xs">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>{formError}</span>
-                </div>
-              )}
-
-              {formSuccess && (
-                <div className="bg-teal-50 border-2 border-brand-teal p-3 text-brand-dark text-xs mb-3 flex items-center gap-2 shadow-brutal-xs">
-                  <CheckCircle2 className="w-4 h-4 text-brand-teal flex-shrink-0" />
-                  <span>{formSuccess}</span>
-                </div>
-              )}
-
-              <form id="mobile-assignment-submission-form" onSubmit={handleSubmitWork} className="space-y-4">
-                {submissionType === 'text' && (
-                  <div>
-                    <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
-                      Solution Steps &amp; Theoretical Reasoning *
-                    </label>
-                    <textarea
-                      rows={5}
-                      value={textContent}
-                      onChange={(e) => setTextContent(e.target.value)}
-                      placeholder="Write out your mathematical derivation, proof steps, or chapter review answers here..."
-                      className="w-full bg-brand-paper border-2 border-brand-dark p-3 text-base sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
-                      required
-                    />
-                    <p className="text-[11px] font-mono text-brand-muted mt-1">
-                      Be explicit with formulas, coordinate choices, and intermediate steps.
-                    </p>
+                {formError && (
+                  <div className="bg-red-50 border sm:border-2 border-red-500 rounded-semantic-xs p-3 text-red-700 text-xs mb-3 flex items-center gap-2 shadow-micro">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{formError}</span>
                   </div>
                 )}
 
-                {submissionType === 'link' && (
-                  <div className="space-y-3">
+                {formSuccess && (
+                  <div className="bg-teal-50 border sm:border-2 border-brand-teal rounded-semantic-xs p-3 text-brand-dark text-xs mb-3 flex items-center gap-2 shadow-micro">
+                    <CheckCircle2 className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                    <span>{formSuccess}</span>
+                  </div>
+                )}
+
+                <form id="mobile-assignment-submission-form" onSubmit={handleSubmitWork} className="space-y-4">
+                  {submissionType === 'text' && (
                     <div>
                       <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
-                        External Cloud Document URL *
+                        Solution Steps &amp; Theoretical Reasoning *
                       </label>
-                      <input
-                        type="url"
-                        value={linkUrl}
-                        onChange={(e) => setLinkUrl(e.target.value)}
-                        placeholder="https://drive.google.com/... or https://github.com/..."
-                        className="w-full bg-brand-paper border-2 border-brand-dark px-3 py-2.5 sm:py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 text-brand-dark font-mono focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                      <textarea
+                        rows={5}
+                        value={textContent}
+                        onChange={(e) => setTextContent(e.target.value)}
+                        placeholder="Write out your mathematical derivation, proof steps, or chapter review answers here..."
+                        className="w-full bg-surface-card border sm:border-2 border-primary rounded-semantic-xs p-3 text-base sm:text-sm text-brand-dark font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
                         required
                       />
                       <p className="text-[11px] font-mono text-brand-muted mt-1">
-                        Ensure your link permissions allow viewing by your mentor.
+                        Be explicit with formulas, coordinate choices, and intermediate steps.
                       </p>
                     </div>
-                    <div>
-                      <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
-                        Notes for Mentor (Optional)
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={textContent}
-                        onChange={(e) => setTextContent(e.target.value)}
-                        placeholder="Any specific questions or areas where you encountered difficulty..."
-                        className="w-full bg-brand-paper border-2 border-brand-dark p-3 sm:p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
-                      />
+                  )}
+
+                  {submissionType === 'link' && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                          External Cloud Document URL *
+                        </label>
+                        <input
+                          type="url"
+                          value={linkUrl}
+                          onChange={(e) => setLinkUrl(e.target.value)}
+                          placeholder="https://drive.google.com/... or https://github.com/..."
+                          className="w-full bg-surface-card border sm:border-2 border-primary rounded-semantic-xs px-3 py-2.5 sm:py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 text-brand-dark font-mono focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                          required
+                        />
+                        <p className="text-[11px] font-mono text-brand-muted mt-1">
+                          Ensure your link permissions allow viewing by your mentor.
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                          Notes for Mentor (Optional)
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={textContent}
+                          onChange={(e) => setTextContent(e.target.value)}
+                          placeholder="Any specific questions or areas where you encountered difficulty..."
+                          className="w-full bg-surface-card border sm:border-2 border-primary rounded-semantic-xs p-3 sm:p-2.5 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {submissionType === 'file' && (
-                  <div className="space-y-4">
-                    {/* File Upload Box */}
-                    <div className="bg-brand-paper border-2 border-brand-dark p-4 space-y-3 shadow-brutal-xs">
-                      <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
-                        Attach Solution Document (PDF, PNG, JPG, WebP, DOCX — Max 10MB) *
-                      </label>
+                  {submissionType === 'file' && (
+                    <div className="space-y-4">
+                      {/* File Upload Box */}
+                      <div className="bg-surface-card border sm:border-2 border-primary rounded-semantic-xs p-3.5 space-y-3 shadow-micro">
+                        <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
+                          Attach Solution Document (PDF, PNG, JPG, WebP, DOCX — Max 10MB) *
+                        </label>
 
-                      {/* Case 1: A new file is currently selected */}
-                      {selectedFile ? (
-                        <div className="space-y-3">
-                          <div className="p-3 bg-teal-50 border-2 border-brand-teal flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
-                              <div className="min-w-0">
-                                <span className="font-mono text-xs font-bold text-brand-navy truncate block">
-                                  {selectedFile.name}
-                                </span>
-                                <span className="font-mono text-[11px] text-brand-muted">
-                                  {selectedFile.size < 1024 * 1024
-                                    ? `${Math.round(selectedFile.size / 1024)} KB`
-                                    : `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB`}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                              {['png', 'jpg', 'jpeg', 'webp', 'pdf'].includes(
-                                selectedFile.name.split('.').pop()?.toLowerCase() || ''
-                              ) && (
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={handlePreviewSelectedFile}
-                                  className="flex items-center gap-1"
-                                >
-                                  <Eye className="w-3.5 h-3.5" />
-                                  Preview
-                                </Button>
-                              )}
-
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleRemoveSelectedFile}
-                                className="text-red-600 hover:text-red-700 flex items-center gap-1"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                Remove
-                              </Button>
-                            </div>
-                          </div>
-
-                          {selectedFileObjectUrl &&
-                            ['png', 'jpg', 'jpeg', 'webp'].includes(
-                              selectedFile.name.split('.').pop()?.toLowerCase() || ''
-                            ) && (
-                              <div className="p-2 bg-brand-bg border border-brand-dark flex items-center gap-3">
-                                <img
-                                  src={selectedFileObjectUrl}
-                                  alt="Preview thumbnail"
-                                  className="w-16 h-16 object-cover border border-brand-dark shadow-brutal-xs flex-shrink-0"
-                                />
-                                <div className="text-xs font-mono text-brand-muted">
-                                  <span className="font-bold text-brand-navy block flex items-center gap-1">
-                                    <ImageIcon className="w-3.5 h-3.5 text-brand-teal" />
-                                    Image preview ready
+                        {/* Case 1: A new file is currently selected */}
+                        {selectedFile ? (
+                          <div className="space-y-3">
+                            <div className="p-3 bg-surface-inset border sm:border-2 border-brand-teal rounded-semantic-xs flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Paperclip className="w-4 h-4 text-brand-teal flex-shrink-0" />
+                                <div className="min-w-0">
+                                  <span className="font-mono text-xs font-bold text-brand-navy truncate block">
+                                    {selectedFile.name}
                                   </span>
-                                  Click "Preview" above to inspect in full size before submitting.
+                                  <span className="font-mono text-[11px] text-brand-muted">
+                                    {selectedFile.size < 1024 * 1024
+                                      ? `${Math.round(selectedFile.size / 1024)} KB`
+                                      : `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB`}
+                                  </span>
                                 </div>
                               </div>
-                            )}
-                        </div>
-                      ) : existingFilePath || fileName ? (
-                        /* Case 2: Editing existing submission without choosing new file yet */
-                        <div className="space-y-2">
-                          <div className="p-3 bg-brand-paper border-2 border-brand-dark flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Paperclip className="w-4 h-4 text-brand-navy flex-shrink-0" />
-                              <div className="min-w-0">
-                                <span className="font-mono text-xs font-bold text-brand-navy truncate block">
-                                  Currently Attached: {fileName}
-                                </span>
-                                {fileSize && (
-                                  <span className="font-mono text-[11px] text-brand-muted">
-                                    {fileSize < 1024 * 1024
-                                      ? `${Math.round(fileSize / 1024)} KB`
-                                      : `${(fileSize / (1024 * 1024)).toFixed(2)} MB`}
-                                  </span>
+
+                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                                {['png', 'jpg', 'jpeg', 'webp', 'pdf'].includes(
+                                  selectedFile.name.split('.').pop()?.toLowerCase() || ''
+                                ) && (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handlePreviewSelectedFile}
+                                    className="flex items-center gap-1 rounded-semantic-xs"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                    Preview
+                                  </Button>
                                 )}
+
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleRemoveSelectedFile}
+                                  className="text-red-600 hover:text-red-700 flex items-center gap-1"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  Remove
+                                </Button>
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                              {existingFilePath && (
+                            {selectedFileObjectUrl &&
+                              ['png', 'jpg', 'jpeg', 'webp'].includes(
+                                selectedFile.name.split('.').pop()?.toLowerCase() || ''
+                              ) && (
+                                <div className="p-2 bg-surface-inset border border-primary/20 rounded-semantic-xs flex items-center gap-3">
+                                  <img
+                                    src={selectedFileObjectUrl}
+                                    alt="Preview thumbnail"
+                                    className="w-16 h-16 object-cover border border-primary shadow-micro flex-shrink-0 rounded-semantic-xs"
+                                  />
+                                  <div className="text-xs font-mono text-brand-muted">
+                                    <span className="font-bold text-brand-navy block flex items-center gap-1">
+                                      <ImageIcon className="w-3.5 h-3.5 text-brand-teal" />
+                                      Image preview ready
+                                    </span>
+                                    Click "Preview" above to inspect in full size before submitting.
+                                  </div>
+                                </div>
+                              )}
+                          </div>
+                        ) : existingFilePath || fileName ? (
+                          /* Case 2: Editing existing submission without choosing new file yet */
+                          <div className="space-y-2">
+                            <div className="p-3 bg-surface-card border sm:border-2 border-primary rounded-semantic-xs flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Paperclip className="w-4 h-4 text-brand-navy flex-shrink-0" />
+                                <div className="min-w-0">
+                                  <span className="font-mono text-xs font-bold text-brand-navy truncate block">
+                                    Currently Attached: {fileName}
+                                  </span>
+                                  {fileSize && (
+                                    <span className="font-mono text-[11px] text-brand-muted">
+                                      {fileSize < 1024 * 1024
+                                        ? `${Math.round(fileSize / 1024)} KB`
+                                        : `${(fileSize / (1024 * 1024)).toFixed(2)} MB`}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                                {existingFilePath && (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      handlePreviewExistingAttachment({
+                                        file_name: fileName,
+                                        file_size: fileSize,
+                                        file_path: existingFilePath,
+                                      })
+                                    }
+                                    className="flex items-center gap-1 rounded-semantic-xs"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                    Preview
+                                  </Button>
+                                )}
                                 <Button
                                   type="button"
-                                  variant="outline"
+                                  variant="secondary"
                                   size="sm"
-                                  onClick={() =>
-                                    handlePreviewExistingAttachment({
-                                      file_name: fileName,
-                                      file_size: fileSize,
-                                      file_path: existingFilePath,
-                                    })
-                                  }
-                                  className="flex items-center gap-1"
+                                  onClick={() => mobileFileInputRef.current?.click()}
+                                  className="rounded-semantic-xs"
                                 >
-                                  <Eye className="w-3.5 h-3.5" />
-                                  Preview
+                                  Replace File
                                 </Button>
-                              )}
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => mobileFileInputRef.current?.click()}
-                              >
-                                Replace File
-                              </Button>
+                              </div>
                             </div>
+                            <p className="text-[11px] font-mono text-brand-muted">
+                              Your previously submitted file is retained unless you choose a new file to replace it.
+                            </p>
                           </div>
-                          <p className="text-[11px] font-mono text-brand-muted">
-                            Your previously submitted file is retained unless you choose a new file to replace it.
-                          </p>
-                        </div>
-                      ) : (
-                        /* Case 3: Initial file selection */
-                        <div className="space-y-2">
-                          <input
-                            ref={mobileFileInputRef}
-                            type="file"
-                            onChange={handleFileSelect}
-                            accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
-                            className="w-full bg-brand-paper border-2 border-brand-dark px-3 py-2 text-base sm:text-xs min-h-[44px] font-mono focus:outline-none"
-                            required={!existingFilePath && !fileName}
-                          />
-                          <p className="text-[11px] font-mono text-brand-muted">
-                            Supported formats: PDF documents, PNG/JPG/WebP scan images, and DOCX files up to 10MB.
-                          </p>
-                        </div>
-                      )}
+                        ) : (
+                          /* Case 3: Initial file selection */
+                          <div className="space-y-2">
+                            <input
+                              ref={mobileFileInputRef}
+                              type="file"
+                              onChange={handleFileSelect}
+                              accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+                              className="w-full bg-surface-card border sm:border-2 border-primary rounded-semantic-xs px-3 py-2 text-base sm:text-xs min-h-[44px] font-mono focus:outline-none"
+                              required={!existingFilePath && !fileName}
+                            />
+                            <p className="text-[11px] font-mono text-brand-muted">
+                              Supported formats: PDF documents, PNG/JPG/WebP scan images, and DOCX files up to 10MB.
+                            </p>
+                          </div>
+                        )}
 
-                      {/* Hidden file input for Replace action */}
-                      <input
-                        ref={mobileFileInputRef}
-                        type="file"
-                        onChange={handleFileSelect}
-                        accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
-                        className="hidden"
-                      />
+                        {/* Hidden file input for Replace action */}
+                        <input
+                          ref={mobileFileInputRef}
+                          type="file"
+                          onChange={handleFileSelect}
+                          accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"
+                          className="hidden"
+                        />
+                      </div>
+
+                      {/* Solution Notes */}
+                      <div>
+                        <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
+                          Accompanying Solution Notes *
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={textContent}
+                          onChange={(e) => setTextContent(e.target.value)}
+                          placeholder="Summary of attached exercise solutions, questions, or derivation notes..."
+                          className="w-full bg-surface-card border sm:border-2 border-primary rounded-semantic-xs p-3 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                          required
+                        />
+                      </div>
                     </div>
+                  )}
+                </form>
+              </MobileBottomSheet>
+            </div>
+          );
+        })()}
 
-                    {/* Solution Notes */}
-                    <div>
-                      <label className="block font-mono text-xs font-bold uppercase tracking-wider text-brand-navy mb-1">
-                        Accompanying Solution Notes *
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={textContent}
-                        onChange={(e) => setTextContent(e.target.value)}
-                        placeholder="Summary of attached exercise solutions, questions, or derivation notes..."
-                        className="w-full bg-brand-paper border-2 border-brand-dark p-3 text-base sm:text-xs text-brand-dark font-sans focus:outline-none focus:ring-2 focus:ring-brand-teal"
-                        required
-                      />
-                    </div>
-                  </div>
-                )}
-              </form>
-            </MobileBottomSheet>
-          </div>
-        );
-      })()}
-
-      {/* Attachment Preview Viewer Modal */}
-      <AttachmentViewerModal
-        isOpen={viewerModal.isOpen}
-        onClose={() => setViewerModal((prev) => ({ ...prev, isOpen: false }))}
-        fileName={viewerModal.fileName}
-        fileUrl={viewerModal.fileUrl}
-        fileSize={viewerModal.fileSize}
-        loading={viewerModal.loading}
-        error={viewerModal.error}
-      />
+        {/* Attachment Preview Viewer Modal */}
+        <AttachmentViewerModal
+          isOpen={viewerModal.isOpen}
+          onClose={() => setViewerModal((prev) => ({ ...prev, isOpen: false }))}
+          fileName={viewerModal.fileName}
+          fileUrl={viewerModal.fileUrl}
+          fileSize={viewerModal.fileSize}
+          loading={viewerModal.loading}
+          error={viewerModal.error}
+        />
+      </div>
     </div>
   );
 };
