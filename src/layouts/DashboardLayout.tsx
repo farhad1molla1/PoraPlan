@@ -220,7 +220,7 @@ export const DashboardLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-brand-bg text-brand-dark flex flex-col font-sans">
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-30 bg-brand-header border-b sm:border-b-2 border-brand-dark px-2.5 sm:px-6 py-1.5 sm:py-3 flex items-center justify-between shadow-xs sm:shadow-sm print:hidden">
+      <header className="sticky top-0 z-30 bg-surface-card border-b border-brand-dark sm:border-b-2 px-2.5 sm:px-6 py-1.5 sm:py-3 flex items-center justify-between shadow-micro sm:shadow-sm print:hidden">
         {/* Brand identity & Role Indicator */}
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
@@ -228,7 +228,7 @@ export const DashboardLayout: React.FC = () => {
             className="flex items-center gap-1.5 sm:gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
             aria-label="PoraPlan Workspace"
           >
-            <div className="h-7 w-7 sm:h-9 sm:w-9 p-0.5 bg-brand-paper border sm:border-2 border-brand-dark flex items-center justify-center shadow-none sm:shadow-brutal-xs group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0">
+            <div className="h-7 w-7 sm:h-9 sm:w-9 p-0.5 bg-surface-card border border-brand-dark sm:border-2 rounded-semantic-sm sm:rounded-none flex items-center justify-center shadow-micro sm:shadow-brutal-xs group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0">
               <img
                 src="/poraplan-logo.png"
                 alt="PoraPlan Logo"
@@ -261,7 +261,7 @@ export const DashboardLayout: React.FC = () => {
           {/* Notifications Center Bell */}
           <Link
             to={isMentor ? '/mentor/notifications' : isAdmin ? '/admin/notifications' : '/student/notifications'}
-            className="relative min-w-[38px] min-h-[38px] sm:min-w-0 sm:min-h-0 p-1.5 sm:p-2 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex items-center justify-center text-brand-dark hover:text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal cursor-pointer"
+            className="relative min-w-[38px] min-h-[38px] sm:min-w-0 sm:min-h-0 p-1.5 sm:p-2 border border-brand-dark sm:border-2 bg-surface-card rounded-semantic-sm sm:rounded-none shadow-micro sm:shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-y-[1px] sm:active:translate-x-0.5 sm:active:translate-y-0.5 transition-transform flex items-center justify-center text-brand-dark hover:text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal cursor-pointer"
             title="Notifications Center"
             aria-label={`Notifications Center, ${unreadNotifCount} unread`}
           >
@@ -278,12 +278,12 @@ export const DashboardLayout: React.FC = () => {
             <button
               type="button"
               onClick={() => setProfileDropdownOpen((prev) => !prev)}
-              className="min-w-[38px] min-h-[38px] sm:min-w-0 sm:min-h-0 flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 p-1 sm:px-2.5 sm:py-1 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+              className="min-w-[38px] min-h-[38px] sm:min-w-0 sm:min-h-0 flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 p-1 sm:px-2.5 sm:py-1 border border-brand-dark sm:border-2 bg-surface-card rounded-semantic-sm sm:rounded-none shadow-micro sm:shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-y-[1px] sm:active:translate-x-0.5 sm:active:translate-y-0.5 transition-transform text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
               aria-expanded={profileDropdownOpen}
               aria-haspopup="menu"
               aria-label="User account and profile menu"
             >
-              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-brand-navy text-brand-bg font-heading font-extrabold text-xs flex items-center justify-center border border-brand-dark overflow-hidden shrink-0">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-brand-navy text-brand-bg font-heading font-extrabold text-xs flex items-center justify-center border border-brand-dark rounded-semantic-sm sm:rounded-none overflow-hidden shrink-0">
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -310,12 +310,12 @@ export const DashboardLayout: React.FC = () => {
               <div
                 role="menu"
                 aria-orientation="vertical"
-                className="absolute right-0 mt-2 w-64 sm:w-72 bg-brand-paper dark:bg-brand-paper-tint border-2 border-brand-dark shadow-brutal-md py-2 z-50 animate-in fade-in zoom-in-95 duration-100"
+                className="absolute right-0 mt-2 w-64 sm:w-72 bg-surface-elevated border-2 border-brand-dark shadow-elevated sm:shadow-brutal-md py-2 z-50 rounded-semantic-sm sm:rounded-none animate-in fade-in zoom-in-95 duration-100"
               >
                 {/* Account Details Header */}
-                <div className="px-3.5 py-2 border-b-2 border-brand-dark/15 mb-1.5">
+                <div className="px-3.5 py-2 border-b border-brand-dark/15 sm:border-b-2 mb-1.5">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 bg-brand-navy text-brand-bg font-heading font-extrabold text-sm flex items-center justify-center border border-brand-dark overflow-hidden shrink-0">
+                    <div className="w-9 h-9 bg-brand-navy text-brand-bg font-heading font-extrabold text-sm flex items-center justify-center border border-brand-dark rounded-semantic-sm sm:rounded-none overflow-hidden shrink-0">
                       {profile?.avatar_url ? (
                         <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
                       ) : (
@@ -343,7 +343,7 @@ export const DashboardLayout: React.FC = () => {
                   to="/profile"
                   role="menuitem"
                   onClick={() => setProfileDropdownOpen(false)}
-                  className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-brand-paper-tint transition-colors"
+                  className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-surface-inset transition-colors"
                 >
                   <UserIcon className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.2]" />
                   <span className="flex-1">My Academic Profile</span>
@@ -355,7 +355,7 @@ export const DashboardLayout: React.FC = () => {
                     to="/student/billing"
                     role="menuitem"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-brand-paper-tint transition-colors"
+                    className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-surface-inset transition-colors"
                   >
                     <CreditCard className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.2]" />
                     <span className="flex-1">Billing & Payments</span>
@@ -366,7 +366,7 @@ export const DashboardLayout: React.FC = () => {
                     to="/mentor/payouts"
                     role="menuitem"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-brand-paper-tint transition-colors"
+                    className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-surface-inset transition-colors"
                   >
                     <CreditCard className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.2]" />
                     <span className="flex-1">Payout History</span>
@@ -377,7 +377,7 @@ export const DashboardLayout: React.FC = () => {
                     to="/admin/billing"
                     role="menuitem"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-brand-paper-tint transition-colors"
+                    className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-surface-inset transition-colors"
                   >
                     <CreditCard className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.2]" />
                     <span className="flex-1">Billing Management</span>
@@ -392,13 +392,13 @@ export const DashboardLayout: React.FC = () => {
                     setProfileDropdownOpen(false);
                     setProfileModalOpen(true);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-brand-paper-tint transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-brand-dark hover:bg-surface-inset transition-colors text-left"
                 >
                   <Sparkles className="w-4 h-4 text-brand-gold shrink-0 stroke-[2.2]" />
                   <span className="flex-1">Identity & Email Details</span>
                 </button>
 
-                <div className="border-t-2 border-brand-dark/15 my-1.5" />
+                <div className="border-t border-brand-dark/15 sm:border-t-2 my-1.5" />
 
                 {/* Theme Selector Section */}
                 <div className="px-3.5 py-2" role="none">
@@ -408,7 +408,7 @@ export const DashboardLayout: React.FC = () => {
                   <div
                     role="radiogroup"
                     aria-label="Theme mode"
-                    className="grid grid-cols-3 gap-1.5 bg-brand-paper-tint p-1 border-2 border-brand-dark/20"
+                    className="grid grid-cols-3 gap-1.5 bg-surface-inset p-1 border border-brand-dark/20 sm:border-2 rounded-semantic-sm"
                   >
                     <button
                       type="button"
@@ -417,10 +417,10 @@ export const DashboardLayout: React.FC = () => {
                       aria-label="Light mode"
                       title="Light mode"
                       onClick={() => setTheme('light')}
-                      className={`min-h-[44px] sm:min-h-[36px] flex items-center justify-center gap-1.5 py-2 sm:py-1 px-2 text-xs sm:text-[11px] font-heading font-bold transition-all border-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+                      className={`min-h-[44px] sm:min-h-[36px] flex items-center justify-center gap-1.5 py-2 sm:py-1 px-2 text-xs sm:text-[11px] font-heading font-bold transition-all border sm:border-2 rounded-semantic-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                         theme === 'light'
-                          ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs font-extrabold'
-                          : 'border-transparent text-brand-muted hover:text-brand-dark hover:bg-brand-paper/50'
+                          ? 'bg-surface-card text-brand-navy border-brand-dark shadow-micro sm:shadow-brutal-xs font-extrabold'
+                          : 'border-transparent text-brand-muted hover:text-brand-dark hover:bg-surface-card/50'
                       }`}
                     >
                       <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 stroke-[2.2]" />
@@ -433,10 +433,10 @@ export const DashboardLayout: React.FC = () => {
                       aria-label="Dark mode"
                       title="Dark mode"
                       onClick={() => setTheme('dark')}
-                      className={`min-h-[44px] sm:min-h-[36px] flex items-center justify-center gap-1.5 py-2 sm:py-1 px-2 text-xs sm:text-[11px] font-heading font-bold transition-all border-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+                      className={`min-h-[44px] sm:min-h-[36px] flex items-center justify-center gap-1.5 py-2 sm:py-1 px-2 text-xs sm:text-[11px] font-heading font-bold transition-all border sm:border-2 rounded-semantic-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                         theme === 'dark'
-                          ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs font-extrabold'
-                          : 'border-transparent text-brand-muted hover:text-brand-dark hover:bg-brand-paper/50'
+                          ? 'bg-surface-card text-brand-navy border-brand-dark shadow-micro sm:shadow-brutal-xs font-extrabold'
+                          : 'border-transparent text-brand-muted hover:text-brand-dark hover:bg-surface-card/50'
                       }`}
                     >
                       <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 stroke-[2.2]" />
@@ -449,10 +449,10 @@ export const DashboardLayout: React.FC = () => {
                       aria-label="System mode"
                       title="System mode"
                       onClick={() => setTheme('system')}
-                      className={`min-h-[44px] sm:min-h-[36px] flex items-center justify-center gap-1.5 py-2 sm:py-1 px-2 text-xs sm:text-[11px] font-heading font-bold transition-all border-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+                      className={`min-h-[44px] sm:min-h-[36px] flex items-center justify-center gap-1.5 py-2 sm:py-1 px-2 text-xs sm:text-[11px] font-heading font-bold transition-all border sm:border-2 rounded-semantic-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                         theme === 'system'
-                          ? 'bg-brand-paper text-brand-navy border-brand-dark shadow-brutal-xs font-extrabold'
-                          : 'border-transparent text-brand-muted hover:text-brand-dark hover:bg-brand-paper/50'
+                          ? 'bg-surface-card text-brand-navy border-brand-dark shadow-micro sm:shadow-brutal-xs font-extrabold'
+                          : 'border-transparent text-brand-muted hover:text-brand-dark hover:bg-surface-card/50'
                       }`}
                     >
                       <Monitor className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 stroke-[2.2]" />
@@ -461,7 +461,7 @@ export const DashboardLayout: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="border-t-2 border-brand-dark/15 my-1.5" />
+                <div className="border-t border-brand-dark/15 sm:border-t-2 my-1.5" />
 
                 {/* Sign Out Action inside Dropdown */}
                 <button
@@ -471,7 +471,7 @@ export const DashboardLayout: React.FC = () => {
                     setProfileDropdownOpen(false);
                     handleSignOut();
                   }}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-red-700 hover:bg-red-50 hover:text-red-800 transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-heading font-bold text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-800 transition-colors text-left cursor-pointer"
                 >
                   <LogOut className="w-4 h-4 text-red-600 shrink-0 stroke-[2.2]" />
                   <span>Sign Out</span>
@@ -485,7 +485,7 @@ export const DashboardLayout: React.FC = () => {
       {/* Main Workspace Body with Responsive Shell */}
       <div className="flex-1 flex w-full">
         {/* Desktop Sidebar (md: 768px+) */}
-        <aside className="hidden md:flex flex-col w-60 lg:w-64 border-r-2 border-brand-dark bg-brand-sidebar shrink-0 justify-between print:hidden">
+        <aside className="hidden md:flex flex-col w-60 lg:w-64 border-r-2 border-brand-dark bg-surface-card shrink-0 justify-between print:hidden">
           <div className="p-4 space-y-4">
             <div className="border-b-2 border-brand-dark/20 pb-3">
               <span className="font-mono text-[10px] uppercase font-bold text-brand-muted tracking-wider block">
@@ -506,10 +506,10 @@ export const DashboardLayout: React.FC = () => {
                   <NavLink
                     key={item.label}
                     to={item.to}
-                    className={`flex items-center gap-2.5 px-3 py-2 text-xs font-heading font-bold border-2 transition-all ${
+                    className={`flex items-center gap-2.5 px-3 py-2 text-xs font-heading font-bold border-2 transition-all rounded-semantic-sm ${
                       isActive
-                        ? 'border-brand-dark bg-brand-teal-light text-brand-navy shadow-brutal-xs'
-                        : 'border-transparent text-brand-dark/80 hover:border-brand-dark hover:bg-brand-paper-tint hover:text-brand-dark'
+                        ? 'border-brand-dark bg-brand-teal-light/70 dark:bg-surface-inset text-brand-navy shadow-brutal-xs font-bold'
+                        : 'border-transparent text-brand-dark/80 hover:border-brand-dark hover:bg-surface-inset hover:text-brand-dark'
                     }`}
                   >
                     <Icon className="w-4 h-4 text-brand-navy shrink-0 stroke-[2.2]" />
@@ -526,9 +526,9 @@ export const DashboardLayout: React.FC = () => {
           </div>
 
           {/* Sidebar Footer User Card */}
-          <div className="p-3.5 border-t-2 border-brand-dark bg-brand-paper-tint">
+          <div className="p-3.5 border-t-2 border-brand-dark bg-surface-inset">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-brand-gold border-2 border-brand-dark font-mono font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden">
+              <div className="w-8 h-8 bg-brand-gold border-2 border-brand-dark font-mono font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden rounded-semantic-sm">
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -565,7 +565,7 @@ export const DashboardLayout: React.FC = () => {
 
       {/* Mobile Bottom Navigation Bar (< 768px, 4 primary destinations + More button) */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-header border-t sm:border-t-2 border-brand-dark flex items-stretch justify-around shadow-none print:hidden pb-[env(safe-area-inset-bottom,0px)] h-[calc(3rem+env(safe-area-inset-bottom,0px))]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-card border-t border-brand-dark flex items-stretch justify-around shadow-micro print:hidden pb-[env(safe-area-inset-bottom,0px)] h-[calc(3.25rem+env(safe-area-inset-bottom,0px))]"
         aria-label="Mobile Bottom Navigation"
       >
         {mobileNavItems.map((item) => {
@@ -579,16 +579,19 @@ export const DashboardLayout: React.FC = () => {
             <Link
               key={item.label}
               to={item.to}
-              className={`flex-1 flex flex-col items-center justify-center py-0.5 transition-colors border-r border-brand-dark/20 relative ${
+              className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors border-r border-border-subtle/50 last:border-r-0 relative ${
                 isActive
-                  ? 'bg-brand-teal-light text-brand-navy font-bold'
+                  ? 'bg-surface-inset text-brand-navy font-bold'
                   : 'text-brand-muted hover:text-brand-dark'
               }`}
             >
+              {isActive && (
+                <span className="absolute top-1 w-1.5 h-0.5 bg-brand-teal rounded-full" />
+              )}
               <div className="relative">
-                <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
+                <Icon className="w-4 h-4 stroke-[2.2]" />
               </div>
-              <span className="text-[9px] font-mono mt-0.5 leading-none truncate max-w-[65px]">
+              <span className="text-[9.5px] font-mono mt-0.5 leading-none truncate max-w-[65px]">
                 {item.label}
               </span>
             </Link>
@@ -615,17 +618,20 @@ export const DashboardLayout: React.FC = () => {
               aria-label="More navigation options"
               className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors relative cursor-pointer ${
                 isMoreActive
-                  ? 'bg-brand-teal-light text-brand-navy font-bold'
+                  ? 'bg-surface-inset text-brand-navy font-bold'
                   : 'text-brand-muted hover:text-brand-dark'
               }`}
             >
+              {isMoreActive && (
+                <span className="absolute top-1 w-1.5 h-0.5 bg-brand-teal rounded-full" />
+              )}
               <div className="relative">
                 <Menu className="w-4 h-4 stroke-[2.2]" />
                 {unreadNotifCount > 0 && (
                   <span className="absolute -top-1 -right-1.5 w-2 h-2 bg-brand-coral rounded-full border border-brand-dark" />
                 )}
               </div>
-              <span className="text-[10px] font-mono mt-0.5 leading-none">
+              <span className="text-[9.5px] font-mono mt-0.5 leading-none">
                 More
               </span>
             </button>
@@ -665,10 +671,10 @@ export const DashboardLayout: React.FC = () => {
           }}
         >
           <div
-            className="w-full max-w-md max-h-[85dvh] flex flex-col bg-brand-paper dark:bg-brand-paper-tint border-3 border-brand-dark shadow-brutal-lg p-4 sm:p-6 animate-in fade-in zoom-in-95 my-auto"
+            className="w-full max-w-md max-h-[85dvh] flex flex-col bg-surface-elevated border-2 sm:border-3 border-brand-dark shadow-elevated sm:shadow-brutal-lg p-4 sm:p-6 rounded-semantic-sm sm:rounded-none animate-in fade-in zoom-in-95 my-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3 shrink-0">
+            <div className="flex items-center justify-between border-b sm:border-b-2 border-brand-dark pb-3 shrink-0">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-brand-gold stroke-[2.5]" />
                 <h2 id="profile-modal-title" className="font-heading font-extrabold text-lg text-brand-navy">
@@ -678,7 +684,7 @@ export const DashboardLayout: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setProfileModalOpen(false)}
-                className="p-2 border-2 border-brand-dark bg-brand-paper-tint hover:bg-brand-paper shadow-brutal-xs min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-transform active:translate-x-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+                className="p-2 border border-brand-dark sm:border-2 bg-surface-card hover:bg-surface-inset shadow-micro rounded-semantic-sm min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-transform active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
                 aria-label="Close Profile"
               >
                 <X className="w-4 h-4 text-brand-dark" />
@@ -686,19 +692,19 @@ export const DashboardLayout: React.FC = () => {
             </div>
 
             <div className="overflow-y-auto flex-1 py-3 space-y-3 font-mono text-xs pr-1">
-              <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
+              <div className="p-3 border border-brand-dark sm:border-2 bg-surface-inset rounded-semantic-sm space-y-1">
                 <span className="text-[10px] text-brand-muted uppercase block">PoraPlan ID</span>
                 <span className="font-bold text-brand-navy text-sm font-mono">
                   {poraplanId || profile?.poraplan_id || '-'}
                 </span>
               </div>
 
-              <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
+              <div className="p-3 border border-brand-dark sm:border-2 bg-surface-inset rounded-semantic-sm space-y-1">
                 <span className="text-[10px] text-brand-muted uppercase block">Full Name</span>
                 <span className="font-bold text-brand-dark text-sm font-sans">{userDisplayName}</span>
               </div>
 
-              <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1.5">
+              <div className="p-3 border border-brand-dark sm:border-2 bg-surface-inset rounded-semantic-sm space-y-1.5">
                 <span className="text-[10px] text-brand-muted uppercase block">Associated Email</span>
                 {profile?.linked_email ? (
                   <div className="flex items-center justify-between">
@@ -716,7 +722,7 @@ export const DashboardLayout: React.FC = () => {
                         value={emailToLink}
                         onChange={(e) => setEmailToLink(e.target.value)}
                         placeholder="your.email@example.com"
-                        className="flex-1 px-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-brand-paper font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                        className="flex-1 px-3 py-2 sm:py-1 text-base sm:text-xs min-h-[44px] sm:min-h-0 border border-brand-dark bg-surface-card rounded-semantic-sm font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
                       />
                       <Button
                         type="button"
@@ -731,7 +737,7 @@ export const DashboardLayout: React.FC = () => {
                   </div>
                 )}
                 {emailLinkMessage && (
-                  <p className="text-[11px] font-sans font-bold text-emerald-800">{emailLinkMessage}</p>
+                  <p className="text-[11px] font-sans font-bold text-emerald-800 dark:text-emerald-400">{emailLinkMessage}</p>
                 )}
                 <span className="text-[10px] text-brand-muted block font-sans mt-0.5">
                   Used for Google sign-in and password recovery.
@@ -739,14 +745,14 @@ export const DashboardLayout: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
+                <div className="p-3 border border-brand-dark sm:border-2 bg-surface-inset rounded-semantic-sm space-y-1">
                   <span className="text-[10px] text-brand-muted uppercase block">Role</span>
                   <Badge variant={roleBadgeVariant} size="sm">
                     {roleLabel}
                   </Badge>
                 </div>
 
-                <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
+                <div className="p-3 border-2 border-brand-dark bg-surface-inset rounded-semantic-sm space-y-1">
                   <span className="text-[10px] text-brand-muted uppercase block">Status</span>
                   <span className="font-bold text-brand-teal flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-brand-teal inline-block" />
@@ -756,7 +762,7 @@ export const DashboardLayout: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-3 shrink-0 flex flex-col gap-2 border-t-2 border-brand-dark">
+            <div className="pt-3 shrink-0 flex flex-col gap-2 border-t sm:border-t-2 border-brand-dark">
               <Button
                 variant="primary"
                 size="sm"
@@ -781,7 +787,7 @@ export const DashboardLayout: React.FC = () => {
                   size="sm"
                   onClick={handleSignOut}
                   leftIcon={<LogOut className="w-3.5 h-3.5" />}
-                  className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
                 >
                   Sign Out
                 </Button>
