@@ -281,7 +281,8 @@ export const MentorResourcesPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-3 sm:space-y-6 md:space-y-8 animate-fadeIn pb-12">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-6xl mx-auto space-y-3 sm:space-y-6 md:space-y-8 animate-fadeIn pb-12">
       {/* ========================================================================= */}
       {/* 1. PAGE HEADER                                                            */}
       {/* ========================================================================= */}
@@ -1017,6 +1018,7 @@ export const MentorResourcesPage: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

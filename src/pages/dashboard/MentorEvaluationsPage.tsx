@@ -325,7 +325,8 @@ export const MentorEvaluationsPage: React.FC = () => {
     : null;
 
   return (
-    <div className="space-y-3 sm:space-y-6">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-6xl mx-auto space-y-3 sm:space-y-6">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4 border-b sm:border-b-2 border-brand-dark pb-2.5 sm:pb-4">
         <div>
@@ -476,33 +477,30 @@ export const MentorEvaluationsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('all')}
-              className={`px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark text-[10px] sm:text-xs font-mono font-bold transition-all ${
-                statusFilter === 'all'
-                  ? 'bg-brand-navy text-brand-paper shadow-none sm:shadow-brutal-xs'
-                  : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
-              }`}
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark text-[10px] sm:text-xs font-mono font-bold transition-all ${statusFilter === 'all'
+                ? 'bg-brand-navy text-brand-paper shadow-none sm:shadow-brutal-xs'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
+                }`}
             >
               All Statuses ({totalCount})
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter('scheduled')}
-              className={`px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark text-[10px] sm:text-xs font-mono font-bold transition-all ${
-                statusFilter === 'scheduled'
-                  ? 'bg-brand-gold text-brand-dark shadow-none sm:shadow-brutal-xs'
-                  : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
-              }`}
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark text-[10px] sm:text-xs font-mono font-bold transition-all ${statusFilter === 'scheduled'
+                ? 'bg-brand-gold text-brand-dark shadow-none sm:shadow-brutal-xs'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
+                }`}
             >
               Scheduled ({scheduledCount})
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter('completed')}
-              className={`px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark text-[10px] sm:text-xs font-mono font-bold transition-all ${
-                statusFilter === 'completed'
-                  ? 'bg-brand-teal text-brand-paper shadow-none sm:shadow-brutal-xs'
-                  : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
-              }`}
+              className={`px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark text-[10px] sm:text-xs font-mono font-bold transition-all ${statusFilter === 'completed'
+                ? 'bg-brand-teal text-brand-paper shadow-none sm:shadow-brutal-xs'
+                : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint'
+                }`}
             >
               Completed ({completedCount})
             </button>
@@ -1210,6 +1208,7 @@ export const MentorEvaluationsPage: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

@@ -376,7 +376,8 @@ export const MentorPayoutsPage: React.FC = () => {
   }, [filteredRecords, currentPage, pageSize]);
 
   return (
-    <div className="space-y-3 sm:space-y-5 max-w-5xl mx-auto">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="space-y-3 sm:space-y-5 max-w-5xl mx-auto">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pb-2 sm:pb-3 border-b sm:border-b-2 border-brand-dark">
         <div>
@@ -520,11 +521,10 @@ export const MentorPayoutsPage: React.FC = () => {
                     setStatusFilter(st);
                     setCurrentPage(1);
                   }}
-                  className={`px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-heading font-bold uppercase transition-colors min-h-[28px] sm:min-h-0 ${
-                    statusFilter === st
-                      ? 'bg-brand-navy text-brand-paper'
-                      : 'bg-brand-paper text-brand-dark border border-brand-dark/20 hover:bg-brand-paper-tint'
-                  }`}
+                  className={`px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-heading font-bold uppercase transition-colors min-h-[28px] sm:min-h-0 ${statusFilter === st
+                    ? 'bg-brand-navy text-brand-paper'
+                    : 'bg-brand-paper text-brand-dark border border-brand-dark/20 hover:bg-brand-paper-tint'
+                    }`}
                 >
                   {st}
                 </button>
@@ -715,6 +715,7 @@ export const MentorPayoutsPage: React.FC = () => {
         isOpen={Boolean(selectedRecord)}
         onClose={() => setSelectedRecord(null)}
       />
+      </div>
     </div>
   );
 };

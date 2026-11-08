@@ -244,12 +244,12 @@ export const MentorAnnouncementsPage: React.FC = () => {
           prev.map((item) =>
             item.id === editingAnnouncement.id
               ? {
-                  ...item,
-                  title: editTitle.trim(),
-                  content: editContent.trim(),
-                  priority: editPriority,
-                  updated_at: new Date().toISOString(),
-                }
+                ...item,
+                title: editTitle.trim(),
+                content: editContent.trim(),
+                priority: editPriority,
+                updated_at: new Date().toISOString(),
+              }
               : item
           )
         );
@@ -409,7 +409,8 @@ export const MentorAnnouncementsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-3 sm:space-y-6 pb-12">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-6xl mx-auto space-y-3 sm:space-y-6 pb-12">
       {/* 1. Header & Actions */}
       <div className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
         <div>
@@ -502,9 +503,8 @@ export const MentorAnnouncementsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setStatusFilter('published')}
-          className={`border sm:border-2 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${
-            statusFilter === 'published' ? 'ring-2 ring-brand-navy bg-teal-50' : 'bg-brand-paper'
-          }`}
+          className={`border sm:border-2 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${statusFilter === 'published' ? 'ring-2 ring-brand-navy bg-teal-50' : 'bg-brand-paper'
+            }`}
         >
           <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-brand-teal block">
             PUBLISHED (ACTIVE)
@@ -517,9 +517,8 @@ export const MentorAnnouncementsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setStatusFilter('archived')}
-          className={`border sm:border-2 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${
-            statusFilter === 'archived' ? 'ring-2 ring-brand-navy bg-amber-50' : 'bg-brand-paper'
-          }`}
+          className={`border sm:border-2 border-brand-dark p-2.5 sm:p-4 shadow-none sm:shadow-brutal text-left transition-transform hover:-translate-y-0.5 ${statusFilter === 'archived' ? 'ring-2 ring-brand-navy bg-amber-50' : 'bg-brand-paper'
+            }`}
         >
           <span className="font-mono text-[9px] sm:text-[11px] uppercase font-bold text-brand-muted block">
             ARCHIVED
@@ -566,33 +565,30 @@ export const MentorAnnouncementsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1.5 font-mono text-xs font-bold border-2 border-brand-dark shadow-xs transition-colors whitespace-nowrap ${
-                statusFilter === 'all'
-                  ? 'bg-brand-navy text-white'
-                  : 'bg-brand-paper hover:bg-brand-paper-tint text-brand-dark'
-              }`}
+              className={`px-3 py-1.5 font-mono text-xs font-bold border-2 border-brand-dark shadow-xs transition-colors whitespace-nowrap ${statusFilter === 'all'
+                ? 'bg-brand-navy text-white'
+                : 'bg-brand-paper hover:bg-brand-paper-tint text-brand-dark'
+                }`}
             >
               All ({totalCount})
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter('published')}
-              className={`px-3 py-1.5 font-mono text-xs font-bold border-2 border-brand-dark shadow-xs transition-colors whitespace-nowrap ${
-                statusFilter === 'published'
-                  ? 'bg-brand-teal text-white'
-                  : 'bg-brand-paper hover:bg-teal-50 text-brand-teal'
-              }`}
+              className={`px-3 py-1.5 font-mono text-xs font-bold border-2 border-brand-dark shadow-xs transition-colors whitespace-nowrap ${statusFilter === 'published'
+                ? 'bg-brand-teal text-white'
+                : 'bg-brand-paper hover:bg-teal-50 text-brand-teal'
+                }`}
             >
               Published ({publishedCount})
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter('archived')}
-              className={`px-3 py-1.5 font-mono text-xs font-bold border-2 border-brand-dark shadow-xs transition-colors whitespace-nowrap ${
-                statusFilter === 'archived'
-                  ? 'bg-brand-dark text-white'
-                  : 'bg-brand-paper hover:bg-brand-paper-tint text-brand-muted'
-              }`}
+              className={`px-3 py-1.5 font-mono text-xs font-bold border-2 border-brand-dark shadow-xs transition-colors whitespace-nowrap ${statusFilter === 'archived'
+                ? 'bg-brand-dark text-white'
+                : 'bg-brand-paper hover:bg-brand-paper-tint text-brand-muted'
+                }`}
             >
               Archived ({archivedCount})
             </button>
@@ -690,9 +686,8 @@ export const MentorAnnouncementsPage: React.FC = () => {
             return (
               <article
                 key={announcement.id}
-                className={`border-2 border-brand-dark p-3.5 sm:p-6 shadow-brutal-sm sm:shadow-brutal transition-all flex flex-col justify-between gap-3 sm:gap-4 ${
-                  isArchived ? 'bg-brand-bg/70 opacity-80' : 'bg-brand-paper'
-                }`}
+                className={`border-2 border-brand-dark p-3.5 sm:p-6 shadow-brutal-sm sm:shadow-brutal transition-all flex flex-col justify-between gap-3 sm:gap-4 ${isArchived ? 'bg-brand-bg/70 opacity-80' : 'bg-brand-paper'
+                  }`}
               >
                 {/* Announcement Card Top Header */}
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-dark/15 pb-2.5 sm:pb-3">
@@ -857,11 +852,10 @@ export const MentorAnnouncementsPage: React.FC = () => {
                       setCreateScope('assigned_students');
                       setCreateStudentId('');
                     }}
-                    className={`p-3 border-2 border-brand-dark text-left transition-all ${
-                      createScope === 'assigned_students'
-                        ? 'bg-blue-50 ring-2 ring-brand-navy shadow-brutal-xs'
-                        : 'bg-brand-bg hover:bg-brand-paper-tint'
-                    }`}
+                    className={`p-3 border-2 border-brand-dark text-left transition-all ${createScope === 'assigned_students'
+                      ? 'bg-blue-50 ring-2 ring-brand-navy shadow-brutal-xs'
+                      : 'bg-brand-bg hover:bg-brand-paper-tint'
+                      }`}
                   >
                     <div className="flex items-center gap-1.5 font-heading font-bold text-xs text-brand-navy mb-0.5">
                       <Users className="w-3.5 h-3.5 text-blue-700" />
@@ -875,11 +869,10 @@ export const MentorAnnouncementsPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setCreateScope('individual')}
-                    className={`p-3 border-2 border-brand-dark text-left transition-all ${
-                      createScope === 'individual'
-                        ? 'bg-purple-50 ring-2 ring-brand-navy shadow-brutal-xs'
-                        : 'bg-brand-bg hover:bg-brand-paper-tint'
-                    }`}
+                    className={`p-3 border-2 border-brand-dark text-left transition-all ${createScope === 'individual'
+                      ? 'bg-purple-50 ring-2 ring-brand-navy shadow-brutal-xs'
+                      : 'bg-brand-bg hover:bg-brand-paper-tint'
+                      }`}
                   >
                     <div className="flex items-center gap-1.5 font-heading font-bold text-xs text-brand-navy mb-0.5">
                       <Sparkles className="w-3.5 h-3.5 text-purple-700" />
@@ -900,11 +893,10 @@ export const MentorAnnouncementsPage: React.FC = () => {
                         setCreateScope('platform');
                         setCreateStudentId('');
                       }}
-                      className={`w-full p-3 border-2 border-brand-dark text-left transition-all ${
-                        createScope === 'platform'
-                          ? 'bg-brand-navy text-white ring-2 ring-brand-gold shadow-brutal-xs'
-                          : 'bg-brand-bg hover:bg-brand-paper-tint text-brand-dark'
-                      }`}
+                      className={`w-full p-3 border-2 border-brand-dark text-left transition-all ${createScope === 'platform'
+                        ? 'bg-brand-navy text-white ring-2 ring-brand-gold shadow-brutal-xs'
+                        : 'bg-brand-bg hover:bg-brand-paper-tint text-brand-dark'
+                        }`}
                     >
                       <div className="flex items-center gap-1.5 font-heading font-bold text-xs mb-0.5">
                         <ShieldCheck className="w-3.5 h-3.5 text-brand-gold" />
@@ -961,15 +953,14 @@ export const MentorAnnouncementsPage: React.FC = () => {
                       key={p}
                       type="button"
                       onClick={() => setCreatePriority(p)}
-                      className={`py-2 px-3 border-2 border-brand-dark font-mono text-xs font-bold uppercase text-center transition-all ${
-                        createPriority === p
-                          ? p === 'urgent'
-                            ? 'bg-red-700 text-white shadow-brutal-xs'
-                            : p === 'important'
+                      className={`py-2 px-3 border-2 border-brand-dark font-mono text-xs font-bold uppercase text-center transition-all ${createPriority === p
+                        ? p === 'urgent'
+                          ? 'bg-red-700 text-white shadow-brutal-xs'
+                          : p === 'important'
                             ? 'bg-amber-600 text-white shadow-brutal-xs'
                             : 'bg-brand-navy text-white shadow-brutal-xs'
-                          : 'bg-brand-bg hover:bg-brand-paper-tint text-brand-dark'
-                      }`}
+                        : 'bg-brand-bg hover:bg-brand-paper-tint text-brand-dark'
+                        }`}
                     >
                       {p}
                     </button>
@@ -1081,11 +1072,10 @@ export const MentorAnnouncementsPage: React.FC = () => {
                       key={p}
                       type="button"
                       onClick={() => setEditPriority(p)}
-                      className={`py-2 px-3 border-2 border-brand-dark font-mono text-xs font-bold uppercase text-center transition-all ${
-                        editPriority === p
-                          ? 'bg-brand-navy text-white shadow-brutal-xs'
-                          : 'bg-brand-bg hover:bg-brand-paper-tint text-brand-dark'
-                      }`}
+                      className={`py-2 px-3 border-2 border-brand-dark font-mono text-xs font-bold uppercase text-center transition-all ${editPriority === p
+                        ? 'bg-brand-navy text-white shadow-brutal-xs'
+                        : 'bg-brand-bg hover:bg-brand-paper-tint text-brand-dark'
+                        }`}
                     >
                       {p}
                     </button>
@@ -1174,7 +1164,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
               </div>
 
               {!viewingAcksAnnouncement.acknowledgments ||
-              viewingAcksAnnouncement.acknowledgments.length === 0 ? (
+                viewingAcksAnnouncement.acknowledgments.length === 0 ? (
                 <div className="p-6 text-center border-2 border-dashed border-brand-dark/20 bg-brand-bg space-y-1">
                   <Clock className="w-6 h-6 text-brand-muted mx-auto" />
                   <p className="font-heading font-bold text-xs text-brand-navy">
@@ -1287,6 +1277,7 @@ export const MentorAnnouncementsPage: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

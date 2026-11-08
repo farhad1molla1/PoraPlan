@@ -127,7 +127,8 @@ export const MentorProgressPage: React.FC = () => {
   const totalCompletedEvaluations = scholars.reduce((acc, s) => acc + s.evaluations.completed, 0);
 
   return (
-    <div className="space-y-3 sm:space-y-6 md:space-y-8 animate-fadeIn pb-12">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-6xl mx-auto space-y-3 sm:space-y-6 md:space-y-8 animate-fadeIn pb-12">
       {/* ========================================================================= */}
       {/* 1. PAGE HEADER                                                            */}
       {/* ========================================================================= */}
@@ -746,6 +747,7 @@ export const MentorProgressPage: React.FC = () => {
               ) : null}
             </div>
         </MobileBottomSheet>
+      </div>
     </div>
   );
 };

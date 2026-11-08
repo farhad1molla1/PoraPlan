@@ -137,7 +137,8 @@ export const MentorReportPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full print:p-0 print:bg-white">
+      <div className="space-y-6 max-w-5xl mx-auto pb-16 print:pb-0 print:max-w-none">
       {/* Dedicated Academic Typography & Print-specific A4 Stylesheet */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,600&display=swap');
@@ -1565,6 +1566,7 @@ export const MentorReportPage: React.FC = () => {
           ) : null}
         </div>
       ) : null}
+      </div>
     </div>
   );
 };

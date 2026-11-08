@@ -246,7 +246,8 @@ export const MentorReviewQueuePage: React.FC = () => {
   const revisionCount = submissions.filter((s) => s.status === 'needs_revision').length;
 
   return (
-    <div className="space-y-6">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-6xl mx-auto space-y-6">
       {/* Header Banner */}
       <div className="bg-brand-bg border sm:border-3 border-brand-dark p-2.5 sm:p-6 shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
         <div>
@@ -830,6 +831,7 @@ export const MentorReviewQueuePage: React.FC = () => {
           })
         }
       />
+      </div>
     </div>
   );
 };

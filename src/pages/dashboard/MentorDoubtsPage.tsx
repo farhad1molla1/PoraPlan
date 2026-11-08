@@ -355,7 +355,8 @@ export const MentorDoubtsPage: React.FC = () => {
   const resolvedCount = doubts.filter((d) => d.status === 'resolved').length;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="space-y-6 max-w-6xl mx-auto">
       {/* 1. Header & Breadcrumb */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-4 border-b sm:border-b-2 border-brand-dark pb-2.5 sm:pb-4">
         <div>
@@ -498,8 +499,8 @@ export const MentorDoubtsPage: React.FC = () => {
             {students.length === 0
               ? 'You do not have any assigned students paired with your account yet.'
               : searchQuery || selectedStatus !== 'all' || selectedStudentId !== 'all'
-              ? 'No doubts match the selected criteria.'
-              : 'Your assigned students currently have no pending doubt questions.'}
+                ? 'No doubts match the selected criteria.'
+                : 'Your assigned students currently have no pending doubt questions.'}
           </p>
           {(searchQuery || selectedStatus !== 'all' || selectedStudentId !== 'all') && (
             <button
@@ -524,9 +525,8 @@ export const MentorDoubtsPage: React.FC = () => {
               <div
                 key={doubt.id}
                 onClick={() => setActiveDoubt(doubt)}
-                className={`p-2.5 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform cursor-pointer flex flex-col justify-between group ${
-                  doubt.status === 'open' ? 'border-l-3 sm:border-l-4 border-l-brand-gold bg-amber-50/15' : ''
-                }`}
+                className={`p-2.5 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform cursor-pointer flex flex-col justify-between group ${doubt.status === 'open' ? 'border-l-3 sm:border-l-4 border-l-brand-gold bg-amber-50/15' : ''
+                  }`}
               >
                 <div>
                   {/* Top row: Scholar info & status badge */}
@@ -696,11 +696,10 @@ export const MentorDoubtsPage: React.FC = () => {
                     size="sm"
                     onClick={handleToggleResolved}
                     disabled={statusUpdating}
-                    className={`flex items-center gap-1.5 text-xs ${
-                      activeDoubt.status === 'resolved'
-                        ? 'border-amber-700 text-amber-900 bg-amber-50'
-                        : 'border-emerald-700 text-emerald-900 bg-emerald-50'
-                    }`}
+                    className={`flex items-center gap-1.5 text-xs ${activeDoubt.status === 'resolved'
+                      ? 'border-amber-700 text-amber-900 bg-amber-50'
+                      : 'border-emerald-700 text-emerald-900 bg-emerald-50'
+                      }`}
                   >
                     {statusUpdating ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -771,13 +770,12 @@ export const MentorDoubtsPage: React.FC = () => {
                 </span>
               )}
 
-              <span className={`px-2 py-0.5 font-mono text-[10px] uppercase font-bold border ${
-                activeDoubt.status === 'resolved'
-                  ? 'border-emerald-600 bg-emerald-100 text-emerald-800'
-                  : activeDoubt.status === 'answered'
+              <span className={`px-2 py-0.5 font-mono text-[10px] uppercase font-bold border ${activeDoubt.status === 'resolved'
+                ? 'border-emerald-600 bg-emerald-100 text-emerald-800'
+                : activeDoubt.status === 'answered'
                   ? 'border-teal-600 bg-teal-100 text-teal-800'
                   : 'border-amber-600 bg-amber-100 text-amber-900'
-              }`}>
+                }`}>
                 {activeDoubt.status === 'resolved' ? 'Resolved' : activeDoubt.status === 'answered' ? 'Answered' : 'Awaiting Reply'}
               </span>
             </div>
@@ -828,9 +826,8 @@ export const MentorDoubtsPage: React.FC = () => {
                   return (
                     <div
                       key={resp.id}
-                      className={`p-3.5 border-2 border-brand-dark ${
-                        isMentor ? 'bg-brand-teal/10 border-l-4 border-l-brand-teal' : 'bg-brand-paper'
-                      }`}
+                      className={`p-3.5 border-2 border-brand-dark ${isMentor ? 'bg-brand-teal/10 border-l-4 border-l-brand-teal' : 'bg-brand-paper'
+                        }`}
                     >
                       <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
                         <div className="flex items-center gap-1.5">
@@ -895,6 +892,7 @@ export const MentorDoubtsPage: React.FC = () => {
           })
         }
       />
+      </div>
     </div>
   );
 };
