@@ -888,7 +888,7 @@ export const StudentLibraryPage: React.FC = () => {
         <div className="space-y-6 animate-fadeIn">
           {/* Filter Bar */}
           <section className="p-3 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal space-y-3 sm:space-y-4">
-            <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex flex-col md:flex-row md:flex-wrap lg:flex-nowrap gap-3">
               {/* Search */}
               <div className="relative flex-1">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
@@ -1602,7 +1602,7 @@ export const StudentLibraryPage: React.FC = () => {
 
           {/* Filter Bar */}
           <section className="p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-4">
-            <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex flex-col md:flex-row md:flex-wrap lg:flex-nowrap gap-3">
               {/* Text Search */}
               <div className="relative flex-1">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted" />
@@ -2164,7 +2164,7 @@ export const StudentLibraryPage: React.FC = () => {
 
           {/* Filter Bar */}
           <section className="p-4 sm:p-5 border-2 border-brand-dark bg-brand-paper shadow-brutal space-y-4">
-            <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex flex-col md:flex-row md:flex-wrap lg:flex-nowrap gap-3">
               {/* Search */}
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted pointer-events-none" />

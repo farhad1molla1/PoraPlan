@@ -480,38 +480,38 @@ export const MentorDashboardPage: React.FC = () => {
                     key={student.id}
                     className="min-w-0 p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper-tint flex flex-col justify-between gap-3 shadow-brutal-xs"
                   >
-                    <div className="flex flex-col sm:flex-row items-start justify-between gap-2 min-w-0">
-                      <div className="space-y-0.5 min-w-0 flex-1">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-2 min-w-0 w-full">
+                      <div className="space-y-0.5 min-w-0 flex-1 w-full">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <GraduationCap className="w-4 h-4 text-brand-teal shrink-0" />
                           <h3 className="font-heading font-extrabold text-sm sm:text-base text-brand-navy truncate">
                             {student.full_name}
                           </h3>
                         </div>
-                        <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono text-brand-muted">
+                        <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono text-brand-muted min-w-0">
                           {student.poraplan_id && (
                             <>
-                              <span className="font-bold text-brand-gold shrink-0">
+                              <span className="font-bold text-brand-gold shrink-0 truncate max-w-[120px] sm:max-w-none">
                                 ID: {student.poraplan_id}
                               </span>
                               <span>•</span>
                             </>
                           )}
-                          <span className="truncate max-w-[160px] sm:max-w-[200px]">{student.email}</span>
+                          <span className="truncate min-w-0 max-w-[130px] sm:max-w-[200px]">{student.email}</span>
                         </div>
                         {student.university && (
-                          <div className="text-[11px] text-brand-dark/70 font-sans truncate">
+                          <div className="text-[11px] text-brand-dark/70 font-sans truncate min-w-0">
                             {student.university} {student.department ? `(${student.department})` : ''}
                           </div>
                         )}
                         {record?.cohort && (
-                          <div className="text-[11px] font-mono text-brand-teal font-semibold pt-0.5 truncate">
+                          <div className="text-[11px] font-mono text-brand-teal font-semibold pt-0.5 truncate min-w-0">
                             {record.program?.name || 'Program'} • {record.cohort.name}
                           </div>
                         )}
                       </div>
 
-                      <div className="flex flex-row sm:flex-col items-center sm:items-end gap-1.5 shrink-0 self-start">
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end gap-1.5 shrink-0 self-start max-w-full">
                         <Badge variant={isIndividual ? 'teal' : 'gold'} size="sm" className="font-bold text-[10px]">
                           {isIndividual ? 'INDIVIDUAL' : 'COHORT'}
                         </Badge>
@@ -529,8 +529,8 @@ export const MentorDashboardPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-brand-dark/20 flex items-center justify-between flex-wrap gap-2">
-                      <div className="flex items-center gap-1.5 text-xs">
+                    <div className="pt-2 border-t border-brand-dark/20 flex items-center justify-between flex-wrap gap-2 min-w-0">
+                      <div className="flex items-center gap-1.5 text-xs flex-wrap min-w-0">
                         <Link
                           to={`/mentor/plans?studentId=${student.id}`}
                           className="font-mono text-[11px] font-bold text-brand-teal hover:underline"

@@ -196,14 +196,14 @@ export const DashboardLayout: React.FC = () => {
   const mobileStudentNavItems = [
     { label: 'Home', to: '/student/dashboard', icon: LayoutDashboard },
     { label: 'Tasks', to: '/student/tasks', icon: ListTodo },
-    { label: 'Doubts', to: '/student/doubts', icon: HelpCircle },
+    { label: 'Announcements', to: '/student/announcements', icon: Megaphone },
     { label: 'Plans', to: '/student/plans', icon: Compass },
   ];
 
   const mobileMentorNavItems = [
     { label: 'Home', to: '/mentor/dashboard', icon: LayoutDashboard },
     { label: 'Reviews', to: '/mentor/reviews', icon: FileCheck },
-    { label: 'Doubts', to: '/mentor/doubts', icon: HelpCircle },
+    { label: 'Evaluations', to: '/mentor/evaluations', icon: Calendar },
     { label: 'Tasks', to: '/mentor/tasks', icon: ListTodo },
   ];
 

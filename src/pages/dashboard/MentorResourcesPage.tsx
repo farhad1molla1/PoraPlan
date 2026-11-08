@@ -359,12 +359,12 @@ export const MentorResourcesPage: React.FC = () => {
           </div>
 
           {/* Student Filter */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0 max-w-full">
             <span className="font-mono text-[10px] sm:text-xs font-bold text-brand-muted shrink-0">Student:</span>
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="px-2 sm:px-2.5 py-1.5 sm:py-1.5 text-base sm:text-xs min-h-[36px] sm:min-h-0 font-mono border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal"
+              className="w-full sm:w-auto max-w-full sm:max-w-xs px-2 sm:px-2.5 py-1.5 sm:py-1.5 text-base sm:text-xs min-h-[36px] sm:min-h-0 font-mono border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs focus:outline-none focus:ring-1 focus:ring-brand-teal truncate"
             >
               <option value="all">All Assigned Students ({students.length})</option>
               {students.map((s) => (

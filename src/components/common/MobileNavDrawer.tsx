@@ -18,11 +18,11 @@ import {
   Megaphone,
   CreditCard,
   BookOpen,
-  Calendar,
   GraduationCap,
   Users,
   Bell,
   Compass,
+  HelpCircle,
 } from 'lucide-react';
 
 export interface MobileDrawerNavItem {
@@ -115,7 +115,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
     { label: 'Academic Library', to: '/student/library', icon: BookMarked },
     { label: 'Academic Progress', to: '/student/progress', icon: TrendingUp },
     { label: 'Academic Reports', to: '/student/reports', icon: BarChart3 },
-    { label: 'Announcements', to: '/student/announcements', icon: Megaphone },
+    { label: 'Doubts Desk', to: '/student/doubts', icon: HelpCircle },
     { label: 'Billing & Payments', to: '/student/billing', icon: CreditCard },
     { label: 'Subjects', to: '/student/subjects', icon: BookOpen },
     {
@@ -129,7 +129,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
   const mentorDrawerItems: MobileDrawerNavItem[] = [
     { label: 'Assignments', to: '/mentor/assignments', icon: FileText },
     { label: 'Study Plans', to: '/mentor/plans', icon: Compass },
-    { label: 'Evaluations', to: '/mentor/evaluations', icon: Calendar },
+    { label: 'Doubts Desk', to: '/mentor/doubts', icon: HelpCircle },
     { label: 'Student Progress', to: '/mentor/progress', icon: TrendingUp },
     { label: 'Scholar Reports', to: '/mentor/reports', icon: BarChart3 },
     { label: 'Resources', to: '/mentor/resources', icon: BookMarked },
