@@ -87,7 +87,8 @@ export const StudentReportPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full print:p-0 print:bg-white">
+      <div className="space-y-6 max-w-5xl mx-auto pb-16 print:pb-0 print:max-w-none">
       {/* ========================================================================= */}
       {/* DEDICATED ACADEMIC TYPOGRAPHY & PRINT-SPECIFIC A4 STYLESHEET              */}
       {/* ========================================================================= */}
@@ -1544,6 +1545,7 @@ export const StudentReportPage: React.FC = () => {
         </div>
       </>
     ) : null}
+      </div>
     </div>
   );
 };

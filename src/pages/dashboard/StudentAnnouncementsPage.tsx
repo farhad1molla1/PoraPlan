@@ -246,7 +246,8 @@ export const StudentAnnouncementsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-3 sm:space-y-6 pb-12">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6 pb-12">
       {/* 1. Header & Actions */}
       <div className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
         <div>
@@ -788,6 +789,7 @@ export const StudentAnnouncementsPage: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

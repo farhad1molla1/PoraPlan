@@ -730,7 +730,8 @@ export const StudentLibraryPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-6 animate-fadeIn">
       {/* ========================================================================= */}
       {/* 1. HEADER SECTION                                                         */}
       {/* ========================================================================= */}
@@ -2638,6 +2639,7 @@ export const StudentLibraryPage: React.FC = () => {
             : undefined
         }
       />
+      </div>
     </div>
   );
 };

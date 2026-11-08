@@ -451,7 +451,8 @@ export const StudentAssignmentsPage: React.FC = () => {
   const reviewedCount = assignments.filter((a) => a.submission && a.submission.status === 'reviewed').length;
 
   return (
-    <div className="space-y-3 sm:space-y-6">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6">
       {/* Page Header */}
       <div className="bg-brand-bg border-2 sm:border-4 border-brand-dark p-2.5 sm:p-6 shadow-none sm:shadow-brutal flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div>
@@ -1612,6 +1613,7 @@ export const StudentAssignmentsPage: React.FC = () => {
         loading={viewerModal.loading}
         error={viewerModal.error}
       />
+      </div>
     </div>
   );
 };

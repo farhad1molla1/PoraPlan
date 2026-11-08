@@ -463,7 +463,8 @@ export const StudentDoubtsPage: React.FC = () => {
   const resolvedCount = doubts.filter((d) => d.status === 'resolved').length;
 
   return (
-    <div className="space-y-3 sm:space-y-6 max-w-7xl mx-auto">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="space-y-3 sm:space-y-6 max-w-5xl mx-auto">
       {/* 1. Header & Breadcrumb */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-4 border-b sm:border-b-2 border-brand-dark pb-2.5 sm:pb-4">
         <div>
@@ -1234,6 +1235,7 @@ export const StudentDoubtsPage: React.FC = () => {
           })
         }
       />
+      </div>
     </div>
   );
 };

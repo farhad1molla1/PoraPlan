@@ -103,7 +103,8 @@ export const StudentProgressPage: React.FC = () => {
       progress.subjectsProgress.length > 0);
 
   return (
-    <div className="space-y-2.5 sm:space-y-6 md:space-y-8 animate-fadeIn pb-8">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="space-y-2.5 sm:space-y-6 md:space-y-8 animate-fadeIn pb-8 max-w-5xl mx-auto">
       {/* ========================================================================= */}
       {/* 1. PAGE HEADER                                                            */}
       {/* ========================================================================= */}
@@ -997,6 +998,7 @@ export const StudentProgressPage: React.FC = () => {
           );
         })()
       )}
+      </div>
     </div>
   );
 };
