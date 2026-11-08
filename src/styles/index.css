@@ -23,38 +23,6 @@
   --pattern-navy-fade: rgba(8, 43, 76, 0.045);
   --pattern-dots-fade: rgba(8, 43, 76, 0.12);
   --pattern-rule-fade: rgba(8, 43, 76, 0.08);
-
-  /* Refined Neo-Brutalist Semantic Surface Tokens (Light Mode) */
-  --surface-canvas-rgb: 244 246 249; /* #F4F6F9 */
-  --surface-canvas: rgb(var(--surface-canvas-rgb));
-  --surface-card-rgb: 255 255 255; /* #FFFFFF */
-  --surface-card: rgb(var(--surface-card-rgb));
-  --surface-inset-rgb: 237 243 246; /* #EDF3F6 */
-  --surface-inset: rgb(var(--surface-inset-rgb));
-  --surface-elevated-rgb: 255 255 255; /* #FFFFFF */
-  --surface-elevated: rgb(var(--surface-elevated-rgb));
-
-  /* Refined Neo-Brutalist Semantic Border Tokens (Light Mode) */
-  --border-primary-rgb: 11 25 44; /* #0B192C */
-  --border-primary: rgb(var(--border-primary-rgb));
-  --border-subtle-rgb: 216 226 234; /* #D8E2EA */
-  --border-subtle: rgb(var(--border-subtle-rgb));
-  --border-accent-rgb: 27 73 101; /* #1B4965 */
-  --border-accent: rgb(var(--border-accent-rgb));
-
-  /* Refined Neo-Brutalist Elevation System (Light Mode) */
-  --shadow-none: none;
-  --shadow-micro: 1.5px 1.5px 0px var(--border-primary);
-  --shadow-tactile: 2px 2px 0px var(--border-primary);
-  --shadow-elevated: 3px 3px 0px var(--border-primary);
-  --shadow-prominent: 4px 4px 0px var(--border-primary);
-
-  /* Refined Neo-Brutalist Semantic Radius Tokens */
-  --radius-none: 0px;
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 8px;
-  --radius-full: 9999px;
 }
 
 .dark {
@@ -78,31 +46,6 @@
   --pattern-navy-fade: rgba(232, 237, 244, 0.015);
   --pattern-dots-fade: rgba(232, 237, 244, 0.03);
   --pattern-rule-fade: rgba(232, 237, 244, 0.02);
-
-  /* Refined Neo-Brutalist Semantic Surface Tokens (Midnight Dark Mode) */
-  --surface-canvas-rgb: 7 11 17; /* #070B11 */
-  --surface-canvas: rgb(var(--surface-canvas-rgb));
-  --surface-card-rgb: 15 23 36; /* #0F1724 */
-  --surface-card: rgb(var(--surface-card-rgb));
-  --surface-inset-rgb: 20 31 48; /* #141F30 */
-  --surface-inset: rgb(var(--surface-inset-rgb));
-  --surface-elevated-rgb: 27 41 62; /* #1B293E */
-  --surface-elevated: rgb(var(--surface-elevated-rgb));
-
-  /* Refined Neo-Brutalist Semantic Border Tokens (Midnight Dark Mode) */
-  --border-primary-rgb: 42 59 82; /* #2A3B52 */
-  --border-primary: rgb(var(--border-primary-rgb));
-  --border-subtle-rgb: 28 40 56; /* #1C2838 */
-  --border-subtle: rgb(var(--border-subtle-rgb));
-  --border-accent-rgb: 56 189 248; /* #38BDF8 */
-  --border-accent: rgb(var(--border-accent-rgb));
-
-  /* Refined Neo-Brutalist Elevation System (Midnight Dark Mode: Specular Highlights + Controlled Depth) */
-  --shadow-none: none;
-  --shadow-micro: 0 1px 0 0 rgba(255, 255, 255, 0.08) inset, 1px 1px 0px rgba(0, 0, 0, 0.6);
-  --shadow-tactile: 0 1px 0 0 rgba(255, 255, 255, 0.12) inset, 1.5px 1.5px 0px rgba(0, 0, 0, 0.8);
-  --shadow-elevated: 0 1px 0 0 rgba(255, 255, 255, 0.15) inset, 2px 2px 0px rgba(0, 0, 0, 0.9);
-  --shadow-prominent: 0 1px 0 0 rgba(255, 255, 255, 0.18) inset, 3px 3px 0px rgba(0, 0, 0, 1);
 }
 
 @layer base {

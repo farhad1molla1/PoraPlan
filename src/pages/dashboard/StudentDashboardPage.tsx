@@ -131,16 +131,16 @@ export const StudentDashboardPage: React.FC = () => {
   const upcomingEval = evaluations.find((e) => e.status === 'scheduled');
 
   return (
-    <div className="w-full py-3 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
       <div className="max-w-4xl mx-auto space-y-3 sm:space-y-6">
 
         {/* 1. GREETING & MENTOR SECTION */}
         <section
           aria-labelledby="student-greeting"
-          className="border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-6 space-y-3 sm:space-y-4"
+          className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 space-y-2.5 sm:space-y-4"
         >
           {/* Top Row: Greeting & Meta */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b sm:border-b-2 border-primary/20 sm:border-primary pb-2 sm:pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
             <div>
               <h1 id="student-greeting" className="text-lg sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
                 Welcome, {studentName}
@@ -161,15 +161,15 @@ export const StudentDashboardPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 self-start sm:self-auto">
-              <Badge variant="teal" size="sm" className="font-mono uppercase font-bold text-[9px] sm:text-[10px]">
+            <div className="flex items-center gap-2">
+              <Badge variant="teal" size="sm" className="font-mono uppercase font-bold">
                 Student
               </Badge>
             </div>
           </div>
 
           {/* Mentor Information */}
-          <div className="p-2.5 sm:p-3.5 border border-primary/20 bg-surface-inset rounded-semantic-xs sm:rounded-semantic-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
             <div className="space-y-0.5 sm:space-y-1">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="text-[10px] sm:text-xs font-mono font-bold text-brand-muted uppercase">Mentor</span>
@@ -190,7 +190,7 @@ export const StudentDashboardPage: React.FC = () => {
                       {assignedMentor.full_name}
                     </Link>
                     {assignedMentor.poraplan_id && (
-                      <span className="font-mono text-[10px] sm:text-xs px-1.5 py-0.2 sm:py-0.5 bg-surface-card border border-primary/30 text-brand-navy font-bold rounded-semantic-xs">
+                      <span className="font-mono text-[10px] sm:text-xs px-1.5 py-0.2 sm:py-0.5 bg-brand-paper-tint border border-brand-dark/30 text-brand-navy font-bold">
                         {assignedMentor.poraplan_id}
                       </span>
                     )}
@@ -222,7 +222,7 @@ export const StudentDashboardPage: React.FC = () => {
                     href={`https://wa.me/${assignedMentor.whatsapp_number.replace(/\D/g, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 border sm:border-2 border-primary bg-emerald-600 text-white text-[11px] sm:text-xs font-mono font-bold rounded-semantic-xs shadow-micro sm:shadow-brutal-xs hover:bg-emerald-700 transition-colors min-h-[34px] sm:min-h-0"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 border sm:border-2 border-brand-dark bg-emerald-600 text-white text-[11px] sm:text-xs font-mono font-bold shadow-none sm:shadow-brutal-xs hover:bg-emerald-700 transition-colors min-h-[34px] sm:min-h-0"
                   >
                     <Phone className="w-3.5 h-3.5" />
                     <span>WhatsApp</span>
@@ -230,7 +230,7 @@ export const StudentDashboardPage: React.FC = () => {
                 )}
                 <Link
                   to={`/profile/${assignedMentor.id}`}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 border sm:border-2 border-primary bg-surface-card text-brand-navy text-[11px] sm:text-xs font-mono font-bold rounded-semantic-xs shadow-micro sm:shadow-brutal-xs hover:bg-surface-elevated transition-colors min-h-[34px] sm:min-h-0"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-paper text-brand-navy text-[11px] sm:text-xs font-mono font-bold shadow-none sm:shadow-brutal-xs hover:bg-brand-paper-tint transition-colors min-h-[34px] sm:min-h-0"
                 >
                   <User className="w-3.5 h-3.5" />
                   <span>Profile</span>
@@ -243,9 +243,9 @@ export const StudentDashboardPage: React.FC = () => {
         {/* 2. TODAY'S STUDY & TASKS (PRIMARY FOCUS: "WHAT SHOULD I STUDY TODAY?") */}
         <section
           aria-labelledby="today-study-title"
-          className="border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-6 space-y-3 sm:space-y-4"
+          className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 space-y-2.5 sm:space-y-4"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b sm:border-b-2 border-primary/20 sm:border-primary pb-2 sm:pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
             <div>
               <h2 id="today-study-title" className="font-heading font-extrabold text-sm sm:text-xl text-brand-navy">
                 What to Study Today
@@ -266,7 +266,7 @@ export const StudentDashboardPage: React.FC = () => {
 
           {/* Active Study Plan Banner */}
           {activePlan && (
-            <div className="p-2 sm:p-3 border sm:border-2 border-primary/20 sm:border-primary bg-surface-inset rounded-semantic-xs sm:rounded-semantic-sm flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+            <div className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper-tint flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <span className="text-[10px] sm:text-[11px] font-mono font-bold text-brand-muted uppercase">
@@ -298,8 +298,8 @@ export const StudentDashboardPage: React.FC = () => {
               <span>Loading tasks...</span>
             </div>
           ) : tasks.length === 0 ? (
-            <div className="p-4 sm:p-6 border sm:border-2 border-dashed border-primary/30 bg-surface-inset rounded-semantic-xs sm:rounded-semantic-sm text-center space-y-1.5 sm:space-y-2">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 border sm:border-2 border-primary bg-brand-gold-light rounded-semantic-xs mx-auto flex items-center justify-center">
+            <div className="p-4 sm:p-6 border sm:border-2 border-dashed border-brand-dark/30 bg-brand-paper-tint text-center space-y-1.5 sm:space-y-2">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 border sm:border-2 border-brand-dark bg-brand-gold-light mx-auto flex items-center justify-center">
                 <ListTodo className="w-4 h-4 sm:w-5 sm:h-5 text-brand-dark" />
               </div>
               <h3 className="font-heading font-bold text-xs sm:text-sm text-brand-navy">
@@ -316,10 +316,10 @@ export const StudentDashboardPage: React.FC = () => {
                 return (
                   <div
                     key={task.id}
-                    className={`p-2 sm:p-3 border sm:border-2 border-primary rounded-semantic-xs sm:rounded-semantic-sm flex items-start gap-2 sm:gap-3 transition-colors ${
+                    className={`p-2 sm:p-3 border sm:border-2 border-brand-dark flex items-start gap-2 sm:gap-3 transition-colors ${
                       isDone
-                        ? 'bg-surface-inset/60 opacity-75'
-                        : 'bg-surface-card shadow-micro sm:shadow-brutal-xs hover:bg-surface-inset'
+                        ? 'bg-brand-paper-tint/60 opacity-75'
+                        : 'bg-brand-paper shadow-none sm:shadow-brutal-xs hover:bg-brand-paper-tint'
                     }`}
                   >
                     <button
@@ -331,8 +331,8 @@ export const StudentDashboardPage: React.FC = () => {
                       aria-label={`Toggle task completion for ${task.title}`}
                     >
                       <span
-                        className={`w-4 h-4 sm:w-5 sm:h-5 border sm:border-2 border-primary rounded-semantic-xs flex items-center justify-center shrink-0 transition-colors ${
-                          isDone ? 'bg-brand-teal text-white' : 'bg-surface-card hover:bg-brand-gold-light'
+                        className={`w-4 h-4 sm:w-5 sm:h-5 border sm:border-2 border-brand-dark flex items-center justify-center shrink-0 transition-colors ${
+                          isDone ? 'bg-brand-teal text-white' : 'bg-brand-paper hover:bg-brand-gold-light'
                         }`}
                       >
                         {isDone ? <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[3]" /> : <Circle className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-transparent" />}
@@ -345,14 +345,14 @@ export const StudentDashboardPage: React.FC = () => {
                           {task.title}
                         </h4>
                         {task.estimated_minutes && (
-                          <span className="text-[9px] sm:text-[10px] font-mono px-1 py-0.2 bg-brand-gold-light border border-primary/40 rounded-semantic-xs flex items-center gap-1">
+                          <span className="text-[9px] sm:text-[10px] font-mono px-1 py-0.2 bg-brand-gold-light border border-brand-dark flex items-center gap-1">
                             <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                             {task.estimated_minutes} min
                           </span>
                         )}
                         {task.attachment_path && (
                           <span
-                            className="text-[9px] sm:text-[10px] font-mono px-1 py-0.2 bg-brand-teal-light border border-primary/40 rounded-semantic-xs flex items-center gap-1 text-brand-navy"
+                            className="text-[9px] sm:text-[10px] font-mono px-1 py-0.2 bg-brand-teal-light border border-brand-dark flex items-center gap-1 text-brand-navy"
                             title={task.attachment_name || 'Attachment attached'}
                           >
                             <Paperclip className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-teal" />
@@ -372,7 +372,7 @@ export const StudentDashboardPage: React.FC = () => {
                     </div>
 
                     {task.subject_name && (
-                      <span className="hidden sm:inline font-mono text-[9px] sm:text-[10px] text-brand-muted border border-primary/20 px-1.5 py-0.5 rounded-semantic-xs shrink-0">
+                      <span className="hidden sm:inline font-mono text-[9px] sm:text-[10px] text-brand-muted border border-brand-dark/20 px-1.5 py-0.5 shrink-0">
                         {task.subject_name}
                       </span>
                     )}
@@ -415,7 +415,7 @@ export const StudentDashboardPage: React.FC = () => {
             {/* Card 1: Today's Tasks */}
             <Link
               to="/student/tasks"
-              className="p-2 sm:p-4 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-1 sm:mb-2">
                 <span className="font-mono text-[10px] sm:text-xs font-bold text-brand-muted">
@@ -434,7 +434,7 @@ export const StudentDashboardPage: React.FC = () => {
             {/* Card 2: Assignments */}
             <Link
               to="/student/assignments"
-              className="p-2 sm:p-4 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-1 sm:mb-2">
                 <span className="font-mono text-[10px] sm:text-xs font-bold text-brand-muted">
@@ -453,7 +453,7 @@ export const StudentDashboardPage: React.FC = () => {
             {/* Card 3: Doubts */}
             <Link
               to="/student/doubts"
-              className="p-2 sm:p-4 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-1 sm:mb-2">
                 <span className="font-mono text-[10px] sm:text-xs font-bold text-brand-muted">
@@ -472,7 +472,7 @@ export const StudentDashboardPage: React.FC = () => {
             {/* Card 4: Evaluation */}
             <Link
               to="/student/evaluations"
-              className="p-2 sm:p-4 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-1 sm:mb-2">
                 <span className="font-mono text-[10px] sm:text-xs font-bold text-brand-muted">
@@ -492,7 +492,7 @@ export const StudentDashboardPage: React.FC = () => {
 
         {/* 4. EMAIL CONNECTION (OPTIONAL BACKUP) */}
         {!profile?.linked_email && (
-          <section className="p-2.5 sm:p-4 border sm:border-2 border-primary bg-brand-gold-light rounded-semantic-sm shadow-micro sm:shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+          <section className="p-2.5 sm:p-4 border sm:border-2 border-brand-dark bg-brand-gold-light shadow-none sm:shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
             <div className="space-y-0.5">
               <div className="flex items-center gap-1.5 font-mono text-[11px] sm:text-xs font-bold text-brand-navy">
                 <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy shrink-0" />
@@ -511,13 +511,13 @@ export const StudentDashboardPage: React.FC = () => {
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
                 placeholder="yourname@gmail.com"
-                className="px-2.5 py-1.5 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border sm:border-2 border-primary bg-surface-card rounded-semantic-xs font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                className="px-2.5 py-1.5 sm:py-1.5 text-base sm:text-xs min-h-[44px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-paper font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
               />
               <button
                 type="button"
                 onClick={handleLinkEmail}
                 disabled={isLinking}
-                className="px-2.5 py-1.5 border sm:border-2 border-primary bg-brand-navy text-brand-bg rounded-semantic-xs text-[11px] sm:text-xs font-mono font-bold hover:bg-brand-dark shadow-micro sm:shadow-brutal-xs"
+                className="px-2.5 py-1.5 border sm:border-2 border-brand-dark bg-brand-navy text-brand-bg text-[11px] sm:text-xs font-mono font-bold hover:bg-brand-dark shadow-none sm:shadow-brutal-xs"
               >
                 {isLinking ? 'Linking...' : 'Connect'}
               </button>

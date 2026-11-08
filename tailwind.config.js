@@ -23,18 +23,9 @@ export default {
           'teal-light': 'rgb(var(--brand-teal-light) / <alpha-value>)',
           'navy-light': 'rgb(var(--brand-navy-light) / <alpha-value>)',
         },
-        surface: {
-          canvas: 'rgb(var(--surface-canvas-rgb) / <alpha-value>)',
-          card: 'rgb(var(--surface-card-rgb) / <alpha-value>)',
-          inset: 'rgb(var(--surface-inset-rgb) / <alpha-value>)',
-          elevated: 'rgb(var(--surface-elevated-rgb) / <alpha-value>)',
-        },
       },
       borderColor: {
         'brand-dark': 'rgb(var(--brand-border) / <alpha-value>)',
-        'primary': 'rgb(var(--border-primary-rgb) / <alpha-value>)',
-        'subtle': 'rgb(var(--border-subtle-rgb) / <alpha-value>)',
-        'accent': 'rgb(var(--border-accent-rgb) / <alpha-value>)',
       },
       boxShadow: {
         'brutal-xs': '2px 2px 0px 0px var(--brand-shadow)',
@@ -45,16 +36,6 @@ export default {
         'brutal-navy': '4px 4px 0px 0px var(--brand-navy)',
         'brutal-gold': '4px 4px 0px 0px var(--brand-gold)',
         'brutal-teal': '4px 4px 0px 0px var(--brand-teal)',
-        'micro': 'var(--shadow-micro)',
-        'tactile': 'var(--shadow-tactile)',
-        'elevated': 'var(--shadow-elevated)',
-        'prominent': 'var(--shadow-prominent)',
-      },
-      borderRadius: {
-        'semantic-sm': 'var(--radius-sm)',
-        'semantic-md': 'var(--radius-md)',
-        'semantic-lg': 'var(--radius-lg)',
-        'semantic-full': 'var(--radius-full)',
       },
       fontFamily: {
         sans: ['Plus Jakarta Sans', 'sans-serif'],

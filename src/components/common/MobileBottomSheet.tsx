@@ -109,7 +109,7 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
         ref={sheetRef}
         tabIndex={-1}
         className={cn(
-          'w-full bg-surface-elevated border-t-2 sm:border-2 border-brand-dark shadow-elevated sm:shadow-brutal-lg',
+          'w-full bg-brand-paper border-t-2 sm:border-2 border-brand-dark shadow-brutal-sm sm:shadow-brutal-lg',
           'rounded-t-2xl sm:rounded-none',
           'max-h-[92dvh] sm:max-h-[90vh]',
           'flex flex-col',
@@ -121,12 +121,12 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Mobile Drag Handle Affordance */}
-        <div className="w-10 h-1 bg-brand-dark/30 dark:bg-white/30 rounded-full mx-auto mt-2.5 mb-1.5 sm:hidden shrink-0" aria-hidden="true" />
+        <div className="w-12 h-1.5 bg-brand-dark/25 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" aria-hidden="true" />
 
         {/* Sheet / Dialog Header */}
         <div
           className={cn(
-            'flex items-center justify-between border-b sm:border-b-2 border-brand-dark px-4 py-3 sm:px-6 sm:py-4 shrink-0 bg-surface-elevated',
+            'flex items-center justify-between border-b-2 border-brand-dark px-4 py-3 sm:px-6 sm:py-4 shrink-0 bg-brand-paper',
             headerClassName
           )}
         >
@@ -151,7 +151,7 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="min-w-[44px] min-h-[44px] -mr-2 p-2 flex items-center justify-center text-brand-dark/80 hover:text-brand-dark hover:bg-surface-inset border border-transparent hover:border-brand-dark rounded-semantic-sm transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+              className="min-w-[44px] min-h-[44px] -mr-2 p-2 flex items-center justify-center text-brand-dark/80 hover:text-brand-dark hover:bg-brand-paper-tint border border-transparent hover:border-brand-dark transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
               aria-label="Close dialog"
             >
               <X className="w-4 h-4" />
@@ -162,7 +162,7 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
         {/* Sheet Body Content */}
         <div
           className={cn(
-            'overflow-y-auto overscroll-contain flex-1 px-4 py-3.5 sm:px-6 sm:py-5 space-y-4 text-brand-dark dark:text-brand-navy',
+            'overflow-y-auto overscroll-contain flex-1 px-4 py-3.5 sm:px-6 sm:py-5 space-y-4 text-brand-dark',
             bodyClassName
           )}
         >
@@ -173,7 +173,7 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
         {footer && (
           <div
             className={cn(
-              'sticky bottom-0 z-10 bg-surface-elevated border-t sm:border-t-2 border-brand-dark/20 dark:border-border-subtle px-4 py-3 sm:px-6 sm:py-3.5',
+              'sticky bottom-0 z-10 bg-brand-paper border-t-2 border-brand-dark/15 px-4 py-3 sm:px-6 sm:py-3.5',
               'pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-3.5',
               'flex items-center justify-end gap-2.5 shrink-0 shadow-xs',
               footerClassName

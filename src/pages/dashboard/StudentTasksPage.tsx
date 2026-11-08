@@ -216,15 +216,15 @@ export const StudentTasksPage: React.FC = () => {
   const completedCount = tasks.filter((t) => t.status === 'completed').length;
 
   return (
-    <div className="w-full py-3 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
       <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6">
 
         {/* Top Header Banner */}
-        <section aria-labelledby="tasks-heading" className="border sm:border-2 border-primary bg-brand-navy text-brand-paper rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-7">
+        <section aria-labelledby="tasks-heading" className="border sm:border-2 border-brand-dark bg-brand-navy text-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-7">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
             <div className="space-y-1 sm:space-y-1.5">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="font-mono text-[9px] sm:text-[11px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded-semantic-xs shadow-micro sm:shadow-brutal-xs">
+                <span className="font-mono text-[9px] sm:text-[11px] tracking-wider uppercase font-bold text-brand-gold bg-brand-navy border border-brand-gold/40 px-1.5 sm:px-2 py-0.2 sm:py-0.5 shadow-none sm:shadow-brutal-xs">
                   DAILY TARGETS
                 </span>
               </div>
@@ -238,11 +238,11 @@ export const StudentTasksPage: React.FC = () => {
 
             {/* Quick Stats Banner */}
             <div className="flex items-center gap-1.5 sm:gap-2 self-start sm:self-center">
-              <div className="border border-brand-paper/30 bg-brand-navy p-1.5 sm:p-2.5 text-center min-w-[55px] sm:min-w-[75px] rounded-semantic-xs shadow-micro sm:shadow-brutal-xs">
+              <div className="border border-brand-paper/30 bg-brand-navy p-1.5 sm:p-2.5 text-center min-w-[55px] sm:min-w-[75px] shadow-none sm:shadow-brutal-xs">
                 <span className="text-[9px] sm:text-[11px] font-mono text-brand-paper/70 block uppercase">Pending</span>
                 <span className="text-sm sm:text-lg font-heading font-extrabold text-brand-gold">{pendingCount + inProgressCount}</span>
               </div>
-              <div className="border border-brand-paper/30 bg-brand-navy p-1.5 sm:p-2.5 text-center min-w-[55px] sm:min-w-[75px] rounded-semantic-xs shadow-micro sm:shadow-brutal-xs">
+              <div className="border border-brand-paper/30 bg-brand-navy p-1.5 sm:p-2.5 text-center min-w-[55px] sm:min-w-[75px] shadow-none sm:shadow-brutal-xs">
                 <span className="text-[9px] sm:text-[11px] font-mono text-brand-paper/70 block uppercase">Completed</span>
                 <span className="text-sm sm:text-lg font-heading font-extrabold text-brand-teal-light">{completedCount}</span>
               </div>
@@ -270,14 +270,14 @@ export const StudentTasksPage: React.FC = () => {
 
         {/* Filter Tabs & Refresh Action */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
-          <div className="flex items-center gap-1 border sm:border-2 border-primary bg-surface-card p-0.5 sm:p-1 rounded-semantic-xs shadow-micro sm:shadow-brutal-xs self-start overflow-x-auto max-w-full">
+          <div className="flex items-center gap-1 border sm:border-2 border-brand-dark bg-brand-paper p-0.5 sm:p-1 shadow-none sm:shadow-brutal-xs self-start overflow-x-auto max-w-full">
             <button
               type="button"
               onClick={() => setStatusFilter('all')}
-              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer rounded-semantic-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'all'
-                  ? 'bg-brand-navy text-brand-paper border border-primary'
-                  : 'text-brand-dark hover:bg-surface-inset'
+                  ? 'bg-brand-navy text-brand-paper border border-brand-dark'
+                  : 'text-brand-dark hover:bg-brand-bg'
               }`}
             >
               ALL ({tasks.length})
@@ -285,10 +285,10 @@ export const StudentTasksPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('pending')}
-              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer rounded-semantic-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'pending'
-                  ? 'bg-brand-navy text-brand-paper border border-primary'
-                  : 'text-brand-dark hover:bg-surface-inset'
+                  ? 'bg-brand-navy text-brand-paper border border-brand-dark'
+                  : 'text-brand-dark hover:bg-brand-bg'
               }`}
             >
               PENDING ({pendingCount})
@@ -296,10 +296,10 @@ export const StudentTasksPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('in_progress')}
-              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer rounded-semantic-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'in_progress'
-                  ? 'bg-brand-navy text-brand-paper border border-primary'
-                  : 'text-brand-dark hover:bg-surface-inset'
+                  ? 'bg-brand-navy text-brand-paper border border-brand-dark'
+                  : 'text-brand-dark hover:bg-brand-bg'
               }`}
             >
               IN PROGRESS ({inProgressCount})
@@ -307,10 +307,10 @@ export const StudentTasksPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setStatusFilter('completed')}
-              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer rounded-semantic-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+              className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'completed'
-                  ? 'bg-brand-navy text-brand-paper border border-primary'
-                  : 'text-brand-dark hover:bg-surface-inset'
+                  ? 'bg-brand-navy text-brand-paper border border-brand-dark'
+                  : 'text-brand-dark hover:bg-brand-bg'
               }`}
             >
               COMPLETED ({completedCount})
@@ -321,7 +321,7 @@ export const StudentTasksPage: React.FC = () => {
             type="button"
             onClick={loadData}
             disabled={loading}
-            className="flex items-center justify-center gap-1 px-2.5 py-1 text-[11px] sm:text-xs font-heading font-bold border sm:border-2 border-primary bg-surface-card rounded-semantic-xs shadow-micro sm:shadow-brutal-xs hover:bg-surface-elevated transition-colors text-brand-navy disabled:opacity-50 self-end sm:self-auto min-h-[34px] sm:min-h-0"
+            className="flex items-center justify-center gap-1 px-2.5 py-1 text-[11px] sm:text-xs font-heading font-bold border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal-xs hover:bg-brand-bg transition-colors disabled:opacity-50 self-end sm:self-auto min-h-[34px] sm:min-h-0"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -330,7 +330,7 @@ export const StudentTasksPage: React.FC = () => {
 
         {/* Error Banner */}
         {error && (
-          <div className="p-3 sm:p-4 border sm:border-2 border-red-500 bg-red-50 text-brand-dark rounded-semantic-sm shadow-micro sm:shadow-brutal flex items-start gap-3">
+          <div className="p-4 border-2 border-brand-dark bg-red-50 text-brand-dark shadow-brutal flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
             <div className="space-y-1">
               <h3 className="font-heading font-extrabold text-sm text-red-900">
@@ -350,7 +350,7 @@ export const StudentTasksPage: React.FC = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="p-8 sm:p-12 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal text-center space-y-3">
+          <div className="p-8 sm:p-12 border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal text-center space-y-3">
             <Loader2 className="w-8 h-8 animate-spin text-brand-teal mx-auto" />
             <h2 className="font-heading font-extrabold text-sm text-brand-navy">
               RETRIEVING SCHEDULED TASKS
@@ -363,8 +363,8 @@ export const StudentTasksPage: React.FC = () => {
 
         {/* Empty State */}
         {!loading && !error && filteredTasks.length === 0 && (
-          <section aria-labelledby="empty-tasks-title" className="border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-5 sm:p-8 text-center space-y-4">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-brand-gold-light border sm:border-2 border-primary rounded-semantic-xs mx-auto flex items-center justify-center shadow-micro">
+          <section aria-labelledby="empty-tasks-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-5 sm:p-8 text-center space-y-4">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-brand-gold-light border-2 border-brand-dark mx-auto flex items-center justify-center shadow-brutal-xs">
               <ListTodo className="w-6 h-6 sm:w-8 sm:h-8 text-brand-dark stroke-[2.2]" />
             </div>
             <div className="max-w-md mx-auto space-y-1.5">
@@ -403,8 +403,8 @@ export const StudentTasksPage: React.FC = () => {
               return (
                 <article
                   key={task.id}
-                  className={`border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 sm:gap-4 transition-all ${
-                    isCompleted ? 'opacity-80 bg-surface-inset/70' : ''
+                  className={`border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4 transition-all ${
+                    isCompleted ? 'opacity-80 bg-brand-paper-tint' : ''
                   }`}
                 >
                   <div className="flex items-start gap-2.5 sm:gap-3.5 flex-1">
@@ -417,10 +417,10 @@ export const StudentTasksPage: React.FC = () => {
                       className="relative -m-2 p-2 sm:m-0 sm:p-0 min-w-[38px] min-h-[38px] sm:min-w-0 sm:min-h-0 flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
                     >
                       <span
-                        className={`w-5 h-5 sm:w-6 sm:h-6 border sm:border-2 border-primary rounded-semantic-xs flex items-center justify-center shrink-0 transition-colors ${
+                        className={`w-5 h-5 sm:w-6 sm:h-6 border sm:border-2 border-brand-dark flex items-center justify-center shrink-0 transition-colors ${
                           isCompleted
                             ? 'bg-brand-teal text-white shadow-none'
-                            : 'bg-surface-card hover:bg-surface-elevated shadow-micro sm:shadow-brutal-xs'
+                            : 'bg-brand-paper hover:bg-brand-paper shadow-none sm:shadow-brutal-xs'
                         }`}
                       >
                         {isUpdating ? (
@@ -437,14 +437,14 @@ export const StudentTasksPage: React.FC = () => {
                       {/* Tags & Badges */}
                       <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
                         {task.subject_name && (
-                          <span className="font-mono text-[9px] sm:text-[11px] font-bold uppercase tracking-wider bg-brand-teal-light border border-primary/30 px-1.5 sm:px-2 py-0.2 sm:py-0.5 text-brand-navy rounded-semantic-xs flex items-center gap-1">
+                          <span className="font-mono text-[9px] sm:text-[11px] font-bold uppercase tracking-wider bg-brand-teal-light border border-brand-dark px-1.5 sm:px-2 py-0.2 sm:py-0.5 text-brand-navy flex items-center gap-1">
                             <BookOpen className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-navy" />
                             {task.subject_name}
                           </span>
                         )}
 
                         {task.plan_title && (
-                          <span className="font-mono text-[9px] sm:text-[11px] font-bold uppercase tracking-wider bg-surface-inset border border-primary/30 px-1.5 sm:px-2 py-0.2 sm:py-0.5 text-brand-muted rounded-semantic-xs flex items-center gap-1">
+                          <span className="font-mono text-[9px] sm:text-[11px] font-bold uppercase tracking-wider bg-brand-bg border border-brand-dark px-1.5 sm:px-2 py-0.2 sm:py-0.5 text-brand-muted flex items-center gap-1">
                             <Compass className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-muted" />
                             {task.plan_title}
                           </span>
@@ -484,7 +484,7 @@ export const StudentTasksPage: React.FC = () => {
 
                       {/* Mentor Reference Attachment */}
                       {task.attachment_path && (
-                        <div className="mt-1.5 p-2 sm:p-2.5 bg-surface-inset border border-primary/25 rounded-semantic-xs flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
+                        <div className="mt-1.5 p-1.5 sm:p-2.5 bg-brand-bg border sm:border-2 border-brand-dark flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
                           <div className="flex items-center gap-1.5 min-w-0">
                             <Paperclip className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-teal shrink-0" />
                             <span className="font-mono font-bold text-brand-navy truncate max-w-[160px] sm:max-w-xs">
@@ -503,12 +503,12 @@ export const StudentTasksPage: React.FC = () => {
                               type="button"
                               onClick={() =>
                                 handlePreviewAttachment({
-                                   name: task.attachment_name,
-                                   size: task.attachment_size,
-                                   path: task.attachment_path,
-                                 })
-                               }
-                              className="px-2 py-0.5 sm:py-1 bg-surface-card border border-primary rounded-semantic-xs font-heading text-[10px] sm:text-[11px] font-bold text-brand-navy hover:bg-surface-elevated shadow-micro sm:shadow-brutal-xs flex items-center gap-1 min-h-[32px] sm:min-h-0"
+                                  name: task.attachment_name,
+                                  size: task.attachment_size,
+                                  path: task.attachment_path,
+                                })
+                              }
+                              className="px-2 py-0.5 sm:py-1 bg-brand-paper border border-brand-dark font-heading text-[10px] sm:text-[11px] font-bold text-brand-navy hover:bg-brand-paper shadow-none sm:shadow-brutal-xs flex items-center gap-1 min-h-[32px] sm:min-h-0"
                             >
                               <Eye className="w-3 h-3 text-brand-teal" />
                               Preview
@@ -517,11 +517,11 @@ export const StudentTasksPage: React.FC = () => {
                               type="button"
                               onClick={() =>
                                 handleDownloadAttachment({
-                                   name: task.attachment_name,
-                                   path: task.attachment_path,
-                                 })
-                               }
-                              className="px-2 py-0.5 sm:py-1 bg-brand-navy border border-primary rounded-semantic-xs font-heading text-[10px] sm:text-[11px] font-bold text-white hover:bg-brand-navy/90 shadow-micro sm:shadow-brutal-xs flex items-center gap-1 min-h-[32px] sm:min-h-0"
+                                  name: task.attachment_name,
+                                  path: task.attachment_path,
+                                })
+                              }
+                              className="px-2 py-0.5 sm:py-1 bg-brand-navy border border-brand-dark font-heading text-[10px] sm:text-[11px] font-bold text-white hover:bg-brand-navy/90 shadow-none sm:shadow-brutal-xs flex items-center gap-1 min-h-[32px] sm:min-h-0"
                             >
                               <Download className="w-3 h-3 text-brand-gold" />
                               Download
@@ -560,9 +560,9 @@ export const StudentTasksPage: React.FC = () => {
         )}
 
         {/* Academic Workflow Guidance Footer */}
-        <section aria-labelledby="task-workflow-title" className="border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <section aria-labelledby="task-workflow-title" className="border-2 border-brand-dark bg-brand-paper shadow-brutal-sm sm:shadow-brutal p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 border sm:border-2 border-primary bg-brand-teal-light rounded-semantic-xs flex items-center justify-center shrink-0 shadow-micro sm:shadow-brutal-xs">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 border-2 border-brand-dark bg-brand-teal-light flex items-center justify-center shrink-0 shadow-brutal-xs">
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-brand-navy stroke-[2.2]" />
             </div>
             <div>
