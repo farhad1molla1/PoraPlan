@@ -18,22 +18,23 @@ export const Card: React.FC<CardProps> = ({
   className,
   ...props
 }) => {
-  const baseClasses = 'relative border sm:border-2 border-brand-dark transition-all duration-150 rounded-none motion-reduce:transition-none';
+  const baseClasses =
+    'relative border border-brand-dark sm:border-2 transition-all duration-150 rounded-semantic-sm sm:rounded-none motion-reduce:transition-none';
 
   const shadowClasses = {
-    none: '',
-    sm: 'shadow-none sm:shadow-brutal-xs',
-    md: 'shadow-none sm:shadow-brutal-sm',
-    lg: 'shadow-brutal-xs sm:shadow-brutal',
+    none: 'shadow-none',
+    sm: 'shadow-micro sm:shadow-brutal-xs',
+    md: 'shadow-micro sm:shadow-brutal-sm',
+    lg: 'shadow-tactile sm:shadow-brutal',
   };
 
   const hoverClasses = hoverable
-    ? 'hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal motion-reduce:hover:transform-none cursor-pointer'
+    ? 'hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-tactile sm:hover:shadow-brutal motion-reduce:hover:transform-none cursor-pointer'
     : '';
 
   const variantClasses: Record<CardVariant, string> = {
-    default: 'bg-brand-paper text-brand-dark',
-    paper: 'bg-brand-paper text-brand-dark',
+    default: 'bg-surface-card text-brand-dark dark:text-brand-navy',
+    paper: 'bg-surface-card text-brand-dark dark:text-brand-navy',
     navy: 'bg-brand-navy text-brand-bg',
     gold: 'bg-brand-gold text-brand-dark',
     teal: 'bg-brand-teal text-white',
@@ -51,7 +52,7 @@ export const Card: React.FC<CardProps> = ({
       {...props}
     >
       {headerBar && (
-        <div className="border-b-2 border-brand-dark px-3 sm:px-4 py-1.5 sm:py-2 bg-black/[0.04] dark:bg-white/[0.04] flex items-center justify-between font-mono text-[11px] sm:text-xs tracking-wider">
+        <div className="border-b border-brand-dark sm:border-b-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-surface-inset flex items-center justify-between font-mono text-[11px] sm:text-xs tracking-wider text-brand-muted">
           {headerBar}
         </div>
       )}
