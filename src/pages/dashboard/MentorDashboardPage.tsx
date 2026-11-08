@@ -118,16 +118,16 @@ export const MentorDashboardPage: React.FC = () => {
   const needsAttentionCount = pendingReviews.length + openDoubts.length;
 
   return (
-    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+    <div className="w-full py-3 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
       <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6">
 
         {/* 1. MENTOR GREETING & PRIORITY ATTENTION */}
         <section
           aria-labelledby="mentor-greeting"
-          className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 space-y-2.5 sm:space-y-4"
+          className="border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-6 space-y-3 sm:space-y-4"
         >
           {/* Top Row: Greeting & Meta */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b sm:border-b-2 border-primary/20 sm:border-primary pb-2 sm:pb-3">
             <div>
               <h1 id="mentor-greeting" className="text-lg sm:text-2xl font-extrabold font-heading text-brand-navy tracking-tight">
                 Welcome, {mentorName}
@@ -148,15 +148,15 @@ export const MentorDashboardPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Badge variant="gold" size="sm" className="font-mono uppercase font-bold">
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <Badge variant="gold" size="sm" className="font-mono uppercase font-bold text-[9px] sm:text-[10px]">
                 Mentor
               </Badge>
             </div>
           </div>
 
           {/* Actionable Priority Banner */}
-          <div className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-gold-light text-brand-dark">
+          <div className="p-2.5 sm:p-4 border sm:border-2 border-primary/25 bg-brand-gold-light rounded-semantic-xs sm:rounded-semantic-sm text-brand-dark">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-1.5 font-mono text-[10px] sm:text-xs font-bold text-brand-navy uppercase">
@@ -194,7 +194,7 @@ export const MentorDashboardPage: React.FC = () => {
                 {pendingReviews.length > 0 && (
                   <Link
                     to="/mentor/reviews"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-navy text-brand-bg text-[11px] sm:text-xs font-mono font-bold shadow-none sm:shadow-brutal-xs hover:bg-brand-dark transition-colors"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 border sm:border-2 border-primary bg-brand-navy text-brand-bg text-[11px] sm:text-xs font-mono font-bold rounded-semantic-xs shadow-micro sm:shadow-brutal-xs hover:bg-brand-dark transition-colors"
                   >
                     <span>Review Queue ({pendingReviews.length})</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -203,7 +203,7 @@ export const MentorDashboardPage: React.FC = () => {
                 {openDoubts.length > 0 && (
                   <Link
                     to="/mentor/doubts"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-paper text-brand-dark text-[11px] sm:text-xs font-mono font-bold shadow-none sm:shadow-brutal-xs hover:bg-brand-paper-tint transition-colors"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 border sm:border-2 border-primary bg-surface-card text-brand-dark text-[11px] sm:text-xs font-mono font-bold rounded-semantic-xs shadow-micro sm:shadow-brutal-xs hover:bg-surface-elevated transition-colors"
                   >
                     <span>Answer Doubts ({openDoubts.length})</span>
                   </Link>
@@ -224,7 +224,7 @@ export const MentorDashboardPage: React.FC = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
             {/* Metric 1: Assigned Students */}
-            <div className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal flex flex-col justify-between">
+            <div className="p-2 sm:p-4 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal flex flex-col justify-between">
               <div className="flex items-center justify-between mb-1 sm:mb-2">
                 <span className="font-mono text-[9px] sm:text-xs font-bold text-brand-muted">
                   Assigned Students
@@ -242,7 +242,7 @@ export const MentorDashboardPage: React.FC = () => {
             {/* Metric 2: Pending Reviews */}
             <Link
               to="/mentor/reviews"
-              className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-2 sm:p-4 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-1 sm:mb-2">
                 <span className="font-mono text-[9px] sm:text-xs font-bold text-brand-muted">
@@ -261,7 +261,7 @@ export const MentorDashboardPage: React.FC = () => {
             {/* Metric 3: Open Doubts */}
             <Link
               to="/mentor/doubts"
-              className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-2 sm:p-4 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-1 sm:mb-2">
                 <span className="font-mono text-[9px] sm:text-xs font-bold text-brand-muted">
@@ -280,7 +280,7 @@ export const MentorDashboardPage: React.FC = () => {
             {/* Metric 4: Scheduled Evaluations */}
             <Link
               to="/mentor/evaluations"
-              className="p-2 sm:p-4 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
+              className="p-2 sm:p-4 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-1 sm:mb-2">
                 <span className="font-mono text-[9px] sm:text-xs font-bold text-brand-muted">
@@ -304,10 +304,10 @@ export const MentorDashboardPage: React.FC = () => {
           {/* Submission Review Queue Card */}
           <section
             aria-labelledby="reviews-title"
-            className="min-w-0 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 flex flex-col justify-between space-y-2.5 sm:space-y-4"
+            className="min-w-0 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-6 flex flex-col justify-between space-y-3 sm:space-y-4"
           >
             <div className="space-y-2 sm:space-y-3">
-              <div className="flex items-center justify-between border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+              <div className="flex items-center justify-between border-b sm:border-b-2 border-primary/20 sm:border-primary pb-2 sm:pb-3">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <FileCheck className="w-4 h-4 sm:w-5 sm:h-5 text-brand-gold stroke-[2.5]" />
                   <h2 id="reviews-title" className="font-heading font-extrabold text-xs sm:text-base text-brand-navy">
@@ -320,8 +320,8 @@ export const MentorDashboardPage: React.FC = () => {
               </div>
 
               {pendingReviews.length === 0 ? (
-                <div className="p-3 sm:p-5 border sm:border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center space-y-1.5 sm:space-y-2 my-1 sm:my-2">
-                  <div className="w-7 h-7 sm:w-9 sm:h-9 border sm:border-2 border-brand-dark bg-brand-gold-light mx-auto flex items-center justify-center">
+                <div className="p-3 sm:p-5 border sm:border-2 border-dashed border-primary/30 bg-surface-inset rounded-semantic-xs sm:rounded-semantic-sm text-center space-y-1.5 sm:space-y-2 my-1 sm:my-2">
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 border sm:border-2 border-primary bg-brand-gold-light rounded-semantic-xs mx-auto flex items-center justify-center">
                     <FileCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-dark" />
                   </div>
                   <h3 className="font-heading font-bold text-xs sm:text-sm text-brand-navy">
@@ -336,7 +336,7 @@ export const MentorDashboardPage: React.FC = () => {
                   {pendingReviews.slice(0, 3).map((sub) => (
                     <div
                       key={sub.id}
-                      className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-between"
+                      className="p-2 sm:p-3 border sm:border-2 border-primary/25 bg-surface-inset rounded-semantic-xs flex items-center justify-between"
                     >
                       <div>
                         <h4 className="font-heading font-bold text-xs sm:text-sm text-brand-navy">
@@ -357,7 +357,7 @@ export const MentorDashboardPage: React.FC = () => {
               )}
             </div>
 
-            <div className="pt-2 sm:pt-3 border-t border-brand-dark/20 flex items-center justify-between text-[11px] sm:text-xs font-mono text-brand-muted">
+            <div className="pt-2 sm:pt-3 border-t border-primary/20 flex items-center justify-between text-[11px] sm:text-xs font-mono text-brand-muted">
               <span>Practice Submissions</span>
               <Link
                 to="/mentor/reviews"
@@ -372,10 +372,10 @@ export const MentorDashboardPage: React.FC = () => {
           {/* Upcoming Evaluations Card */}
           <section
             aria-labelledby="evaluations-title"
-            className="min-w-0 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 flex flex-col justify-between space-y-2.5 sm:space-y-4"
+            className="min-w-0 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-6 flex flex-col justify-between space-y-3 sm:space-y-4"
           >
             <div className="space-y-2 sm:space-y-3">
-              <div className="flex items-center justify-between border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+              <div className="flex items-center justify-between border-b sm:border-b-2 border-primary/20 sm:border-primary pb-2 sm:pb-3">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal stroke-[2.5]" />
                   <h2 id="evaluations-title" className="font-heading font-extrabold text-xs sm:text-base text-brand-navy">
@@ -388,8 +388,8 @@ export const MentorDashboardPage: React.FC = () => {
               </div>
 
               {scheduledEvaluations.length === 0 ? (
-                <div className="p-3 sm:p-5 border sm:border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center space-y-1.5 sm:space-y-2 my-1 sm:my-2">
-                  <div className="w-7 h-7 sm:w-9 sm:h-9 border sm:border-2 border-brand-dark bg-brand-teal-light mx-auto flex items-center justify-center">
+                <div className="p-3 sm:p-5 border sm:border-2 border-dashed border-primary/30 bg-surface-inset rounded-semantic-xs sm:rounded-semantic-sm text-center space-y-1.5 sm:space-y-2 my-1 sm:my-2">
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 border sm:border-2 border-primary bg-brand-teal-light rounded-semantic-xs mx-auto flex items-center justify-center">
                     <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-teal" />
                   </div>
                   <h3 className="font-heading font-bold text-xs sm:text-sm text-brand-navy">
@@ -404,7 +404,7 @@ export const MentorDashboardPage: React.FC = () => {
                   {scheduledEvaluations.slice(0, 3).map((ev) => (
                     <div
                       key={ev.id}
-                      className="p-2 sm:p-3 border sm:border-2 border-brand-dark bg-brand-paper-tint flex items-center justify-between"
+                      className="p-2 sm:p-3 border sm:border-2 border-primary/25 bg-surface-inset rounded-semantic-xs flex items-center justify-between"
                     >
                       <div>
                         <h4 className="font-heading font-bold text-xs sm:text-sm text-brand-navy">
@@ -425,7 +425,7 @@ export const MentorDashboardPage: React.FC = () => {
               )}
             </div>
 
-            <div className="pt-2 sm:pt-3 border-t border-brand-dark/20 flex items-center justify-between text-[11px] sm:text-xs font-mono text-brand-muted">
+            <div className="pt-2 sm:pt-3 border-t border-primary/20 flex items-center justify-between text-[11px] sm:text-xs font-mono text-brand-muted">
               <span>Oral &amp; Written Reviews</span>
               <Link
                 to="/mentor/evaluations"
@@ -443,9 +443,9 @@ export const MentorDashboardPage: React.FC = () => {
         <section
           id="roster"
           aria-labelledby="roster-title"
-          className="min-w-0 border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 space-y-2.5 sm:space-y-4"
+          className="min-w-0 border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-6 space-y-3 sm:space-y-4"
         >
-          <div className="flex items-center justify-between border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+          <div className="flex items-center justify-between border-b sm:border-b-2 border-primary/20 sm:border-primary pb-2 sm:pb-3">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <Users className="w-4 h-4 sm:w-5 sm:h-5 text-brand-navy stroke-[2.5]" />
               <h2 id="roster-title" className="font-heading font-extrabold text-xs sm:text-base text-brand-navy">
@@ -458,7 +458,7 @@ export const MentorDashboardPage: React.FC = () => {
           </div>
 
           {errorMessage && (
-            <div className="p-3 border-2 border-brand-dark bg-red-50 text-red-900 text-xs font-mono flex items-center gap-2">
+            <div className="p-3 border sm:border-2 border-red-500 bg-red-50 text-red-900 text-xs font-mono rounded-semantic-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-red-700 shrink-0" />
               <span>Failed to load assigned students: {errorMessage}</span>
             </div>
@@ -478,7 +478,7 @@ export const MentorDashboardPage: React.FC = () => {
                 return (
                   <div
                     key={student.id}
-                    className="min-w-0 p-3.5 sm:p-4 border-2 border-brand-dark bg-brand-paper-tint flex flex-col justify-between gap-3 shadow-brutal-xs"
+                    className="min-w-0 p-3 sm:p-4 border sm:border-2 border-primary/30 sm:border-primary bg-surface-inset rounded-semantic-xs sm:rounded-semantic-sm flex flex-col justify-between gap-3 shadow-micro"
                   >
                     <div className="flex flex-col sm:flex-row items-start justify-between gap-2 min-w-0">
                       <div className="space-y-0.5 min-w-0 flex-1">
@@ -529,7 +529,7 @@ export const MentorDashboardPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-brand-dark/20 flex items-center justify-between flex-wrap gap-2">
+                    <div className="pt-2 border-t border-primary/20 flex items-center justify-between flex-wrap gap-2">
                       <div className="flex items-center gap-1.5 text-xs">
                         <Link
                           to={`/mentor/plans?studentId=${student.id}`}
@@ -568,8 +568,8 @@ export const MentorDashboardPage: React.FC = () => {
               })}
             </div>
           ) : (
-            <div className="p-6 border-2 border-dashed border-brand-dark/40 bg-brand-paper-tint text-center space-y-2.5">
-              <div className="w-10 h-10 border-2 border-brand-dark bg-brand-teal-light rounded-none mx-auto flex items-center justify-center">
+            <div className="p-6 border sm:border-2 border-dashed border-primary/30 bg-surface-inset rounded-semantic-xs sm:rounded-semantic-sm text-center space-y-2.5">
+              <div className="w-10 h-10 border sm:border-2 border-primary bg-brand-teal-light rounded-semantic-xs mx-auto flex items-center justify-center">
                 <Users className="w-5 h-5 text-brand-teal stroke-[2.5]" />
               </div>
               <div className="max-w-md mx-auto">
@@ -594,8 +594,8 @@ export const MentorDashboardPage: React.FC = () => {
           aria-modal="true"
           aria-labelledby="student-details-title"
         >
-          <div className="w-full max-w-md bg-brand-paper border-3 border-brand-dark shadow-brutal-lg p-5 sm:p-6 space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-brand-dark pb-3">
+          <div className="w-full max-w-md bg-surface-card border-2 sm:border-3 border-primary rounded-semantic-md shadow-brutal-lg p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-primary pb-3">
               <div className="flex items-center gap-2">
                 <GraduationCap className="w-5 h-5 text-brand-teal stroke-[2.5]" />
                 <h2 id="student-details-title" className="font-heading font-extrabold text-lg text-brand-navy">
@@ -605,7 +605,7 @@ export const MentorDashboardPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedStudent(null)}
-                className="p-1 border-2 border-brand-dark bg-brand-paper-tint hover:bg-brand-paper shadow-brutal-xs"
+                className="p-1 border-2 border-primary bg-surface-inset hover:bg-surface-elevated rounded-semantic-xs shadow-micro"
                 aria-label="Close"
               >
                 <X className="w-4 h-4 text-brand-dark" />
@@ -613,20 +613,20 @@ export const MentorDashboardPage: React.FC = () => {
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
+              <div className="p-3 border border-primary/30 bg-surface-inset rounded-semantic-xs space-y-1">
                 <span className="font-mono text-[10px] text-brand-muted uppercase block font-bold">Full Name</span>
                 <span className="font-bold text-brand-dark text-base font-sans">{selectedStudent.full_name}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 font-mono">
-                <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
+                <div className="p-3 border border-primary/30 bg-surface-inset rounded-semantic-xs space-y-1">
                   <span className="text-[10px] text-brand-muted uppercase block font-bold">PoraPlan ID</span>
                   <span className="font-bold text-brand-gold text-sm">
                     {selectedStudent.poraplan_id || '-'}
                   </span>
                 </div>
 
-                <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
+                <div className="p-3 border border-primary/30 bg-surface-inset rounded-semantic-xs space-y-1">
                   <span className="text-[10px] text-brand-muted uppercase block font-bold">Status</span>
                   <Badge variant="teal" size="sm">
                     {selectedStudent.status || 'ACTIVE'}
@@ -634,7 +634,7 @@ export const MentorDashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3 border-2 border-brand-dark bg-brand-paper-tint space-y-1">
+              <div className="p-3 border border-primary/30 bg-surface-inset rounded-semantic-xs space-y-1">
                 <span className="font-mono text-[10px] text-brand-muted uppercase block font-bold">Email</span>
                 <div className="flex items-center gap-1.5 text-brand-dark">
                   <Mail className="w-3.5 h-3.5 text-brand-navy shrink-0" />
@@ -642,7 +642,7 @@ export const MentorDashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3.5 border-2 border-brand-dark bg-brand-teal-light/40 space-y-1 text-brand-dark font-sans text-xs">
+              <div className="p-3.5 border border-primary/30 bg-brand-teal-light/40 rounded-semantic-xs space-y-1 text-brand-dark font-sans text-xs">
                 <div className="flex items-center gap-1.5 font-bold font-mono text-[10px] uppercase text-brand-teal">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Assigned Student</span>
@@ -653,7 +653,7 @@ export const MentorDashboardPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-2 flex items-center justify-between gap-2 border-t border-brand-dark/20">
+            <div className="pt-2 flex items-center justify-between gap-2 border-t border-primary/20">
               <Link to={`/mentor/plans?studentId=${selectedStudent.id}`} onClick={() => setSelectedStudent(null)}>
                 <Button variant="primary" size="sm" leftIcon={<Compass className="w-3.5 h-3.5" />}>
                   Study Plans

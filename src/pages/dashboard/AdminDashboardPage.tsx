@@ -159,9 +159,9 @@ export const AdminDashboardPage: React.FC = () => {
         {/* Header / Admin Identity Card */}
         <section
           aria-labelledby="admin-header-title"
-          className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-6 space-y-2 sm:space-y-4"
+          className="border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-6 space-y-2.5 sm:space-y-4"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b sm:border-b-2 border-primary/20 sm:border-primary pb-2 sm:pb-3">
             <div>
               <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
                 <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-brand-teal stroke-[2.5]" />
@@ -227,7 +227,7 @@ export const AdminDashboardPage: React.FC = () => {
               return (
                 <div
                   key={desk.id}
-                  className="border sm:border-2 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal p-2.5 sm:p-4 flex flex-col justify-between space-y-2 sm:space-y-3 hover:-translate-y-0.5 transition-transform"
+                  className="border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-4 flex flex-col justify-between space-y-2 sm:space-y-3 hover:-translate-y-0.5 transition-transform"
                 >
                   <div className="space-y-1 sm:space-y-2">
                     <div className="flex items-center gap-1.5 sm:gap-2">
@@ -241,12 +241,12 @@ export const AdminDashboardPage: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="pt-1.5 sm:pt-2 border-t border-brand-dark/20">
+                  <div className="pt-1.5 sm:pt-2 border-t border-primary/20">
                     <Button
                       to={desk.to}
                       variant={desk.variant}
                       size="sm"
-                      className="w-full justify-between min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
+                      className="w-full justify-between min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3 rounded-semantic-xs"
                       rightIcon={<ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
                     >
                       {desk.buttonLabel}
@@ -261,9 +261,9 @@ export const AdminDashboardPage: React.FC = () => {
         {/* Controlled Member Account Provisioning Card */}
         <section
           aria-labelledby="member-provisioning-title"
-          className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-6 shadow-none sm:shadow-brutal space-y-2.5 sm:space-y-5"
+          className="border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-6 space-y-2.5 sm:space-y-5"
         >
-          <div className="border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3 flex items-center justify-between">
+          <div className="border-b sm:border-b-2 border-primary/20 sm:border-primary pb-2 sm:pb-3 flex items-center justify-between">
             <div>
               <h2
                 id="member-provisioning-title"
@@ -283,7 +283,7 @@ export const AdminDashboardPage: React.FC = () => {
 
           {provisionMessage && (
             <div
-              className={`p-2 sm:p-3 border sm:border-2 border-brand-dark text-[11px] sm:text-xs font-sans flex items-start gap-1.5 sm:gap-2 ${
+              className={`p-2 sm:p-3 border sm:border-2 border-primary rounded-semantic-xs text-[11px] sm:text-xs font-sans flex items-start gap-1.5 sm:gap-2 ${
                 provisionMessage.type === 'success'
                   ? 'bg-emerald-50 text-emerald-900'
                   : 'bg-red-50 text-red-900'
@@ -310,7 +310,7 @@ export const AdminDashboardPage: React.FC = () => {
                 value={newId}
                 onChange={(e) => setNewId(e.target.value.toUpperCase())}
                 placeholder="e.g. PP004"
-                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans uppercase"
+                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-primary bg-surface-card dark:bg-surface-inset rounded-semantic-xs focus:bg-brand-teal-light focus:outline-none font-sans uppercase"
               />
             </div>
 
@@ -325,7 +325,7 @@ export const AdminDashboardPage: React.FC = () => {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Member full name"
-                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-primary bg-surface-card dark:bg-surface-inset rounded-semantic-xs focus:bg-brand-teal-light focus:outline-none font-sans"
               />
             </div>
 
@@ -340,7 +340,7 @@ export const AdminDashboardPage: React.FC = () => {
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="member@example.com"
-                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-primary bg-surface-card dark:bg-surface-inset rounded-semantic-xs focus:bg-brand-teal-light focus:outline-none font-sans"
               />
             </div>
 
@@ -352,7 +352,7 @@ export const AdminDashboardPage: React.FC = () => {
                 id="provision-role"
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value as UserRole)}
-                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                className="w-full px-2.5 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-primary bg-surface-card dark:bg-surface-inset rounded-semantic-xs focus:bg-brand-teal-light focus:outline-none font-sans"
               >
                 <option value="student">Student (PP...)</option>
                 <option value="mentor">Mentor (PPM...)</option>
@@ -365,7 +365,7 @@ export const AdminDashboardPage: React.FC = () => {
                 variant="primary"
                 size="md"
                 disabled={provisionLoading}
-                className="min-h-[36px] sm:min-h-0 text-xs sm:text-sm"
+                className="min-h-[36px] sm:min-h-0 text-xs sm:text-sm rounded-semantic-xs"
                 leftIcon={!provisionLoading ? <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" /> : undefined}
               >
                 {provisionLoading ? (
@@ -384,9 +384,9 @@ export const AdminDashboardPage: React.FC = () => {
         {/* Pre-Registered Test Accounts Reference Table */}
         <section
           aria-labelledby="test-accounts-title"
-          className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-6 shadow-none sm:shadow-brutal space-y-2 sm:space-y-4"
+          className="border sm:border-2 border-primary bg-surface-card rounded-semantic-sm sm:rounded-semantic-md shadow-micro sm:shadow-brutal p-3 sm:p-6 space-y-2 sm:space-y-4"
         >
-          <div className="border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+          <div className="border-b sm:border-b-2 border-primary/20 sm:border-primary pb-2 sm:pb-3">
             <h2
               id="test-accounts-title"
               className="font-heading font-extrabold text-xs sm:text-base text-brand-navy"
@@ -402,13 +402,13 @@ export const AdminDashboardPage: React.FC = () => {
           <div className="lg:hidden">
             <table className="w-full text-[11px] sm:text-xs font-sans text-left border-collapse">
               <thead>
-                <tr className="border-b sm:border-b-2 border-brand-dark font-mono font-bold uppercase text-[9px] sm:text-[10.5px] text-brand-navy bg-brand-paper-tint">
+                <tr className="border-b sm:border-b-2 border-primary/30 sm:border-primary font-mono font-bold uppercase text-[9px] sm:text-[10.5px] text-brand-navy bg-surface-inset">
                   <th scope="col" className="py-1.5 sm:py-2.5 px-2 sm:px-2.5">Member &amp; Role</th>
                   <th scope="col" className="py-1.5 sm:py-2.5 px-1.5 sm:px-2">System Email</th>
                   <th scope="col" className="py-1.5 sm:py-2.5 px-2 sm:px-2.5 text-right">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y border-b sm:border-b-2 border-brand-dark">
+              <tbody className="divide-y border-b sm:border-b-2 border-primary/20 sm:border-primary">
                 <tr>
                   <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 align-top">
                     <div className="font-bold text-brand-navy text-xs sm:text-sm">Fahim Rahman</div>
@@ -462,7 +462,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-xs font-sans text-left border-collapse">
               <thead>
-                <tr className="border-b-2 border-brand-dark font-mono font-bold uppercase text-brand-navy bg-brand-paper-tint">
+                <tr className="border-b-2 border-primary font-mono font-bold uppercase text-brand-navy bg-surface-inset">
                   <th className="py-2.5 px-3">PoraPlan ID</th>
                   <th className="py-2.5 px-3">Role</th>
                   <th className="py-2.5 px-3">Full Name</th>
@@ -470,7 +470,7 @@ export const AdminDashboardPage: React.FC = () => {
                   <th className="py-2.5 px-3">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y border-b-2 border-brand-dark">
+              <tbody className="divide-y border-b-2 border-primary">
                 <tr>
                   <td className="py-2 px-3 font-mono font-bold text-brand-navy">PP001</td>
                   <td className="py-2 px-3"><Badge variant="teal" size="sm">STUDENT</Badge></td>
