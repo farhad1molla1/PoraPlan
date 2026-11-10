@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, AlertCircle, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
+import { TurnstileWidget, type TurnstileRef } from '../components/auth/TurnstileWidget';
+import { isTurnstileConfigured, getTurnstileSiteKey } from '../lib/supabase';
 
 const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
   <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
@@ -37,9 +39,26 @@ export const LoginPage: React.FC = () => {
   const [resetEmail, setResetEmail] = useState('');
   const [isResetting, setIsResetting] = useState(false);
 
+  // Security & abuse protection state
+  const [loginCaptchaToken, setLoginCaptchaToken] = useState<string | null>(null);
+  const [recoveryCaptchaToken, setRecoveryCaptchaToken] = useState<string | null>(null);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [progressiveCooldown, setProgressiveCooldown] = useState(false);
+
+  const loginTurnstileRef = useRef<TurnstileRef>(null);
+  const recoveryTurnstileRef = useRef<TurnstileRef>(null);
+  const turnstileConfigured = isTurnstileConfigured();
+  const turnstileSiteKey = getTurnstileSiteKey();
+
   const { signInWithPoraPlanId, signInWithGoogle, resetPassword, user, role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Bounded progressive delay: 0s for 0 attempts, 1s for 1st fail, 2s for 2nd, 4s for 3rd, max 8s
+  const getProgressiveDelay = (attempts: number) => {
+    if (attempts <= 0) return 0;
+    return Math.min(1000 * Math.pow(2, attempts - 1), 8000);
+  };
 
   // Derive query parameter notices without triggering cascading renders in effects
   const queryParams = new URLSearchParams(location.search);
@@ -71,25 +90,81 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting || progressiveCooldown) {
+      return;
+    }
+
     setErrorMessage(null);
     setSuccessNotice(null);
+
+    const cleanId = poraplanId.trim();
+    if (!cleanId) {
+      setErrorMessage('Please enter your PoraPlan ID.');
+      return;
+    }
+
+    if (!password) {
+      setErrorMessage('Please enter your password.');
+      return;
+    }
+
+    if (turnstileConfigured && !loginCaptchaToken) {
+      setErrorMessage('Please complete the security challenge.');
+      return;
+    }
+
     setIsSubmitting(true);
 
+    // Apply bounded progressive delay if previous failures occurred in this session
+    const delay = getProgressiveDelay(failedAttempts);
+    if (delay > 0) {
+      setProgressiveCooldown(true);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      setProgressiveCooldown(false);
+    }
+
     try {
-      const { error, role: loggedInRole } = await signInWithPoraPlanId(poraplanId, password);
+      let resolutionToken = loginCaptchaToken || undefined;
+      let loginToken = loginCaptchaToken || undefined;
+
+      // Handle single-use Turnstile token lifecycle:
+      // Token 1 goes to resolver; request fresh Token 2 for GoTrue
+      if (turnstileConfigured && loginTurnstileRef.current) {
+        const freshTokenPromise = loginTurnstileRef.current.refreshToken();
+        loginToken = await Promise.race([
+          freshTokenPromise,
+          new Promise<string | undefined>((resolve) => setTimeout(() => resolve(undefined), 1500)),
+        ]);
+      }
+
+      const { error, role: loggedInRole } = await signInWithPoraPlanId(
+        cleanId,
+        password,
+        { resolutionToken, loginToken }
+      );
 
       if (error) {
+        setFailedAttempts((prev) => prev + 1);
+        if (turnstileConfigured && loginTurnstileRef.current) {
+          loginTurnstileRef.current.reset();
+          setLoginCaptchaToken(null);
+        }
+
         const raw = error.message || '';
-        if (raw.toLowerCase().includes('not recognized') || raw.toLowerCase().includes('not found')) {
-          setErrorMessage('This PoraPlan ID is not recognized. Please check your ID or contact your mentor.');
-        } else if (raw.toLowerCase().includes('suspended')) {
-          setErrorMessage('This account is currently suspended. Please contact your mentor or administrator.');
+        if (raw.toLowerCase().includes('challenge') || raw.toLowerCase().includes('captcha')) {
+          setErrorMessage('Security verification failed. Please try again.');
+        } else if (raw.toLowerCase().includes('network') || raw.toLowerCase().includes('unavailable')) {
+          setErrorMessage('Authentication service temporarily unavailable. Please check your network connection.');
         } else {
-          setErrorMessage('Your PoraPlan ID or password is incorrect.');
+          // Uniform error message: never reveal whether ID exists, whether password failed, or if account is suspended
+          setErrorMessage('Invalid PoraPlan ID or password.');
         }
         setIsSubmitting(false);
         return;
       }
+
+      // Successful login resets progressive failure count
+      setFailedAttempts(0);
 
       const targetRole = loggedInRole || role || 'student';
       if (targetRole === 'mentor') {
@@ -100,7 +175,12 @@ export const LoginPage: React.FC = () => {
         navigate('/student/dashboard');
       }
     } catch {
-      setErrorMessage('Your PoraPlan ID or password is incorrect.');
+      setFailedAttempts((prev) => prev + 1);
+      if (turnstileConfigured && loginTurnstileRef.current) {
+        loginTurnstileRef.current.reset();
+        setLoginCaptchaToken(null);
+      }
+      setErrorMessage('Invalid PoraPlan ID or password.');
     } finally {
       setIsSubmitting(false);
     }
@@ -127,6 +207,10 @@ export const LoginPage: React.FC = () => {
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isResetting) {
+      return;
+    }
+
     setErrorMessage(null);
     setSuccessNotice(null);
 
@@ -136,21 +220,35 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
+    if (turnstileConfigured && !recoveryCaptchaToken) {
+      setErrorMessage('Please complete the security challenge.');
+      return;
+    }
+
     setIsResetting(true);
     try {
-      const { error } = await resetPassword(emailTrimmed);
+      const { error } = await resetPassword(emailTrimmed, recoveryCaptchaToken || undefined);
       if (error) {
-        setErrorMessage(error.message || 'Unable to send reset email. Please try again.');
+        if (turnstileConfigured && recoveryTurnstileRef.current) {
+          recoveryTurnstileRef.current.reset();
+          setRecoveryCaptchaToken(null);
+        }
+        const raw = error.message || '';
+        if (raw.toLowerCase().includes('captcha') || raw.toLowerCase().includes('challenge')) {
+          setErrorMessage('Security verification failed. Please try again.');
+        } else {
+          setErrorMessage('Unable to send reset email. Please try again later.');
+        }
       } else {
         setSuccessNotice(
           'If an account is associated with this email, password reset instructions have been sent. Please check your inbox.'
         );
         setShowForgotPassword(false);
         setResetEmail('');
+        setRecoveryCaptchaToken(null);
       }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error sending reset email.';
-      setErrorMessage(msg);
+    } catch {
+      setErrorMessage('Unable to send reset email. Please try again later.');
     } finally {
       setIsResetting(false);
     }
@@ -281,15 +379,31 @@ export const LoginPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Cloudflare Turnstile CAPTCHA (Login) */}
+                {turnstileConfigured && (
+                  <TurnstileWidget
+                    ref={loginTurnstileRef}
+                    siteKey={turnstileSiteKey}
+                    onSuccess={(token) => setLoginCaptchaToken(token)}
+                    onExpire={() => setLoginCaptchaToken(null)}
+                    action="login"
+                  />
+                )}
+
                 <div className="pt-1">
                   <Button
                     type="submit"
                     variant="primary"
                     size="md"
                     fullWidth
-                    disabled={isSubmitting || isGoogleLoading}
+                    disabled={isSubmitting || isGoogleLoading || progressiveCooldown}
                   >
-                    {isSubmitting ? (
+                    {progressiveCooldown ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Please wait...
+                      </span>
+                    ) : isSubmitting ? (
                       <span className="flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Logging in...
@@ -361,6 +475,17 @@ export const LoginPage: React.FC = () => {
                 <span className="text-[11px] text-brand-muted mt-1 block font-sans">
                   Password reset requires access to your verified connected email address.
                 </span>
+
+                {/* Cloudflare Turnstile CAPTCHA (Recovery) */}
+                {turnstileConfigured && (
+                  <TurnstileWidget
+                    ref={recoveryTurnstileRef}
+                    siteKey={turnstileSiteKey}
+                    onSuccess={(token) => setRecoveryCaptchaToken(token)}
+                    onExpire={() => setRecoveryCaptchaToken(null)}
+                    action="reset_password"
+                  />
+                )}
               </div>
 
               <div className="flex items-center gap-2 pt-1">

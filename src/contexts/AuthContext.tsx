@@ -74,12 +74,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { profile: userProfile, error } = await getProfile(currentUserId);
       if (userProfile && !error) {
+        if (userProfile.status === 'suspended') {
+          // Immediately revoke local session if user is suspended
+          await supabase.auth.signOut();
+          setProfile(null);
+          setUser(null);
+          setSession(null);
+          return null;
+        }
         setProfile(userProfile);
         return userProfile;
       }
 
       // Fallback: extract from user metadata if trigger has slight latency
       if (currentUser?.user_metadata) {
+        if (currentUser.user_metadata.status === 'suspended') {
+          await supabase.auth.signOut();
+          setProfile(null);
+          setUser(null);
+          setSession(null);
+          return null;
+        }
         const metaRole = (currentUser.user_metadata.role as UserRole) || 'student';
         const fallbackProfile: Profile = {
           id: currentUserId,
@@ -191,7 +206,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithPoraPlanId = useCallback(
     async (
       poraplanId: string,
-      password: string
+      password: string,
+      captchaTokens?: { resolutionToken?: string; loginToken?: string }
     ): Promise<{ error: Error | null; role?: UserRole }> => {
       const cleanId = poraplanId.trim();
       if (!cleanId) {
@@ -204,9 +220,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!isConfigured) {
         // Local mode with strict pre-registered account verification
         const { account, error: authError } = authenticateMockPoraPlanId(cleanId, password);
-        if (authError || !account) {
+        if (authError || !account || account.status === 'suspended') {
           return {
-            error: authError || new Error('This PoraPlan ID is not recognized. Please verify your ID with your mentor.'),
+            error: new Error('Invalid PoraPlan ID or password.'),
           };
         }
 
@@ -236,40 +252,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       try {
-        // 1. Resolve PoraPlan ID to credentials and check registration status
-        const { resolution, error: resolveError } = await resolvePoraPlanIdLogin(cleanId);
+        // 1. Resolve PoraPlan ID with anti-enumeration protection and CAPTCHA
+        const { resolution, error: resolveError } = await resolvePoraPlanIdLogin(
+          cleanId,
+          captchaTokens?.resolutionToken
+        );
         if (resolveError || !resolution) {
-          return {
-            error: new Error(
-              resolveError?.message ||
-                'This PoraPlan ID is not recognized. Please verify your ID with your mentor.'
-            ),
-          };
+          const msg = resolveError?.message || 'Invalid PoraPlan ID or password.';
+          return { error: new Error(msg) };
         }
 
         if (resolution.status === 'suspended') {
           return {
-            error: new Error(
-              'This account is currently suspended. Please contact your mentor or administrator.'
-            ),
+            error: new Error('Invalid PoraPlan ID or password.'),
           };
         }
 
-        // 2. Authenticate against Supabase Auth
+        // 2. Authenticate against Supabase Auth with fresh login CAPTCHA token if provided
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email: resolution.authEmail,
           password,
+          options: captchaTokens?.loginToken ? { captchaToken: captchaTokens.loginToken } : undefined,
         });
 
         if (signInError) {
+          if (signInError.message?.toLowerCase().includes('captcha')) {
+            return { error: new Error('Security verification failed. Please try again.') };
+          }
           return {
-            error: new Error(
-              'Incorrect password. Please verify and try again, or use password recovery if you have an associated email.'
-            ),
+            error: new Error('Invalid PoraPlan ID or password.'),
           };
         }
 
         if (data.user) {
+          const loadedProfile = await fetchUserProfile(data.user.id, data.user);
+          if (!loadedProfile || loadedProfile.status === 'suspended') {
+            await supabase.auth.signOut();
+            setSession(null);
+            setUser(null);
+            setProfile(null);
+            return {
+              error: new Error('Invalid PoraPlan ID or password.'),
+            };
+          }
+
           // If first-time activation, update status to active
           if (resolution.status === 'not_activated') {
             await supabase
@@ -278,15 +304,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               .eq('id', data.user.id);
           }
 
-          const loadedProfile = await fetchUserProfile(data.user.id, data.user);
           const finalRole = loadedProfile?.role || resolution.role;
           return { error: null, role: finalRole };
         }
 
         return { error: null, role: resolution.role };
-      } catch (err: unknown) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        return { error };
+      } catch {
+        return { error: new Error('Invalid PoraPlan ID or password.') };
       }
     },
     [isConfigured, fetchUserProfile]
@@ -410,7 +434,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * PASSWORD RECOVERY: Send secure reset link to associated email
    */
   const resetPassword = useCallback(
-    async (email: string): Promise<{ error: Error | null }> => {
+    async (email: string, captchaToken?: string): Promise<{ error: Error | null }> => {
       if (!isConfigured) {
         return { error: null };
       }
@@ -418,9 +442,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
           redirectTo: `${window.location.origin}/reset-password`,
+          captchaToken,
         });
 
         if (error) {
+          if (error.message?.toLowerCase().includes('captcha')) {
+            return { error: new Error('Security verification failed. Please try again.') };
+          }
           return { error };
         }
 

@@ -3,6 +3,7 @@ import type { Database } from '../types/database';
 
 const supabaseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || '';
 const supabaseAnonKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) || '';
+const turnstileSiteKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_TURNSTILE_SITE_KEY) || '';
 
 /**
  * Checks whether Supabase environment variables are provided and not placeholders.
@@ -14,6 +15,24 @@ export const isSupabaseConfigured = (): boolean => {
     !supabaseUrl.includes('your-project-id') &&
     !supabaseAnonKey.includes('your-anon-key')
   );
+};
+
+/**
+ * Checks whether Cloudflare Turnstile public Site Key is provided and not a placeholder.
+ */
+export const isTurnstileConfigured = (): boolean => {
+  return (
+    Boolean(turnstileSiteKey) &&
+    !turnstileSiteKey.includes('your-turnstile-site-key') &&
+    turnstileSiteKey.trim() !== ''
+  );
+};
+
+/**
+ * Retrieves the public Cloudflare Turnstile Site Key for frontend challenge rendering.
+ */
+export const getTurnstileSiteKey = (): string => {
+  return turnstileSiteKey;
 };
 
 /**

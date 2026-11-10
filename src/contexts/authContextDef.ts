@@ -13,11 +13,12 @@ export interface AuthContextType {
   isConfigured: boolean;
   signInWithPoraPlanId: (
     poraplanId: string,
-    password: string
+    password: string,
+    captchaTokens?: { resolutionToken?: string; loginToken?: string }
   ) => Promise<{ error: Error | null; role?: UserRole }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null; role?: UserRole }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
-  resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  resetPassword: (email: string, captchaToken?: string) => Promise<{ error: Error | null }>;
   updateNewPassword: (newPassword: string) => Promise<{ error: Error | null }>;
   connectEmail: (email: string) => Promise<{ error: Error | null }>;
   signUp: (

@@ -54,11 +54,15 @@ export async function getProfile(userId: string): Promise<{
 }
 
 /**
- * Resolves a PoraPlan ID (e.g. PP001, PPM001) to its corresponding auth credentials & status.
- * Uses the secure RPC function resolve_poraplan_id_login with fallback to profiles table.
- * Rejects unauthorized or non-existent PoraPlan IDs (e.g. PP999).
+ * Resolves a PoraPlan ID (e.g. PP001, PPM001) to its corresponding auth credentials.
+ * Routes through the hardened resolve-poraplan-id server boundary with CAPTCHA verification
+ * and anti-enumeration protections. Rejects unauthorized, suspended, or invented IDs
+ * with a uniform error message.
  */
-export async function resolvePoraPlanIdLogin(poraplanId: string): Promise<{
+export async function resolvePoraPlanIdLogin(
+  poraplanId: string,
+  captchaToken?: string
+): Promise<{
   resolution: PoraPlanIdResolution | null;
   error: Error | null;
 }> {
@@ -69,10 +73,10 @@ export async function resolvePoraPlanIdLogin(poraplanId: string): Promise<{
 
   if (!isSupabaseConfigured()) {
     const mockRes = resolveMockPoraPlanId(cleanId);
-    if (!mockRes) {
+    if (!mockRes || mockRes.status === 'suspended') {
       return {
         resolution: null,
-        error: new Error('This PoraPlan ID is not recognized. Please verify your ID with your mentor.'),
+        error: new Error('Invalid PoraPlan ID or password.'),
       };
     }
     return {
@@ -87,7 +91,51 @@ export async function resolvePoraPlanIdLogin(poraplanId: string): Promise<{
   }
 
   try {
-    // 1. Try secure RPC function
+    // 1. Invoke the secure server-side Edge Function with anti-enumeration protection
+    const { data: fnData, error: fnError } = await supabase.functions.invoke('resolve-poraplan-id', {
+      body: {
+        poraplanId: cleanId,
+        captchaToken,
+      },
+    });
+
+    if (!fnError && fnData?.authEmail) {
+      return {
+        resolution: {
+          authEmail: fnData.authEmail,
+          status: 'active',
+          role: 'student',
+          poraplanId: cleanId.toUpperCase(),
+        },
+        error: null,
+      };
+    }
+
+    if (fnError) {
+      let resolvedMessage = 'Invalid PoraPlan ID or password.';
+      try {
+        const ctx = (fnError as unknown as { context?: Response }).context;
+        if (ctx && typeof ctx.json === 'function') {
+          const parsed = await ctx.json();
+          if (parsed?.error) {
+            resolvedMessage = parsed.error;
+          }
+        } else if (fnError.message) {
+          if (fnError.message.includes('CAPTCHA') || fnError.message.includes('temporarily unavailable')) {
+            resolvedMessage = fnError.message;
+          }
+        }
+      } catch {
+        // Fall back to uniform message on parse error
+      }
+
+      // If the function returned a deliberate security failure, honor it
+      if (resolvedMessage === 'Invalid PoraPlan ID or password.' || resolvedMessage.includes('CAPTCHA')) {
+        return { resolution: null, error: new Error(resolvedMessage) };
+      }
+    }
+
+    // 2. Transitional / local fallback via RPC if function is not deployed in local environment
     const { data: rpcData, error: rpcError } = await supabase.rpc(
       'resolve_poraplan_id_login',
       { p_poraplan_id: cleanId }
@@ -95,6 +143,13 @@ export async function resolvePoraPlanIdLogin(poraplanId: string): Promise<{
 
     if (!rpcError && rpcData && rpcData.length > 0) {
       const match = rpcData[0];
+      if (match.account_status === 'suspended') {
+        return {
+          resolution: null,
+          error: new Error('Invalid PoraPlan ID or password.'),
+        };
+      }
+
       return {
         resolution: {
           authEmail: match.auth_email,
@@ -106,34 +161,10 @@ export async function resolvePoraPlanIdLogin(poraplanId: string): Promise<{
       };
     }
 
-    // 2. Direct query fallback on profiles table (case-insensitive)
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('email, status, role, poraplan_id')
-      .ilike('poraplan_id', cleanId)
-      .limit(1)
-      .maybeSingle();
-
-    if (profileError && profileError.code !== 'PGRST116') {
-      return { resolution: null, error: profileError };
-    }
-
-    if (profileData) {
-      return {
-        resolution: {
-          authEmail: profileData.email,
-          status: (profileData.status as AccountStatus) || 'active',
-          role: profileData.role,
-          poraplanId: profileData.poraplan_id || cleanId.toUpperCase(),
-        },
-        error: null,
-      };
-    }
-
-    // ID not found in database: unauthorized/invented ID
+    // Return uniform error message: never reveal whether ID exists or was unrecognized
     return {
       resolution: null,
-      error: new Error('This PoraPlan ID is not recognized. Please verify your ID with your mentor.'),
+      error: new Error('Invalid PoraPlan ID or password.'),
     };
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
