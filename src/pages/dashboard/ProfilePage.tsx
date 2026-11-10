@@ -247,7 +247,8 @@ export const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6 pb-6 sm:pb-12">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-6 pb-6 sm:pb-12">
       {/* Page Title & Breadcrumb */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-4">
         <div>
@@ -590,9 +591,9 @@ export const ProfilePage: React.FC = () => {
                                         })}
                                         {enr.cohort.end_date
                                           ? ` – ${new Date(enr.cohort.end_date).toLocaleDateString(undefined, {
-                                              month: 'short',
-                                              year: 'numeric',
-                                            })}`
+                                            month: 'short',
+                                            year: 'numeric',
+                                          })}`
                                           : ''}
                                       </span>
                                     </span>
@@ -666,9 +667,9 @@ export const ProfilePage: React.FC = () => {
                                         })}
                                         {enr.cohort.end_date
                                           ? ` – ${new Date(enr.cohort.end_date).toLocaleDateString(undefined, {
-                                              month: 'short',
-                                              year: 'numeric',
-                                            })}`
+                                            month: 'short',
+                                            year: 'numeric',
+                                          })}`
                                           : ''}
                                       </span>
                                     </span>
@@ -1020,12 +1021,13 @@ export const ProfilePage: React.FC = () => {
             Platform Governance Notice
           </span>
           <p className="text-brand-muted leading-relaxed">
-            Your PoraPlan ID (<span className="font-mono font-bold text-brand-dark">{poraplanId || profile?.poraplan_id || 'PP001'}</span>) 
-            and account role (<span className="font-bold text-brand-dark">{roleLabel}</span>) are cryptographically secured 
-            by database row-level security and trigger constraints. If you require role adjustments or cohort transfer, 
+            Your PoraPlan ID (<span className="font-mono font-bold text-brand-dark">{poraplanId || profile?.poraplan_id || 'PP001'}</span>)
+            and account role (<span className="font-bold text-brand-dark">{roleLabel}</span>) are cryptographically secured
+            by database row-level security and trigger constraints. If you require role adjustments or cohort transfer,
             please contact your academic mentor or PoraPlan administration.
           </p>
         </div>
+      </div>
       </div>
     </div>
   );
