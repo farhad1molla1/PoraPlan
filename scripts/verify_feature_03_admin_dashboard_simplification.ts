@@ -130,6 +130,7 @@ async function runSuite() {
   console.log('\n--- Suite 5: Pre-Registered Testing Accounts Reference Preservation ---');
 
   assert(adminSrc.includes('Pre-Registered Testing Accounts'), 'Preserves testing accounts section');
+  assert(adminSrc.includes('import.meta.env.DEV'), 'Pre-registered testing accounts table is gated by import.meta.env.DEV for production safety');
   assert(adminSrc.includes('PP001'), 'Preserves student testing account PP001');
   assert(adminSrc.includes('PPM001'), 'Preserves mentor testing account PPM001');
   assert(adminSrc.includes('PPA001'), 'Preserves admin testing account PPA001');

@@ -381,121 +381,123 @@ export const AdminDashboardPage: React.FC = () => {
           </form>
         </section>
 
-        {/* Pre-Registered Test Accounts Reference Table */}
-        <section
-          aria-labelledby="test-accounts-title"
-          className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-6 shadow-none sm:shadow-brutal space-y-2 sm:space-y-4"
-        >
-          <div className="border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
-            <h2
-              id="test-accounts-title"
-              className="font-heading font-extrabold text-xs sm:text-base text-brand-navy"
-            >
-              Pre-Registered Testing Accounts
-            </h2>
-            <p className="text-[11px] sm:text-xs text-brand-dark/80 font-sans mt-0.5">
-              Authorized credentials available for development verification.
-            </p>
-          </div>
+        {/* Pre-Registered Test Accounts Reference Table (Development Only) */}
+        {import.meta.env.DEV && (
+          <section
+            aria-labelledby="test-accounts-title"
+            className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-6 shadow-none sm:shadow-brutal space-y-2 sm:space-y-4"
+          >
+            <div className="border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
+              <h2
+                id="test-accounts-title"
+                className="font-heading font-extrabold text-xs sm:text-base text-brand-navy"
+              >
+                Pre-Registered Testing Accounts
+              </h2>
+              <p className="text-[11px] sm:text-xs text-brand-dark/80 font-sans mt-0.5">
+                Authorized credentials available for development verification.
+              </p>
+            </div>
 
-          {/* Compact Responsive Table (< lg: 1024px) */}
-          <div className="lg:hidden">
-            <table className="w-full text-[11px] sm:text-xs font-sans text-left border-collapse">
-              <thead>
-                <tr className="border-b sm:border-b-2 border-brand-dark font-mono font-bold uppercase text-[9px] sm:text-[10.5px] text-brand-navy bg-brand-paper-tint">
-                  <th scope="col" className="py-1.5 sm:py-2.5 px-2 sm:px-2.5">Member &amp; Role</th>
-                  <th scope="col" className="py-1.5 sm:py-2.5 px-1.5 sm:px-2">System Email</th>
-                  <th scope="col" className="py-1.5 sm:py-2.5 px-2 sm:px-2.5 text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y border-b sm:border-b-2 border-brand-dark">
-                <tr>
-                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 align-top">
-                    <div className="font-bold text-brand-navy text-xs sm:text-sm">Fahim Rahman</div>
-                    <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5">
-                      <span className="font-mono text-[9px] sm:text-[10.5px] font-bold text-brand-teal">PP001</span>
-                      <Badge variant="teal" size="sm" className="text-[8px] sm:text-[9px]">STUDENT</Badge>
-                    </div>
-                  </td>
-                  <td className="py-1.5 sm:py-2 px-1.5 sm:px-2 font-mono text-[10px] sm:text-[11px] text-brand-muted align-top break-all">
-                    student.pp001@poraplan.internal
-                  </td>
-                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 text-right align-top">
-                    <span className="text-emerald-700 dark:text-emerald-400 font-bold text-[10px] sm:text-xs">Active</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 align-top">
-                    <div className="font-bold text-brand-navy text-xs sm:text-sm">Dr. Rafiqul Islam</div>
-                    <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5">
-                      <span className="font-mono text-[9px] sm:text-[10.5px] font-bold text-brand-teal">PPM001</span>
-                      <Badge variant="gold" size="sm" className="text-[8px] sm:text-[9px]">MENTOR</Badge>
-                    </div>
-                  </td>
-                  <td className="py-1.5 sm:py-2 px-1.5 sm:px-2 font-mono text-[10px] sm:text-[11px] text-brand-muted align-top break-all">
-                    mentor.ppm001@poraplan.internal
-                  </td>
-                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 text-right align-top">
-                    <span className="text-emerald-700 dark:text-emerald-400 font-bold text-[10px] sm:text-xs">Active</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 align-top">
-                    <div className="font-bold text-brand-navy text-xs sm:text-sm">PoraPlan System Admin</div>
-                    <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5">
-                      <span className="font-mono text-[9px] sm:text-[10.5px] font-bold text-brand-teal">PPA001</span>
-                      <Badge variant="navy" size="sm" className="text-[8px] sm:text-[9px]">ADMIN</Badge>
-                    </div>
-                  </td>
-                  <td className="py-1.5 sm:py-2 px-1.5 sm:px-2 font-mono text-[10px] sm:text-[11px] text-brand-muted align-top break-all">
-                    admin.ppa001@poraplan.internal
-                  </td>
-                  <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 text-right align-top">
-                    <span className="text-emerald-700 dark:text-emerald-400 font-bold text-[10px] sm:text-xs">Active</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+            {/* Compact Responsive Table (< lg: 1024px) */}
+            <div className="lg:hidden">
+              <table className="w-full text-[11px] sm:text-xs font-sans text-left border-collapse">
+                <thead>
+                  <tr className="border-b sm:border-b-2 border-brand-dark font-mono font-bold uppercase text-[9px] sm:text-[10.5px] text-brand-navy bg-brand-paper-tint">
+                    <th scope="col" className="py-1.5 sm:py-2.5 px-2 sm:px-2.5">Member &amp; Role</th>
+                    <th scope="col" className="py-1.5 sm:py-2.5 px-1.5 sm:px-2">System Email</th>
+                    <th scope="col" className="py-1.5 sm:py-2.5 px-2 sm:px-2.5 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y border-b sm:border-b-2 border-brand-dark">
+                  <tr>
+                    <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 align-top">
+                      <div className="font-bold text-brand-navy text-xs sm:text-sm">Fahim Rahman</div>
+                      <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5">
+                        <span className="font-mono text-[9px] sm:text-[10.5px] font-bold text-brand-teal">PP001</span>
+                        <Badge variant="teal" size="sm" className="text-[8px] sm:text-[9px]">STUDENT</Badge>
+                      </div>
+                    </td>
+                    <td className="py-1.5 sm:py-2 px-1.5 sm:px-2 font-mono text-[10px] sm:text-[11px] text-brand-muted align-top break-all">
+                      student.pp001@poraplan.internal
+                    </td>
+                    <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 text-right align-top">
+                      <span className="text-emerald-700 dark:text-emerald-400 font-bold text-[10px] sm:text-xs">Active</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 align-top">
+                      <div className="font-bold text-brand-navy text-xs sm:text-sm">Dr. Rafiqul Islam</div>
+                      <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5">
+                        <span className="font-mono text-[9px] sm:text-[10.5px] font-bold text-brand-teal">PPM001</span>
+                        <Badge variant="gold" size="sm" className="text-[8px] sm:text-[9px]">MENTOR</Badge>
+                      </div>
+                    </td>
+                    <td className="py-1.5 sm:py-2 px-1.5 sm:px-2 font-mono text-[10px] sm:text-[11px] text-brand-muted align-top break-all">
+                      mentor.ppm001@poraplan.internal
+                    </td>
+                    <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 text-right align-top">
+                      <span className="text-emerald-700 dark:text-emerald-400 font-bold text-[10px] sm:text-xs">Active</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 align-top">
+                      <div className="font-bold text-brand-navy text-xs sm:text-sm">PoraPlan System Admin</div>
+                      <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5">
+                        <span className="font-mono text-[9px] sm:text-[10.5px] font-bold text-brand-teal">PPA001</span>
+                        <Badge variant="navy" size="sm" className="text-[8px] sm:text-[9px]">ADMIN</Badge>
+                      </div>
+                    </td>
+                    <td className="py-1.5 sm:py-2 px-1.5 sm:px-2 font-mono text-[10px] sm:text-[11px] text-brand-muted align-top break-all">
+                      admin.ppa001@poraplan.internal
+                    </td>
+                    <td className="py-1.5 sm:py-2 px-2 sm:px-2.5 text-right align-top">
+                      <span className="text-emerald-700 dark:text-emerald-400 font-bold text-[10px] sm:text-xs">Active</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-          {/* Desktop Table (>= lg: 1024px) */}
-          <div className="hidden lg:block overflow-x-auto">
-            <table className="w-full text-xs font-sans text-left border-collapse">
-              <thead>
-                <tr className="border-b-2 border-brand-dark font-mono font-bold uppercase text-brand-navy bg-brand-paper-tint">
-                  <th className="py-2.5 px-3">PoraPlan ID</th>
-                  <th className="py-2.5 px-3">Role</th>
-                  <th className="py-2.5 px-3">Full Name</th>
-                  <th className="py-2.5 px-3">System Email</th>
-                  <th className="py-2.5 px-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y border-b-2 border-brand-dark">
-                <tr>
-                  <td className="py-2 px-3 font-mono font-bold text-brand-navy">PP001</td>
-                  <td className="py-2 px-3"><Badge variant="teal" size="sm">STUDENT</Badge></td>
-                  <td className="py-2 px-3">Fahim Rahman</td>
-                  <td className="py-2 px-3 font-mono text-brand-muted">student.pp001@poraplan.internal</td>
-                  <td className="py-2 px-3"><span className="text-emerald-700 font-bold">Active</span></td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-3 font-mono font-bold text-brand-navy">PPM001</td>
-                  <td className="py-2 px-3"><Badge variant="gold" size="sm">MENTOR</Badge></td>
-                  <td className="py-2 px-3">Dr. Rafiqul Islam</td>
-                  <td className="py-2 px-3 font-mono text-brand-muted">mentor.ppm001@poraplan.internal</td>
-                  <td className="py-2 px-3"><span className="text-emerald-700 font-bold">Active</span></td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-3 font-mono font-bold text-brand-navy">PPA001</td>
-                  <td className="py-2 px-3"><Badge variant="navy" size="sm">ADMIN</Badge></td>
-                  <td className="py-2 px-3">PoraPlan System Admin</td>
-                  <td className="py-2 px-3 font-mono text-brand-muted">admin.ppa001@poraplan.internal</td>
-                  <td className="py-2 px-3"><span className="text-emerald-700 font-bold">Active</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+            {/* Desktop Table (>= lg: 1024px) */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full text-xs font-sans text-left border-collapse">
+                <thead>
+                  <tr className="border-b-2 border-brand-dark font-mono font-bold uppercase text-brand-navy bg-brand-paper-tint">
+                    <th className="py-2.5 px-3">PoraPlan ID</th>
+                    <th className="py-2.5 px-3">Role</th>
+                    <th className="py-2.5 px-3">Full Name</th>
+                    <th className="py-2.5 px-3">System Email</th>
+                    <th className="py-2.5 px-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y border-b-2 border-brand-dark">
+                  <tr>
+                    <td className="py-2 px-3 font-mono font-bold text-brand-navy">PP001</td>
+                    <td className="py-2 px-3"><Badge variant="teal" size="sm">STUDENT</Badge></td>
+                    <td className="py-2 px-3">Fahim Rahman</td>
+                    <td className="py-2 px-3 font-mono text-brand-muted">student.pp001@poraplan.internal</td>
+                    <td className="py-2 px-3"><span className="text-emerald-700 font-bold">Active</span></td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-3 font-mono font-bold text-brand-navy">PPM001</td>
+                    <td className="py-2 px-3"><Badge variant="gold" size="sm">MENTOR</Badge></td>
+                    <td className="py-2 px-3">Dr. Rafiqul Islam</td>
+                    <td className="py-2 px-3 font-mono text-brand-muted">mentor.ppm001@poraplan.internal</td>
+                    <td className="py-2 px-3"><span className="text-emerald-700 font-bold">Active</span></td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-3 font-mono font-bold text-brand-navy">PPA001</td>
+                    <td className="py-2 px-3"><Badge variant="navy" size="sm">ADMIN</Badge></td>
+                    <td className="py-2 px-3">PoraPlan System Admin</td>
+                    <td className="py-2 px-3 font-mono text-brand-muted">admin.ppa001@poraplan.internal</td>
+                    <td className="py-2 px-3"><span className="text-emerald-700 font-bold">Active</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
 
       </div>
     </div>
