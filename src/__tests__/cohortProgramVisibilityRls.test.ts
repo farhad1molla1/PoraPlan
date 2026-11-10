@@ -1,3 +1,4 @@
+/// <reference types="node" />
 /**
  * PoraPlan — Cohort and Program RLS Visibility Verification Suite
  *
@@ -158,6 +159,7 @@ function evaluateCohortSelectRLS(
   const studentMatch = db.enrollments.some(
     (pe) =>
       pe.cohort_id === cohort.id &&
+      pe.program_id === cohort.program_id &&
       pe.student_id === user.id &&
       ['active', 'on_hold', 'completed'].includes(pe.status)
   );
@@ -291,6 +293,10 @@ function runTests() {
     const hasEnrollmentStatusWhitelist = /pe\.status\s+IN\s+\('active',\s*'on_hold',\s*'completed'\)/i.test(sql);
     report('MIG-06', hasEnrollmentStatusWhitelist, 'Enrollment predicate enforces status whitelist (active, on_hold, completed)');
 
+    // Predicate checks: enrollment cohort_id and program_id consistency
+    const hasEnrollmentCohortAndProgram = /pe\.cohort_id\s*=\s*cohorts\.id\s+AND\s+pe\.program_id\s*=\s*cohorts\.program_id/i.test(sql);
+    report('MIG-06B', hasEnrollmentCohortAndProgram, 'Enrollment predicate enforces both cohort_id and program_id consistency');
+
     // Active mentor status checks
     const hasActiveCohortMentor = /cm\.is_active\s*=\s*true\s+AND\s+cm\.ended_at\s+IS\s+NULL/i.test(sql);
     const hasActiveStudentMentor = /sma\.is_active\s*=\s*true\s+AND\s+sma\.ended_at\s+IS\s+NULL/i.test(sql);
@@ -382,6 +388,27 @@ function runTests() {
 
   // Scenario 14: Admin user + archived cohort -> Allowed
   report('COH-14', evaluateCohortSelectRLS(adminUser, archCohort, baseDb) === true, 'Admin user can view archived cohort');
+
+  // Scenario 15 (Regression): Student with mismatched program_id in enrollment -> Denied
+  const studentMismatched: UserContext = { id: 'user-std-mismatch', role: 'student' };
+  const dbWithMismatch: DatabaseState = {
+    ...baseDb,
+    enrollments: [
+      ...baseDb.enrollments,
+      {
+        id: 'enr-mismatch',
+        student_id: 'user-std-mismatch',
+        cohort_id: 'coh-draft', // Matches draftCohort.id
+        program_id: 'prog-draft', // Mismatched: does NOT match draftCohort.program_id ('prog-pub')
+        status: 'active',
+      },
+    ],
+  };
+  report(
+    'COH-REG-01',
+    evaluateCohortSelectRLS(studentMismatched, draftCohort, dbWithMismatch) === false,
+    'Regression: Student with mismatched program_id in enrollment cannot access cohort'
+  );
 
   // ===========================================================================
   // SECTION 3: Program Access Matrix Simulation

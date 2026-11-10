@@ -33,6 +33,7 @@ CREATE POLICY "Enrolled students and assigned mentors can view own cohorts"
     EXISTS (
       SELECT 1 FROM public.program_enrollments pe
       WHERE pe.cohort_id = cohorts.id
+        AND pe.program_id = cohorts.program_id
         AND pe.student_id = auth.uid()
         AND pe.status IN ('active', 'on_hold', 'completed')
     )
