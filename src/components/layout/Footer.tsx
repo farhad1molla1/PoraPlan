@@ -113,7 +113,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 pt-6 border-t border-brand-bg/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-brand-bg/60">
+        <div className="mt-8 sm:mt-10 pt-6 border-t border-brand-bg/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-brand-bg/60 text-center sm:text-left">
           <p>© {new Date().getFullYear()} {APP_CONFIG.name}. {APP_CONFIG.descriptor}.</p>
           <p className="flex items-center gap-2">
             <span className="inline-block w-2 h-2 rounded-full bg-brand-teal"></span>

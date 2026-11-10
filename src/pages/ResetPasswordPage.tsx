@@ -67,7 +67,7 @@ export const ResetPasswordPage: React.FC = () => {
         </div>
 
         {/* Card */}
-        <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8">
+        <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 sm:p-8">
           
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
@@ -126,12 +126,12 @@ export const ResetPasswordPage: React.FC = () => {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="At least 6 characters"
-                  className="w-full px-3 py-2 pr-10 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                  className="w-full px-3 py-2.5 pr-12 text-base sm:text-sm min-h-[44px] border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword((prev) => !prev)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-brand-muted hover:text-brand-dark focus:outline-none transition-colors"
+                  className="absolute right-0 top-0 bottom-0 min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-brand-muted hover:text-brand-dark focus:outline-none transition-colors cursor-pointer"
                   aria-label={showNewPassword ? 'Hide password' : 'Show password'}
                   title={showNewPassword ? 'Hide password' : 'Show password'}
                 >
@@ -160,12 +160,12 @@ export const ResetPasswordPage: React.FC = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter your new password"
-                  className="w-full px-3 py-2 pr-10 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                  className="w-full px-3 py-2.5 pr-12 text-base sm:text-sm min-h-[44px] border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-brand-muted hover:text-brand-dark focus:outline-none transition-colors"
+                  className="absolute right-0 top-0 bottom-0 min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-brand-muted hover:text-brand-dark focus:outline-none transition-colors cursor-pointer"
                   aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                   title={showConfirmPassword ? 'Hide password' : 'Show password'}
                 >

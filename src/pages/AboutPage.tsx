@@ -106,7 +106,7 @@ export const AboutPage: React.FC = () => {
         
         {/* Section 1: What is PoraPlan? */}
         <section aria-labelledby="what-is-poraplan" className="space-y-4">
-          <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-4">
+          <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 sm:p-6 md:p-8 space-y-4">
             <Badge variant="teal" size="sm">WHAT IS PORAPLAN?</Badge>
             
             <h2 id="what-is-poraplan" className="text-2xl sm:text-3xl font-extrabold font-heading text-brand-navy">
@@ -126,7 +126,7 @@ export const AboutPage: React.FC = () => {
 
         {/* Section 2: Why does PoraPlan exist? */}
         <section aria-labelledby="why-it-exists" className="space-y-4">
-          <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-4">
+          <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 sm:p-6 md:p-8 space-y-4">
             <Badge variant="gold" size="sm">WHY WE BUILT THIS</Badge>
             
             <h2 id="why-it-exists" className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy">
@@ -189,7 +189,7 @@ export const AboutPage: React.FC = () => {
 
         {/* Section 4: How does it help during your week? */}
         <section aria-labelledby="how-it-helps" className="space-y-4">
-          <div className="border-2 border-brand-dark bg-brand-navy text-brand-bg shadow-brutal p-6 sm:p-8 space-y-4">
+          <div className="border-2 border-brand-dark bg-brand-navy text-brand-bg shadow-brutal p-4 sm:p-6 md:p-8 space-y-4">
             <span className="font-mono text-xs uppercase font-bold text-brand-gold tracking-wider block">
               YOUR WEEKLY RHYTHM
             </span>
@@ -227,7 +227,7 @@ export const AboutPage: React.FC = () => {
 
         {/* Section 5: How mentor support works */}
         <section aria-labelledby="mentor-support" className="space-y-4">
-          <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-4">
+          <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 sm:p-6 md:p-8 space-y-4">
             <Badge variant="teal" size="sm">MENTOR SUPPORT</Badge>
             
             <h2 id="mentor-support" className="text-xl sm:text-2xl font-extrabold font-heading text-brand-navy">
@@ -257,7 +257,7 @@ export const AboutPage: React.FC = () => {
         </section>
 
         {/* Section 6: Closing CTA */}
-        <section className="text-center p-8 sm:p-10 border-2 border-brand-dark bg-brand-gold shadow-brutal space-y-4">
+        <section className="text-center p-5 sm:p-8 md:p-10 border-2 border-brand-dark bg-brand-gold shadow-brutal space-y-4">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-navy font-heading">
             Start studying with a clear plan today
           </h2>
@@ -269,6 +269,7 @@ export const AboutPage: React.FC = () => {
               to="/login"
               variant="dark"
               size="md"
+              className="w-full sm:w-auto"
               rightIcon={<ArrowRight className="w-4 h-4 stroke-[2.5]" />}
             >
               Log In to Workspace
@@ -277,6 +278,7 @@ export const AboutPage: React.FC = () => {
               to="/how-it-works"
               variant="outline"
               size="md"
+              className="w-full sm:w-auto"
             >
               See How It Works
             </Button>

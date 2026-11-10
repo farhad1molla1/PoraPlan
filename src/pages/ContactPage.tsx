@@ -38,7 +38,7 @@ export const ContactPage: React.FC = () => {
           </p>
 
           {inquiryTarget && (
-            <div className="mt-4 p-3.5 border-2 border-brand-teal bg-white flex items-center justify-between gap-3 text-xs sm:text-sm font-sans shadow-brutal-xs">
+            <div className="mt-4 p-3.5 border-2 border-brand-teal bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 text-xs sm:text-sm font-sans shadow-brutal-xs">
               <div>
                 <span className="font-mono text-[10px] uppercase font-bold text-brand-teal block">
                   ENROLLMENT INQUIRY
@@ -49,7 +49,7 @@ export const ContactPage: React.FC = () => {
               </div>
               <Link
                 to="/programs"
-                className="font-mono text-xs text-brand-teal hover:underline font-bold shrink-0"
+                className="font-mono text-xs text-brand-teal hover:underline font-bold shrink-0 self-start sm:self-auto"
               >
                 Explore Programs
               </Link>
@@ -169,7 +169,7 @@ export const ContactPage: React.FC = () => {
         </section>
 
         {/* Member Access Information */}
-        <section className="border-2 border-brand-dark bg-brand-paper p-6 sm:p-8 shadow-brutal space-y-4">
+        <section className="border-2 border-brand-dark bg-brand-paper p-4 sm:p-6 md:p-8 shadow-brutal space-y-4">
           <div className="flex items-center gap-2 text-brand-navy font-heading font-bold text-base">
             <ShieldCheck className="w-5 h-5 text-brand-teal stroke-[2.5]" />
             <span>New to PoraPlan?</span>
@@ -191,6 +191,7 @@ export const ContactPage: React.FC = () => {
               to="/login"
               variant="primary"
               size="md"
+              className="w-full sm:w-auto"
               rightIcon={<ArrowRight className="w-4 h-4 stroke-[2.5]" />}
             >
               Log in with PoraPlan ID
@@ -199,6 +200,7 @@ export const ContactPage: React.FC = () => {
               to="/signup"
               variant="outline"
               size="md"
+              className="w-full sm:w-auto"
             >
               Activate Your Account
             </Button>

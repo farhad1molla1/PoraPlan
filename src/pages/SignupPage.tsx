@@ -84,7 +84,7 @@ export const SignupPage: React.FC = () => {
         </div>
 
         {/* Activation Card */}
-        <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-6 sm:p-8 space-y-5">
+        <div className="border-2 border-brand-dark bg-brand-paper shadow-brutal p-4 sm:p-8 space-y-5">
           
           {/* Header with Official Logo */}
           <div className="flex items-center gap-3">
@@ -148,7 +148,7 @@ export const SignupPage: React.FC = () => {
                 value={poraplanId}
                 onChange={(e) => setPoraplanId(e.target.value.toUpperCase())}
                 placeholder="e.g. PP001 or PPM001"
-                className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                className="w-full px-3 py-2.5 text-base sm:text-sm min-h-[44px] border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
               />
             </div>
 
@@ -168,12 +168,12 @@ export const SignupPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your initial password"
-                  className="w-full px-3 py-2 pr-10 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                  className="w-full px-3 py-2.5 pr-12 text-base sm:text-sm min-h-[44px] border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-brand-muted hover:text-brand-dark focus:outline-none transition-colors"
+                  className="absolute right-0 top-0 bottom-0 min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-brand-muted hover:text-brand-dark focus:outline-none transition-colors cursor-pointer"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   title={showPassword ? 'Hide password' : 'Show password'}
                 >
@@ -200,7 +200,7 @@ export const SignupPage: React.FC = () => {
                 value={personalEmail}
                 onChange={(e) => setPersonalEmail(e.target.value)}
                 placeholder="student@example.com"
-                className="w-full px-3 py-2 text-sm border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
+                className="w-full px-3 py-2.5 text-base sm:text-sm min-h-[44px] border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
               />
               <span className="text-[10px] text-brand-muted mt-1 block font-sans">
                 Connect your email now to enable password recovery and Google sign-in.

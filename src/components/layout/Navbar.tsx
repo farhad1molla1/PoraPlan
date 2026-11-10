@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ArrowUpRight, LogOut, LayoutDashboard } from 'lucide-react';
 import { Button } from '../common/Button';
@@ -12,6 +12,19 @@ export const Navbar: React.FC = () => {
 
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
   const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen]);
 
   const getDashboardPath = () => {
     if (role === 'mentor') return '/mentor/dashboard';
@@ -112,14 +125,14 @@ export const Navbar: React.FC = () => {
             {user ? (
               <Link
                 to={getDashboardPath()}
-                className="text-[11px] font-mono font-bold px-2 py-1 border-2 border-brand-dark bg-brand-teal text-white shadow-brutal-xs"
+                className="text-xs font-mono font-bold px-3 py-1.5 min-h-[40px] inline-flex items-center justify-center border-2 border-brand-dark bg-brand-teal text-white shadow-brutal-xs"
               >
                 Workspace
               </Link>
             ) : (
               <Link
                 to="/login"
-                className="text-[11px] font-mono font-bold px-2 py-1 border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:bg-brand-paper-tint"
+                className="text-xs font-mono font-bold px-3 py-1.5 min-h-[40px] inline-flex items-center justify-center border-2 border-brand-dark bg-brand-paper shadow-brutal-xs hover:bg-brand-paper-tint"
               >
                 Log In
               </Link>
@@ -127,11 +140,11 @@ export const Navbar: React.FC = () => {
             <button
               type="button"
               onClick={toggleMobileMenu}
-              className="p-1.5 border-2 border-brand-dark bg-brand-paper text-brand-dark shadow-brutal-xs hover:bg-brand-paper-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center border-2 border-brand-dark bg-brand-paper text-brand-dark shadow-brutal-xs hover:bg-brand-paper-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal cursor-pointer"
               aria-label={mobileMenuOpen ? 'Close Menu' : 'Open Menu'}
               aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X className="w-4 h-4 stroke-[2.5]" /> : <Menu className="w-4 h-4 stroke-[2.5]" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 stroke-[2.5]" /> : <Menu className="w-5 h-5 stroke-[2.5]" />}
             </button>
           </div>
         </div>
@@ -148,7 +161,7 @@ export const Navbar: React.FC = () => {
                   key={link.href}
                   to={link.href}
                   onClick={closeMobileMenu}
-                  className={`p-2.5 font-bold border-2 border-brand-dark text-xs sm:text-sm ${
+                  className={`p-2.5 min-h-[44px] flex items-center font-bold border-2 border-brand-dark text-xs sm:text-sm ${
                     isActive
                       ? 'bg-brand-teal text-white shadow-brutal-xs'
                       : 'bg-brand-paper text-brand-dark hover:bg-brand-paper-tint shadow-brutal-xs'

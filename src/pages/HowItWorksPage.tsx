@@ -35,7 +35,7 @@ export const HowItWorksPage: React.FC = () => {
       </section>
 
       {/* Two Roles Overview: Student & Mentor */}
-      <section className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-6">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-6">
         <SectionHeading
           badge="STUDENT &amp; MENTOR"
           eyebrow="// HOW WE WORK TOGETHER"
@@ -154,7 +154,7 @@ export const HowItWorksPage: React.FC = () => {
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-10 sm:mt-14 p-5 sm:p-7 bg-brand-navy text-white border-2 border-brand-dark shadow-brutal flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+        <div className="mt-10 sm:mt-14 p-5 sm:p-7 bg-brand-navy text-white border-2 border-brand-dark shadow-brutal flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 text-center sm:text-left">
           <div>
             <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-brand-bg">
               Ready to start your study plan?
@@ -167,6 +167,7 @@ export const HowItWorksPage: React.FC = () => {
             to="/login"
             variant="primary"
             size="md"
+            className="w-full sm:w-auto"
             rightIcon={<ArrowRight className="w-4 h-4 stroke-[2.5]" />}
           >
             Log In to Workspace
