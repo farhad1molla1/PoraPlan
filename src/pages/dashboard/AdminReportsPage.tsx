@@ -121,7 +121,8 @@ export const AdminReportsPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-16">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full print:p-0 print:bg-white">
+      <div className="space-y-6 max-w-6xl mx-auto pb-16 print:pb-0 print:max-w-none">
       {/* Scoped Academic Typography and Print Stylesheet */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,600&display=swap');
@@ -231,33 +232,30 @@ export const AdminReportsPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
-            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 border sm:border-2 font-mono text-[10px] sm:text-xs font-bold transition-all min-h-[32px] sm:min-h-0 ${
-              activeTab === 'overview'
-                ? 'border-brand-dark bg-brand-teal text-white shadow-none sm:shadow-brutal-xs'
-                : 'border-transparent text-brand-muted hover:border-brand-dark hover:bg-brand-paper-tint hover:text-brand-dark'
-            }`}
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 border sm:border-2 font-mono text-[10px] sm:text-xs font-bold transition-all min-h-[32px] sm:min-h-0 ${activeTab === 'overview'
+              ? 'border-brand-dark bg-brand-teal text-white shadow-none sm:shadow-brutal-xs'
+              : 'border-transparent text-brand-muted hover:border-brand-dark hover:bg-brand-paper-tint hover:text-brand-dark'
+              }`}
           >
             Executive Overview &amp; Attention
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('students')}
-            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 border sm:border-2 font-mono text-[10px] sm:text-xs font-bold transition-all min-h-[32px] sm:min-h-0 ${
-              activeTab === 'students'
-                ? 'border-brand-dark bg-brand-teal text-white shadow-none sm:shadow-brutal-xs'
-                : 'border-transparent text-brand-muted hover:border-brand-dark hover:bg-brand-paper-tint hover:text-brand-dark'
-            }`}
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 border sm:border-2 font-mono text-[10px] sm:text-xs font-bold transition-all min-h-[32px] sm:min-h-0 ${activeTab === 'students'
+              ? 'border-brand-dark bg-brand-teal text-white shadow-none sm:shadow-brutal-xs'
+              : 'border-transparent text-brand-muted hover:border-brand-dark hover:bg-brand-paper-tint hover:text-brand-dark'
+              }`}
           >
             Student Progress Directory ({report?.students.length || 0})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('mentors')}
-            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 border sm:border-2 font-mono text-[10px] sm:text-xs font-bold transition-all min-h-[32px] sm:min-h-0 ${
-              activeTab === 'mentors'
-                ? 'border-brand-dark bg-brand-teal text-white shadow-none sm:shadow-brutal-xs'
-                : 'border-transparent text-brand-muted hover:border-brand-dark hover:bg-brand-paper-tint hover:text-brand-dark'
-            }`}
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 border sm:border-2 font-mono text-[10px] sm:text-xs font-bold transition-all min-h-[32px] sm:min-h-0 ${activeTab === 'mentors'
+              ? 'border-brand-dark bg-brand-teal text-white shadow-none sm:shadow-brutal-xs'
+              : 'border-transparent text-brand-muted hover:border-brand-dark hover:bg-brand-paper-tint hover:text-brand-dark'
+              }`}
           >
             Mentor Workload Directory ({report?.mentors.length || 0})
           </button>
@@ -271,11 +269,10 @@ export const AdminReportsPage: React.FC = () => {
               key={p}
               type="button"
               onClick={() => setPeriod(p)}
-              className={`px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold uppercase transition-all min-h-[30px] sm:min-h-0 ${
-                period === p
-                  ? 'border sm:border-2 border-brand-dark bg-brand-navy text-white shadow-none sm:shadow-brutal-xs'
-                  : 'border border-brand-dark/20 text-brand-muted hover:border-brand-dark hover:text-brand-dark'
-              }`}
+              className={`px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold uppercase transition-all min-h-[30px] sm:min-h-0 ${period === p
+                ? 'border sm:border-2 border-brand-dark bg-brand-navy text-white shadow-none sm:shadow-brutal-xs'
+                : 'border border-brand-dark/20 text-brand-muted hover:border-brand-dark hover:text-brand-dark'
+                }`}
             >
               {p === 'schedule' ? 'Schedule' : p}
             </button>
@@ -513,13 +510,12 @@ export const AdminReportsPage: React.FC = () => {
                                 </span>
                               </div>
                               <span
-                                className={`px-2 py-0.5 border text-[9.5px] font-bold uppercase inline-block shrink-0 ${
-                                  item.level === 'critical'
-                                    ? 'bg-red-700 text-white border-red-900'
-                                    : item.level === 'warning'
+                                className={`px-2 py-0.5 border text-[9.5px] font-bold uppercase inline-block shrink-0 ${item.level === 'critical'
+                                  ? 'bg-red-700 text-white border-red-900'
+                                  : item.level === 'warning'
                                     ? 'bg-amber-600 text-white border-amber-800'
                                     : 'bg-slate-200 text-brand-dark border-brand-dark/40'
-                                }`}
+                                  }`}
                               >
                                 {item.levelLabel}
                               </span>
@@ -584,13 +580,12 @@ export const AdminReportsPage: React.FC = () => {
                                 </td>
                                 <td className="p-2.5 text-center">
                                   <span
-                                    className={`px-2 py-0.5 border text-[9.5px] font-bold uppercase inline-block ${
-                                      item.level === 'critical'
-                                        ? 'bg-red-700 text-white border-red-900'
-                                        : item.level === 'warning'
+                                    className={`px-2 py-0.5 border text-[9.5px] font-bold uppercase inline-block ${item.level === 'critical'
+                                      ? 'bg-red-700 text-white border-red-900'
+                                      : item.level === 'warning'
                                         ? 'bg-amber-600 text-white border-amber-800'
                                         : 'bg-slate-200 text-brand-dark border-brand-dark/40'
-                                    }`}
+                                      }`}
                                   >
                                     {item.levelLabel}
                                   </span>
@@ -733,13 +728,12 @@ export const AdminReportsPage: React.FC = () => {
                             </div>
                             <div className="mt-0.5">
                               <span
-                                className={`text-[9px] uppercase font-bold px-1.5 py-0.2 border ${
-                                  s.enrollmentStatus === 'active'
-                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                                    : s.enrollmentStatus === 'completed'
+                                className={`text-[9px] uppercase font-bold px-1.5 py-0.2 border ${s.enrollmentStatus === 'active'
+                                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                  : s.enrollmentStatus === 'completed'
                                     ? 'bg-blue-100 text-blue-800 border-blue-300'
                                     : 'bg-slate-100 text-slate-700 border-slate-300'
-                                }`}
+                                  }`}
                               >
                                 {s.enrollmentStatus}
                               </span>
@@ -766,13 +760,12 @@ export const AdminReportsPage: React.FC = () => {
                             {s.averageScorePercentage !== null ? (
                               <div>
                                 <span
-                                  className={`font-bold text-sm ${
-                                    s.averageScorePercentage >= 85
-                                      ? 'text-emerald-700'
-                                      : s.averageScorePercentage < 70
+                                  className={`font-bold text-sm ${s.averageScorePercentage >= 85
+                                    ? 'text-emerald-700'
+                                    : s.averageScorePercentage < 70
                                       ? 'text-red-700'
                                       : 'text-brand-navy'
-                                  }`}
+                                    }`}
                                 >
                                   {s.averageScorePercentage}%
                                 </span>
@@ -798,15 +791,14 @@ export const AdminReportsPage: React.FC = () => {
                           </td>
                           <td className="p-3 text-center">
                             <span
-                              className={`px-2 py-0.5 border text-[9px] font-bold uppercase inline-block ${
-                                s.attentionLevel === 'critical'
-                                  ? 'bg-red-700 text-white border-red-900'
-                                  : s.attentionLevel === 'warning'
+                              className={`px-2 py-0.5 border text-[9px] font-bold uppercase inline-block ${s.attentionLevel === 'critical'
+                                ? 'bg-red-700 text-white border-red-900'
+                                : s.attentionLevel === 'warning'
                                   ? 'bg-amber-600 text-white border-amber-800'
                                   : s.attentionLevel === 'normal'
-                                  ? 'bg-emerald-700 text-white border-emerald-900'
-                                  : 'bg-slate-200 text-brand-dark border-brand-dark/30'
-                              }`}
+                                    ? 'bg-emerald-700 text-white border-emerald-900'
+                                    : 'bg-slate-200 text-brand-dark border-brand-dark/30'
+                                }`}
                               title={s.attentionReason}
                             >
                               {s.attentionLevel === 'insufficient_data'
@@ -943,6 +935,7 @@ export const AdminReportsPage: React.FC = () => {
           )}
         </div>
       ) : null}
+      </div>
     </div>
   );
 };

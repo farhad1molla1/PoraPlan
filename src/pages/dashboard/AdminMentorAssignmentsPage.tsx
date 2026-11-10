@@ -388,7 +388,8 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-3 sm:space-y-6">
+    <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
+      <div className="max-w-7xl mx-auto space-y-3 sm:space-y-6">
       {/* 1. HEADER & DESK SUMMARY */}
       <div className="border sm:border-3 border-brand-dark bg-brand-paper p-2.5 sm:p-6 shadow-none sm:shadow-brutal">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 sm:gap-4">
@@ -1537,6 +1538,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
