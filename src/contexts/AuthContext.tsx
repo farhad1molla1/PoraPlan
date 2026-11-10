@@ -13,6 +13,7 @@ import {
   resetMockPassword,
   getMockAccountById,
 } from '../lib/mockAuthStore';
+import { validatePasswordPolicy } from '../lib/passwordPolicy';
 import type { Profile, UserRole, AccountStatus } from '../types/database';
 import { AuthContext } from './authContextDef';
 
@@ -437,9 +438,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   const updateNewPassword = useCallback(
     async (newPassword: string): Promise<{ error: Error | null }> => {
+      const validation = validatePasswordPolicy(newPassword);
+      if (!validation.valid) {
+        return { error: new Error(validation.error || 'Password does not meet security requirements.') };
+      }
+
       if (!isConfigured) {
         if (user?.email) {
-          resetMockPassword(user.email, newPassword);
+          const res = resetMockPassword(user.email, newPassword);
+          if (res.error) {
+            return { error: res.error };
+          }
         }
         return { error: null };
       }

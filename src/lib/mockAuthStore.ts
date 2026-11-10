@@ -72,6 +72,7 @@ import type {
   BillingDateAuditLog,
 } from '../types/database';
 import { sha256 } from './crypto';
+import { validatePasswordPolicy } from './passwordPolicy';
 import {
   deriveDefaultBillingStartDate,
   toBangladeshDateStr,
@@ -393,6 +394,11 @@ export function resetMockPassword(
   email: string,
   newPassword: string
 ): { success: boolean; error: Error | null } {
+  const validation = validatePasswordPolicy(newPassword);
+  if (!validation.valid) {
+    return { success: false, error: new Error(validation.error || 'Password policy violation.') };
+  }
+
   const cleanEmail = email.trim().toLowerCase();
   const index = mockStore.findIndex(
     (acc) =>
@@ -410,6 +416,37 @@ export function resetMockPassword(
   };
 
   return { success: true, error: null };
+}
+
+/**
+ * Reset password by PoraPlan ID for administrative password resets in mock store.
+ */
+export function resetMockPasswordByPoraplanId(
+  poraplanId: string,
+  newPassword: string
+): { success: boolean; message: string } {
+  const validation = validatePasswordPolicy(newPassword);
+  if (!validation.valid) {
+    return { success: false, message: validation.error || 'Password policy violation.' };
+  }
+
+  const cleanId = poraplanId.trim().toUpperCase();
+  const index = mockStore.findIndex((acc) => acc.poraplanId.toUpperCase() === cleanId);
+
+  if (index === -1) {
+    return { success: false, message: `Member with PoraPlan ID "${cleanId}" not found.` };
+  }
+
+  mockStore[index] = {
+    ...mockStore[index],
+    passwordHash: sha256(newPassword),
+    status: 'not_activated',
+  };
+
+  return {
+    success: true,
+    message: `Password for member ${cleanId} successfully reset. Status set to not_activated.`,
+  };
 }
 
 /**
@@ -524,8 +561,15 @@ export function adminRegisterMockMember(
   fullName: string,
   email: string,
   role: UserRole,
-  initialPassword = 'password'
+  initialPassword?: string
 ): { success: boolean; message: string } {
+  if (initialPassword) {
+    const validation = validatePasswordPolicy(initialPassword);
+    if (!validation.valid) {
+      return { success: false, message: validation.error || 'Password policy violation.' };
+    }
+  }
+
   const cleanId = poraplanId.trim().toUpperCase();
   if (!cleanId) {
     return { success: false, message: 'Please provide a valid PoraPlan ID.' };
@@ -535,13 +579,15 @@ export function adminRegisterMockMember(
     return { success: false, message: `PoraPlan ID ${cleanId} already exists.` };
   }
 
+  const effectivePassword = initialPassword || 'PoraPlan#2026';
+
   const newRecord: MockAccountRecord = {
     id: `mock-${role}-${cleanId.toLowerCase()}`,
     poraplanId: cleanId,
     fullName: fullName.trim() || 'New Member',
     authEmail: email.trim().toLowerCase() || `${cleanId.toLowerCase()}@poraplan.internal`,
     linkedEmail: undefined,
-    passwordHash: sha256(initialPassword),
+    passwordHash: sha256(effectivePassword),
     role,
     status: 'not_activated',
   };

@@ -2060,6 +2060,17 @@ export type Database = {
           p_email: string;
           p_role: UserRole;
           p_status?: string;
+          p_initial_password?: string;
+        };
+        Returns: {
+          success: boolean;
+          message: string;
+        }[];
+      };
+      admin_reset_member_password: {
+        Args: {
+          p_poraplan_id: string;
+          p_new_password: string;
         };
         Returns: {
           success: boolean;

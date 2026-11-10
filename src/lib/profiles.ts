@@ -7,9 +7,11 @@ import {
   getMockProfile,
   updateMockProfile,
   adminRegisterMockMember,
+  resetMockPasswordByPoraplanId,
   getMockUsers,
   getMockPublicProfile,
 } from './mockAuthStore';
+import { validatePasswordPolicy } from './passwordPolicy';
 
 export interface PoraPlanIdResolution {
   authEmail: string;
@@ -389,10 +391,18 @@ export async function adminRegisterMember(
   poraplanId: string,
   fullName: string,
   email: string,
-  role: UserRole
+  role: UserRole,
+  initialPassword?: string
 ): Promise<{ success: boolean; message: string }> {
+  if (initialPassword) {
+    const validation = validatePasswordPolicy(initialPassword);
+    if (!validation.valid) {
+      return { success: false, message: validation.error || 'Password policy violation.' };
+    }
+  }
+
   if (!isSupabaseConfigured()) {
-    return adminRegisterMockMember(poraplanId, fullName, email, role);
+    return adminRegisterMockMember(poraplanId, fullName, email, role, initialPassword);
   }
 
   try {
@@ -402,6 +412,7 @@ export async function adminRegisterMember(
       p_email: email.trim().toLowerCase(),
       p_role: role,
       p_status: 'not_activated',
+      ...(initialPassword ? { p_initial_password: initialPassword } : {}),
     });
 
     if (error) {
@@ -414,6 +425,45 @@ export async function adminRegisterMember(
     }
 
     return { success: true, message: `Member ${poraplanId.toUpperCase()} successfully pre-registered.` };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { success: false, message: msg };
+  }
+}
+
+/**
+ * Admin function to reset a member password via privileged server-side RPC.
+ * Enforces unified password security policy before execution.
+ */
+export async function adminResetMemberPassword(
+  poraplanId: string,
+  newPassword: string
+): Promise<{ success: boolean; message: string }> {
+  const validation = validatePasswordPolicy(newPassword);
+  if (!validation.valid) {
+    return { success: false, message: validation.error || 'Password policy violation.' };
+  }
+
+  if (!isSupabaseConfigured()) {
+    return resetMockPasswordByPoraplanId(poraplanId, newPassword);
+  }
+
+  try {
+    const { data, error } = await supabase.rpc('admin_reset_member_password', {
+      p_poraplan_id: poraplanId.trim().toUpperCase(),
+      p_new_password: newPassword,
+    });
+
+    if (error) {
+      return { success: false, message: error.message };
+    }
+
+    const rows = Array.isArray(data) ? (data as Array<{ success: boolean; message: string }>) : [];
+    if (rows.length > 0) {
+      return { success: Boolean(rows[0].success), message: rows[0].message };
+    }
+
+    return { success: true, message: `Password for member ${poraplanId.toUpperCase()} successfully reset.` };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     return { success: false, message: msg };

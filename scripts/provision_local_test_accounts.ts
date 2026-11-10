@@ -22,6 +22,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { validatePasswordPolicy } from '../src/lib/passwordPolicy';
 
 const LOCAL_TARGET_ACCOUNTS = [
   {
@@ -96,6 +97,12 @@ async function runLocalProvisioning() {
     const password = process.env[target.passwordEnvVar]?.trim();
     if (!password) {
       console.error('[SKIP] ' + target.poraplanId + ': Missing password environment variable (' + target.passwordEnvVar + ').');
+      continue;
+    }
+
+    const validation = validatePasswordPolicy(password);
+    if (!validation.valid) {
+      console.error('[SKIP] ' + target.poraplanId + ': Password policy violation: ' + validation.error);
       continue;
     }
 

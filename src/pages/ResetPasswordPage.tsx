@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertCircle, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
+import { validatePasswordPolicy, PASSWORD_GUIDANCE_TEXT } from '../lib/passwordPolicy';
 
 export const ResetPasswordPage: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
@@ -21,8 +22,9 @@ export const ResetPasswordPage: React.FC = () => {
     setErrorMessage(null);
     setSuccessNotice(null);
 
-    if (newPassword.length < 6) {
-      setErrorMessage('Password must be at least 6 characters in length.');
+    const validation = validatePasswordPolicy(newPassword);
+    if (!validation.valid) {
+      setErrorMessage(validation.error || 'Password does not meet security requirements.');
       return;
     }
 
@@ -117,6 +119,9 @@ export const ResetPasswordPage: React.FC = () => {
               >
                 New password
               </label>
+              <p className="text-[11px] sm:text-xs text-brand-dark/75 font-sans mb-1.5 leading-relaxed">
+                {PASSWORD_GUIDANCE_TEXT}
+              </p>
               <div className="relative">
                 <input
                   id="new-password"
@@ -125,7 +130,7 @@ export const ResetPasswordPage: React.FC = () => {
                   autoComplete="new-password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="At least 6 characters"
+                  placeholder="At least 8 characters (12-16+ recommended)"
                   className="w-full px-3 py-2.5 pr-12 text-base sm:text-sm min-h-[44px] border-2 border-brand-dark bg-brand-paper focus:bg-brand-teal-light focus:outline-none font-sans"
                 />
                 <button
