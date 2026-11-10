@@ -1,6 +1,6 @@
 /// <reference types="node" />
 /**
- * PoraPlan — Phase 2.3B.2 Test Account Decommissioning Verification Suite
+ * PoraPlan — Phase 2.3B.2 & 2.3B.2.1 Test Account Decommissioning Verification Suite
  *
  * Validates:
  * 1. Migration SQL static analysis:
@@ -15,13 +15,17 @@
  *
  * 2. Admin Dashboard UI gating:
  *    - Reference credentials table is strictly gated by import.meta.env.DEV.
- *    - Stripped from production bundles.
+ *    - Stripped from production builds.
  *
- * 3. Operator Retirement Script Safety (scripts/retire_test_accounts_auth.ts):
+ * 3. Operator Retirement Script Safety & API Contract (scripts/retire_test_accounts_auth.ts):
  *    - Script exists and requires both --confirm and --enable-retirement.
  *    - Never reads .env files.
  *    - Never logs secrets, passwords, or tokens.
  *    - Uses exact test account targets only.
+ *    - Conforms to Supabase Auth Admin API contract: never passes user ID to signOut().
+ *    - Accurately distinguishes account ban, session/refresh token revocation, and stateless JWT TTL.
+ *    - Documents database-layer RLS mitigation and operator SQL workflow.
+ *    - Handles errors and partial failure without falsely reporting success.
  *
  * 4. Local-Only Provisioning Script Safety (scripts/provision_local_test_accounts.ts):
  *    - Strictly checks that SUPABASE_URL is localhost or 127.0.0.1.
@@ -37,6 +41,11 @@
 
 import fs from 'fs';
 import path from 'path';
+import {
+  retireTargetAccount,
+  TARGET_TEST_ACCOUNTS,
+} from '../../scripts/retire_test_accounts_auth';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 let passCount = 0;
 let failCount = 0;
@@ -51,9 +60,9 @@ function report(scenario: string, passed: boolean, message: string) {
   }
 }
 
-function runVerification() {
+async function runVerification() {
   console.log('================================================================');
-  console.log('PoraPlan Phase 2.3B.2 Test Account Decommissioning Verification');
+  console.log('PoraPlan Phase 2.3B.2 / 2.3B.2.1 Test Account Decommissioning Verification');
   console.log('================================================================\n');
 
   // ===========================================================================
@@ -130,9 +139,9 @@ function runVerification() {
   report('UI-02', !emojiRegex.test(adminSrc), 'AdminDashboardPage contains zero emojis');
 
   // ===========================================================================
-  // SECTION 3: Operator Retirement Script Verification
+  // SECTION 3: Operator Retirement Script Verification & API Contract
   // ===========================================================================
-  console.log('\n--- Section 3: Operator Retirement Script Verification ---');
+  console.log('\n--- Section 3: Operator Retirement Script Verification & API Contract ---');
 
   const retireScriptPath = path.resolve(process.cwd(), 'scripts/retire_test_accounts_auth.ts');
   const retireScriptExists = fs.existsSync(retireScriptPath);
@@ -156,11 +165,173 @@ function runVerification() {
                          scriptSrc.includes('admin.ppa001@poraplan.internal');
     report('SCR-04', targetsExact, 'Retirement script targets strictly exact test account emails');
 
-    // Preserves metadata and bans user
-    const bansUser = scriptSrc.includes('ban_duration');
-    const signsOut = scriptSrc.includes('signOut');
-    report('SCR-05', bansUser && signsOut, 'Retirement script bans user via Auth Admin API and revokes sessions');
+    // Supabase Auth Admin API contract compliance:
+    // Does NOT call signOut with a user ID / UUID (which violates API contract)
+    const callsSignOutWithId = /await\s+.*admin\.signOut\s*\(/.test(scriptSrc) || scriptSrc.includes('signOut(match.id)');
+    report('SCR-05', !callsSignOutWithId, 'Conforms to Supabase Auth API: does not pass user ID to admin.signOut()');
+
+    // Sets ban_duration on user update
+    const setsBanDuration = scriptSrc.includes("ban_duration: '876600h'");
+    report('SCR-06', setsBanDuration, 'Sets ban_duration (876600h) via updateUserById to prevent future authentication');
+
+    // Documents token lifecycle and API contract distinctions
+    const documentsJwtContract = scriptSrc.includes('signOut(jwt: string');
+    report('SCR-07', documentsJwtContract, 'Documents that admin.signOut requires a valid JWT string, not a user UUID');
+
+    const documentsStatelessJwtTtl = scriptSrc.includes('stateless') && scriptSrc.includes('TTL');
+    report('SCR-08', documentsStatelessJwtTtl, 'Accurately documents that already-issued stateless JWTs expire with natural TTL');
+
+    const documentsDatabaseRlsMitigation = scriptSrc.includes('status != \'suspended\'') || scriptSrc.includes('database authorization layer');
+    report('SCR-09', documentsDatabaseRlsMitigation, 'Documents immediate access revocation via database RLS status = suspended');
+
+    const documentsOperatorSessionSql = scriptSrc.includes('DELETE FROM auth.sessions WHERE user_id');
+    report('SCR-10', documentsOperatorSessionSql, 'Documents optional operator SQL workflow for immediate session row purging');
+
+    report('SCR-11', !emojiRegex.test(scriptSrc), 'Retirement script contains zero emojis');
   }
+
+  // ===========================================================================
+  // SECTION 3.1: Behavioral Unit Tests for Auth Retirement Function
+  // ===========================================================================
+  console.log('\n--- Section 3.1: Behavioral Unit Tests for Auth Retirement Function ---');
+
+  const testTarget = TARGET_TEST_ACCOUNTS[0]; // PP001
+
+  // Test 3.1.1: Successful retirement
+  let updateUserCalls: Array<{ id: string; attributes: Record<string, unknown> }> = [];
+  let signOutCalled = false;
+
+  const mockAdminSuccess = {
+    auth: {
+      admin: {
+        listUsers: async () => ({
+          data: {
+            users: [
+              {
+                id: 'uuid-pp001',
+                email: 'student.pp001@poraplan.internal',
+                banned_until: null,
+                user_metadata: { role: 'student', full_name: 'Test Student' },
+              },
+            ],
+          },
+          error: null,
+        }),
+        updateUserById: async (id: string, attributes: Record<string, unknown>) => {
+          updateUserCalls.push({ id, attributes });
+          return { data: { user: { id } }, error: null };
+        },
+        signOut: async () => {
+          signOutCalled = true;
+          return { data: null, error: null };
+        },
+      },
+    },
+  } as unknown as SupabaseClient;
+
+  const successResult = await retireTargetAccount(mockAdminSuccess, testTarget);
+  report('BEH-01', successResult.status === 'retired', 'Successful retirement returns status "retired"');
+  report(
+    'BEH-02',
+    updateUserCalls.length === 1 &&
+      updateUserCalls[0].id === 'uuid-pp001' &&
+      updateUserCalls[0].attributes.ban_duration === '876600h',
+    'Calls updateUserById with user UUID and ban_duration: 876600h'
+  );
+  report('BEH-03', !signOutCalled, 'Does not call signOut with user UUID on success');
+
+  // Test 3.1.2: Error handling on updateUserById failure
+  const mockAdminUpdateError = {
+    auth: {
+      admin: {
+        listUsers: async () => ({
+          data: {
+            users: [
+              {
+                id: 'uuid-pp001',
+                email: 'student.pp001@poraplan.internal',
+                banned_until: null,
+                user_metadata: {},
+              },
+            ],
+          },
+          error: null,
+        }),
+        updateUserById: async () => ({
+          data: null,
+          error: { message: 'Database connection timeout' },
+        }),
+      },
+    },
+  } as unknown as SupabaseClient;
+
+  const failureResult = await retireTargetAccount(mockAdminUpdateError, testTarget);
+  report('BEH-04', failureResult.status === 'failed', 'Returns status "failed" when updateUserById fails');
+  report(
+    'BEH-05',
+    failureResult.message.includes('Database connection timeout'),
+    'Includes actual error message on updateUserById failure'
+  );
+
+  // Test 3.1.3: Idempotent detection of already retired user
+  let updateCalledForAlreadyRetired = false;
+  const mockAdminAlreadyRetired = {
+    auth: {
+      admin: {
+        listUsers: async () => ({
+          data: {
+            users: [
+              {
+                id: 'uuid-pp001',
+                email: 'student.pp001@poraplan.internal',
+                banned_until: '2099-01-01T00:00:00.000Z',
+                user_metadata: { status: 'suspended', retired: true },
+              },
+            ],
+          },
+          error: null,
+        }),
+        updateUserById: async () => {
+          updateCalledForAlreadyRetired = true;
+          return { data: null, error: null };
+        },
+      },
+    },
+  } as unknown as SupabaseClient;
+
+  const alreadyRetiredResult = await retireTargetAccount(mockAdminAlreadyRetired, testTarget);
+  report('BEH-06', alreadyRetiredResult.status === 'already_retired', 'Returns status "already_retired" for banned/retired user');
+  report('BEH-07', !updateCalledForAlreadyRetired, 'Does not call updateUserById when user is already retired');
+
+  // Test 3.1.4: Handling of absent user
+  const mockAdminAbsent = {
+    auth: {
+      admin: {
+        listUsers: async () => ({
+          data: { users: [] },
+          error: null,
+        }),
+      },
+    },
+  } as unknown as SupabaseClient;
+
+  const absentResult = await retireTargetAccount(mockAdminAbsent, testTarget);
+  report('BEH-08', absentResult.status === 'absent', 'Returns status "absent" when account does not exist');
+
+  // Test 3.1.5: Error in listUsers
+  const mockAdminListError = {
+    auth: {
+      admin: {
+        listUsers: async () => ({
+          data: null,
+          error: { message: 'Auth service down' },
+        }),
+      },
+    },
+  } as unknown as SupabaseClient;
+
+  const listErrorResult = await retireTargetAccount(mockAdminListError, testTarget);
+  report('BEH-09', listErrorResult.status === 'failed', 'Returns status "failed" when listUsers fails');
 
   // ===========================================================================
   // SECTION 4: Local Provisioning Script Verification
@@ -188,6 +359,8 @@ function runVerification() {
     // Does NOT read .env files
     const readsDotEnv = localSrc.includes('.env') && !localSrc.includes('Never read');
     report('LOC-05', !readsDotEnv, 'Local script never reads or opens .env files');
+
+    report('LOC-06', !emojiRegex.test(localSrc), 'Local script contains zero emojis');
   }
 
   // ===========================================================================
@@ -203,6 +376,7 @@ function runVerification() {
     const seedSrc = fs.readFileSync(seedPath, 'utf8');
     const hasPassword = seedSrc.toLowerCase().includes('password') && !seedSrc.includes('NEVER contain');
     report('SEED-02', !hasPassword, 'supabase/seed.sql contains zero credentials or passwords');
+    report('SEED-03', !emojiRegex.test(seedSrc), 'Seed file contains zero emojis');
   }
 
   // ===========================================================================
@@ -217,4 +391,7 @@ function runVerification() {
   }
 }
 
-runVerification();
+runVerification().catch((err) => {
+  console.error('Fatal error during verification:', err);
+  process.exit(1);
+});
