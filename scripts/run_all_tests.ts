@@ -77,6 +77,13 @@ const testSuites: TestSuiteDef[] = [
     category: 'Pagination Foundation',
   },
 
+  // Batch 4.2 Student Academic Workspaces Pagination
+  {
+    name: 'Batch 4.2: Student Academic Workspaces Pagination',
+    relativePath: 'src/__tests__/studentWorkspacesPagination.test.ts',
+    category: 'Pagination Foundation',
+  },
+
   // Modern Security & RLS Suites
   {
     name: 'RLS Helper Privacy & Status Semantics',

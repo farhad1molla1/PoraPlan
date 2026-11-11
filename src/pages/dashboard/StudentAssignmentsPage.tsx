@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
-  getStudentAssignments,
+  getStudentAssignmentsPaginated,
+  getStudentAssignmentStatusCounts,
   submitAssignment,
   type AssignmentWithMeta,
+  type StudentAssignmentStatusCounts,
+  DEFAULT_ASSIGNMENTS_PAGE_SIZE,
 } from '../../lib/assignments';
 import {
   validateAcademicFile,
@@ -14,10 +17,12 @@ import {
 } from '../../lib/storage';
 import { getAssignedMentors } from '../../lib/mentorship';
 import type { Profile, SubmissionType } from '../../types/database';
+import type { PaginationMeta } from '../../types/pagination';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
 import { MobileBottomSheet } from '../../components/common/MobileBottomSheet';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import {
   FileText,
   Calendar,
@@ -50,6 +55,16 @@ export const StudentAssignmentsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'submitted' | 'reviewed'>('all');
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(DEFAULT_ASSIGNMENTS_PAGE_SIZE);
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
+  const [statusCounts, setStatusCounts] = useState<StudentAssignmentStatusCounts>({
+    total: 0,
+    pending: 0,
+    submitted: 0,
+    reviewed: 0,
+    error: null,
+  });
 
   // Active submission form state
   const [activeAssignmentId, setActiveAssignmentId] = useState<string | null>(null);
@@ -117,14 +132,24 @@ export const StudentAssignmentsPage: React.FC = () => {
     setError(null);
 
     Promise.all([
-      getStudentAssignments(studentId),
+      getStudentAssignmentsPaginated({
+        studentId,
+        page,
+        pageSize,
+        statusFilter,
+      }),
+      getStudentAssignmentStatusCounts(studentId),
       getAssignedMentors(studentId),
     ])
-      .then(([assignRes, mentorsRes]) => {
+      .then(([assignRes, countsRes, mentorsRes]) => {
         if (assignRes.error) {
           setError(assignRes.error.message);
         } else {
           setAssignments(assignRes.assignments);
+          setPagination(assignRes.pagination);
+        }
+        if (!countsRes.error) {
+          setStatusCounts(countsRes);
         }
         setMentors(mentorsRes.mentors);
         setLoading(false);
@@ -139,7 +164,7 @@ export const StudentAssignmentsPage: React.FC = () => {
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studentId]);
+  }, [studentId, page, pageSize, statusFilter]);
 
   const handleOpenSubmission = (assignment: AssignmentWithMeta) => {
     // If submission is already under review or reviewed, prevent editing
@@ -433,22 +458,27 @@ export const StudentAssignmentsPage: React.FC = () => {
     setAssignments((prev) =>
       prev.map((a) => (a.id === activeAssignmentId ? { ...a, submission } : a))
     );
+
+    if (studentId) {
+      getStudentAssignmentStatusCounts(studentId).then((countsRes) => {
+        if (!countsRes.error) {
+          setStatusCounts(countsRes);
+        }
+      });
+    }
   };
 
-  // Filter assignments
-  const filteredAssignments = assignments.filter((a) => {
-    if (statusFilter === 'all') return true;
-    if (statusFilter === 'pending') return !a.submission;
-    if (statusFilter === 'submitted') return a.submission && a.submission.status === 'submitted';
-    if (statusFilter === 'reviewed')
-      return a.submission && (a.submission.status === 'reviewed' || a.submission.status === 'under_review');
-    return true;
-  });
+  const handleFilterChange = (filter: 'all' | 'pending' | 'submitted' | 'reviewed') => {
+    setStatusFilter(filter);
+    setPage(1);
+  };
 
-  const totalCount = assignments.length;
-  const pendingCount = assignments.filter((a) => !a.submission).length;
-  const submittedCount = assignments.filter((a) => a.submission && a.submission.status === 'submitted').length;
-  const reviewedCount = assignments.filter((a) => a.submission && a.submission.status === 'reviewed').length;
+  const filteredAssignments = assignments;
+
+  const totalCount = statusCounts.total;
+  const pendingCount = statusCounts.pending;
+  const submittedCount = statusCounts.submitted;
+  const reviewedCount = statusCounts.reviewed;
 
   return (
     <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
@@ -544,7 +574,7 @@ export const StudentAssignmentsPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
         <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
           <button
-            onClick={() => setStatusFilter('all')}
+            onClick={() => handleFilterChange('all')}
             className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               statusFilter === 'all'
                 ? 'bg-brand-navy text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
@@ -554,7 +584,7 @@ export const StudentAssignmentsPage: React.FC = () => {
             All ({totalCount})
           </button>
           <button
-            onClick={() => setStatusFilter('pending')}
+            onClick={() => handleFilterChange('pending')}
             className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               statusFilter === 'pending'
                 ? 'bg-brand-gold text-brand-dark shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
@@ -564,7 +594,7 @@ export const StudentAssignmentsPage: React.FC = () => {
             To Submit ({pendingCount})
           </button>
           <button
-            onClick={() => setStatusFilter('submitted')}
+            onClick={() => handleFilterChange('submitted')}
             className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               statusFilter === 'submitted'
                 ? 'bg-brand-teal text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
@@ -574,7 +604,7 @@ export const StudentAssignmentsPage: React.FC = () => {
             Submitted ({submittedCount})
           </button>
           <button
-            onClick={() => setStatusFilter('reviewed')}
+            onClick={() => handleFilterChange('reviewed')}
             className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               statusFilter === 'reviewed'
                 ? 'bg-brand-navy text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
@@ -1234,6 +1264,20 @@ export const StudentAssignmentsPage: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Server-Side Pagination Controls */}
+      {!loading && !error && pagination && pagination.totalCount > 0 && (
+        <div className="pt-2">
+          <PaginationControls
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            totalCount={pagination.totalCount}
+            pageSize={pagination.pageSize}
+            onPageChange={setPage}
+            isLoading={loading}
+          />
         </div>
       )}
 

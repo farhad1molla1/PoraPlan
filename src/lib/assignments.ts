@@ -11,6 +11,15 @@ import type {
   StudyPlan,
 } from '../types/database';
 import {
+  DEFAULT_PAGE,
+  type PaginationMeta,
+  type PaginationParams,
+} from '../types/pagination';
+import {
+  calculatePaginationRange,
+  createPaginationMeta,
+} from './pagination';
+import {
   getMockStudentAssignments,
   getMockAssignmentById,
   createMockAssignment,
@@ -25,6 +34,29 @@ import {
   calculateReminderSchedule,
 } from './mockAuthStore';
 import { createNotification } from './notifications';
+
+export const DEFAULT_ASSIGNMENTS_PAGE_SIZE = 15;
+
+export interface StudentAssignmentsPaginatedParams extends PaginationParams {
+  studentId: string;
+  statusFilter?: 'all' | 'pending' | 'submitted' | 'reviewed';
+  programId?: string;
+  search?: string;
+}
+
+export interface StudentAssignmentsPaginatedResult {
+  assignments: AssignmentWithMeta[];
+  pagination: PaginationMeta;
+  error: Error | null;
+}
+
+export interface StudentAssignmentStatusCounts {
+  total: number;
+  pending: number;
+  submitted: number;
+  reviewed: number;
+  error: Error | null;
+}
 
 export type SubmissionWithMeta = Submission & {
   assignment_title?: string;
@@ -145,6 +177,360 @@ export async function getStudentAssignmentsCount(
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { count: 0, error };
+  }
+}
+
+/**
+ * Fetch assignments for a student with server-side pagination, status filtering, and search.
+ * Enforces deterministic sorting with an id tie-breaker.
+ */
+export async function getStudentAssignmentsPaginated(
+  params: StudentAssignmentsPaginatedParams
+): Promise<StudentAssignmentsPaginatedResult> {
+  const {
+    studentId,
+    page = DEFAULT_PAGE,
+    pageSize = DEFAULT_ASSIGNMENTS_PAGE_SIZE,
+    statusFilter = 'all',
+    programId,
+    search,
+  } = params;
+
+  if (!studentId) {
+    const emptyMeta = createPaginationMeta({ page, pageSize, totalCount: 0 });
+    return { assignments: [], pagination: emptyMeta, error: new Error('Student ID is required.') };
+  }
+
+  const range = calculatePaginationRange({ page, pageSize });
+
+  if (!isSupabaseConfigured()) {
+    let list = getMockStudentAssignments(studentId) as AssignmentWithMeta[];
+    if (programId && programId !== 'all') {
+      list = list.filter((a) => !a.program_id || a.program_id === programId);
+    }
+    if (statusFilter === 'pending') {
+      list = list.filter((a) => !a.submission);
+    } else if (statusFilter === 'submitted') {
+      list = list.filter((a) => a.submission && a.submission.status === 'submitted');
+    } else if (statusFilter === 'reviewed') {
+      list = list.filter(
+        (a) =>
+          a.submission &&
+          (a.submission.status === 'reviewed' || a.submission.status === 'under_review')
+      );
+    }
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(
+        (a) => a.title.toLowerCase().includes(q) || a.subject_name?.toLowerCase().includes(q)
+      );
+    }
+    const totalCount = list.length;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+      clampToTotal: true,
+    });
+    const actualFrom = (pagination.page - 1) * pagination.pageSize;
+    const paginatedData = list.slice(actualFrom, actualFrom + pagination.pageSize);
+    return { assignments: paginatedData, pagination, error: null };
+  }
+
+  try {
+    let assignmentQuery = supabase
+      .from('assignments')
+      .select('*, subjects(*), study_plans(*), submissions(*)', { count: 'exact' })
+      .eq('student_id', studentId);
+
+    if (programId && programId !== 'all') {
+      assignmentQuery = assignmentQuery.eq('program_id', programId);
+    }
+
+    if (search && search.trim()) {
+      assignmentQuery = assignmentQuery.ilike('title', `%${search.trim()}%`);
+    }
+
+    // Apply status filter via student's submission relations
+    if (statusFilter === 'submitted') {
+      const { data: subs, error: subErr } = await supabase
+        .from('submissions')
+        .select('assignment_id')
+        .eq('student_id', studentId)
+        .eq('status', 'submitted');
+
+      if (subErr) {
+        const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+        return { assignments: [], pagination: emptyMeta, error: subErr };
+      }
+      const ids = (subs || []).map((s) => s.assignment_id);
+      if (ids.length === 0) {
+        const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+        return { assignments: [], pagination: emptyMeta, error: null };
+      }
+      assignmentQuery = assignmentQuery.in('id', ids);
+    } else if (statusFilter === 'reviewed') {
+      const { data: subs, error: subErr } = await supabase
+        .from('submissions')
+        .select('assignment_id')
+        .eq('student_id', studentId)
+        .in('status', ['reviewed', 'under_review']);
+
+      if (subErr) {
+        const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+        return { assignments: [], pagination: emptyMeta, error: subErr };
+      }
+      const ids = (subs || []).map((s) => s.assignment_id);
+      if (ids.length === 0) {
+        const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+        return { assignments: [], pagination: emptyMeta, error: null };
+      }
+      assignmentQuery = assignmentQuery.in('id', ids);
+    } else if (statusFilter === 'pending') {
+      const { data: subs, error: subErr } = await supabase
+        .from('submissions')
+        .select('assignment_id')
+        .eq('student_id', studentId);
+
+      if (subErr) {
+        const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+        return { assignments: [], pagination: emptyMeta, error: subErr };
+      }
+      const submittedIds = (subs || []).map((s) => s.assignment_id);
+      if (submittedIds.length > 0) {
+        assignmentQuery = assignmentQuery.not('id', 'in', `(${submittedIds.join(',')})`);
+      }
+    }
+
+    // Stable deterministic sorting with id tie-breaker
+    const { data, count, error } = await assignmentQuery
+      .order('due_date', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true })
+      .range(range.from, range.to);
+
+    if (error) {
+      const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+      return { assignments: [], pagination: emptyMeta, error };
+    }
+
+    const totalCount = count ?? 0;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+      clampToTotal: true,
+    });
+
+    const assignments: AssignmentWithMeta[] = (data || []).map((row: any) => {
+      const submissionsList = Array.isArray(row.submissions)
+        ? row.submissions
+        : row.submissions
+        ? [row.submissions]
+        : [];
+      const submission = submissionsList.find((s: any) => s.student_id === studentId) || null;
+
+      return {
+        id: row.id,
+        student_id: row.student_id,
+        mentor_id: row.mentor_id,
+        subject_id: row.subject_id,
+        plan_id: row.plan_id,
+        title: row.title,
+        instructions: row.instructions,
+        due_date: row.due_date,
+        total_points: row.total_points,
+        status: row.status,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        subject: row.subjects || null,
+        subject_name: row.subjects?.name || undefined,
+        plan: row.study_plans || null,
+        plan_title: row.study_plans?.title || undefined,
+        submission,
+      };
+    });
+
+    return { assignments, pagination, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+    return { assignments: [], pagination: emptyMeta, error };
+  }
+}
+
+/**
+ * Lightweight server-side status counters for Student Assignments tab badges and metrics.
+ * Executes parallel HEAD requests without downloading full data records.
+ */
+export async function getStudentAssignmentStatusCounts(
+  studentId: string,
+  programId?: string
+): Promise<StudentAssignmentStatusCounts> {
+  if (!studentId) {
+    return { total: 0, pending: 0, submitted: 0, reviewed: 0, error: new Error('Student ID is required.') };
+  }
+
+  if (!isSupabaseConfigured()) {
+    const all = getMockStudentAssignments(studentId);
+    const filtered =
+      programId && programId !== 'all'
+        ? all.filter((a) => !a.program_id || a.program_id === programId)
+        : all;
+    const submitted = filtered.filter((a) => a.submission && a.submission.status === 'submitted').length;
+    const reviewed = filtered.filter(
+      (a) =>
+        a.submission &&
+        (a.submission.status === 'reviewed' || a.submission.status === 'under_review')
+    ).length;
+    const pending = filtered.filter((a) => !a.submission).length;
+    return {
+      total: filtered.length,
+      pending,
+      submitted,
+      reviewed,
+      error: null,
+    };
+  }
+
+  try {
+    let totalQ = supabase
+      .from('assignments')
+      .select('*', { count: 'exact', head: true })
+      .eq('student_id', studentId);
+    if (programId && programId !== 'all') {
+      totalQ = totalQ.eq('program_id', programId);
+    }
+
+    const [totalRes, submittedRes, reviewedRes] = await Promise.all([
+      totalQ,
+      supabase
+        .from('submissions')
+        .select('*', { count: 'exact', head: true })
+        .eq('student_id', studentId)
+        .eq('status', 'submitted'),
+      supabase
+        .from('submissions')
+        .select('*', { count: 'exact', head: true })
+        .eq('student_id', studentId)
+        .in('status', ['reviewed', 'under_review']),
+    ]);
+
+    const error = totalRes.error || submittedRes.error || reviewedRes.error;
+    if (error) {
+      return { total: 0, pending: 0, submitted: 0, reviewed: 0, error };
+    }
+
+    const total = totalRes.count ?? 0;
+    const submitted = submittedRes.count ?? 0;
+    const reviewed = reviewedRes.count ?? 0;
+    const pending = Math.max(0, total - (submitted + reviewed));
+
+    return {
+      total,
+      pending,
+      submitted,
+      reviewed,
+      error: null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { total: 0, pending: 0, submitted: 0, reviewed: 0, error };
+  }
+}
+
+/**
+ * Bounded query for Student Dashboard home screen preview.
+ * Retrieves only top unsubmitted assignments (maximum 3) and exact status counts.
+ */
+export async function getStudentDashboardAssignmentsPreview(
+  studentId: string,
+  limit = 3
+): Promise<{
+  assignments: AssignmentWithMeta[];
+  totalCount: number;
+  pendingCount: number;
+  submittedCount: number;
+  error: Error | null;
+}> {
+  if (!studentId) {
+    return { assignments: [], totalCount: 0, pendingCount: 0, submittedCount: 0, error: new Error('Student ID is required.') };
+  }
+
+  if (!isSupabaseConfigured()) {
+    const list = getMockStudentAssignments(studentId) as AssignmentWithMeta[];
+    const pending = list.filter((a) => !a.submission);
+    const submitted = list.filter((a) => Boolean(a.submission));
+    const preview = pending.slice(0, limit);
+    return {
+      assignments: preview,
+      totalCount: list.length,
+      pendingCount: pending.length,
+      submittedCount: submitted.length,
+      error: null,
+    };
+  }
+
+  try {
+    const [counts, subsRes] = await Promise.all([
+      getStudentAssignmentStatusCounts(studentId),
+      supabase.from('submissions').select('assignment_id').eq('student_id', studentId),
+    ]);
+
+    if (counts.error) {
+      return { assignments: [], totalCount: 0, pendingCount: 0, submittedCount: 0, error: counts.error };
+    }
+
+    let query = supabase
+      .from('assignments')
+      .select('*, subjects(*), study_plans(*), submissions(*)')
+      .eq('student_id', studentId);
+
+    const submittedIds = (subsRes.data || []).map((s) => s.assignment_id);
+    if (submittedIds.length > 0) {
+      query = query.not('id', 'in', `(${submittedIds.join(',')})`);
+    }
+
+    const { data, error } = await query
+      .order('due_date', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true })
+      .limit(limit);
+
+    if (error) {
+      return { assignments: [], totalCount: counts.total, pendingCount: counts.pending, submittedCount: counts.submitted, error };
+    }
+
+    const assignments: AssignmentWithMeta[] = (data || []).map((row: any) => ({
+      id: row.id,
+      student_id: row.student_id,
+      mentor_id: row.mentor_id,
+      subject_id: row.subject_id,
+      plan_id: row.plan_id,
+      title: row.title,
+      instructions: row.instructions,
+      due_date: row.due_date,
+      total_points: row.total_points,
+      status: row.status,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      subject: row.subjects || null,
+      subject_name: row.subjects?.name || undefined,
+      plan: row.study_plans || null,
+      plan_title: row.study_plans?.title || undefined,
+      submission: null,
+    }));
+
+    return {
+      assignments,
+      totalCount: counts.total,
+      pendingCount: counts.pending,
+      submittedCount: counts.submitted,
+      error: null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { assignments: [], totalCount: 0, pendingCount: 0, submittedCount: 0, error };
   }
 }
 

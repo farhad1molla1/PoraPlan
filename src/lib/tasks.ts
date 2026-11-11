@@ -9,8 +9,19 @@ import type {
   Subject,
   StudyPlan,
 } from '../types/database';
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+  type PaginationMeta,
+  type PaginationParams,
+} from '../types/pagination';
+import {
+  calculatePaginationRange,
+  createPaginationMeta,
+} from './pagination';
 
 export type { StudentTaskFilters };
+export { DEFAULT_PAGE, DEFAULT_PAGE_SIZE };
 import {
   getMockStudentTasks,
   getMockTaskById,
@@ -26,6 +37,26 @@ export type TaskWithMeta = Task & {
   subject?: Subject | null;
   plan?: StudyPlan | null;
 };
+
+export interface StudentTasksPaginatedParams extends PaginationParams {
+  studentId: string;
+  filters?: StudentTaskFilters;
+  search?: string;
+}
+
+export interface StudentTasksPaginatedResult {
+  tasks: TaskWithMeta[];
+  pagination: PaginationMeta;
+  error: Error | null;
+}
+
+export interface StudentTaskStatusCounts {
+  all: number;
+  pending: number;
+  in_progress: number;
+  completed: number;
+  error: Error | null;
+}
 
 /**
  * Fetch all tasks for a given student ID with optional filters:
@@ -161,6 +192,281 @@ export async function getStudentTasksCount(
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { count: 0, error };
+  }
+}
+
+/**
+ * Fetch tasks for a student with server-side pagination, status filtering, and search.
+ * Enforces deterministic sorting with an id tie-breaker.
+ */
+export async function getStudentTasksPaginated(
+  params: StudentTasksPaginatedParams
+): Promise<StudentTasksPaginatedResult> {
+  const { studentId, page = DEFAULT_PAGE, pageSize = DEFAULT_PAGE_SIZE, filters = {}, search } = params;
+
+  if (!studentId) {
+    const emptyMeta = createPaginationMeta({ page, pageSize, totalCount: 0 });
+    return { tasks: [], pagination: emptyMeta, error: new Error('Student ID is required.') };
+  }
+
+  const range = calculatePaginationRange({ page, pageSize });
+
+  if (!isSupabaseConfigured()) {
+    let list = getMockStudentTasks(studentId, filters) as TaskWithMeta[];
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(
+        (t) => t.title.toLowerCase().includes(q) || t.subject_name?.toLowerCase().includes(q)
+      );
+    }
+    const totalCount = list.length;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+      clampToTotal: true,
+    });
+    const actualFrom = (pagination.page - 1) * pagination.pageSize;
+    const paginatedData = list.slice(actualFrom, actualFrom + pagination.pageSize);
+    return { tasks: paginatedData, pagination, error: null };
+  }
+
+  try {
+    let query = supabase
+      .from('tasks')
+      .select('*, subjects(*), study_plans(*)', { count: 'exact' })
+      .eq('student_id', studentId);
+
+    if (filters.programId && filters.programId !== 'all') {
+      query = query.eq('program_id', filters.programId);
+    }
+
+    if (filters.subjectId && filters.subjectId !== 'all') {
+      query = query.eq('subject_id', filters.subjectId);
+    }
+
+    if (filters.status && (filters.status as string) !== 'all') {
+      query = query.eq('status', filters.status);
+    }
+
+    if (filters.startDate) {
+      const cleanStart = filters.startDate.includes('T')
+        ? filters.startDate.split('T')[0]
+        : filters.startDate.trim();
+      query = query.gte('due_date', cleanStart);
+    }
+
+    if (filters.endDate) {
+      const cleanEnd = filters.endDate.includes('T')
+        ? filters.endDate.split('T')[0]
+        : filters.endDate.trim();
+      query = query.lte('due_date', cleanEnd);
+    }
+
+    if (search && search.trim()) {
+      query = query.ilike('title', `%${search.trim()}%`);
+    }
+
+    // Stable deterministic sorting with id tie-breaker
+    const { data, count, error } = await query
+      .order('due_date', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true })
+      .range(range.from, range.to);
+
+    if (error) {
+      const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+      return { tasks: [], pagination: emptyMeta, error };
+    }
+
+    const totalCount = count ?? 0;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+      clampToTotal: true,
+    });
+
+    const tasks: TaskWithMeta[] = (data || []).map((row: any) => ({
+      id: row.id,
+      student_id: row.student_id,
+      created_by: row.created_by,
+      subject_id: row.subject_id,
+      plan_id: row.plan_id,
+      title: row.title,
+      description: row.description,
+      priority: row.priority,
+      status: row.status,
+      due_date: row.due_date,
+      estimated_minutes: row.estimated_minutes,
+      completed_at: row.completed_at,
+      attachment_path: row.attachment_path || null,
+      attachment_name: row.attachment_name || null,
+      attachment_size: row.attachment_size || null,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      subject: row.subjects || null,
+      subject_name: row.subjects?.name || undefined,
+      plan: row.study_plans || null,
+      plan_title: row.study_plans?.title || undefined,
+    }));
+
+    return { tasks, pagination, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+    return { tasks: [], pagination: emptyMeta, error };
+  }
+}
+
+/**
+ * Lightweight server-side status counters for Student Tasks tab badges.
+ * Executes parallel HEAD requests without downloading full data records.
+ */
+export async function getStudentTaskStatusCounts(
+  studentId: string,
+  programId?: string
+): Promise<StudentTaskStatusCounts> {
+  if (!studentId) {
+    return { all: 0, pending: 0, in_progress: 0, completed: 0, error: new Error('Student ID is required.') };
+  }
+
+  if (!isSupabaseConfigured()) {
+    const allTasks = getMockStudentTasks(studentId);
+    const filtered =
+      programId && programId !== 'all' ? allTasks.filter((t) => t.program_id === programId) : allTasks;
+    return {
+      all: filtered.length,
+      pending: filtered.filter((t) => t.status === 'pending').length,
+      in_progress: filtered.filter((t) => t.status === 'in_progress').length,
+      completed: filtered.filter((t) => t.status === 'completed').length,
+      error: null,
+    };
+  }
+
+  try {
+    const buildCountQuery = (status?: TaskStatus) => {
+      let q = supabase
+        .from('tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('student_id', studentId);
+      if (programId && programId !== 'all') {
+        q = q.eq('program_id', programId);
+      }
+      if (status) {
+        q = q.eq('status', status);
+      }
+      return q;
+    };
+
+    const [allRes, pendingRes, inProgressRes, completedRes] = await Promise.all([
+      buildCountQuery(),
+      buildCountQuery('pending'),
+      buildCountQuery('in_progress'),
+      buildCountQuery('completed'),
+    ]);
+
+    const error = allRes.error || pendingRes.error || inProgressRes.error || completedRes.error;
+    if (error) {
+      return { all: 0, pending: 0, in_progress: 0, completed: 0, error };
+    }
+
+    return {
+      all: allRes.count ?? 0,
+      pending: pendingRes.count ?? 0,
+      in_progress: inProgressRes.count ?? 0,
+      completed: completedRes.count ?? 0,
+      error: null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { all: 0, pending: 0, in_progress: 0, completed: 0, error };
+  }
+}
+
+/**
+ * Bounded query for Student Dashboard home screen preview.
+ * Retrieves only the top tasks (maximum 5) and exact overall workload counts.
+ */
+export async function getStudentDashboardTasksPreview(
+  studentId: string,
+  limit = 5
+): Promise<{
+  tasks: TaskWithMeta[];
+  totalCount: number;
+  pendingCount: number;
+  completedCount: number;
+  error: Error | null;
+}> {
+  if (!studentId) {
+    return { tasks: [], totalCount: 0, pendingCount: 0, completedCount: 0, error: new Error('Student ID is required.') };
+  }
+
+  if (!isSupabaseConfigured()) {
+    const mockList = getMockStudentTasks(studentId) as TaskWithMeta[];
+    const pending = mockList.filter((t) => t.status !== 'completed');
+    const completed = mockList.filter((t) => t.status === 'completed');
+    const preview = pending.length > 0 ? pending.slice(0, limit) : mockList.slice(0, limit);
+    return {
+      tasks: preview,
+      totalCount: mockList.length,
+      pendingCount: pending.length,
+      completedCount: completed.length,
+      error: null,
+    };
+  }
+
+  try {
+    const [counts, previewRes] = await Promise.all([
+      getStudentTaskStatusCounts(studentId),
+      supabase
+        .from('tasks')
+        .select('*, subjects(*), study_plans(*)')
+        .eq('student_id', studentId)
+        .order('due_date', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: true })
+        .limit(limit),
+    ]);
+
+    if (previewRes.error) {
+      return { tasks: [], totalCount: 0, pendingCount: 0, completedCount: 0, error: previewRes.error };
+    }
+
+    const tasks: TaskWithMeta[] = (previewRes.data || []).map((row: any) => ({
+      id: row.id,
+      student_id: row.student_id,
+      created_by: row.created_by,
+      subject_id: row.subject_id,
+      plan_id: row.plan_id,
+      title: row.title,
+      description: row.description,
+      priority: row.priority,
+      status: row.status,
+      due_date: row.due_date,
+      estimated_minutes: row.estimated_minutes,
+      completed_at: row.completed_at,
+      attachment_path: row.attachment_path || null,
+      attachment_name: row.attachment_name || null,
+      attachment_size: row.attachment_size || null,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      subject: row.subjects || null,
+      subject_name: row.subjects?.name || undefined,
+      plan: row.study_plans || null,
+      plan_title: row.study_plans?.title || undefined,
+    }));
+
+    return {
+      tasks,
+      totalCount: counts.all,
+      pendingCount: counts.pending + counts.in_progress,
+      completedCount: counts.completed,
+      error: null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { tasks: [], totalCount: 0, pendingCount: 0, completedCount: 0, error };
   }
 }
 

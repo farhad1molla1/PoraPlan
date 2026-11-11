@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { getStudentTasks, setTaskStatus, type TaskWithMeta } from '../../lib/tasks';
+import {
+  getStudentTasksPaginated,
+  getStudentTaskStatusCounts,
+  setTaskStatus,
+  type TaskWithMeta,
+  type StudentTaskStatusCounts,
+  DEFAULT_PAGE_SIZE,
+} from '../../lib/tasks';
 import { getAssignedMentors } from '../../lib/mentorship';
 import { getAcademicFileSignedUrl } from '../../lib/storage';
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import type { Profile, TaskStatus } from '../../types/database';
+import type { PaginationMeta } from '../../types/pagination';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import {
@@ -36,6 +45,16 @@ export const StudentTasksPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
   const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
+  const [statusCounts, setStatusCounts] = useState<StudentTaskStatusCounts>({
+    all: 0,
+    pending: 0,
+    in_progress: 0,
+    completed: 0,
+    error: null,
+  });
 
   // Attachment Viewer Modal State
   const [viewerModal, setViewerModal] = useState<{
@@ -136,14 +155,26 @@ export const StudentTasksPage: React.FC = () => {
     setError(null);
 
     Promise.all([
-      getStudentTasks(studentId),
+      getStudentTasksPaginated({
+        studentId,
+        page,
+        pageSize,
+        filters: {
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+        },
+      }),
+      getStudentTaskStatusCounts(studentId),
       getAssignedMentors(studentId),
     ])
-      .then(([tasksRes, mentorsRes]) => {
+      .then(([tasksRes, countsRes, mentorsRes]) => {
         if (tasksRes.error) {
           setError(tasksRes.error.message);
         } else {
           setTasks(tasksRes.tasks);
+          setPagination(tasksRes.pagination);
+        }
+        if (!countsRes.error) {
+          setStatusCounts(countsRes);
         }
         setMentors(mentorsRes.mentors);
         setLoading(false);
@@ -163,15 +194,27 @@ export const StudentTasksPage: React.FC = () => {
     let isMounted = true;
 
     Promise.all([
-      getStudentTasks(studentId),
+      getStudentTasksPaginated({
+        studentId,
+        page,
+        pageSize,
+        filters: {
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+        },
+      }),
+      getStudentTaskStatusCounts(studentId),
       getAssignedMentors(studentId),
     ])
-      .then(([tasksRes, mentorsRes]) => {
+      .then(([tasksRes, countsRes, mentorsRes]) => {
         if (!isMounted) return;
         if (tasksRes.error) {
           setError(tasksRes.error.message);
         } else {
           setTasks(tasksRes.tasks);
+          setPagination(tasksRes.pagination);
+        }
+        if (!countsRes.error) {
+          setStatusCounts(countsRes);
         }
         setMentors(mentorsRes.mentors);
         setLoading(false);
@@ -186,7 +229,7 @@ export const StudentTasksPage: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [studentId]);
+  }, [studentId, page, pageSize, statusFilter]);
 
   const handleToggleStatus = async (task: TaskWithMeta) => {
     const nextStatus: TaskStatus = task.status === 'completed' ? 'pending' : 'completed';
@@ -198,22 +241,29 @@ export const StudentTasksPage: React.FC = () => {
         setTasks((prev) =>
           prev.map((t) => (t.id === task.id ? { ...t, status: updated.status, completed_at: updated.completed_at } : t))
         );
+        if (studentId) {
+          getStudentTaskStatusCounts(studentId).then((res) => {
+            if (!res.error) setStatusCounts(res);
+          });
+        }
       }
     } finally {
       setUpdatingTaskId(null);
     }
   };
 
+  const handleFilterChange = (filter: 'all' | 'pending' | 'in_progress' | 'completed') => {
+    setStatusFilter(filter);
+    setPage(1);
+  };
+
   const assignedMentor = mentors.length > 0 ? mentors[0] : null;
 
-  const filteredTasks = tasks.filter((task) => {
-    if (statusFilter === 'all') return true;
-    return task.status === statusFilter;
-  });
+  const filteredTasks = tasks;
 
-  const pendingCount = tasks.filter((t) => t.status === 'pending').length;
-  const inProgressCount = tasks.filter((t) => t.status === 'in_progress').length;
-  const completedCount = tasks.filter((t) => t.status === 'completed').length;
+  const pendingCount = statusCounts.pending;
+  const inProgressCount = statusCounts.in_progress;
+  const completedCount = statusCounts.completed;
 
   return (
     <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
@@ -273,18 +323,18 @@ export const StudentTasksPage: React.FC = () => {
           <div className="flex items-center gap-1 border sm:border-2 border-brand-dark bg-brand-paper p-0.5 sm:p-1 shadow-none sm:shadow-brutal-xs self-start overflow-x-auto max-w-full">
             <button
               type="button"
-              onClick={() => setStatusFilter('all')}
+              onClick={() => handleFilterChange('all')}
               className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'all'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
                   : 'text-brand-dark hover:bg-brand-bg'
               }`}
             >
-              ALL ({tasks.length})
+              ALL ({statusCounts.all})
             </button>
             <button
               type="button"
-              onClick={() => setStatusFilter('pending')}
+              onClick={() => handleFilterChange('pending')}
               className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'pending'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
@@ -295,7 +345,7 @@ export const StudentTasksPage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => setStatusFilter('in_progress')}
+              onClick={() => handleFilterChange('in_progress')}
               className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'in_progress'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
@@ -306,7 +356,7 @@ export const StudentTasksPage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => setStatusFilter('completed')}
+              onClick={() => handleFilterChange('completed')}
               className={`min-h-[34px] sm:min-h-0 py-1 px-2 sm:px-3 font-heading text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
                 statusFilter === 'completed'
                   ? 'bg-brand-navy text-brand-paper border border-brand-dark'
@@ -557,6 +607,20 @@ export const StudentTasksPage: React.FC = () => {
               );
             })}
           </section>
+        )}
+
+        {/* Server-Side Pagination Controls */}
+        {!loading && !error && pagination && pagination.totalCount > 0 && (
+          <div className="pt-1">
+            <PaginationControls
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              totalCount={pagination.totalCount}
+              pageSize={pagination.pageSize}
+              onPageChange={setPage}
+              isLoading={loading}
+            />
+          </div>
         )}
 
         {/* Academic Workflow Guidance Footer */}

@@ -3,9 +3,15 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getAssignedMentors } from '../../lib/mentorship';
 import { getEffectiveMentor } from '../../lib/mentorAssignments';
-import { getStudentTasks, setTaskStatus, type TaskWithMeta } from '../../lib/tasks';
+import {
+  getStudentDashboardTasksPreview,
+  setTaskStatus,
+  type TaskWithMeta,
+} from '../../lib/tasks';
 import { getStudentStudyPlans, type StudyPlanWithMeta } from '../../lib/studyPlans';
-import { getStudentAssignments, type AssignmentWithMeta } from '../../lib/assignments';
+import {
+  getStudentDashboardAssignmentsPreview,
+} from '../../lib/assignments';
 import { getStudentDoubts, type DoubtWithMeta } from '../../lib/doubts';
 import { getStudentEvaluations, type EvaluationWithMeta } from '../../lib/evaluations';
 import type { Profile, TaskStatus, EffectiveMentorResolution } from '../../types/database';
@@ -37,8 +43,9 @@ export const StudentDashboardPage: React.FC = () => {
   const [mentors, setMentors] = useState<Profile[]>([]);
   const [effectiveResolution, setEffectiveResolution] = useState<EffectiveMentorResolution | null>(null);
   const [tasks, setTasks] = useState<TaskWithMeta[]>([]);
+  const [taskCounts, setTaskCounts] = useState({ total: 0, pending: 0, completed: 0 });
   const [plans, setPlans] = useState<StudyPlanWithMeta[]>([]);
-  const [assignments, setAssignments] = useState<AssignmentWithMeta[]>([]);
+  const [assignmentCounts, setAssignmentCounts] = useState({ total: 0, pending: 0, submitted: 0 });
   const [doubts, setDoubts] = useState<DoubtWithMeta[]>([]);
   const [evaluations, setEvaluations] = useState<EvaluationWithMeta[]>([]);
   const [loading, setLoading] = useState(() => Boolean(studentId));
@@ -49,16 +56,16 @@ export const StudentDashboardPage: React.FC = () => {
   const [isLinking, setIsLinking] = useState(false);
   const [linkMsg, setLinkMsg] = useState<string | null>(null);
 
-  // Fetch real student workspace data
+  // Fetch real student workspace data with bounded preview queries
   useEffect(() => {
     if (!studentId) return;
     let isMounted = true;
     Promise.all([
       getEffectiveMentor(studentId),
       getAssignedMentors(studentId),
-      getStudentTasks(studentId),
+      getStudentDashboardTasksPreview(studentId, 5),
       getStudentStudyPlans(studentId),
-      getStudentAssignments(studentId),
+      getStudentDashboardAssignmentsPreview(studentId, 3),
       getStudentDoubts(studentId),
       getStudentEvaluations(studentId),
     ])
@@ -67,8 +74,17 @@ export const StudentDashboardPage: React.FC = () => {
         setEffectiveResolution(effRes.resolution || null);
         setMentors(mentorsRes.mentors || []);
         setTasks(tasksRes.tasks || []);
+        setTaskCounts({
+          total: tasksRes.totalCount || 0,
+          pending: tasksRes.pendingCount || 0,
+          completed: tasksRes.completedCount || 0,
+        });
         setPlans(plansRes.plans || []);
-        setAssignments(assignmentsRes.assignments || []);
+        setAssignmentCounts({
+          total: assignmentsRes.totalCount || 0,
+          pending: assignmentsRes.pendingCount || 0,
+          submitted: assignmentsRes.submittedCount || 0,
+        });
         setDoubts(doubtsRes.doubts || []);
         setEvaluations(evalsRes.evaluations || []);
         setLoading(false);
@@ -91,6 +107,19 @@ export const StudentDashboardPage: React.FC = () => {
         setTasks((prev) =>
           prev.map((t) => (t.id === task.id ? { ...t, status: updated.status, completed_at: updated.completed_at } : t))
         );
+        if (nextStatus === 'completed') {
+          setTaskCounts((c) => ({
+            ...c,
+            pending: Math.max(0, c.pending - 1),
+            completed: c.completed + 1,
+          }));
+        } else {
+          setTaskCounts((c) => ({
+            ...c,
+            pending: c.pending + 1,
+            completed: Math.max(0, c.completed - 1),
+          }));
+        }
       }
     } finally {
       setUpdatingTaskId(null);
@@ -124,9 +153,6 @@ export const StudentDashboardPage: React.FC = () => {
 
   // Active plan & daily tasks
   const activePlan = plans.find((p) => p.status === 'active') || plans[0] || null;
-  const pendingTasks = tasks.filter((t) => t.status !== 'completed');
-  const completedTasks = tasks.filter((t) => t.status === 'completed');
-  const pendingAssignments = assignments.filter((a) => !a.submission);
   const openDoubts = doubts.filter((d) => d.status === 'open');
   const upcomingEval = evaluations.find((e) => e.status === 'scheduled');
 
@@ -250,9 +276,9 @@ export const StudentDashboardPage: React.FC = () => {
               <h2 id="today-study-title" className="font-heading font-extrabold text-sm sm:text-xl text-brand-navy">
                 What to Study Today
               </h2>
-              {tasks.length > 0 && (
+              {taskCounts.total > 0 && (
                 <p className="text-[11px] sm:text-xs font-mono text-brand-muted mt-0.5">
-                  {pendingTasks.length} pending, {completedTasks.length} completed
+                  {taskCounts.pending} pending, {taskCounts.completed} completed
                 </p>
               )}
             </div>
@@ -380,13 +406,13 @@ export const StudentDashboardPage: React.FC = () => {
                 );
               })}
 
-              {tasks.length > 5 && (
+              {taskCounts.total > tasks.length && (
                 <div className="text-center pt-0.5 sm:pt-1">
                   <Link
                     to="/student/tasks"
                     className="font-mono text-[11px] sm:text-xs font-bold text-brand-teal hover:underline inline-flex items-center gap-1"
                   >
-                    <span>View {tasks.length - 5} more tasks</span>
+                    <span>View {taskCounts.total - tasks.length} more tasks</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
@@ -424,10 +450,10 @@ export const StudentDashboardPage: React.FC = () => {
                 <ListTodo className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-navy" />
               </div>
               <div className="font-heading font-black text-lg sm:text-2xl text-brand-navy">
-                {pendingTasks.length} <span className="text-[10px] sm:text-xs font-mono font-normal text-brand-muted">Pending</span>
+                {taskCounts.pending} <span className="text-[10px] sm:text-xs font-mono font-normal text-brand-muted">Pending</span>
               </div>
               <span className="text-[10px] sm:text-[11px] font-mono text-brand-teal font-bold mt-0.5 sm:mt-1">
-                {completedTasks.length} completed
+                {taskCounts.completed} completed
               </span>
             </Link>
 
@@ -443,10 +469,10 @@ export const StudentDashboardPage: React.FC = () => {
                 <FileCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-gold" />
               </div>
               <div className="font-heading font-black text-lg sm:text-2xl text-brand-navy">
-                {pendingAssignments.length} <span className="text-[10px] sm:text-xs font-mono font-normal text-brand-muted">To Submit</span>
+                {assignmentCounts.pending} <span className="text-[10px] sm:text-xs font-mono font-normal text-brand-muted">To Submit</span>
               </div>
               <span className="text-[10px] sm:text-[11px] font-mono text-brand-muted mt-0.5 sm:mt-1">
-                {assignments.length - pendingAssignments.length} submitted
+                {assignmentCounts.submitted} submitted
               </span>
             </Link>
 
