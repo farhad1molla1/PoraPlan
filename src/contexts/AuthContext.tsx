@@ -30,7 +30,23 @@ function getInitialMockState(isConfigured: boolean): {
     if (cachedId) {
       const account = getMockAccountById(cachedId);
       if (account) {
+        if (account.status === 'suspended') {
+          try {
+            sessionStorage.removeItem('poraplan_mock_session');
+          } catch {
+            // Storage access restricted
+          }
+          return { user: null, session: null, profile: null };
+        }
         const mockProf = getMockProfile(account.id);
+        if (mockProf?.status === 'suspended') {
+          try {
+            sessionStorage.removeItem('poraplan_mock_session');
+          } catch {
+            // Storage access restricted
+          }
+          return { user: null, session: null, profile: null };
+        }
         const mockUsr = {
           id: account.id,
           email: account.authEmail,
@@ -69,52 +85,135 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(initialMock.profile);
   const [loading, setLoading] = useState(isConfigured);
 
-  // Helper to fetch profile with fallbacks
-  const fetchUserProfile = useCallback(async (currentUserId: string, currentUser?: User | null) => {
-    try {
-      const { profile: userProfile, error } = await getProfile(currentUserId);
-      if (userProfile && !error) {
-        if (userProfile.status === 'suspended') {
-          // Immediately revoke local session if user is suspended
-          await supabase.auth.signOut();
-          setProfile(null);
-          setUser(null);
-          setSession(null);
-          return null;
-        }
-        setProfile(userProfile);
-        return userProfile;
+  // Helper to fetch profile with rigorous status and failure discrimination
+  const fetchUserProfile = useCallback(
+    async (currentUserId: string, currentUser?: User | null): Promise<Profile | null> => {
+      if (!currentUserId) {
+        return null;
       }
 
-      // Fallback: extract from user metadata if trigger has slight latency
-      if (currentUser?.user_metadata) {
-        if (currentUser.user_metadata.status === 'suspended') {
+      // 1. If currentUser metadata explicitly marks account as suspended, fail-closed immediately
+      if (currentUser?.user_metadata?.status === 'suspended') {
+        if (isConfigured) {
           await supabase.auth.signOut();
-          setProfile(null);
-          setUser(null);
-          setSession(null);
-          return null;
         }
-        const metaRole = (currentUser.user_metadata.role as UserRole) || 'student';
-        const fallbackProfile: Profile = {
-          id: currentUserId,
-          poraplan_id: currentUser.user_metadata.poraplan_id || null,
-          full_name: currentUser.user_metadata.full_name || 'Academic Scholar',
-          email: currentUser.email || '',
-          linked_email: currentUser.user_metadata.linked_email || null,
-          role: metaRole,
-          status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        setProfile(fallbackProfile);
-        return fallbackProfile;
+        setProfile(null);
+        setUser(null);
+        setSession(null);
+        return null;
       }
-    } catch {
-      // Keep silent on transient network errors
-    }
-    return null;
-  }, []);
+
+      try {
+        const { profile: userProfile, error } = await getProfile(currentUserId);
+
+        // 2. Database profile returned successfully
+        if (userProfile && !error) {
+          if (userProfile.status === 'suspended') {
+            // Immediately revoke session if user is suspended in database
+            if (isConfigured) {
+              await supabase.auth.signOut();
+            }
+            setProfile(null);
+            setUser(null);
+            setSession(null);
+            return null;
+          }
+
+          // Valid profile (active, not_activated, etc.)
+          setProfile(userProfile);
+          return userProfile;
+        }
+
+        // 3. Database query returned an error
+        if (error) {
+          const errMsg = error.message ? error.message.toLowerCase() : '';
+          const errCode = (error as { code?: string })?.code || '';
+
+          // Check if error indicates permission denied / RLS blocking (e.g. suspended user attempting to query profiles)
+          const isPermissionDenied =
+            errCode === '42501' ||
+            errMsg.includes('permission denied') ||
+            errMsg.includes('row-level security');
+
+          if (isPermissionDenied) {
+            if (isConfigured) {
+              await supabase.auth.signOut();
+            }
+            setProfile(null);
+            setUser(null);
+            setSession(null);
+            return null;
+          }
+
+          // Check if error is a transient network failure
+          const isNetworkFailure =
+            errMsg.includes('failed to fetch') ||
+            errMsg.includes('network') ||
+            errMsg.includes('timeout') ||
+            errMsg.includes('abort') ||
+            errMsg.includes('connection refused') ||
+            errMsg.includes('offline');
+
+          if (isNetworkFailure) {
+            // Transient network error: do NOT sign out legitimate user (Requirement 8),
+            // but do NOT grant active student status (Requirements 1 & 9).
+            setProfile(null);
+            return null;
+          }
+
+          // Non-network query error: fail-safe, do not grant active status
+          const isNotFound = errCode === 'PGRST116' || errMsg.includes('0 rows') || errMsg.includes('not found');
+          if (!isNotFound) {
+            setProfile(null);
+            return null;
+          }
+        }
+
+        // 4. Missing profile row (0 rows returned or new registration before trigger completion)
+        // If user metadata exists for a fresh registration, construct fallback ONLY with 'not_activated' status.
+        // Unresolved/unverified profiles must NEVER be granted 'active' status.
+        if (currentUser?.user_metadata) {
+          if (currentUser.user_metadata.status === 'suspended') {
+            if (isConfigured) {
+              await supabase.auth.signOut();
+            }
+            setProfile(null);
+            setUser(null);
+            setSession(null);
+            return null;
+          }
+
+          const metaRole = (currentUser.user_metadata.role as UserRole) || 'student';
+          // Strictly 'not_activated' for unconfirmed trigger fallback; NEVER silently grant 'active'
+          const fallbackStatus: AccountStatus = 'not_activated';
+
+          const fallbackProfile: Profile = {
+            id: currentUserId,
+            poraplan_id: currentUser.user_metadata.poraplan_id || null,
+            full_name: currentUser.user_metadata.full_name || 'Academic Scholar',
+            email: currentUser.email || '',
+            linked_email: currentUser.user_metadata.linked_email || null,
+            role: metaRole,
+            status: fallbackStatus,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+
+          setProfile(fallbackProfile);
+          return fallbackProfile;
+        }
+
+        // Profile missing and no metadata: profile remains null
+        setProfile(null);
+        return null;
+      } catch {
+        // Keep silent on transient network/runtime errors; ensure profile is never active
+        setProfile(null);
+      }
+      return null;
+    },
+    [isConfigured]
+  );
 
   const refreshProfile = useCallback(async () => {
     if (user?.id) {
@@ -342,9 +441,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (data.user) {
           const loadedProfile = await fetchUserProfile(data.user.id, data.user);
-          const resolvedRole =
-            loadedProfile?.role || (data.user.user_metadata?.role as UserRole) || 'student';
-          return { error: null, role: resolvedRole };
+          if (!loadedProfile || loadedProfile.status === 'suspended') {
+            await supabase.auth.signOut();
+            setSession(null);
+            setUser(null);
+            setProfile(null);
+            return {
+              error: new Error('Invalid email or password.'),
+            };
+          }
+          return { error: null, role: loadedProfile.role };
         }
 
         return { error: null };
@@ -530,7 +636,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isConfigured]);
 
   const role = useMemo(() => {
-    return profile?.role || (user?.user_metadata?.role as UserRole) || null;
+    if (profile?.role) {
+      return profile.role;
+    }
+    // If metadata explicitly indicates suspended, never grant any active role
+    if (user?.user_metadata?.status === 'suspended') {
+      return null;
+    }
+    return (user?.user_metadata?.role as UserRole) || null;
   }, [profile, user]);
 
   const poraplanId = useMemo(() => {
@@ -538,7 +651,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [profile, user]);
 
   const status = useMemo(() => {
-    return profile?.status || (user?.user_metadata?.status as AccountStatus) || null;
+    if (profile?.status) {
+      return profile.status;
+    }
+    // Explicit suspension in metadata is enforced immediately
+    if (user?.user_metadata?.status === 'suspended') {
+      return 'suspended';
+    }
+    // Explicit not_activated status in metadata
+    if (user?.user_metadata?.status === 'not_activated') {
+      return 'not_activated';
+    }
+    // A failed or unavailable database profile lookup must NEVER silently grant 'active'
+    return null;
   }, [profile, user]);
 
   const value = useMemo(
