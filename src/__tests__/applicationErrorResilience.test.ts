@@ -173,13 +173,13 @@ async function runApplicationErrorResilienceVerification() {
   // Verify DashboardLayout.tsx wiring
   const dashboardLayoutPath = path.join(projectRoot, 'src/layouts/DashboardLayout.tsx');
   const dashboardLayoutContent = fs.readFileSync(dashboardLayoutPath, 'utf8');
-  const dashboardHasRouteBoundary = /<RouteErrorBoundary>\s*<Outlet\s*\/>\s*<\/RouteErrorBoundary>/.test(dashboardLayoutContent);
+  const dashboardHasRouteBoundary = /<RouteErrorBoundary>[\s\S]*?<Outlet\s*\/>[\s\S]*?<\/RouteErrorBoundary>/.test(dashboardLayoutContent);
   report('ARCH-07', dashboardHasRouteBoundary, 'RouteErrorBoundary wraps <Outlet /> inside DashboardLayout.tsx', 'STATIC/ARCH');
 
   // Verify RootLayout.tsx wiring
   const rootLayoutPath = path.join(projectRoot, 'src/layouts/RootLayout.tsx');
   const rootLayoutContent = fs.readFileSync(rootLayoutPath, 'utf8');
-  const rootHasRouteBoundary = /<RouteErrorBoundary>\s*<Outlet\s*\/>\s*<\/RouteErrorBoundary>/.test(rootLayoutContent);
+  const rootHasRouteBoundary = /<RouteErrorBoundary>[\s\S]*?<Outlet\s*\/>[\s\S]*?<\/RouteErrorBoundary>/.test(rootLayoutContent);
   report('ARCH-08', rootHasRouteBoundary, 'RouteErrorBoundary wraps <Outlet /> inside RootLayout.tsx', 'STATIC/ARCH');
 
   // Verify routes/index.tsx wiring

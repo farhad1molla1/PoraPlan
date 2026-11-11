@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
 import { Footer } from '../components/layout/Footer';
 import { RouteErrorBoundary } from '../components/common/ErrorBoundary';
+import { LoadingFallback } from '../components/common/LoadingFallback';
 
 export const RootLayout: React.FC = () => {
   return (
@@ -10,7 +11,9 @@ export const RootLayout: React.FC = () => {
       <Navbar />
       <main className="flex-1 w-full" id="main-content">
         <RouteErrorBoundary>
-          <Outlet />
+          <Suspense fallback={<LoadingFallback label="LOADING PAGE" subtext="Loading page resources..." />}>
+            <Outlet />
+          </Suspense>
         </RouteErrorBoundary>
       </main>
       <Footer />

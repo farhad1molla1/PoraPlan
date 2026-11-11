@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { RouteErrorBoundary } from '../components/common/ErrorBoundary';
+import { LoadingFallback } from '../components/common/LoadingFallback';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { Badge } from '../components/common/Badge';
@@ -554,7 +555,16 @@ export const DashboardLayout: React.FC = () => {
           id="workspace-content"
         >
           <RouteErrorBoundary>
-            <Outlet />
+            <React.Suspense
+              fallback={
+                <LoadingFallback
+                  label="LOADING WORKSPACE"
+                  subtext="Opening academic section..."
+                />
+              }
+            >
+              <Outlet />
+            </React.Suspense>
           </RouteErrorBoundary>
 
           {/* Clean App Footer */}

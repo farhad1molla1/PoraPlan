@@ -1,59 +1,95 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { RootLayout } from '../layouts/RootLayout';
 import { DashboardLayout } from '../layouts/DashboardLayout';
-import { LandingPage } from '../pages/LandingPage';
-import { ProgramsPage } from '../pages/ProgramsPage';
-import { ProgramDetailPage } from '../pages/ProgramDetailPage';
-import { CohortDetailPage } from '../pages/CohortDetailPage';
-import { HowItWorksPage } from '../pages/HowItWorksPage';
-import { AboutPage } from '../pages/AboutPage';
-import { ContactPage } from '../pages/ContactPage';
-import { LoginPage } from '../pages/LoginPage';
-import { SignupPage } from '../pages/SignupPage';
-import { ResetPasswordPage } from '../pages/ResetPasswordPage';
-import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { RouteErrorBoundary } from '../components/common/ErrorBoundary';
-import { StudentDashboardPage } from '../pages/dashboard/StudentDashboardPage';
-import { MentorDashboardPage } from '../pages/dashboard/MentorDashboardPage';
-import { AdminDashboardPage } from '../pages/dashboard/AdminDashboardPage';
-import { AdminProgramsPage } from '../pages/dashboard/AdminProgramsPage';
-import { StudentSubjectsPage } from '../pages/dashboard/StudentSubjectsPage';
-import { MentorSubjectsPage } from '../pages/dashboard/MentorSubjectsPage';
-import { SubjectDetailPage } from '../pages/dashboard/SubjectDetailPage';
-import { StudentPlansPage } from '../pages/dashboard/StudentPlansPage';
-import { MentorPlansPage } from '../pages/dashboard/MentorPlansPage';
-import { PlanDetailPage } from '../pages/dashboard/PlanDetailPage';
-import { StudentTasksPage } from '../pages/dashboard/StudentTasksPage';
-import { MentorTasksPage } from '../pages/dashboard/MentorTasksPage';
-import { StudentAssignmentsPage } from '../pages/dashboard/StudentAssignmentsPage';
-import { MentorAssignmentsPage } from '../pages/dashboard/MentorAssignmentsPage';
-import { MentorReviewQueuePage } from '../pages/dashboard/MentorReviewQueuePage';
-import { MentorEvaluationsPage } from '../pages/dashboard/MentorEvaluationsPage';
-import { StudentProgressPage } from '../pages/dashboard/StudentProgressPage';
-import { MentorProgressPage } from '../pages/dashboard/MentorProgressPage';
-import { StudentLibraryPage } from '../pages/dashboard/StudentLibraryPage';
-import { MentorResourcesPage } from '../pages/dashboard/MentorResourcesPage';
-import { StudentDoubtsPage } from '../pages/dashboard/StudentDoubtsPage';
-import { MentorDoubtsPage } from '../pages/dashboard/MentorDoubtsPage';
-import { StudentAnnouncementsPage } from '../pages/dashboard/StudentAnnouncementsPage';
-import { MentorAnnouncementsPage } from '../pages/dashboard/MentorAnnouncementsPage';
-import { StudentNotificationsPage } from '../pages/dashboard/StudentNotificationsPage';
-import { MentorNotificationsPage } from '../pages/dashboard/MentorNotificationsPage';
-import { AdminNotificationsPage } from '../pages/dashboard/AdminNotificationsPage';
-import { StudentReportPage } from '../pages/dashboard/StudentReportPage';
-import { StudentBillingPage } from '../pages/dashboard/StudentBillingPage';
-import { MentorReportPage } from '../pages/dashboard/MentorReportPage';
-import { MentorPayoutsPage } from '../pages/dashboard/MentorPayoutsPage';
-import { ProfilePage } from '../pages/dashboard/ProfilePage';
-import { PublicProfilePage } from '../pages/dashboard/PublicProfilePage';
-import { AdminEnrollmentsPage } from '../pages/dashboard/AdminEnrollmentsPage';
-import { AdminMentorAssignmentsPage } from '../pages/dashboard/AdminMentorAssignmentsPage';
-import { AdminUsersPage } from '../pages/dashboard/AdminUsersPage';
-import { AdminReportsPage } from '../pages/dashboard/AdminReportsPage';
-import { AdminBillingPage } from '../pages/dashboard/AdminBillingPage';
 import { useAuth } from '../hooks/useAuth';
+
+/**
+ * Robust lazy import wrapper with single automatic retry on chunk loading failure.
+ * If dynamic chunk fetch fails due to network drop or CDN redeployment, retries once before
+ * delegating to the nearest RouteErrorBoundary.
+ */
+function lazyRoute<T extends Record<string, unknown>, K extends keyof T>(
+  importer: () => Promise<T>,
+  exportName: K
+) {
+  return lazy(async () => {
+    try {
+      const module = await importer();
+      return { default: module[exportName] as React.ComponentType };
+    } catch (err) {
+      // Automatic single retry after short delay for network glitches
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 350));
+        const module = await importer();
+        return { default: module[exportName] as React.ComponentType };
+      } catch {
+        throw err;
+      }
+    }
+  });
+}
+
+// Public marketing & auth pages (code-split)
+const LandingPage = lazyRoute(() => import('../pages/LandingPage'), 'LandingPage');
+const ProgramsPage = lazyRoute(() => import('../pages/ProgramsPage'), 'ProgramsPage');
+const ProgramDetailPage = lazyRoute(() => import('../pages/ProgramDetailPage'), 'ProgramDetailPage');
+const CohortDetailPage = lazyRoute(() => import('../pages/CohortDetailPage'), 'CohortDetailPage');
+const HowItWorksPage = lazyRoute(() => import('../pages/HowItWorksPage'), 'HowItWorksPage');
+const AboutPage = lazyRoute(() => import('../pages/AboutPage'), 'AboutPage');
+const ContactPage = lazyRoute(() => import('../pages/ContactPage'), 'ContactPage');
+const LoginPage = lazyRoute(() => import('../pages/LoginPage'), 'LoginPage');
+const SignupPage = lazyRoute(() => import('../pages/SignupPage'), 'SignupPage');
+const ResetPasswordPage = lazyRoute(() => import('../pages/ResetPasswordPage'), 'ResetPasswordPage');
+const NotFoundPage = lazyRoute(() => import('../pages/NotFoundPage'), 'NotFoundPage');
+
+// Primary Student Sector (code-split)
+const StudentDashboardPage = lazyRoute(() => import('../pages/dashboard/StudentDashboardPage'), 'StudentDashboardPage');
+const StudentTasksPage = lazyRoute(() => import('../pages/dashboard/StudentTasksPage'), 'StudentTasksPage');
+const StudentAssignmentsPage = lazyRoute(() => import('../pages/dashboard/StudentAssignmentsPage'), 'StudentAssignmentsPage');
+const StudentReportPage = lazyRoute(() => import('../pages/dashboard/StudentReportPage'), 'StudentReportPage');
+const StudentProgressPage = lazyRoute(() => import('../pages/dashboard/StudentProgressPage'), 'StudentProgressPage');
+const StudentSubjectsPage = lazyRoute(() => import('../pages/dashboard/StudentSubjectsPage'), 'StudentSubjectsPage');
+const StudentPlansPage = lazyRoute(() => import('../pages/dashboard/StudentPlansPage'), 'StudentPlansPage');
+const StudentLibraryPage = lazyRoute(() => import('../pages/dashboard/StudentLibraryPage'), 'StudentLibraryPage');
+const StudentDoubtsPage = lazyRoute(() => import('../pages/dashboard/StudentDoubtsPage'), 'StudentDoubtsPage');
+const StudentAnnouncementsPage = lazyRoute(() => import('../pages/dashboard/StudentAnnouncementsPage'), 'StudentAnnouncementsPage');
+const StudentNotificationsPage = lazyRoute(() => import('../pages/dashboard/StudentNotificationsPage'), 'StudentNotificationsPage');
+const StudentBillingPage = lazyRoute(() => import('../pages/dashboard/StudentBillingPage'), 'StudentBillingPage');
+
+// Primary Mentor Sector (code-split)
+const MentorDashboardPage = lazyRoute(() => import('../pages/dashboard/MentorDashboardPage'), 'MentorDashboardPage');
+const MentorTasksPage = lazyRoute(() => import('../pages/dashboard/MentorTasksPage'), 'MentorTasksPage');
+const MentorAssignmentsPage = lazyRoute(() => import('../pages/dashboard/MentorAssignmentsPage'), 'MentorAssignmentsPage');
+const MentorReviewQueuePage = lazyRoute(() => import('../pages/dashboard/MentorReviewQueuePage'), 'MentorReviewQueuePage');
+const MentorEvaluationsPage = lazyRoute(() => import('../pages/dashboard/MentorEvaluationsPage'), 'MentorEvaluationsPage');
+const MentorReportPage = lazyRoute(() => import('../pages/dashboard/MentorReportPage'), 'MentorReportPage');
+const MentorProgressPage = lazyRoute(() => import('../pages/dashboard/MentorProgressPage'), 'MentorProgressPage');
+const MentorSubjectsPage = lazyRoute(() => import('../pages/dashboard/MentorSubjectsPage'), 'MentorSubjectsPage');
+const MentorPlansPage = lazyRoute(() => import('../pages/dashboard/MentorPlansPage'), 'MentorPlansPage');
+const MentorResourcesPage = lazyRoute(() => import('../pages/dashboard/MentorResourcesPage'), 'MentorResourcesPage');
+const MentorDoubtsPage = lazyRoute(() => import('../pages/dashboard/MentorDoubtsPage'), 'MentorDoubtsPage');
+const MentorAnnouncementsPage = lazyRoute(() => import('../pages/dashboard/MentorAnnouncementsPage'), 'MentorAnnouncementsPage');
+const MentorNotificationsPage = lazyRoute(() => import('../pages/dashboard/MentorNotificationsPage'), 'MentorNotificationsPage');
+const MentorPayoutsPage = lazyRoute(() => import('../pages/dashboard/MentorPayoutsPage'), 'MentorPayoutsPage');
+
+// Administrative Sector (code-split)
+const AdminDashboardPage = lazyRoute(() => import('../pages/dashboard/AdminDashboardPage'), 'AdminDashboardPage');
+const AdminProgramsPage = lazyRoute(() => import('../pages/dashboard/AdminProgramsPage'), 'AdminProgramsPage');
+const AdminEnrollmentsPage = lazyRoute(() => import('../pages/dashboard/AdminEnrollmentsPage'), 'AdminEnrollmentsPage');
+const AdminMentorAssignmentsPage = lazyRoute(() => import('../pages/dashboard/AdminMentorAssignmentsPage'), 'AdminMentorAssignmentsPage');
+const AdminUsersPage = lazyRoute(() => import('../pages/dashboard/AdminUsersPage'), 'AdminUsersPage');
+const AdminReportsPage = lazyRoute(() => import('../pages/dashboard/AdminReportsPage'), 'AdminReportsPage');
+const AdminBillingPage = lazyRoute(() => import('../pages/dashboard/AdminBillingPage'), 'AdminBillingPage');
+const AdminNotificationsPage = lazyRoute(() => import('../pages/dashboard/AdminNotificationsPage'), 'AdminNotificationsPage');
+
+// Shared / Detail Pages (code-split)
+const SubjectDetailPage = lazyRoute(() => import('../pages/dashboard/SubjectDetailPage'), 'SubjectDetailPage');
+const PlanDetailPage = lazyRoute(() => import('../pages/dashboard/PlanDetailPage'), 'PlanDetailPage');
+const ProfilePage = lazyRoute(() => import('../pages/dashboard/ProfilePage'), 'ProfilePage');
+const PublicProfilePage = lazyRoute(() => import('../pages/dashboard/PublicProfilePage'), 'PublicProfilePage');
 
 /**
  * Resolves /dashboard to the user's corresponding role workspace.
