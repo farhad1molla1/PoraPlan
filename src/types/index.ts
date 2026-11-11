@@ -17,3 +17,5 @@ export type ButtonVariant = 'primary' | 'secondary' | 'dark' | 'outline' | 'ghos
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export type CardVariant = 'default' | 'paper' | 'navy' | 'gold' | 'teal';
+
+export * from './pagination';

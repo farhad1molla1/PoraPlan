@@ -22,7 +22,13 @@ const projectRoot = path.resolve(__dirname, '..');
 interface TestSuiteDef {
   name: string;
   relativePath: string;
-  category: 'Legacy Verification' | 'Security & RLS' | 'Authentication Hardening' | 'Application Resilience' | 'Performance & Optimization';
+  category:
+    | 'Legacy Verification'
+    | 'Security & RLS'
+    | 'Authentication Hardening'
+    | 'Application Resilience'
+    | 'Performance & Optimization'
+    | 'Pagination Foundation';
 }
 
 const testSuites: TestSuiteDef[] = [
@@ -62,6 +68,13 @@ const testSuites: TestSuiteDef[] = [
     name: 'Batch 3: Bundle Optimization & Route-Level Splitting',
     relativePath: 'src/__tests__/routeCodeSplittingOptimization.test.ts',
     category: 'Performance & Optimization',
+  },
+
+  // Batch 4.1 Shared Pagination Foundation
+  {
+    name: 'Batch 4.1: Shared Pagination Foundation',
+    relativePath: 'src/__tests__/sharedPaginationFoundation.test.ts',
+    category: 'Pagination Foundation',
   },
 
   // Modern Security & RLS Suites
