@@ -22,7 +22,7 @@ const projectRoot = path.resolve(__dirname, '..');
 interface TestSuiteDef {
   name: string;
   relativePath: string;
-  category: 'Legacy Verification' | 'Security & RLS' | 'Authentication Hardening';
+  category: 'Legacy Verification' | 'Security & RLS' | 'Authentication Hardening' | 'Application Resilience';
 }
 
 const testSuites: TestSuiteDef[] = [
@@ -48,6 +48,13 @@ const testSuites: TestSuiteDef[] = [
     name: 'Batch 1: AuthContext Fallback Hardening',
     relativePath: 'src/__tests__/authContextFallbackHardening.test.ts',
     category: 'Authentication Hardening',
+  },
+
+  // Batch 2 Application Error Resilience
+  {
+    name: 'Batch 2: Application Error Resilience',
+    relativePath: 'src/__tests__/applicationErrorResilience.test.ts',
+    category: 'Application Resilience',
   },
 
   // Modern Security & RLS Suites

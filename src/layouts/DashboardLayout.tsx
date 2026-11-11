@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
+import { RouteErrorBoundary } from '../components/common/ErrorBoundary';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { Badge } from '../components/common/Badge';
@@ -552,7 +553,9 @@ export const DashboardLayout: React.FC = () => {
           className="flex-1 min-w-0 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:pb-8"
           id="workspace-content"
         >
-          <Outlet />
+          <RouteErrorBoundary>
+            <Outlet />
+          </RouteErrorBoundary>
 
           {/* Clean App Footer */}
           <footer className="max-w-5xl mx-auto px-3 sm:px-6 pt-3 pb-1.5 text-center print:hidden">

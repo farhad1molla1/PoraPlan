@@ -14,6 +14,7 @@ import { SignupPage } from '../pages/SignupPage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
+import { RouteErrorBoundary } from '../components/common/ErrorBoundary';
 import { StudentDashboardPage } from '../pages/dashboard/StudentDashboardPage';
 import { MentorDashboardPage } from '../pages/dashboard/MentorDashboardPage';
 import { AdminDashboardPage } from '../pages/dashboard/AdminDashboardPage';
@@ -486,7 +487,9 @@ export const AppRoutes: React.FC = () => {
         path="dashboard"
         element={
           <ProtectedRoute>
-            <DashboardRedirect />
+            <RouteErrorBoundary>
+              <DashboardRedirect />
+            </RouteErrorBoundary>
           </ProtectedRoute>
         }
       />
