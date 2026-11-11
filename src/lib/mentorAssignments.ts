@@ -409,25 +409,55 @@ export async function getEffectiveStudentsForMentor(mentorId: string): Promise<{
       .eq('mentor_id', mentorId)
       .eq('is_active', true);
 
-    for (const ca of cohortAssignments || []) {
+    if (cohortAssignments && cohortAssignments.length > 0) {
+      const cohortIds = cohortAssignments.map((ca: any) => ca.cohort_id).filter(Boolean);
+      const cohortMap = new Map<string, any>();
+      for (const ca of cohortAssignments) {
+        cohortMap.set(ca.cohort_id, ca);
+      }
+
+      // Batch query 1: Fetch all active enrollments across all assigned cohorts in ONE query (eliminates per-cohort queries)
       const { data: enrollments } = await (supabase.from('program_enrollments') as any)
         .select('*, student:profiles!student_id(*)')
-        .eq('cohort_id', ca.cohort_id)
+        .in('cohort_id', cohortIds)
         .eq('status', 'active');
 
-      for (const enr of enrollments || []) {
-        const studentProgramKey = `${enr.student_id}:${ca.program_id}`;
-        if (!processedStudentProgramKeys.has(studentProgramKey)) {
-          // Verify student does not have an active override to someone else in this specific program
-          const { data: otherOverride } = await (supabase.from('student_mentor_assignments') as any)
-            .select('id')
-            .eq('student_id', enr.student_id)
-            .eq('program_id', ca.program_id)
-            .eq('is_active', true)
-            .neq('mentor_id', mentorId)
-            .maybeSingle();
+      if (enrollments && enrollments.length > 0) {
+        const candidateStudentIds = Array.from(
+          new Set(enrollments.map((enr: any) => enr.student_id).filter(Boolean))
+        );
 
-          if (!otherOverride && enr.student) {
+        // Batch query 2: Fetch all other-mentor active overrides across candidates in ONE query (eliminates per-student N+1 queries)
+        let overrideQuery = (supabase.from('student_mentor_assignments') as any)
+          .select('student_id, program_id')
+          .in('student_id', candidateStudentIds)
+          .eq('is_active', true)
+          .neq('mentor_id', mentorId);
+
+        const programIds = Array.from(new Set(cohortAssignments.map((ca: any) => ca.program_id).filter(Boolean)));
+        if (cohortAssignments.length === 1 && cohortAssignments[0]) {
+          const ca = cohortAssignments[0];
+          overrideQuery = overrideQuery.eq('program_id', ca.program_id);
+        } else if (programIds.length > 0) {
+          overrideQuery = overrideQuery.in('program_id', programIds);
+        }
+
+        const { data: otherOverrides } = await overrideQuery;
+
+        const excludedKeys = new Set<string>();
+        for (const ov of otherOverrides || []) {
+          excludedKeys.add(`${ov.student_id}:${ov.program_id}`);
+        }
+
+        for (const enr of enrollments) {
+          const ca = cohortMap.get(enr.cohort_id);
+          if (!ca) continue;
+          const studentProgramKey = `${enr.student_id}:${ca.program_id}`;
+          if (
+            !processedStudentProgramKeys.has(studentProgramKey) &&
+            !excludedKeys.has(studentProgramKey) &&
+            enr.student
+          ) {
             result.push({
               student: enr.student,
               cohort: ca.cohorts,

@@ -67,6 +67,28 @@ export type SubmissionWithMeta = Submission & {
   reviewer_name?: string;
 };
 
+export const DEFAULT_REVIEW_QUEUE_PAGE_SIZE = 20;
+
+export interface MentorReviewQueuePaginatedParams extends PaginationParams {
+  mentorId: string;
+  statusFilter?: 'all' | 'needs_review' | 'reviewed' | 'needs_revision';
+  search?: string;
+}
+
+export interface MentorReviewQueuePaginatedResult {
+  submissions: SubmissionWithMeta[];
+  pagination: PaginationMeta;
+  error: Error | null;
+}
+
+export interface MentorReviewQueueStatusCounts {
+  total: number;
+  needs_review: number;
+  reviewed: number;
+  needs_revision: number;
+  error: Error | null;
+}
+
 export type AssignmentWithMeta = Assignment & {
   subject_name?: string;
   plan_title?: string;
@@ -1066,6 +1088,182 @@ export async function getMentorReviewQueue(mentorId: string): Promise<{
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { submissions: [], error };
+  }
+}
+
+/**
+ * Fetch mentor review queue submissions with server-side pagination, status filtering, and search.
+ * Deterministic sorting with unique id tie-breaker.
+ */
+export async function getMentorReviewQueuePaginated(
+  params: MentorReviewQueuePaginatedParams
+): Promise<MentorReviewQueuePaginatedResult> {
+  const {
+    mentorId,
+    page = DEFAULT_PAGE,
+    pageSize = DEFAULT_REVIEW_QUEUE_PAGE_SIZE,
+    statusFilter = 'all',
+    search,
+  } = params;
+
+  if (!mentorId) {
+    const emptyMeta = createPaginationMeta({ page, pageSize, totalCount: 0 });
+    return { submissions: [], pagination: emptyMeta, error: new Error('Mentor ID is required.') };
+  }
+
+  const range = calculatePaginationRange({ page, pageSize });
+
+  if (!isSupabaseConfigured()) {
+    let list = getMockMentorSubmissions(mentorId) as SubmissionWithMeta[];
+    if (statusFilter === 'needs_review') {
+      list = list.filter((s) => s.status === 'submitted' || s.status === 'under_review');
+    } else if (statusFilter === 'reviewed') {
+      list = list.filter((s) => s.status === 'reviewed');
+    } else if (statusFilter === 'needs_revision') {
+      list = list.filter((s) => s.status === 'needs_revision');
+    }
+
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(
+        (s) =>
+          (s.assignment_title && s.assignment_title.toLowerCase().includes(q)) ||
+          (s.student_name && s.student_name.toLowerCase().includes(q)) ||
+          (s.student_poraplan_id && s.student_poraplan_id.toLowerCase().includes(q)) ||
+          (s.subject_name && s.subject_name.toLowerCase().includes(q)) ||
+          (s.content && s.content.toLowerCase().includes(q)) ||
+          (s.file_name && s.file_name.toLowerCase().includes(q))
+      );
+    }
+
+    list.sort((a, b) => {
+      const diff = new Date(b.submitted_at || 0).getTime() - new Date(a.submitted_at || 0).getTime();
+      if (diff !== 0) return diff;
+      return (a.id || '').localeCompare(b.id || '');
+    });
+
+    const totalCount = list.length;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+      clampToTotal: true,
+    });
+    const actualFrom = (pagination.page - 1) * pagination.pageSize;
+    const paginatedData = list.slice(actualFrom, actualFrom + pagination.pageSize);
+    return { submissions: paginatedData, pagination, error: null };
+  }
+
+  try {
+    let query = supabase
+      .from('submissions')
+      .select('*, assignments(title, total_points, subjects(name)), profiles!student_id(full_name, poraplan_id)', {
+        count: 'exact',
+      });
+
+    if (statusFilter === 'needs_review') {
+      query = query.in('status', ['submitted', 'under_review']);
+    } else if (statusFilter === 'reviewed') {
+      query = query.eq('status', 'reviewed');
+    } else if (statusFilter === 'needs_revision') {
+      query = query.eq('status', 'needs_revision');
+    }
+
+    if (search && search.trim()) {
+      const q = search.trim();
+      query = query.or(`content.ilike.%${q}%,file_name.ilike.%${q}%`);
+    }
+
+    const { data, count, error } = await query
+      .order('submitted_at', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true })
+      .range(range.from, range.to);
+
+    if (error) {
+      const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+      return { submissions: [], pagination: emptyMeta, error };
+    }
+
+    const totalCount = count ?? 0;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+      clampToTotal: true,
+    });
+
+    const submissions: SubmissionWithMeta[] = (data || []).map((row: any) => ({
+      id: row.id,
+      assignment_id: row.assignment_id,
+      student_id: row.student_id,
+      submission_type: row.submission_type,
+      content: row.content,
+      link_url: row.link_url,
+      file_name: row.file_name,
+      file_size: row.file_size,
+      file_path: row.file_path || null,
+      status: row.status,
+      feedback: row.feedback,
+      score: row.score,
+      reviewed_by: row.reviewed_by,
+      reviewed_at: row.reviewed_at,
+      submitted_at: row.submitted_at,
+      updated_at: row.updated_at,
+      assignment_title: row.assignments?.title || 'Assignment',
+      assignment_total_points: row.assignments?.total_points || 100,
+      subject_name: row.assignments?.subjects?.name || undefined,
+      student_name: row.profiles?.full_name || 'Scholar',
+      student_poraplan_id: row.profiles?.poraplan_id || undefined,
+    }));
+
+    return { submissions, pagination, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+    return { submissions: [], pagination: emptyMeta, error };
+  }
+}
+
+/**
+ * Lightweight server-side status counters for Mentor Review Queue tab badges.
+ * Executes parallel HEAD requests without downloading full data records.
+ */
+export async function getMentorReviewQueueStatusCounts(
+  mentorId: string
+): Promise<MentorReviewQueueStatusCounts> {
+  if (!mentorId) {
+    return { total: 0, needs_review: 0, reviewed: 0, needs_revision: 0, error: new Error('Mentor ID is required.') };
+  }
+
+  if (!isSupabaseConfigured()) {
+    const list = getMockMentorSubmissions(mentorId);
+    return {
+      total: list.length,
+      needs_review: list.filter((s) => s.status === 'submitted' || s.status === 'under_review').length,
+      reviewed: list.filter((s) => s.status === 'reviewed').length,
+      needs_revision: list.filter((s) => s.status === 'needs_revision').length,
+      error: null,
+    };
+  }
+
+  try {
+    const [totalRes, needsReviewRes, reviewedRes, revisionRes] = await Promise.all([
+      supabase.from('submissions').select('*', { count: 'exact', head: true }),
+      supabase.from('submissions').select('*', { count: 'exact', head: true }).in('status', ['submitted', 'under_review']),
+      supabase.from('submissions').select('*', { count: 'exact', head: true }).eq('status', 'reviewed'),
+      supabase.from('submissions').select('*', { count: 'exact', head: true }).eq('status', 'needs_revision'),
+    ]);
+
+    return {
+      total: totalRes.count ?? 0,
+      needs_review: needsReviewRes.count ?? 0,
+      reviewed: reviewedRes.count ?? 0,
+      needs_revision: revisionRes.count ?? 0,
+      error: totalRes.error || needsReviewRes.error || reviewedRes.error || revisionRes.error || null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { total: 0, needs_review: 0, reviewed: 0, needs_revision: 0, error };
   }
 }
 

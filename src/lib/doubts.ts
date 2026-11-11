@@ -22,6 +22,15 @@ import {
   updateMockDoubtStatus,
   deleteMockDoubt,
 } from './mockAuthStore';
+import {
+  DEFAULT_PAGE,
+  type PaginationMeta,
+  type PaginationParams,
+} from '../types/pagination';
+import {
+  calculatePaginationRange,
+  createPaginationMeta,
+} from './pagination';
 import { getAssignedStudents } from './mentorship';
 import { getEffectiveMentor } from './mentorAssignments';
 import { createNotification } from './notifications';
@@ -49,6 +58,29 @@ export interface DoubtWithMeta extends Doubt {
   responses?: DoubtResponseWithAuthor[];
   responses_count?: number;
   latest_response?: DoubtResponseWithAuthor;
+}
+
+export const DEFAULT_DOUBTS_PAGE_SIZE = 20;
+
+export interface MentorDoubtsPaginatedParams extends PaginationParams {
+  mentorId: string;
+  studentId?: string;
+  statusFilter?: 'all' | DoubtStatus;
+  search?: string;
+}
+
+export interface MentorDoubtsPaginatedResult {
+  doubts: DoubtWithMeta[];
+  pagination: PaginationMeta;
+  error: Error | null;
+}
+
+export interface MentorDoubtStatusCounts {
+  total: number;
+  open: number;
+  answered: number;
+  resolved: number;
+  error: Error | null;
 }
 
 /**
@@ -232,6 +264,256 @@ export async function getMentorDoubts(mentorId: string): Promise<{
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { doubts: [], error };
+  }
+}
+
+/**
+ * Fetch doubts for a mentor's assigned scholars with server-side pagination, status filtering, and search.
+ * Enforces mentor access boundary: only doubts from scholars assigned to this mentor are returned.
+ * Deterministic sorting with unique id tie-breaker: created_at DESC, id ASC.
+ */
+export async function getMentorDoubtsPaginated(
+  params: MentorDoubtsPaginatedParams
+): Promise<MentorDoubtsPaginatedResult> {
+  const {
+    mentorId,
+    studentId,
+    statusFilter = 'all',
+    search,
+    page = DEFAULT_PAGE,
+    pageSize = DEFAULT_DOUBTS_PAGE_SIZE,
+  } = params;
+
+  if (!mentorId) {
+    const emptyMeta = createPaginationMeta({ page, pageSize, totalCount: 0 });
+    return { doubts: [], pagination: emptyMeta, error: new Error('Mentor ID is required.') };
+  }
+
+  const range = calculatePaginationRange({ page, pageSize });
+
+  if (!isSupabaseConfigured()) {
+    let list = getMockMentorDoubts(mentorId) as DoubtWithMeta[];
+
+    if (studentId && studentId !== 'all') {
+      list = list.filter((d) => d.student_id === studentId);
+    }
+
+    if (statusFilter && statusFilter !== 'all') {
+      list = list.filter((d) => d.status === statusFilter);
+    }
+
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(
+        (d) =>
+          d.title.toLowerCase().includes(q) ||
+          d.question.toLowerCase().includes(q) ||
+          (d.student_name && d.student_name.toLowerCase().includes(q)) ||
+          (d.student_poraplan_id && d.student_poraplan_id.toLowerCase().includes(q)) ||
+          (d.subject_name && d.subject_name.toLowerCase().includes(q))
+      );
+    }
+
+    list.sort((a, b) => {
+      const diff = new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      if (diff !== 0) return diff;
+      return (a.id || '').localeCompare(b.id || '');
+    });
+
+    const totalCount = list.length;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+      clampToTotal: true,
+    });
+    const actualFrom = (pagination.page - 1) * pagination.pageSize;
+    const paginatedData = list.slice(actualFrom, actualFrom + pagination.pageSize);
+    return { doubts: paginatedData, pagination, error: null };
+  }
+
+  try {
+    // 1. Fetch mentor's assigned students for access boundary enforcement
+    const { students, error: stuErr } = await getAssignedStudents(mentorId);
+    if (stuErr) {
+      const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+      return { doubts: [], pagination: emptyMeta, error: stuErr };
+    }
+
+    if (!students || students.length === 0) {
+      const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+      return { doubts: [], pagination: emptyMeta, error: null };
+    }
+
+    const assignedStudentIds = students.map((s) => s.id);
+
+    // 2. Validate studentId filter against assigned students
+    let targetStudentIds: string[] = assignedStudentIds;
+    if (studentId && studentId !== 'all') {
+      if (!assignedStudentIds.includes(studentId)) {
+        // Requested student is not assigned to this mentor - enforce access boundary
+        const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+        return { doubts: [], pagination: emptyMeta, error: null };
+      }
+      targetStudentIds = [studentId];
+    }
+
+    // 3. Build query with exact count
+    let query = supabase
+      .from('doubts')
+      .select(
+        '*, subjects(id, name, code), study_plans(id, title), tasks(id, title), assignments(id, title), profiles!student_id(full_name, poraplan_id), doubt_responses(*, profiles!author_id(full_name, poraplan_id, role))',
+        { count: 'exact' }
+      )
+      .in('student_id', targetStudentIds);
+
+    if (statusFilter && statusFilter !== 'all') {
+      query = query.eq('status', statusFilter);
+    }
+
+    if (search && search.trim()) {
+      const q = search.trim();
+      query = query.or(`title.ilike.%${q}%,question.ilike.%${q}%`);
+    }
+
+    // 4. Stable deterministic sorting with id tie-breaker
+    const { data, count, error } = await query
+      .order('created_at', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true })
+      .range(range.from, range.to);
+
+    if (error) {
+      const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+      return { doubts: [], pagination: emptyMeta, error };
+    }
+
+    const totalCount = count ?? 0;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+      clampToTotal: true,
+    });
+
+    const doubts: DoubtWithMeta[] = (data || []).map((row: any) => {
+      const rawResponses: any[] = row.doubt_responses || [];
+      const responses: DoubtResponseWithAuthor[] = rawResponses
+        .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
+        .map((r) => ({
+          id: r.id,
+          doubt_id: r.doubt_id,
+          author_id: r.author_id,
+          message: r.message,
+          created_at: r.created_at,
+          attachment_path: r.attachment_path || undefined,
+          attachment_name: r.attachment_name || undefined,
+          attachment_size: r.attachment_size || undefined,
+          author_name: r.profiles?.full_name || 'User',
+          author_role: r.profiles?.role,
+          author_poraplan_id: r.profiles?.poraplan_id,
+        }));
+
+      return {
+        id: row.id,
+        student_id: row.student_id,
+        mentor_id: row.mentor_id,
+        subject_id: row.subject_id,
+        plan_id: row.plan_id,
+        task_id: row.task_id,
+        assignment_id: row.assignment_id,
+        title: row.title,
+        question: row.question,
+        priority: row.priority,
+        status: row.status,
+        attachment_path: row.attachment_path || undefined,
+        attachment_name: row.attachment_name || undefined,
+        attachment_size: row.attachment_size || undefined,
+        resolved_at: row.resolved_at,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        student_name: row.profiles?.full_name || undefined,
+        student_poraplan_id: row.profiles?.poraplan_id || undefined,
+        subject_name: row.subjects?.name || undefined,
+        subject_code: row.subjects?.code || undefined,
+        plan_title: row.study_plans?.title || undefined,
+        task_title: row.tasks?.title || undefined,
+        assignment_title: row.assignments?.title || undefined,
+        responses,
+        responses_count: responses.length,
+        latest_response: responses.length > 0 ? responses[responses.length - 1] : undefined,
+      };
+    });
+
+    return { doubts, pagination, error: null };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    const emptyMeta = createPaginationMeta({ page: range.page, pageSize: range.pageSize, totalCount: 0 });
+    return { doubts: [], pagination: emptyMeta, error };
+  }
+}
+
+/**
+ * Lightweight server-side status counters for Mentor Doubts tab badges.
+ * Executes parallel HEAD requests without downloading full data records.
+ */
+export async function getMentorDoubtStatusCounts(
+  mentorId: string,
+  studentId?: string
+): Promise<MentorDoubtStatusCounts> {
+  if (!mentorId) {
+    return { total: 0, open: 0, answered: 0, resolved: 0, error: new Error('Mentor ID is required.') };
+  }
+
+  if (!isSupabaseConfigured()) {
+    let list = getMockMentorDoubts(mentorId);
+    if (studentId && studentId !== 'all') {
+      list = list.filter((d) => d.student_id === studentId);
+    }
+    return {
+      total: list.length,
+      open: list.filter((d) => d.status === 'open').length,
+      answered: list.filter((d) => d.status === 'answered').length,
+      resolved: list.filter((d) => d.status === 'resolved').length,
+      error: null,
+    };
+  }
+
+  try {
+    const { students, error: stuErr } = await getAssignedStudents(mentorId);
+    if (stuErr) {
+      return { total: 0, open: 0, answered: 0, resolved: 0, error: stuErr };
+    }
+
+    if (!students || students.length === 0) {
+      return { total: 0, open: 0, answered: 0, resolved: 0, error: null };
+    }
+
+    const assignedStudentIds = students.map((s) => s.id);
+    let targetStudentIds = assignedStudentIds;
+    if (studentId && studentId !== 'all') {
+      if (!assignedStudentIds.includes(studentId)) {
+        return { total: 0, open: 0, answered: 0, resolved: 0, error: null };
+      }
+      targetStudentIds = [studentId];
+    }
+
+    const [totalRes, openRes, answeredRes, resolvedRes] = await Promise.all([
+      supabase.from('doubts').select('*', { count: 'exact', head: true }).in('student_id', targetStudentIds),
+      supabase.from('doubts').select('*', { count: 'exact', head: true }).in('student_id', targetStudentIds).eq('status', 'open'),
+      supabase.from('doubts').select('*', { count: 'exact', head: true }).in('student_id', targetStudentIds).eq('status', 'answered'),
+      supabase.from('doubts').select('*', { count: 'exact', head: true }).in('student_id', targetStudentIds).eq('status', 'resolved'),
+    ]);
+
+    return {
+      total: totalRes.count ?? 0,
+      open: openRes.count ?? 0,
+      answered: answeredRes.count ?? 0,
+      resolved: resolvedRes.count ?? 0,
+      error: totalRes.error || openRes.error || answeredRes.error || resolvedRes.error || null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { total: 0, open: 0, answered: 0, resolved: 0, error };
   }
 }
 

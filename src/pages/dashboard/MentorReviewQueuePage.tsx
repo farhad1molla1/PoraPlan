@@ -2,15 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
-  getMentorReviewQueue,
+  getMentorReviewQueuePaginated,
+  getMentorReviewQueueStatusCounts,
   reviewSubmission,
+  DEFAULT_REVIEW_QUEUE_PAGE_SIZE,
   type SubmissionWithMeta,
+  type MentorReviewQueueStatusCounts,
 } from '../../lib/assignments';
 import type { SubmissionStatus } from '../../types/database';
+import type { PaginationMeta } from '../../types/pagination';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
 import { MobileBottomSheet } from '../../components/common/MobileBottomSheet';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import { getAcademicFileSignedUrl } from '../../lib/storage';
 import {
   FileCheck,
@@ -37,6 +42,16 @@ export const MentorReviewQueuePage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filterState, setFilterState] = useState<'all' | 'needs_review' | 'reviewed' | 'needs_revision'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(DEFAULT_REVIEW_QUEUE_PAGE_SIZE);
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
+  const [statusCounts, setStatusCounts] = useState<MentorReviewQueueStatusCounts>({
+    total: 0,
+    needs_review: 0,
+    reviewed: 0,
+    needs_revision: 0,
+    error: null,
+  });
 
   // Review Modal State
   const [reviewTarget, setReviewTarget] = useState<SubmissionWithMeta | null>(null);
@@ -149,12 +164,25 @@ export const MentorReviewQueuePage: React.FC = () => {
     setLoading(true);
     setErrorMessage(null);
 
-    getMentorReviewQueue(mentorId)
-      .then(({ submissions: list, error }) => {
-        if (error) {
-          setErrorMessage(error.message);
+    Promise.all([
+      getMentorReviewQueuePaginated({
+        mentorId,
+        page,
+        pageSize,
+        statusFilter: filterState,
+        search: searchQuery,
+      }),
+      getMentorReviewQueueStatusCounts(mentorId),
+    ])
+      .then(([queueRes, countsRes]) => {
+        if (queueRes.error) {
+          setErrorMessage(queueRes.error.message);
         } else {
-          setSubmissions(list);
+          setSubmissions(queueRes.submissions);
+          setPagination(queueRes.pagination);
+        }
+        if (!countsRes.error) {
+          setStatusCounts(countsRes);
         }
         setLoading(false);
       })
@@ -168,7 +196,17 @@ export const MentorReviewQueuePage: React.FC = () => {
   useEffect(() => {
     loadSubmissions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mentorId]);
+  }, [mentorId, page, pageSize, filterState, searchQuery]);
+
+  const handleFilterChange = (newFilter: 'all' | 'needs_review' | 'reviewed' | 'needs_revision') => {
+    setFilterState(newFilter);
+    setPage(1);
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setPage(1);
+  };
 
   const handleOpenReviewModal = (submission: SubmissionWithMeta) => {
     setReviewTarget(submission);
@@ -214,36 +252,10 @@ export const MentorReviewQueuePage: React.FC = () => {
     }
   };
 
-  // Filter submissions
-  const filteredSubmissions = submissions.filter((s) => {
-    // Filter by tab
-    if (filterState === 'needs_review' && (s.status !== 'submitted' && s.status !== 'under_review')) {
-      return false;
-    }
-    if (filterState === 'reviewed' && s.status !== 'reviewed') {
-      return false;
-    }
-    if (filterState === 'needs_revision' && s.status !== 'needs_revision') {
-      return false;
-    }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchTitle = s.assignment_title?.toLowerCase().includes(q);
-      const matchStudent = s.student_name?.toLowerCase().includes(q);
-      const matchId = s.student_poraplan_id?.toLowerCase().includes(q);
-      const matchSubj = s.subject_name?.toLowerCase().includes(q);
-      if (!matchTitle && !matchStudent && !matchId && !matchSubj) return false;
-    }
-
-    return true;
-  });
-
-  const totalCount = submissions.length;
-  const needsReviewCount = submissions.filter((s) => s.status === 'submitted' || s.status === 'under_review').length;
-  const reviewedCount = submissions.filter((s) => s.status === 'reviewed').length;
-  const revisionCount = submissions.filter((s) => s.status === 'needs_revision').length;
+  const totalCount = statusCounts.total;
+  const needsReviewCount = statusCounts.needs_review;
+  const reviewedCount = statusCounts.reviewed;
+  const revisionCount = statusCounts.needs_revision;
 
   return (
     <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
@@ -342,7 +354,7 @@ export const MentorReviewQueuePage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b sm:border-b-2 border-brand-dark pb-2 sm:pb-3">
         <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
           <button
-            onClick={() => setFilterState('all')}
+            onClick={() => handleFilterChange('all')}
             className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               filterState === 'all'
                 ? 'bg-brand-navy text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
@@ -352,7 +364,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             All Submissions ({totalCount})
           </button>
           <button
-            onClick={() => setFilterState('needs_review')}
+            onClick={() => handleFilterChange('needs_review')}
             className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               filterState === 'needs_review'
                 ? 'bg-brand-gold text-brand-dark shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
@@ -362,7 +374,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             Needs Review ({needsReviewCount})
           </button>
           <button
-            onClick={() => setFilterState('reviewed')}
+            onClick={() => handleFilterChange('reviewed')}
             className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               filterState === 'reviewed'
                 ? 'bg-brand-teal text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
@@ -372,7 +384,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             Reviewed ({reviewedCount})
           </button>
           <button
-            onClick={() => setFilterState('needs_revision')}
+            onClick={() => handleFilterChange('needs_revision')}
             className={`font-mono text-[10px] sm:text-xs font-bold uppercase px-2.5 sm:px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-0 border sm:border-2 border-brand-dark transition-all ${
               filterState === 'needs_revision'
                 ? 'bg-red-600 text-white shadow-none sm:shadow-brutal-xs translate-x-0.5 translate-y-0.5'
@@ -387,7 +399,7 @@ export const MentorReviewQueuePage: React.FC = () => {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Search student or assignment..."
             className="w-full px-2.5 py-1.5 sm:py-1 text-base sm:text-xs min-h-[36px] sm:min-h-0 border sm:border-2 border-brand-dark bg-brand-bg font-sans focus:outline-none focus:ring-1 focus:ring-brand-teal"
           />
@@ -402,7 +414,7 @@ export const MentorReviewQueuePage: React.FC = () => {
             Loading student submissions...
           </p>
         </div>
-      ) : filteredSubmissions.length === 0 ? (
+      ) : submissions.length === 0 ? (
         <div className="bg-brand-paper border-4 border-brand-dark p-8 md:p-12 text-center shadow-brutal">
           <div className="w-16 h-16 bg-brand-paper-tint border-3 border-brand-dark flex items-center justify-center mx-auto mb-4 shadow-brutal-sm">
             <FileCheck className="w-8 h-8 text-brand-muted" />
@@ -424,7 +436,7 @@ export const MentorReviewQueuePage: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredSubmissions.map((sub) => {
+          {submissions.map((sub) => {
             const isReviewed = sub.status === 'reviewed';
             const isRevision = sub.status === 'needs_revision';
 
@@ -583,6 +595,20 @@ export const MentorReviewQueuePage: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Server-Side Pagination Controls */}
+      {!loading && !errorMessage && pagination && pagination.totalCount > 0 && (
+        <div className="pt-2">
+          <PaginationControls
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            totalCount={pagination.totalCount}
+            pageSize={pagination.pageSize}
+            onPageChange={setPage}
+            isLoading={loading}
+          />
         </div>
       )}
 

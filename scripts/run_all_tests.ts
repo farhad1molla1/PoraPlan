@@ -84,6 +84,13 @@ const testSuites: TestSuiteDef[] = [
     category: 'Pagination Foundation',
   },
 
+  // Batch 4.3 Mentor Workspaces Pagination & Roster Optimization
+  {
+    name: 'Batch 4.3: Mentor Workspaces Pagination & Roster Optimization',
+    relativePath: 'src/__tests__/mentorWorkspacesPagination.test.ts',
+    category: 'Pagination Foundation',
+  },
+
   // Modern Security & RLS Suites
   {
     name: 'RLS Helper Privacy & Status Semantics',

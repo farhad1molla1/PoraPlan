@@ -2,10 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
-  getMentorDoubts,
+  getMentorDoubtsPaginated,
+  getMentorDoubtStatusCounts,
   addDoubtResponse,
   updateDoubtStatus,
+  DEFAULT_DOUBTS_PAGE_SIZE,
   type DoubtWithMeta,
+  type MentorDoubtStatusCounts,
 } from '../../lib/doubts';
 import { getAssignedStudents } from '../../lib/mentorship';
 import {
@@ -14,7 +17,9 @@ import {
 } from '../../lib/storage';
 import { AttachmentViewerModal } from '../../components/common/AttachmentViewerModal';
 import { MobileBottomSheet } from '../../components/common/MobileBottomSheet';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import type { Profile, DoubtStatus } from '../../types/database';
+import type { PaginationMeta } from '../../types/pagination';
 import { Button } from '../../components/common/Button';
 import {
   HelpCircle,
@@ -50,6 +55,16 @@ export const MentorDoubtsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(DEFAULT_DOUBTS_PAGE_SIZE);
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
+  const [statusCounts, setStatusCounts] = useState<MentorDoubtStatusCounts>({
+    total: 0,
+    open: 0,
+    answered: 0,
+    resolved: 0,
+    error: null,
+  });
 
   // Detail / Thread Modal
   const [activeDoubt, setActiveDoubt] = useState<DoubtWithMeta | null>(null);
@@ -89,8 +104,16 @@ export const MentorDoubtsPage: React.FC = () => {
       setErrorMessage(null);
 
       try {
-        const [doubtsRes, stuRes] = await Promise.all([
-          getMentorDoubts(mentorId),
+        const [doubtsRes, countsRes, stuRes] = await Promise.all([
+          getMentorDoubtsPaginated({
+            mentorId,
+            studentId: selectedStudentId,
+            statusFilter: selectedStatus,
+            search: searchQuery,
+            page,
+            pageSize,
+          }),
+          getMentorDoubtStatusCounts(mentorId, selectedStudentId),
           getAssignedStudents(mentorId),
         ]);
 
@@ -100,6 +123,11 @@ export const MentorDoubtsPage: React.FC = () => {
           setErrorMessage(doubtsRes.error.message);
         } else {
           setDoubts(doubtsRes.doubts);
+          setPagination(doubtsRes.pagination);
+        }
+
+        if (!countsRes.error) {
+          setStatusCounts(countsRes);
         }
 
         if (stuRes.students) {
@@ -118,23 +146,60 @@ export const MentorDoubtsPage: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [mentorId]);
+  }, [mentorId, page, pageSize, selectedStudentId, selectedStatus, searchQuery]);
 
   const handleRefresh = async () => {
     if (!mentorId) return;
     setRefreshing(true);
     setErrorMessage(null);
-    const { doubts: list, error } = await getMentorDoubts(mentorId);
-    if (error) {
-      setErrorMessage(error.message);
-    } else {
-      setDoubts(list);
-      if (activeDoubt) {
-        const updated = list.find((d) => d.id === activeDoubt.id);
-        if (updated) setActiveDoubt(updated);
+    try {
+      const [doubtsRes, countsRes] = await Promise.all([
+        getMentorDoubtsPaginated({
+          mentorId,
+          studentId: selectedStudentId,
+          statusFilter: selectedStatus,
+          search: searchQuery,
+          page,
+          pageSize,
+        }),
+        getMentorDoubtStatusCounts(mentorId, selectedStudentId),
+      ]);
+
+      if (doubtsRes.error) {
+        setErrorMessage(doubtsRes.error.message);
+      } else {
+        setDoubts(doubtsRes.doubts);
+        setPagination(doubtsRes.pagination);
+        if (activeDoubt) {
+          const updated = doubtsRes.doubts.find((d) => d.id === activeDoubt.id);
+          if (updated) setActiveDoubt(updated);
+        }
       }
+
+      if (!countsRes.error) {
+        setStatusCounts(countsRes);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMessage(msg);
+    } finally {
+      setRefreshing(false);
     }
-    setRefreshing(false);
+  };
+
+  const handleStudentChange = (id: string) => {
+    setSelectedStudentId(id);
+    setPage(1);
+  };
+
+  const handleStatusChange = (status: 'all' | DoubtStatus) => {
+    setSelectedStatus(status);
+    setPage(1);
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setPage(1);
   };
 
   // Attachment Helpers
@@ -335,24 +400,11 @@ export const MentorDoubtsPage: React.FC = () => {
     }
   };
 
-  // Filtered Doubts
-  const filteredDoubts = doubts.filter((d) => {
-    const matchesStudent = selectedStudentId === 'all' || d.student_id === selectedStudentId;
-    const matchesStatus = selectedStatus === 'all' || d.status === selectedStatus;
-    const matchesSearch =
-      d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (d.student_name && d.student_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (d.subject_name && d.subject_name.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    return matchesStudent && matchesStatus && matchesSearch;
-  });
-
   // Metrics
-  const totalCount = doubts.length;
-  const awaitingCount = doubts.filter((d) => d.status === 'open').length;
-  const answeredCount = doubts.filter((d) => d.status === 'answered').length;
-  const resolvedCount = doubts.filter((d) => d.status === 'resolved').length;
+  const totalCount = statusCounts.total;
+  const awaitingCount = statusCounts.open;
+  const answeredCount = statusCounts.answered;
+  const resolvedCount = statusCounts.resolved;
 
   return (
     <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
@@ -443,7 +495,7 @@ export const MentorDoubtsPage: React.FC = () => {
             type="text"
             placeholder="Search by student name, question title, or content..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full pl-9 pr-3 py-1.5 sm:py-1.5 border sm:border-2 border-brand-dark bg-brand-paper font-sans text-base sm:text-xs min-h-[38px] sm:min-h-0 text-brand-navy focus:outline-none focus:ring-1 focus:ring-brand-teal"
           />
         </div>
@@ -454,7 +506,7 @@ export const MentorDoubtsPage: React.FC = () => {
             <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-muted">Student:</span>
             <select
               value={selectedStudentId}
-              onChange={(e) => setSelectedStudentId(e.target.value)}
+              onChange={(e) => handleStudentChange(e.target.value)}
               className="font-sans text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[32px] sm:min-h-0 py-0.5"
               aria-label="Filter doubts by assigned student"
             >
@@ -472,7 +524,7 @@ export const MentorDoubtsPage: React.FC = () => {
             <span className="font-mono text-[10px] sm:text-[11px] uppercase font-bold text-brand-muted">Status:</span>
             <select
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value as any)}
+              onChange={(e) => handleStatusChange(e.target.value as any)}
               className="font-sans text-xs font-bold text-brand-navy bg-transparent border-none focus:outline-none cursor-pointer min-h-[32px] sm:min-h-0 py-0.5"
               aria-label="Filter doubts by status"
             >
@@ -491,7 +543,7 @@ export const MentorDoubtsPage: React.FC = () => {
           <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-brand-teal mb-2 sm:mb-3" />
           <p className="font-mono text-[10px] sm:text-xs text-brand-muted uppercase">Loading student doubts...</p>
         </div>
-      ) : filteredDoubts.length === 0 ? (
+      ) : doubts.length === 0 ? (
         <div className="p-6 sm:p-10 border sm:border-2 border-dashed border-brand-dark/40 bg-brand-paper/50 rounded flex flex-col items-center justify-center text-center">
           <HelpCircle className="w-8 h-8 sm:w-10 sm:h-10 text-brand-muted mb-2 opacity-50" />
           <h3 className="font-heading font-bold text-xs sm:text-sm text-brand-navy">No Doubt Inquiries Found</h3>
@@ -508,6 +560,7 @@ export const MentorDoubtsPage: React.FC = () => {
                 setSearchQuery('');
                 setSelectedStatus('all');
                 setSelectedStudentId('all');
+                setPage(1);
               }}
               className="mt-3 font-mono text-[11px] sm:text-xs text-brand-teal underline font-bold"
             >
@@ -517,7 +570,7 @@ export const MentorDoubtsPage: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-2.5 sm:space-y-3">
-          {filteredDoubts.map((doubt) => {
+          {doubts.map((doubt) => {
             const isResolved = doubt.status === 'resolved';
             const isAnswered = doubt.status === 'answered';
 
@@ -615,6 +668,20 @@ export const MentorDoubtsPage: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Server-Side Pagination Controls */}
+      {!loading && !errorMessage && pagination && pagination.totalCount > 0 && (
+        <div className="pt-2">
+          <PaginationControls
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            totalCount={pagination.totalCount}
+            pageSize={pagination.pageSize}
+            onPageChange={setPage}
+            isLoading={loading || refreshing}
+          />
         </div>
       )}
 
