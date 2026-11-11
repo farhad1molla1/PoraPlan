@@ -98,6 +98,13 @@ const testSuites: TestSuiteDef[] = [
     category: 'Pagination Foundation',
   },
 
+  // Batch 4.5B-1 Admin Enrollments Desk Server-Side Pagination
+  {
+    name: 'Batch 4.5B-1: Admin Enrollments Desk Pagination',
+    relativePath: 'src/__tests__/adminEnrollmentsPagination.test.ts',
+    category: 'Pagination Foundation',
+  },
+
   // Modern Security & RLS Suites
   {
     name: 'RLS Helper Privacy & Status Semantics',

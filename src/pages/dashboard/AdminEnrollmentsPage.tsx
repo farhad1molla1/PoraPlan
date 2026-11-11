@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  getEnrollments,
+  getEnrollmentsPaginated,
+  getEnrollmentStatusCounts,
   updateEnrollmentStatus,
   getEnrollmentStatusBadgeVariant,
   adminManualEnrollStudent,
+  DEFAULT_ENROLLMENTS_PAGE_SIZE,
+  type EnrollmentStatusCounts,
 } from '../../lib/applications';
 import { getPrograms, getCohorts } from '../../lib/programs';
 import { getAdminUsers } from '../../lib/profiles';
@@ -15,8 +18,10 @@ import type {
   EnrollmentStatus,
   Profile,
 } from '../../types/database';
+import type { PaginationMeta } from '../../types/pagination';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import {
   UserCheck,
   Search,
@@ -40,11 +45,35 @@ export const AdminEnrollmentsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Pagination & Server Status Counts
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_ENROLLMENTS_PAGE_SIZE);
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
+  const [statusCounts, setStatusCounts] = useState<EnrollmentStatusCounts | null>(null);
+
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | EnrollmentStatus>('all');
   const [programFilter, setProgramFilter] = useState<string>('all');
   const [cohortFilter, setCohortFilter] = useState<string>('all');
+
+  // Request-version tracker to eliminate stale-async race conditions
+  const requestIdRef = useRef(0);
+
+  // 300ms Search Debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch((prev) => {
+        if (prev !== searchQuery) {
+          setPage(1);
+          return searchQuery;
+        }
+        return prev;
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Status Change State / Modal
   const [selectedEnrollment, setSelectedEnrollment] = useState<ProgramEnrollmentWithMeta | null>(null);
@@ -104,6 +133,88 @@ export const AdminEnrollmentsPage: React.FC = () => {
     }
   };
 
+  // Load Programs and Cohorts metadata
+  const loadMetadata = useCallback(async () => {
+    try {
+      const [progRes, cohRes] = await Promise.all([
+        getPrograms({ includeUnpublished: true }),
+        getCohorts(),
+      ]);
+      setPrograms(progRes.programs);
+      setCohorts(cohRes.cohorts);
+    } catch {
+      // best-effort metadata
+    }
+  }, []);
+
+  useEffect(() => {
+    loadMetadata();
+  }, [loadMetadata]);
+
+  // Load Paginated Enrollments and Status Counts
+  const loadEnrollments = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const [res, counts] = await Promise.all([
+        getEnrollmentsPaginated({
+          page,
+          pageSize,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+          programId: programFilter === 'all' ? undefined : programFilter,
+          cohortId: cohortFilter === 'all' ? undefined : cohortFilter,
+          search: debouncedSearch.trim() || undefined,
+        }),
+        getEnrollmentStatusCounts({
+          programId: programFilter === 'all' ? undefined : programFilter,
+          cohortId: cohortFilter === 'all' ? undefined : cohortFilter,
+        }),
+      ]);
+
+      if (requestId !== requestIdRef.current) return;
+
+      if (res.error) {
+        setError(res.error.message);
+      } else {
+        setEnrollments(res.enrollments);
+        setPagination(res.pagination);
+      }
+
+      if (counts) {
+        setStatusCounts(counts);
+      }
+    } catch (err: unknown) {
+      if (requestId !== requestIdRef.current) return;
+      setError(err instanceof Error ? err.message : 'Failed to load enrollments');
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+      }
+    }
+  }, [page, pageSize, statusFilter, programFilter, cohortFilter, debouncedSearch]);
+
+  useEffect(() => {
+    loadEnrollments();
+  }, [loadEnrollments]);
+
+  const handleStatusFilterChange = (status: 'all' | EnrollmentStatus) => {
+    setStatusFilter(status);
+    setPage(1);
+  };
+
+  const handleProgramFilterChange = (progId: string) => {
+    setProgramFilter(progId);
+    setCohortFilter('all');
+    setPage(1);
+  };
+
+  const handleCohortFilterChange = (cohId: string) => {
+    setCohortFilter(cohId);
+    setPage(1);
+  };
+
   const handleDirectEnrollSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setEnrollError(null);
@@ -145,7 +256,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
       } else {
         setEnrollModalOpen(false);
         setSuccessMessage(`Scholar ${studentObj?.full_name || 'Student'} enrolled successfully in ${progObj?.name || 'Program'}.`);
-        await loadData();
+        await loadEnrollments();
       }
     } catch (err: unknown) {
       setEnrollError(err instanceof Error ? err.message : 'An unexpected error occurred during direct enrollment.');
@@ -153,59 +264,6 @@ export const AdminEnrollmentsPage: React.FC = () => {
       setIsEnrolling(false);
     }
   };
-
-  const loadData = async () => {
-    try {
-      const [enrRes, progRes, cohRes] = await Promise.all([
-        getEnrollments(),
-        getPrograms({ includeUnpublished: true }),
-        getCohorts(),
-      ]);
-
-      if (enrRes.error) {
-        setError(enrRes.error.message);
-      } else {
-        setEnrollments(enrRes.enrollments);
-        setPrograms(progRes.programs);
-        setCohorts(cohRes.cohorts);
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load enrollments');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let isMounted = true;
-    async function init() {
-      setLoading(true);
-      setError(null);
-      try {
-        const [enrRes, progRes, cohRes] = await Promise.all([
-          getEnrollments(),
-          getPrograms({ includeUnpublished: true }),
-          getCohorts(),
-        ]);
-        if (!isMounted) return;
-        if (enrRes.error) {
-          setError(enrRes.error.message);
-        } else {
-          setEnrollments(enrRes.enrollments);
-          setPrograms(progRes.programs);
-          setCohorts(cohRes.cohorts);
-        }
-      } catch (err: unknown) {
-        if (isMounted) setError(err instanceof Error ? err.message : 'Failed to load enrollments');
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-    init();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const openStatusModal = (enr: ProgramEnrollmentWithMeta) => {
     setSelectedEnrollment(enr);
@@ -233,8 +291,8 @@ export const AdminEnrollmentsPage: React.FC = () => {
       );
       setModalOpen(false);
       setSelectedEnrollment(null);
-      // Reload updated list
-      await loadData();
+      // Reload updated list and counts
+      await loadEnrollments();
     }
   };
 
@@ -244,45 +302,12 @@ export const AdminEnrollmentsPage: React.FC = () => {
       ? cohorts
       : cohorts.filter((c) => c.program_id === programFilter);
 
-  // Filtered enrollments
-  const filteredEnrollments = enrollments.filter((enr) => {
-    // Status
-    if (statusFilter !== 'all' && enr.status !== statusFilter) return false;
-    // Program
-    if (programFilter !== 'all' && enr.program_id !== programFilter) return false;
-    // Cohort
-    if (cohortFilter !== 'all' && enr.cohort_id !== cohortFilter) return false;
-
-    // Search query
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const studentName = enr.student?.full_name?.toLowerCase() || '';
-      const email = enr.student?.email?.toLowerCase() || '';
-      const poraplanId = enr.student?.poraplan_id?.toLowerCase() || '';
-      const uni = enr.student?.university?.toLowerCase() || '';
-      const progName = enr.program?.name?.toLowerCase() || '';
-      const cohortName = enr.cohort?.name?.toLowerCase() || '';
-
-      const matches =
-        studentName.includes(q) ||
-        email.includes(q) ||
-        poraplanId.includes(q) ||
-        uni.includes(q) ||
-        progName.includes(q) ||
-        cohortName.includes(q);
-
-      if (!matches) return false;
-    }
-
-    return true;
-  });
-
-  // Metric counts
-  const totalCount = enrollments.length;
-  const activeCount = enrollments.filter((e) => e.status === 'active').length;
-  const onHoldCount = enrollments.filter((e) => e.status === 'on_hold').length;
-  const completedCount = enrollments.filter((e) => e.status === 'completed').length;
-  const withdrawnCount = enrollments.filter((e) => e.status === 'withdrawn').length;
+  // Metric counts from server status counts
+  const totalCount = statusCounts?.all ?? (pagination?.totalCount ?? enrollments.length);
+  const activeCount = statusCounts?.active ?? 0;
+  const onHoldCount = statusCounts?.on_hold ?? 0;
+  const completedCount = statusCounts?.completed ?? 0;
+  const withdrawnCount = statusCounts?.withdrawn ?? 0;
 
   return (
     <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
@@ -309,8 +334,8 @@ export const AdminEnrollmentsPage: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={() => {
-                setLoading(true);
-                loadData();
+                loadEnrollments();
+                loadMetadata();
               }}
               disabled={loading}
               className="gap-1.5 sm:gap-2 min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
@@ -411,10 +436,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
           <div className="md:col-span-3">
             <select
               value={programFilter}
-              onChange={(e) => {
-                setProgramFilter(e.target.value);
-                setCohortFilter('all');
-              }}
+              onChange={(e) => handleProgramFilterChange(e.target.value)}
               className="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Programs</option>
@@ -430,7 +452,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
           <div className="md:col-span-3">
             <select
               value={cohortFilter}
-              onChange={(e) => setCohortFilter(e.target.value)}
+              onChange={(e) => handleCohortFilterChange(e.target.value)}
               className="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Cohorts</option>
@@ -446,7 +468,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
           <div className="md:col-span-2">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => handleStatusFilterChange(e.target.value as any)}
               className="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-base sm:text-sm min-h-[38px] sm:min-h-0 border sm:border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
             >
               <option value="all">All Statuses</option>
@@ -465,7 +487,7 @@ export const AdminEnrollmentsPage: React.FC = () => {
           <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin mx-auto text-brand-teal mb-2 sm:mb-3" />
           <p className="text-xs sm:text-sm font-bold text-brand-navy">Loading enrollments roster...</p>
         </div>
-      ) : filteredEnrollments.length === 0 ? (
+      ) : enrollments.length === 0 ? (
         <div className="border sm:border-3 border-brand-dark bg-brand-paper p-8 sm:p-12 text-center shadow-none sm:shadow-brutal">
           <UserCheck className="w-10 h-10 sm:w-12 sm:h-12 text-brand-navy/30 mx-auto mb-2 sm:mb-3" />
           <h3 className="text-base sm:text-lg font-black text-brand-navy">No Enrollments Found</h3>
@@ -480,9 +502,11 @@ export const AdminEnrollmentsPage: React.FC = () => {
               size="sm"
               onClick={() => {
                 setSearchQuery('');
+                setDebouncedSearch('');
                 setStatusFilter('all');
                 setProgramFilter('all');
                 setCohortFilter('all');
+                setPage(1);
               }}
               className="mt-3 sm:mt-4 gap-1 sm:gap-1.5 min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
             >
@@ -491,156 +515,38 @@ export const AdminEnrollmentsPage: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="border sm:border-3 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal overflow-hidden">
-          {/* Mobile Responsive Cards (< md: 768px) */}
-          <div className="md:hidden p-2 sm:p-4 space-y-2 sm:space-y-3 bg-brand-bg">
-            {filteredEnrollments.map((enr) => {
-              const student = enr.student;
-              const program = enr.program;
-              const cohort = enr.cohort;
+        <div className="space-y-4">
+          <div className="border sm:border-3 border-brand-dark bg-brand-paper shadow-none sm:shadow-brutal overflow-hidden">
+            {/* Mobile Responsive Cards (< md: 768px) */}
+            <div className="md:hidden p-2 sm:p-4 space-y-2 sm:space-y-3 bg-brand-bg">
+              {enrollments.map((enr) => {
+                const student = enr.student;
+                const program = enr.program;
+                const cohort = enr.cohort;
 
-              return (
-                <div
-                  key={enr.id}
-                  className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-4 shadow-none sm:shadow-brutal-xs space-y-2 sm:space-y-3"
-                >
-                  {/* Student Identity + Status Badge */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-                      <div className="w-7 h-7 sm:w-9 sm:h-9 border sm:border-2 border-brand-dark bg-[#0BA7B4]/20 flex items-center justify-center font-black text-brand-navy shrink-0 text-xs sm:text-sm">
-                        {student?.full_name?.charAt(0) || 'S'}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-black text-brand-navy flex flex-wrap items-center gap-1 sm:gap-1.5 leading-tight text-xs sm:text-sm">
-                          <span className="truncate">{student?.full_name || 'Unknown Student'}</span>
-                          {student?.poraplan_id && (
-                            <span className="font-mono text-[10px] sm:text-[11px] px-1.5 py-0.5 bg-brand-bg border border-brand-dark/30 text-brand-navy/80 font-bold shrink-0">
-                              {student.poraplan_id}
-                            </span>
-                          )}
-                        </div>
-                        {(student?.university || student?.department || student?.current_semester) && (
-                          <div className="text-[10px] sm:text-xs text-brand-navy/70 flex flex-wrap items-center gap-1 mt-0.5 font-medium">
-                            {student?.university && <span>{student.university}</span>}
-                            {student?.department && (
-                              <>
-                                <span>•</span>
-                                <span>{student.department}</span>
-                              </>
-                            )}
-                            {student?.current_semester && (
-                              <>
-                                <span>•</span>
-                                <span>Sem {student.current_semester}</span>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <Badge
-                      variant={getEnrollmentStatusBadgeVariant(enr.status)}
-                      size="sm"
-                      className="font-bold uppercase tracking-wide shrink-0"
-                    >
-                      {enr.status.replace('_', ' ')}
-                    </Badge>
-                  </div>
-
-                  {/* Program, Cohort, & Enrollment Date */}
-                  <div className="p-2 sm:p-2.5 bg-brand-bg border border-brand-dark/20 text-[11px] sm:text-xs space-y-1 sm:space-y-1.5">
-                    <div className="flex justify-between items-start gap-2">
-                      <span className="text-brand-muted font-mono uppercase text-[9px] sm:text-[10px] shrink-0 font-bold">
-                        Program
-                      </span>
-                      <span className="font-bold text-brand-navy text-right leading-tight">
-                        {program?.name || 'General Mentorship'}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center gap-2 pt-1 border-t border-brand-dark/10">
-                      <span className="text-brand-muted font-mono uppercase text-[9px] sm:text-[10px] shrink-0 font-bold">
-                        Cohort
-                      </span>
-                      <div className="flex items-center gap-1 text-[10px] sm:text-[11px]">
-                        <span className="font-mono font-semibold px-1 py-0.5 bg-gray-100 border border-gray-300 text-gray-700">
-                          {cohort?.name || 'Assigned Cohort'}
-                        </span>
-                        {cohort?.code && (
-                          <span className="text-brand-navy/60 font-mono">({cohort.code})</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center gap-2 pt-1 border-t border-brand-dark/10">
-                      <span className="text-brand-muted font-mono uppercase text-[9px] sm:text-[10px] shrink-0 font-bold">
-                        Enrolled
-                      </span>
-                      <span className="font-mono text-brand-navy/80 text-[10px] sm:text-[11px] flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-brand-teal" />
-                        {new Date(enr.enrolled_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openStatusModal(enr)}
-                    className="w-full min-h-[34px] sm:min-h-[44px] flex items-center justify-center gap-1.5 font-bold text-[11px] sm:text-xs py-1"
+                return (
+                  <div
+                    key={enr.id}
+                    className="border sm:border-2 border-brand-dark bg-brand-paper p-2.5 sm:p-4 shadow-none sm:shadow-brutal-xs space-y-2 sm:space-y-3"
                   >
-                    Manage Status
-                    <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </Button>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Desktop Table (>= md: 768px) */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b-3 border-brand-dark bg-brand-bg text-xs font-black uppercase text-brand-navy tracking-wider">
-                  <th className="py-3 px-4">Student</th>
-                  <th className="py-3 px-4">Program & Cohort</th>
-                  <th className="py-3 px-4">Enrolled Date</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y-2 divide-[#082B4C]/10 text-sm">
-                {filteredEnrollments.map((enr) => {
-                  const student = enr.student;
-                  const program = enr.program;
-                  const cohort = enr.cohort;
-
-                  return (
-                    <tr
-                      key={enr.id}
-                      className="hover:bg-brand-bg/80 transition-colors"
-                    >
-                      {/* Student Info */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 border-2 border-brand-dark bg-[#0BA7B4]/20 flex items-center justify-center font-black text-brand-navy flex-shrink-0 text-sm">
-                            {student?.full_name?.charAt(0) || 'S'}
+                    {/* Student Identity + Status Badge */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                        <div className="w-7 h-7 sm:w-9 sm:h-9 border sm:border-2 border-brand-dark bg-[#0BA7B4]/20 flex items-center justify-center font-black text-brand-navy shrink-0 text-xs sm:text-sm">
+                          {student?.full_name?.charAt(0) || 'S'}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-black text-brand-navy flex flex-wrap items-center gap-1 sm:gap-1.5 leading-tight text-xs sm:text-sm">
+                            <span className="truncate">{student?.full_name || 'Unknown Student'}</span>
+                            {student?.poraplan_id && (
+                              <span className="font-mono text-[10px] sm:text-[11px] px-1.5 py-0.5 bg-brand-bg border border-brand-dark/30 text-brand-navy/80 font-bold shrink-0">
+                                {student.poraplan_id}
+                              </span>
+                            )}
                           </div>
-                          <div>
-                            <div className="font-black text-brand-navy flex items-center gap-2">
-                              <span>{student?.full_name || 'Unknown Student'}</span>
-                              {student?.poraplan_id && (
-                                <span className="font-mono text-xs px-1.5 py-0.2 bg-brand-bg border border-brand-dark/30 text-brand-navy/80 font-bold">
-                                  {student.poraplan_id}
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-xs text-brand-navy/70 flex items-center gap-2 mt-0.5 font-medium">
-                              {student?.university && (
-                                <span>{student.university}</span>
-                              )}
+                          {(student?.university || student?.department || student?.current_semester) && (
+                            <div className="text-[10px] sm:text-xs text-brand-navy/70 flex flex-wrap items-center gap-1 mt-0.5 font-medium">
+                              {student?.university && <span>{student.university}</span>}
                               {student?.department && (
                                 <>
                                   <span>•</span>
@@ -654,62 +560,202 @@ export const AdminEnrollmentsPage: React.FC = () => {
                                 </>
                               )}
                             </div>
-                          </div>
+                          )}
                         </div>
-                      </td>
+                      </div>
 
-                      {/* Program & Cohort */}
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-brand-navy">
+                      <Badge
+                        variant={getEnrollmentStatusBadgeVariant(enr.status)}
+                        size="sm"
+                        className="font-bold uppercase tracking-wide shrink-0"
+                      >
+                        {enr.status.replace('_', ' ')}
+                      </Badge>
+                    </div>
+
+                    {/* Program, Cohort, & Enrollment Date */}
+                    <div className="p-2 sm:p-2.5 bg-brand-bg border border-brand-dark/20 text-[11px] sm:text-xs space-y-1 sm:space-y-1.5">
+                      <div className="flex justify-between items-start gap-2">
+                        <span className="text-brand-muted font-mono uppercase text-[9px] sm:text-[10px] shrink-0 font-bold">
+                          Program
+                        </span>
+                        <span className="font-bold text-brand-navy text-right leading-tight">
                           {program?.name || 'General Mentorship'}
-                        </div>
-                        <div className="text-xs text-brand-navy/70 flex items-center gap-1.5 mt-0.5 font-medium">
-                          <span className="font-mono font-semibold px-1 py-0.2 bg-gray-100 border border-gray-300 text-gray-700">
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center gap-2 pt-1 border-t border-brand-dark/10">
+                        <span className="text-brand-muted font-mono uppercase text-[9px] sm:text-[10px] shrink-0 font-bold">
+                          Cohort
+                        </span>
+                        <div className="flex items-center gap-1 text-[10px] sm:text-[11px]">
+                          <span className="font-mono font-semibold px-1 py-0.5 bg-gray-100 border border-gray-300 text-gray-700">
                             {cohort?.name || 'Assigned Cohort'}
                           </span>
                           {cohort?.code && (
-                            <span className="text-brand-navy/50">({cohort.code})</span>
+                            <span className="text-brand-navy/60 font-mono">({cohort.code})</span>
                           )}
                         </div>
-                      </td>
+                      </div>
 
-                      {/* Enrolled Date */}
-                      <td className="py-3.5 px-4 font-mono text-xs text-brand-navy/80">
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-brand-teal" />
-                          <span>{new Date(enr.enrolled_at).toLocaleDateString()}</span>
-                        </div>
-                      </td>
+                      <div className="flex justify-between items-center gap-2 pt-1 border-t border-brand-dark/10">
+                        <span className="text-brand-muted font-mono uppercase text-[9px] sm:text-[10px] shrink-0 font-bold">
+                          Enrolled
+                        </span>
+                        <span className="font-mono text-brand-navy/80 text-[10px] sm:text-[11px] flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-brand-teal" />
+                          {new Date(enr.enrolled_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
 
-                      {/* Status */}
-                      <td className="py-3.5 px-4">
-                        <Badge
-                          variant={getEnrollmentStatusBadgeVariant(enr.status)}
-                          size="sm"
-                          className="font-bold uppercase tracking-wide"
-                        >
-                          {enr.status.replace('_', ' ')}
-                        </Badge>
-                      </td>
+                    {/* Action Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openStatusModal(enr)}
+                      className="w-full min-h-[34px] sm:min-h-[44px] flex items-center justify-center gap-1.5 font-bold text-[11px] sm:text-xs py-1"
+                    >
+                      Manage Status
+                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
 
-                      {/* Actions */}
-                      <td className="py-3.5 px-4 text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openStatusModal(enr)}
-                          className="gap-1 font-bold"
-                        >
-                          Manage Status
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            {/* Desktop Table (>= md: 768px) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b-3 border-brand-dark bg-brand-bg text-xs font-black uppercase text-brand-navy tracking-wider">
+                    <th className="py-3 px-4">Student</th>
+                    <th className="py-3 px-4">Program & Cohort</th>
+                    <th className="py-3 px-4">Enrolled Date</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y-2 divide-[#082B4C]/10 text-sm">
+                  {enrollments.map((enr) => {
+                    const student = enr.student;
+                    const program = enr.program;
+                    const cohort = enr.cohort;
+
+                    return (
+                      <tr
+                        key={enr.id}
+                        className="hover:bg-brand-bg/80 transition-colors"
+                      >
+                        {/* Student Info */}
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 border-2 border-brand-dark bg-[#0BA7B4]/20 flex items-center justify-center font-black text-brand-navy flex-shrink-0 text-sm">
+                              {student?.full_name?.charAt(0) || 'S'}
+                            </div>
+                            <div>
+                              <div className="font-black text-brand-navy flex items-center gap-2">
+                                <span>{student?.full_name || 'Unknown Student'}</span>
+                                {student?.poraplan_id && (
+                                  <span className="font-mono text-xs px-1.5 py-0.2 bg-brand-bg border border-brand-dark/30 text-brand-navy/80 font-bold">
+                                    {student.poraplan_id}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-xs text-brand-navy/70 flex items-center gap-2 mt-0.5 font-medium">
+                                {student?.university && (
+                                  <span>{student.university}</span>
+                                )}
+                                {student?.department && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{student.department}</span>
+                                  </>
+                                )}
+                                {student?.current_semester && (
+                                  <>
+                                    <span>•</span>
+                                    <span>Sem {student.current_semester}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Program & Cohort */}
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-brand-navy">
+                            {program?.name || 'General Mentorship'}
+                          </div>
+                          <div className="text-xs text-brand-navy/70 flex items-center gap-1.5 mt-0.5 font-medium">
+                            <span className="font-mono font-semibold px-1 py-0.2 bg-gray-100 border border-gray-300 text-gray-700">
+                              {cohort?.name || 'Assigned Cohort'}
+                            </span>
+                            {cohort?.code && (
+                              <span className="text-brand-navy/50">({cohort.code})</span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Enrolled Date */}
+                        <td className="py-3.5 px-4 font-mono text-xs text-brand-navy/80">
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-brand-teal" />
+                            <span>{new Date(enr.enrolled_at).toLocaleDateString()}</span>
+                          </div>
+                        </td>
+
+                        {/* Status */}
+                        <td className="py-3.5 px-4">
+                          <Badge
+                            variant={getEnrollmentStatusBadgeVariant(enr.status)}
+                            size="sm"
+                            className="font-bold uppercase tracking-wide"
+                          >
+                            {enr.status.replace('_', ' ')}
+                          </Badge>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="py-3.5 px-4 text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openStatusModal(enr)}
+                            className="gap-1 font-bold"
+                          >
+                            Manage Status
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {/* Server-Side Pagination Controls */}
+          {!loading && !error && pagination && pagination.totalCount > 0 && (
+            <div className="border sm:border-3 border-brand-dark bg-brand-paper p-2.5 sm:p-4 shadow-none sm:shadow-brutal">
+              <PaginationControls
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                totalCount={pagination.totalCount}
+                pageSize={pagination.pageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+                onPageChange={setPage}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize);
+                  setPage(1);
+                }}
+                isLoading={loading}
+                ariaLabel="Admin enrollments pagination"
+              />
+            </div>
+          )}
         </div>
       )}
 

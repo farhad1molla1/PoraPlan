@@ -9,6 +9,15 @@ import type {
   EnrollmentStatus,
 } from '../types/database';
 import {
+  DEFAULT_PAGE,
+  type PaginationMeta,
+  type PaginationParams,
+} from '../types/pagination';
+import {
+  calculatePaginationRange,
+  createPaginationMeta,
+} from './pagination';
+import {
   getMockApplications,
   getMockApplicationById,
   createMockApplication,
@@ -21,6 +30,40 @@ import {
   adminManualEnrollMockStudent,
 } from './mockAuthStore';
 import { createNotification } from './notifications';
+
+export const DEFAULT_ENROLLMENTS_PAGE_SIZE = 25;
+
+export interface EnrollmentsPaginatedParams extends PaginationParams {
+  studentId?: string;
+  programId?: string;
+  cohortId?: string;
+  status?: string;
+  search?: string;
+}
+
+export interface EnrollmentsPaginatedResult {
+  enrollments: ProgramEnrollmentWithMeta[];
+  pagination: PaginationMeta;
+  error: Error | null;
+}
+
+export interface EnrollmentStatusCounts {
+  all: number;
+  active: number;
+  on_hold: number;
+  completed: number;
+  withdrawn: number;
+  error: Error | null;
+}
+
+/**
+ * Safely sanitizes search query input for PostgREST .or() filter expressions.
+ * Strips syntax delimiters (commas, parentheses, colons, quotes) to prevent filter manipulation.
+ */
+export function sanitizeSearchInput(input: string): string {
+  if (!input || typeof input !== 'string') return '';
+  return input.replace(/[,()":]/g, ' ').replace(/\s+/g, ' ').trim();
+}
 
 // ==============================================================================
 // Helper utilities and Badge Variants
@@ -456,6 +499,234 @@ export async function getEnrollments(filters?: {
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { enrollments: [], error };
+  }
+}
+
+/**
+ * Retrieve paginated program enrollments with server-side filtering, deterministic sorting,
+ * and standard pagination metadata.
+ */
+export async function getEnrollmentsPaginated(
+  params?: EnrollmentsPaginatedParams
+): Promise<EnrollmentsPaginatedResult> {
+  const page = params?.page ?? DEFAULT_PAGE;
+  const pageSize = params?.pageSize ?? DEFAULT_ENROLLMENTS_PAGE_SIZE;
+  const range = calculatePaginationRange({ page, pageSize });
+
+  const emptyMeta = createPaginationMeta({
+    page: range.page,
+    pageSize: range.pageSize,
+    totalCount: 0,
+  });
+
+  if (!isSupabaseConfigured()) {
+    const list = getMockEnrollments({
+      studentId: params?.studentId,
+      programId: params?.programId,
+      cohortId: params?.cohortId,
+      status: params?.status,
+    });
+
+    let enriched: ProgramEnrollmentWithMeta[] = list.map((enr) => {
+      const student = getMockProfile(enr.student_id);
+      const program = getMockProgramById(enr.program_id);
+      const cohorts = getMockCohorts(enr.program_id);
+      const cohort = enr.cohort_id ? cohorts.find((c) => c.id === enr.cohort_id) || null : null;
+      const application = enr.application_id ? getMockApplicationById(enr.application_id) : null;
+
+      return {
+        ...enr,
+        student,
+        program,
+        cohort,
+        application,
+      };
+    });
+
+    if (params?.search && params.search.trim()) {
+      const q = params.search.trim().toLowerCase();
+      enriched = enriched.filter((enr) => {
+        const student = enr.student;
+        return (
+          (student?.full_name || '').toLowerCase().includes(q) ||
+          (student?.email || '').toLowerCase().includes(q) ||
+          (student?.poraplan_id || '').toLowerCase().includes(q) ||
+          (student?.university || '').toLowerCase().includes(q)
+        );
+      });
+    }
+
+    // Deterministic sort: enrolled_at DESC (nulls last), id ASC
+    enriched.sort((a, b) => {
+      const timeA = a.enrolled_at ? new Date(a.enrolled_at).getTime() : -Infinity;
+      const timeB = b.enrolled_at ? new Date(b.enrolled_at).getTime() : -Infinity;
+      if (timeB !== timeA) return timeB - timeA;
+      return (a.id || '').localeCompare(b.id || '');
+    });
+
+    const totalCount = enriched.length;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+    });
+    const sliced = enriched.slice(range.from, range.to + 1);
+
+    return {
+      enrollments: sliced,
+      pagination,
+      error: null,
+    };
+  }
+
+  try {
+    let studentIdFilter: string[] | null = null;
+    if (params?.search && params.search.trim()) {
+      const sanitized = sanitizeSearchInput(params.search);
+      if (sanitized) {
+        const { data: matchedProfiles, error: profileErr } = await supabase
+          .from('profiles')
+          .select('id')
+          .or(`full_name.ilike.%${sanitized}%,email.ilike.%${sanitized}%,poraplan_id.ilike.%${sanitized}%,university.ilike.%${sanitized}%`);
+
+        if (profileErr) {
+          return { enrollments: [], pagination: emptyMeta, error: profileErr };
+        }
+
+        const ids = (matchedProfiles || []).map((p: any) => p.id);
+        if (ids.length === 0) {
+          return { enrollments: [], pagination: emptyMeta, error: null };
+        }
+        studentIdFilter = ids;
+      }
+    }
+
+    let query = (supabase.from('program_enrollments') as any)
+      .select(
+        '*, profiles!student_id(id, full_name, email, role, poraplan_id, avatar_url, university, department, batch, current_semester, whatsapp_number), programs(id, name, slug, category), cohorts(id, name, code, status, start_date, end_date), program_applications(id, status, submitted_at)',
+        { count: 'exact' }
+      );
+
+    if (params?.studentId) {
+      query = query.eq('student_id', params.studentId);
+    } else if (studentIdFilter !== null) {
+      query = query.in('student_id', studentIdFilter);
+    }
+
+    if (params?.programId && params.programId !== 'all') {
+      query = query.eq('program_id', params.programId);
+    }
+    if (params?.cohortId && params.cohortId !== 'all') {
+      query = query.eq('cohort_id', params.cohortId);
+    }
+    if (params?.status && params.status !== 'all') {
+      query = query.eq('status', params.status);
+    }
+
+    const { data, count, error } = await query
+      .order('enrolled_at', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true })
+      .range(range.from, range.to);
+
+    if (error) {
+      return { enrollments: [], pagination: emptyMeta, error };
+    }
+
+    const enrollments: ProgramEnrollmentWithMeta[] = (data || []).map((row: any) => ({
+      id: row.id,
+      student_id: row.student_id,
+      program_id: row.program_id,
+      cohort_id: row.cohort_id,
+      application_id: row.application_id,
+      status: row.status,
+      enrolled_at: row.enrolled_at,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      student: row.profiles,
+      program: row.programs,
+      cohort: row.cohorts,
+      application: row.program_applications,
+    }));
+
+    const totalCount = count ?? 0;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+    });
+
+    return {
+      enrollments,
+      pagination,
+      error: null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { enrollments: [], pagination: emptyMeta, error };
+  }
+}
+
+/**
+ * Retrieve exact enrollment status metric counts for platform administrators.
+ * Uses lightweight parallel head: true queries to avoid downloading table rows.
+ */
+export async function getEnrollmentStatusCounts(filters?: {
+  programId?: string;
+  cohortId?: string;
+}): Promise<EnrollmentStatusCounts> {
+  if (!isSupabaseConfigured()) {
+    const list = getMockEnrollments(filters);
+    const all = list.length;
+    const active = list.filter((e) => e.status === 'active').length;
+    const on_hold = list.filter((e) => e.status === 'on_hold').length;
+    const completed = list.filter((e) => e.status === 'completed').length;
+    const withdrawn = list.filter((e) => e.status === 'withdrawn').length;
+    return { all, active, on_hold, completed, withdrawn, error: null };
+  }
+
+  try {
+    const buildCountQuery = (status?: EnrollmentStatus) => {
+      let q = supabase
+        .from('program_enrollments')
+        .select('*', { count: 'exact', head: true });
+
+      if (filters?.programId && filters.programId !== 'all') {
+        q = q.eq('program_id', filters.programId);
+      }
+      if (filters?.cohortId && filters.cohortId !== 'all') {
+        q = q.eq('cohort_id', filters.cohortId);
+      }
+      if (status) {
+        q = q.eq('status', status);
+      }
+      return q;
+    };
+
+    const [allRes, activeRes, onHoldRes, completedRes, withdrawnRes] = await Promise.all([
+      buildCountQuery(),
+      buildCountQuery('active'),
+      buildCountQuery('on_hold'),
+      buildCountQuery('completed'),
+      buildCountQuery('withdrawn'),
+    ]);
+
+    if (allRes.error) return { all: 0, active: 0, on_hold: 0, completed: 0, withdrawn: 0, error: allRes.error };
+    if (activeRes.error) return { all: 0, active: 0, on_hold: 0, completed: 0, withdrawn: 0, error: activeRes.error };
+    if (onHoldRes.error) return { all: 0, active: 0, on_hold: 0, completed: 0, withdrawn: 0, error: onHoldRes.error };
+    if (completedRes.error) return { all: 0, active: 0, on_hold: 0, completed: 0, withdrawn: 0, error: completedRes.error };
+    if (withdrawnRes.error) return { all: 0, active: 0, on_hold: 0, completed: 0, withdrawn: 0, error: withdrawnRes.error };
+
+    return {
+      all: allRes.count ?? 0,
+      active: activeRes.count ?? 0,
+      on_hold: onHoldRes.count ?? 0,
+      completed: completedRes.count ?? 0,
+      withdrawn: withdrawnRes.count ?? 0,
+      error: null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { all: 0, active: 0, on_hold: 0, completed: 0, withdrawn: 0, error };
   }
 }
 
