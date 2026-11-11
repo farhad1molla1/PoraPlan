@@ -91,6 +91,13 @@ const testSuites: TestSuiteDef[] = [
     category: 'Pagination Foundation',
   },
 
+  // Batch 4.4B Notification Query Optimization & Inbox Pagination
+  {
+    name: 'Batch 4.4B: Notification Query Optimization & Inbox Pagination',
+    relativePath: 'src/__tests__/notificationQueryOptimization.test.ts',
+    category: 'Pagination Foundation',
+  },
+
   // Modern Security & RLS Suites
   {
     name: 'RLS Helper Privacy & Status Semantics',

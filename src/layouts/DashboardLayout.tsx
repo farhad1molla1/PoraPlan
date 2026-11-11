@@ -97,27 +97,83 @@ export const DashboardLayout: React.FC = () => {
   }, [profileModalOpen, isLinkingEmail]);
 
   // Poll/fetch unread notification count for active user (Student, Mentor, Admin)
+  // Batch 4.4B: 60s polling interval, visibility-aware, in-flight guard, decoupled from route navigation
   React.useEffect(() => {
     let isMounted = true;
+    let inFlight = false;
+
     const fetchUnread = async () => {
       const activeUserId = profile?.id || user?.id;
-      if (activeUserId) {
-        const { count } = await getUnreadNotificationCount(activeUserId);
-        if (isMounted) setUnreadNotifCount(count || 0);
+      if (!activeUserId || inFlight || !isMounted) return;
+
+      inFlight = true;
+      try {
+        const { count, error } = await getUnreadNotificationCount(activeUserId);
+        if (isMounted && !error && count !== undefined) {
+          setUnreadNotifCount(Math.max(0, count));
+        }
+      } finally {
+        inFlight = false;
       }
     };
+
+    // Initial query on mount / user change
     fetchUnread();
-    const interval = setInterval(fetchUnread, 15000);
-    const handleUpdate = () => {
+
+    // 60-second periodic poll; paused while tab or window is hidden
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      fetchUnread();
+    }, 60000);
+
+    // Visibilitychange listener: immediate refresh when becoming visible
+    const handleVisibilityChange = () => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        fetchUnread();
+      }
+    };
+
+    // Handle notifications-updated custom event with optimistic update support
+    const handleUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const detail = customEvent?.detail;
+
+      if (detail?.count !== undefined) {
+        if (isMounted) setUnreadNotifCount(Math.max(0, detail.count));
+        return;
+      }
+
+      if (detail?.source === 'single_read') {
+        if (isMounted) setUnreadNotifCount((prev) => Math.max(0, prev - 1));
+        return;
+      }
+
+      if (detail?.source === 'mark_all_read') {
+        if (isMounted) setUnreadNotifCount(0);
+        return;
+      }
+
       fetchUnread();
     };
-    window.addEventListener('notifications-updated', handleUpdate);
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('notifications-updated', handleUpdate);
+    }
+
     return () => {
       isMounted = false;
       clearInterval(interval);
-      window.removeEventListener('notifications-updated', handleUpdate);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      }
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('notifications-updated', handleUpdate);
+      }
     };
-  }, [profile?.id, user?.id, role, location.pathname]);
+  }, [profile?.id, user?.id, role]);
 
   const handleLinkEmail = async () => {
     if (!emailToLink.trim()) return;
