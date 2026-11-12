@@ -126,6 +126,13 @@ const testSuites: TestSuiteDef[] = [
     category: 'Pagination Foundation',
   },
 
+  // Batch 4.6B-2 Admin Billing Desk Integration & Server-side Pagination
+  {
+    name: 'Batch 4.6B-2: Admin Billing Desk Integration',
+    relativePath: 'src/__tests__/adminBillingUIIntegration.test.ts',
+    category: 'Pagination Foundation',
+  },
+
   // Modern Security & RLS Suites
   {
     name: 'RLS Helper Privacy & Status Semantics',

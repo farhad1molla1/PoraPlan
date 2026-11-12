@@ -1552,8 +1552,9 @@ export interface GlobalDuplicateReferencesResult {
  */
 export function isDuplicateTransactionReference(
   reference: string | null | undefined,
-  duplicateSet: Set<string>
+  duplicateSet?: Set<string> | null
 ): boolean {
+  if (!duplicateSet || duplicateSet.size === 0) return false;
   if (!reference || typeof reference !== 'string') return false;
   const clean = reference.trim().toUpperCase();
   return clean.length > 0 && duplicateSet.has(clean);
@@ -1924,6 +1925,94 @@ export async function getRecentMentorPaymentRecords(
     return {
       records: [],
       error: err instanceof Error ? err : new Error('Failed to retrieve recent mentor payout records.'),
+    };
+  }
+}
+
+export interface AdminCalendarMonthDataResult {
+  studentRecords: StudentPaymentRecord[];
+  mentorRecords: MentorPaymentRecord[];
+  error: Error | null;
+}
+
+/**
+ * Admin: Retrieve month-scoped student payments and mentor payouts for the calendar heatmap.
+ * Queries records whose due date or payout date falls within the active calendar month in Asia/Dhaka time.
+ * Bounded date-range query eliminates full-table historical scans.
+ */
+export async function getAdminCalendarMonthData(
+  year: number,
+  month: number
+): Promise<AdminCalendarMonthDataResult> {
+  const emptyResult: AdminCalendarMonthDataResult = {
+    studentRecords: [],
+    mentorRecords: [],
+    error: null,
+  };
+
+  const auth = await resolveAuthContext();
+  if (auth.error) return { ...emptyResult, error: auth.error };
+  if (auth.role !== 'admin') {
+    return { ...emptyResult, error: new Error('Unauthorized: Admin privilege required.') };
+  }
+
+  // Calculate Bangladesh calendar boundaries (UTC+6)
+  const safeYear = Math.max(2000, Math.floor(year));
+  const safeMonth = Math.min(Math.max(1, Math.floor(month)), 12);
+  const daysInMonth = new Date(safeYear, safeMonth, 0).getDate();
+
+  const startDateStr = `${safeYear}-${String(safeMonth).padStart(2, '0')}-01`;
+  const endDateStr = `${safeYear}-${String(safeMonth).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+
+  const sb = await getSupabaseBackend();
+  if (!sb.isConfigured || !sb.supabase) {
+    const rawStudents = getMockStudentPaymentRecords({ includeDeleted: false });
+    const rawMentors = getMockMentorPaymentRecords({ includeDeleted: false });
+
+    const studentRecords = rawStudents.filter((r) => {
+      if (!r.next_due_date) return false;
+      return r.next_due_date >= startDateStr && r.next_due_date <= endDateStr;
+    });
+
+    const mentorRecords = rawMentors.filter((r) => {
+      if (!r.payout_date) return false;
+      const dateKey = r.payout_date.split('T')[0];
+      return dateKey >= startDateStr && dateKey <= endDateStr;
+    });
+
+    return { studentRecords, mentorRecords, error: null };
+  }
+
+  try {
+    const [studentRes, mentorRes] = await Promise.all([
+      sb.supabase
+        .from('student_payment_records')
+        .select('*')
+        .eq('is_deleted', false)
+        .gte('next_due_date', startDateStr)
+        .lte('next_due_date', endDateStr)
+        .order('next_due_date', { ascending: true }),
+      sb.supabase
+        .from('mentor_payment_records')
+        .select('*')
+        .eq('is_deleted', false)
+        .gte('payout_date', `${startDateStr}T00:00:00+06:00`)
+        .lte('payout_date', `${endDateStr}T23:59:59.999+06:00`)
+        .order('payout_date', { ascending: true }),
+    ]);
+
+    if (studentRes.error) throw studentRes.error;
+    if (mentorRes.error) throw mentorRes.error;
+
+    return {
+      studentRecords: (studentRes.data as StudentPaymentRecord[]) || [],
+      mentorRecords: (mentorRes.data as MentorPaymentRecord[]) || [],
+      error: null,
+    };
+  } catch (err: unknown) {
+    return {
+      ...emptyResult,
+      error: err instanceof Error ? err : new Error('Failed to retrieve calendar month data.'),
     };
   }
 }

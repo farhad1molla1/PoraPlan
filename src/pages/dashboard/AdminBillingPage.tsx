@@ -1,7 +1,15 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
-  getAdminStudentPaymentRecords,
-  getAdminMentorPaymentRecords,
+  getAdminStudentPaymentRecordsPaginated,
+  getAdminMentorPaymentRecordsPaginated,
+  getGlobalDuplicateReferences,
+  getAdminBillingMetrics,
+  getRecentStudentPaymentRecords,
+  getRecentMentorPaymentRecords,
+  getAdminCalendarMonthData,
+  isDuplicateTransactionReference,
+  DEFAULT_ADMIN_STUDENT_PAYMENT_PAGE_SIZE,
+  DEFAULT_ADMIN_MENTOR_PAYMENT_PAGE_SIZE,
   createStudentPaymentRecord,
   updateStudentPaymentRecord,
   softDeleteStudentPaymentRecord,
@@ -14,6 +22,8 @@ import {
   createPaymentAdminNote,
   overrideBillingStartDate,
   getBillingDateAuditLogs,
+  type AdminBillingMetrics,
+  type GlobalDuplicateReferencesResult,
 } from '../../lib/payments';
 import {
   formatCalendarDate,
@@ -39,8 +49,10 @@ import type {
   Profile,
   Program,
 } from '../../types/database';
+import type { PaginationMeta } from '../../types/pagination';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import {
   RefreshCw,
   CheckCircle2,
@@ -53,8 +65,6 @@ import {
   History,
   Search,
   X,
-  ChevronRight,
-  ChevronLeft,
   Eye,
   Lock,
 } from 'lucide-react';
@@ -175,32 +185,45 @@ export const AdminBillingPage: React.FC = () => {
   // Workspace Navigation Tab
   const [activeTab, setActiveTab] = useState<'overview' | 'student_payments' | 'mentor_payouts' | 'calendar' | 'audit_notes'>('overview');
 
-  // Core Data
-  const [studentRecords, setStudentRecords] = useState<StudentPaymentRecord[]>([]);
-  const [mentorRecords, setMentorRecords] = useState<MentorPaymentRecord[]>([]);
-  const [enrollments, setEnrollments] = useState<ProgramEnrollmentWithMeta[]>([]);
-  const [auditLogs, setAuditLogs] = useState<BillingDateAuditLog[]>([]);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [programs, setPrograms] = useState<Program[]>([]);
+  // Reference Data
+  const [enrollments, setEnrollments] = useState<ProgramEnrollmentWithMeta[]>(() => getMockEnrollments());
+  const [profiles, setProfiles] = useState<Profile[]>(() => getMockUsers());
+  const [programs, setPrograms] = useState<Program[]>(() => getMockPrograms());
 
   // Page State
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  // Search & Filters
+  // Overview Data & Metrics
+  const [metrics, setMetrics] = useState<AdminBillingMetrics | null>(null);
+  const [recentStudentPayments, setRecentStudentPayments] = useState<StudentPaymentRecord[]>([]);
+  const [recentMentorPayouts, setRecentMentorPayouts] = useState<MentorPaymentRecord[]>([]);
+  const [overviewLoading, setOverviewLoading] = useState(false);
+
+  // Global Duplicate Reference Detection
+  const [duplicateReferences, setDuplicateReferences] = useState<GlobalDuplicateReferencesResult | null>(null);
+
+  // Student Payments Pagination & Search State
+  const [studentRecords, setStudentRecords] = useState<StudentPaymentRecord[]>([]);
+  const [studentPagination, setStudentPagination] = useState<PaginationMeta | null>(null);
+  const [studentPage, setStudentPage] = useState(1);
+  const [studentPageSize, setStudentPageSize] = useState<number>(DEFAULT_ADMIN_STUDENT_PAYMENT_PAGE_SIZE);
   const [studentSearch, setStudentSearch] = useState('');
+  const [debouncedStudentSearch, setDebouncedStudentSearch] = useState('');
   const [studentStatusFilter, setStudentStatusFilter] = useState<'all' | StudentPaymentStatus>('all');
   const [studentMethodFilter, setStudentMethodFilter] = useState<'all' | PaymentMethod>('all');
+  const [studentLoading, setStudentLoading] = useState(false);
 
+  // Mentor Payouts Pagination & Search State
+  const [mentorRecords, setMentorRecords] = useState<MentorPaymentRecord[]>([]);
+  const [mentorPagination, setMentorPagination] = useState<PaginationMeta | null>(null);
+  const [mentorPage, setMentorPage] = useState(1);
+  const [mentorPageSize, setMentorPageSize] = useState<number>(DEFAULT_ADMIN_MENTOR_PAYMENT_PAGE_SIZE);
   const [mentorSearch, setMentorSearch] = useState('');
+  const [debouncedMentorSearch, setDebouncedMentorSearch] = useState('');
   const [mentorStatusFilter, setMentorStatusFilter] = useState<'all' | MentorPaymentStatus>('all');
   const [mentorMethodFilter, setMentorMethodFilter] = useState<'all' | PaymentMethod>('all');
-
-  // Pagination
-  const [studentPage, setStudentPage] = useState(1);
-  const [mentorPage, setMentorPage] = useState(1);
-  const pageSize = 10;
+  const [mentorLoading, setMentorLoading] = useState(false);
 
   // Selected Record Drawers
   const [selectedStudentRecord, setSelectedStudentRecord] = useState<StudentPaymentRecord | null>(null);
@@ -223,6 +246,21 @@ export const AdminBillingPage: React.FC = () => {
   const [calendarYear, setCalendarYear] = useState(() => parseInt(todayBD.split('-')[0], 10));
   const [calendarMonth, setCalendarMonth] = useState(() => parseInt(todayBD.split('-')[1], 10));
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string>(todayBD);
+  const [calendarStudentRecords, setCalendarStudentRecords] = useState<StudentPaymentRecord[]>([]);
+  const [calendarMentorRecords, setCalendarMentorRecords] = useState<MentorPaymentRecord[]>([]);
+  const [calendarLoading, setCalendarLoading] = useState(false);
+
+  // Audit Logs (Lazy Loaded)
+  const [auditLogs, setAuditLogs] = useState<BillingDateAuditLog[]>([]);
+  const [auditLogsLoading, setAuditLogsLoading] = useState(false);
+  const [auditLogsLoaded, setAuditLogsLoaded] = useState(false);
+
+  // Request ID refs for race condition prevention
+  const studentReqIdRef = useRef(0);
+  const mentorReqIdRef = useRef(0);
+  const overviewReqIdRef = useRef(0);
+  const calendarReqIdRef = useRef(0);
+  const auditReqIdRef = useRef(0);
 
   // Lookup Maps
   const studentsMap = useMemo(() => {
@@ -249,160 +287,235 @@ export const AdminBillingPage: React.FC = () => {
     return map;
   }, [enrollments]);
 
-  // Load Data
-  const loadDeskData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  // Debounce student search (300ms)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedStudentSearch(studentSearch);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [studentSearch]);
+
+  // Debounce mentor search (300ms)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedMentorSearch(mentorSearch);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [mentorSearch]);
+
+  // 1. Overview Loader
+  const loadOverviewData = useCallback(async () => {
+    const reqId = ++overviewReqIdRef.current;
+    setOverviewLoading(true);
     try {
-      const [sRes, mRes, aRes] = await Promise.all([
-        getAdminStudentPaymentRecords(),
-        getAdminMentorPaymentRecords(),
-        getBillingDateAuditLogs(),
+      const [mRes, sRecent, mRecent] = await Promise.all([
+        getAdminBillingMetrics(),
+        getRecentStudentPaymentRecords(5),
+        getRecentMentorPaymentRecords(5),
       ]);
-
-      if (sRes.error) throw sRes.error;
+      if (reqId !== overviewReqIdRef.current) return;
       if (mRes.error) throw mRes.error;
-      if (aRes.error) throw aRes.error;
+      if (sRecent.error) throw sRecent.error;
+      if (mRecent.error) throw mRecent.error;
 
-      setStudentRecords(sRes.records);
-      setMentorRecords(mRes.records);
-      setAuditLogs(aRes.logs);
-
-      setProfiles(getMockUsers());
-      setPrograms(getMockPrograms());
-      setEnrollments(getMockEnrollments());
+      setMetrics(mRes.metrics);
+      setRecentStudentPayments(sRecent.records);
+      setRecentMentorPayouts(mRecent.records);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load billing records.');
+      if (reqId === overviewReqIdRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to load billing metrics.');
+      }
     } finally {
-      setLoading(false);
+      if (reqId === overviewReqIdRef.current) {
+        setOverviewLoading(false);
+      }
     }
   }, []);
 
+  // 2. Duplicate References Loader
+  const loadDuplicateReferences = useCallback(async () => {
+    try {
+      const res = await getGlobalDuplicateReferences();
+      if (!res.error) {
+        setDuplicateReferences(res);
+      }
+    } catch (err) {
+      console.warn('Failed to load duplicate references:', err);
+    }
+  }, []);
+
+  // 3. Student Payments Loader
+  const loadStudentPayments = useCallback(async () => {
+    const reqId = ++studentReqIdRef.current;
+    setStudentLoading(true);
+    try {
+      const res = await getAdminStudentPaymentRecordsPaginated({
+        page: studentPage,
+        pageSize: studentPageSize,
+        status: studentStatusFilter === 'all' ? undefined : studentStatusFilter,
+        paymentMethod: studentMethodFilter === 'all' ? undefined : studentMethodFilter,
+        search: debouncedStudentSearch.trim() || undefined,
+      });
+      if (reqId !== studentReqIdRef.current) return;
+      if (res.error) throw res.error;
+
+      setStudentRecords(res.records);
+      setStudentPagination(res.pagination);
+    } catch (err: unknown) {
+      if (reqId === studentReqIdRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to load student payment records.');
+      }
+    } finally {
+      if (reqId === studentReqIdRef.current) {
+        setStudentLoading(false);
+      }
+    }
+  }, [studentPage, studentPageSize, studentStatusFilter, studentMethodFilter, debouncedStudentSearch]);
+
+  // 4. Mentor Payouts Loader
+  const loadMentorPayouts = useCallback(async () => {
+    const reqId = ++mentorReqIdRef.current;
+    setMentorLoading(true);
+    try {
+      const res = await getAdminMentorPaymentRecordsPaginated({
+        page: mentorPage,
+        pageSize: mentorPageSize,
+        status: mentorStatusFilter === 'all' ? undefined : mentorStatusFilter,
+        paymentMethod: mentorMethodFilter === 'all' ? undefined : mentorMethodFilter,
+        search: debouncedMentorSearch.trim() || undefined,
+      });
+      if (reqId !== mentorReqIdRef.current) return;
+      if (res.error) throw res.error;
+
+      setMentorRecords(res.records);
+      setMentorPagination(res.pagination);
+    } catch (err: unknown) {
+      if (reqId === mentorReqIdRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to load mentor payout records.');
+      }
+    } finally {
+      if (reqId === mentorReqIdRef.current) {
+        setMentorLoading(false);
+      }
+    }
+  }, [mentorPage, mentorPageSize, mentorStatusFilter, mentorMethodFilter, debouncedMentorSearch]);
+
+  // 5. Calendar Data Loader
+  const loadCalendarData = useCallback(async (year: number, month: number) => {
+    const reqId = ++calendarReqIdRef.current;
+    setCalendarLoading(true);
+    try {
+      const res = await getAdminCalendarMonthData(year, month);
+      if (reqId !== calendarReqIdRef.current) return;
+      if (res.error) throw res.error;
+
+      setCalendarStudentRecords(res.studentRecords);
+      setCalendarMentorRecords(res.mentorRecords);
+    } catch (err: unknown) {
+      if (reqId === calendarReqIdRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to load calendar data.');
+      }
+    } finally {
+      if (reqId === calendarReqIdRef.current) {
+        setCalendarLoading(false);
+      }
+    }
+  }, []);
+
+  // 6. Audit Logs Loader (Lazy loaded)
+  const loadAuditLogsData = useCallback(async () => {
+    const reqId = ++auditReqIdRef.current;
+    setAuditLogsLoading(true);
+    try {
+      const res = await getBillingDateAuditLogs();
+      if (reqId !== auditReqIdRef.current) return;
+      if (res.error) throw res.error;
+
+      setAuditLogs(res.logs);
+      setAuditLogsLoaded(true);
+    } catch (err: unknown) {
+      if (reqId === auditReqIdRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to load audit logs.');
+      }
+    } finally {
+      if (reqId === auditReqIdRef.current) {
+        setAuditLogsLoading(false);
+      }
+    }
+  }, []);
+
+  // Initial mount data load
   useEffect(() => {
-    loadDeskData();
-  }, [loadDeskData]);
+    loadOverviewData();
+    loadDuplicateReferences();
+    loadStudentPayments();
+    loadMentorPayouts();
+    setProfiles(getMockUsers());
+    setPrograms(getMockPrograms());
+    setEnrollments(getMockEnrollments());
+  }, [loadOverviewData, loadDuplicateReferences, loadStudentPayments, loadMentorPayouts]);
 
-  // Duplicate Reference Detection (computed across student and mentor records)
-  const duplicateReferenceCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const r of studentRecords) {
-      if (r.transaction_reference && r.transaction_reference.trim() && r.payment_method !== 'cash') {
-        const ref = r.transaction_reference.trim().toUpperCase();
-        counts.set(ref, (counts.get(ref) || 0) + 1);
-      }
+  // Calendar effect on month change or tab activation
+  useEffect(() => {
+    if (activeTab === 'calendar') {
+      loadCalendarData(calendarYear, calendarMonth);
     }
-    for (const r of mentorRecords) {
-      if (r.transaction_reference && r.transaction_reference.trim() && r.payment_method !== 'cash') {
-        const ref = r.transaction_reference.trim().toUpperCase();
-        counts.set(ref, (counts.get(ref) || 0) + 1);
-      }
-    }
-    return counts;
-  }, [studentRecords, mentorRecords]);
+  }, [activeTab, calendarYear, calendarMonth, loadCalendarData]);
 
-  const duplicateReferencesList = useMemo(() => {
-    const list: { ref: string; count: number }[] = [];
-    duplicateReferenceCounts.forEach((count, ref) => {
-      if (count > 1) list.push({ ref, count });
-    });
-    return list;
-  }, [duplicateReferenceCounts]);
+  // Audit logs lazy load on tab activation
+  useEffect(() => {
+    if (activeTab === 'audit_notes' && !auditLogsLoaded) {
+      loadAuditLogsData();
+    }
+  }, [activeTab, auditLogsLoaded, loadAuditLogsData]);
+
+  // Unified refresh handler
+  const isRefreshing = overviewLoading || studentLoading || mentorLoading || calendarLoading || auditLogsLoading;
+  const handleRefreshAll = useCallback(() => {
+    loadOverviewData();
+    loadDuplicateReferences();
+    loadStudentPayments();
+    loadMentorPayouts();
+    if (activeTab === 'calendar') {
+      loadCalendarData(calendarYear, calendarMonth);
+    }
+    if (activeTab === 'audit_notes' || auditLogsLoaded) {
+      loadAuditLogsData();
+    }
+  }, [
+    loadOverviewData,
+    loadDuplicateReferences,
+    loadStudentPayments,
+    loadMentorPayouts,
+    activeTab,
+    loadCalendarData,
+    calendarYear,
+    calendarMonth,
+    auditLogsLoaded,
+    loadAuditLogsData,
+  ]);
 
   // Essential Counts
   const counts = useMemo(() => {
-    const pendingStudents = studentRecords.filter((r) => r.status === 'pending').length;
-    const overdueStudents = studentRecords.filter((r) => r.status === 'overdue').length;
-    const pendingMentors = mentorRecords.filter((r) => r.status === 'pending').length;
-
-    // Upcoming renewals within 14 days
-    const upcomingRenewals = enrollments.filter((e) => {
-      if (e.status !== 'active') return false;
-      const anchor = e.billing_start_date || (e.enrolled_at ? e.enrolled_at.substring(0, 10) : todayBD);
-      const period = computeBillingPeriod(anchor, 0);
-      return period.nextDueDate >= todayBD;
-    }).length;
-
     return {
-      pendingStudents,
-      overdueStudents,
-      upcomingRenewals,
-      pendingMentors,
+      pendingStudents: metrics?.pendingStudents ?? 0,
+      overdueStudents: metrics?.overdueStudents ?? 0,
+      upcomingRenewals: metrics?.upcomingRenewals ?? 0,
+      pendingMentors: metrics?.pendingMentors ?? 0,
     };
-  }, [studentRecords, mentorRecords, enrollments, todayBD]);
-
-  // Recent Activity Streams
-  const recentStudentPayments = useMemo(() => {
-    return [...studentRecords]
-      .sort((a, b) => b.cycle_start_date.localeCompare(a.cycle_start_date))
-      .slice(0, 5);
-  }, [studentRecords]);
-
-  const recentMentorPayouts = useMemo(() => {
-    return [...mentorRecords]
-      .sort((a, b) => b.billing_month.localeCompare(a.billing_month))
-      .slice(0, 5);
-  }, [mentorRecords]);
-
-  // Filtered Student Records
-  const filteredStudentRecords = useMemo(() => {
-    return studentRecords.filter((r) => {
-      if (studentStatusFilter !== 'all' && r.status !== studentStatusFilter) return false;
-      if (studentMethodFilter !== 'all' && r.payment_method !== studentMethodFilter) return false;
-      if (studentSearch.trim()) {
-        const q = studentSearch.trim().toLowerCase();
-        const student = studentsMap.get(r.student_id);
-        const nameMatch = (student?.full_name || '').toLowerCase().includes(q);
-        const idMatch = (student?.poraplan_id || '').toLowerCase().includes(q);
-        const refMatch = (r.transaction_reference || '').toLowerCase().includes(q);
-        const cycleMatch = r.cycle_start_date.includes(q) || r.cycle_end_date.includes(q);
-        if (!nameMatch && !idMatch && !refMatch && !cycleMatch) return false;
-      }
-      return true;
-    });
-  }, [studentRecords, studentStatusFilter, studentMethodFilter, studentSearch, studentsMap]);
-
-  // Filtered Mentor Records
-  const filteredMentorRecords = useMemo(() => {
-    return mentorRecords.filter((r) => {
-      if (mentorStatusFilter !== 'all' && r.status !== mentorStatusFilter) return false;
-      if (mentorMethodFilter !== 'all' && r.payment_method !== mentorMethodFilter) return false;
-      if (mentorSearch.trim()) {
-        const q = mentorSearch.trim().toLowerCase();
-        const mentor = mentorsMap.get(r.mentor_id);
-        const nameMatch = (mentor?.full_name || '').toLowerCase().includes(q);
-        const emailMatch = (mentor?.email || '').toLowerCase().includes(q);
-        const monthMatch = r.billing_month.includes(q) || formatBillingMonth(r.billing_month).toLowerCase().includes(q);
-        const refMatch = (r.transaction_reference || '').toLowerCase().includes(q);
-        if (!nameMatch && !emailMatch && !monthMatch && !refMatch) return false;
-      }
-      return true;
-    });
-  }, [mentorRecords, mentorStatusFilter, mentorMethodFilter, mentorSearch, mentorsMap]);
-
-  // Pagination slices
-  const totalStudentPages = Math.max(1, Math.ceil(filteredStudentRecords.length / pageSize));
-  const paginatedStudentRecords = useMemo(() => {
-    const start = (studentPage - 1) * pageSize;
-    return filteredStudentRecords.slice(start, start + pageSize);
-  }, [filteredStudentRecords, studentPage, pageSize]);
-
-  const totalMentorPages = Math.max(1, Math.ceil(filteredMentorRecords.length / pageSize));
-  const paginatedMentorRecords = useMemo(() => {
-    const start = (mentorPage - 1) * pageSize;
-    return filteredMentorRecords.slice(start, start + pageSize);
-  }, [filteredMentorRecords, mentorPage, pageSize]);
+  }, [metrics]);
 
   // Calendar Day Map
   const calendarDaysMap = useMemo(() => {
     const map = new Map<string, { studentDueCount: number; mentorPayoutCount: number }>();
-    studentRecords.forEach((r) => {
+    calendarStudentRecords.forEach((r) => {
       if (r.next_due_date) {
         const entry = map.get(r.next_due_date) || { studentDueCount: 0, mentorPayoutCount: 0 };
         entry.studentDueCount++;
         map.set(r.next_due_date, entry);
       }
     });
-    mentorRecords.forEach((r) => {
+    calendarMentorRecords.forEach((r) => {
       if (r.payout_date) {
         const dateKey = r.payout_date.split('T')[0];
         const entry = map.get(dateKey) || { studentDueCount: 0, mentorPayoutCount: 0 };
@@ -411,7 +524,7 @@ export const AdminBillingPage: React.FC = () => {
       }
     });
     return map;
-  }, [studentRecords, mentorRecords]);
+  }, [calendarStudentRecords, calendarMentorRecords]);
 
   // Calendar matrix calculation
   const calendarMatrix = useMemo(() => {
@@ -436,7 +549,12 @@ export const AdminBillingPage: React.FC = () => {
       if (res.error) throw res.error;
       setActionSuccess('Student payment record deleted.');
       setSelectedStudentRecord(null);
-      loadDeskData();
+      loadStudentPayments();
+      loadOverviewData();
+      loadDuplicateReferences();
+      if (activeTab === 'calendar') {
+        loadCalendarData(calendarYear, calendarMonth);
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to delete record.');
     }
@@ -449,7 +567,12 @@ export const AdminBillingPage: React.FC = () => {
       if (res.error) throw res.error;
       setActionSuccess('Mentor payout record deleted.');
       setSelectedMentorRecord(null);
-      loadDeskData();
+      loadMentorPayouts();
+      loadOverviewData();
+      loadDuplicateReferences();
+      if (activeTab === 'calendar') {
+        loadCalendarData(calendarYear, calendarMonth);
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to delete payout record.');
     }
@@ -473,10 +596,10 @@ export const AdminBillingPage: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={loadDeskData}
-            disabled={loading}
+            onClick={handleRefreshAll}
+            disabled={isRefreshing}
             className="min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
-            leftIcon={<RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />}
+            leftIcon={<RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />}
           >
             Refresh
           </Button>
@@ -544,7 +667,7 @@ export const AdminBillingPage: React.FC = () => {
           }`}
         >
           <span>Student Payments</span>
-          <span className="font-mono text-[10px] sm:text-[11px] opacity-80">({studentRecords.length})</span>
+          <span className="font-mono text-[10px] sm:text-[11px] opacity-80">({studentPagination?.totalCount ?? 0})</span>
         </button>
 
         <button
@@ -557,7 +680,7 @@ export const AdminBillingPage: React.FC = () => {
           }`}
         >
           <span>Mentor Payouts</span>
-          <span className="font-mono text-[10px] sm:text-[11px] opacity-80">({mentorRecords.length})</span>
+          <span className="font-mono text-[10px] sm:text-[11px] opacity-80">({mentorPagination?.totalCount ?? 0})</span>
         </button>
 
         <button
@@ -582,7 +705,7 @@ export const AdminBillingPage: React.FC = () => {
           }`}
         >
           <span>Audit Log</span>
-          <span className="font-mono text-[10px] sm:text-[11px] opacity-80">({auditLogs.length})</span>
+          <span className="font-mono text-[10px] sm:text-[11px] opacity-80">({auditLogsLoaded ? auditLogs.length : '—'})</span>
         </button>
       </div>
 
@@ -623,16 +746,19 @@ export const AdminBillingPage: React.FC = () => {
           </div>
 
           {/* Duplicate Reference Warning */}
-          {duplicateReferencesList.length > 0 && (
+          {duplicateReferences && duplicateReferences.totalDuplicateCount > 0 && (
             <div className="p-2.5 bg-amber-50 border border-amber-300 text-xs text-amber-950 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>Notice: {duplicateReferencesList.length} duplicate transaction reference(s) found across records.</span>
+                <span>Notice: {duplicateReferences.totalDuplicateCount} duplicate transaction reference(s) found across records.</span>
               </div>
               <button
                 type="button"
                 onClick={() => {
-                  setStudentSearch(duplicateReferencesList[0].ref);
+                  if (duplicateReferences.duplicatesList.length > 0) {
+                    setStudentSearch(duplicateReferences.duplicatesList[0].reference);
+                    setStudentPage(1);
+                  }
                   setActiveTab('student_payments');
                 }}
                 className="underline font-bold text-amber-900"
@@ -812,7 +938,11 @@ export const AdminBillingPage: React.FC = () => {
           </div>
 
           {/* Table & Responsive Cards */}
-          {filteredStudentRecords.length === 0 ? (
+          {studentLoading && studentRecords.length === 0 ? (
+            <div className="p-6 bg-brand-paper border border-brand-dark/20 text-center text-xs text-brand-muted">
+              Loading student payment records...
+            </div>
+          ) : studentRecords.length === 0 ? (
             <div className="p-6 bg-brand-paper border border-brand-dark/20 text-center text-xs text-brand-muted">
               No student payment records found.
             </div>
@@ -820,11 +950,11 @@ export const AdminBillingPage: React.FC = () => {
             <>
               {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
               <div className="lg:hidden space-y-2 sm:space-y-3">
-                {paginatedStudentRecords.map((rec) => {
+                {studentRecords.map((rec) => {
                   const student = studentsMap.get(rec.student_id);
                   const enrollment = enrollmentsMap.get(rec.enrollment_id);
                   const program = enrollment ? programsMap.get(enrollment.program_id) : null;
-                  const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
+                  const isDuplicate = isDuplicateTransactionReference(rec.transaction_reference, duplicateReferences?.duplicateSet);
 
                   return (
                     <div
@@ -941,11 +1071,11 @@ export const AdminBillingPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-brand-dark/10">
-                    {paginatedStudentRecords.map((rec) => {
+                    {studentRecords.map((rec) => {
                       const student = studentsMap.get(rec.student_id);
                       const enrollment = enrollmentsMap.get(rec.enrollment_id);
                       const program = enrollment ? programsMap.get(enrollment.program_id) : null;
-                      const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
+                      const isDuplicate = isDuplicateTransactionReference(rec.transaction_reference, duplicateReferences?.duplicateSet);
 
                       return (
                         <tr
@@ -1018,32 +1148,21 @@ export const AdminBillingPage: React.FC = () => {
           )}
 
           {/* Pagination */}
-          {totalStudentPages > 1 && (
-            <div className="flex items-center justify-between text-xs font-mono pt-1 text-brand-muted">
-              <span>Page {studentPage} of {totalStudentPages}</span>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={studentPage <= 1}
-                  onClick={() => setStudentPage((p) => Math.max(1, p - 1))}
-                  className="px-2 py-0.5 text-[11px]"
-                  leftIcon={<ChevronLeft className="w-3 h-3" />}
-                >
-                  Prev
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={studentPage >= totalStudentPages}
-                  onClick={() => setStudentPage((p) => Math.min(totalStudentPages, p + 1))}
-                  className="px-2 py-0.5 text-[11px]"
-                  rightIcon={<ChevronRight className="w-3 h-3" />}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
+          {studentPagination && (
+            <PaginationControls
+              currentPage={studentPagination.page}
+              totalPages={studentPagination.totalPages}
+              totalCount={studentPagination.totalCount}
+              pageSize={studentPagination.pageSize}
+              pageSizeOptions={[10, 25, 50, 100]}
+              onPageChange={(p) => setStudentPage(p)}
+              onPageSizeChange={(newSize) => {
+                setStudentPageSize(newSize);
+                setStudentPage(1);
+              }}
+              isLoading={studentLoading}
+              ariaLabel="Student payment records pagination"
+            />
           )}
         </div>
       )}
@@ -1121,7 +1240,11 @@ export const AdminBillingPage: React.FC = () => {
           </div>
 
           {/* Table & Responsive Cards */}
-          {filteredMentorRecords.length === 0 ? (
+          {mentorLoading && mentorRecords.length === 0 ? (
+            <div className="p-6 bg-brand-paper border border-brand-dark/20 text-center text-xs text-brand-muted">
+              Loading mentor payout records...
+            </div>
+          ) : mentorRecords.length === 0 ? (
             <div className="p-6 bg-brand-paper border border-brand-dark/20 text-center text-xs text-brand-muted">
               No mentor payout records found.
             </div>
@@ -1129,10 +1252,10 @@ export const AdminBillingPage: React.FC = () => {
             <>
               {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
               <div className="lg:hidden space-y-3">
-                {paginatedMentorRecords.map((rec) => {
+                {mentorRecords.map((rec) => {
                   const mentor = mentorsMap.get(rec.mentor_id);
                   const relStudent = rec.related_student_id ? studentsMap.get(rec.related_student_id) : null;
-                  const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
+                  const isDuplicate = isDuplicateTransactionReference(rec.transaction_reference, duplicateReferences?.duplicateSet);
 
                   return (
                     <div
@@ -1247,10 +1370,10 @@ export const AdminBillingPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-brand-dark/10">
-                    {paginatedMentorRecords.map((rec) => {
+                    {mentorRecords.map((rec) => {
                       const mentor = mentorsMap.get(rec.mentor_id);
                       const relStudent = rec.related_student_id ? studentsMap.get(rec.related_student_id) : null;
-                      const isDuplicate = rec.transaction_reference && (duplicateReferenceCounts.get(rec.transaction_reference.trim().toUpperCase()) || 0) > 1;
+                      const isDuplicate = isDuplicateTransactionReference(rec.transaction_reference, duplicateReferences?.duplicateSet);
 
                       return (
                         <tr
@@ -1323,32 +1446,21 @@ export const AdminBillingPage: React.FC = () => {
           )}
 
           {/* Pagination */}
-          {totalMentorPages > 1 && (
-            <div className="flex items-center justify-between text-xs font-mono pt-1 text-brand-muted">
-              <span>Page {mentorPage} of {totalMentorPages}</span>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={mentorPage <= 1}
-                  onClick={() => setMentorPage((p) => Math.max(1, p - 1))}
-                  className="px-2 py-0.5 text-[11px]"
-                  leftIcon={<ChevronLeft className="w-3 h-3" />}
-                >
-                  Prev
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={mentorPage >= totalMentorPages}
-                  onClick={() => setMentorPage((p) => Math.min(totalMentorPages, p + 1))}
-                  className="px-2 py-0.5 text-[11px]"
-                  rightIcon={<ChevronRight className="w-3 h-3" />}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
+          {mentorPagination && (
+            <PaginationControls
+              currentPage={mentorPagination.page}
+              totalPages={mentorPagination.totalPages}
+              totalCount={mentorPagination.totalCount}
+              pageSize={mentorPagination.pageSize}
+              pageSizeOptions={[10, 25, 50, 100]}
+              onPageChange={(p) => setMentorPage(p)}
+              onPageSizeChange={(newSize) => {
+                setMentorPageSize(newSize);
+                setMentorPage(1);
+              }}
+              isLoading={mentorLoading}
+              ariaLabel="Mentor payout records pagination"
+            />
           )}
         </div>
       )}
@@ -1368,12 +1480,17 @@ export const AdminBillingPage: React.FC = () => {
                 size="sm"
                 className="px-2 py-0.5 text-[11px]"
                 onClick={() => {
+                  let newYear = calendarYear;
+                  let newMonth = calendarMonth;
                   if (calendarMonth === 1) {
-                    setCalendarMonth(12);
-                    setCalendarYear((y) => y - 1);
+                    newMonth = 12;
+                    newYear = calendarYear - 1;
                   } else {
-                    setCalendarMonth((m) => m - 1);
+                    newMonth = calendarMonth - 1;
                   }
+                  setCalendarMonth(newMonth);
+                  setCalendarYear(newYear);
+                  loadCalendarData(newYear, newMonth);
                 }}
               >
                 Prev
@@ -1384,9 +1501,12 @@ export const AdminBillingPage: React.FC = () => {
                 className="px-2 py-0.5 text-[11px]"
                 onClick={() => {
                   const parts = todayBD.split('-');
-                  setCalendarYear(parseInt(parts[0], 10));
-                  setCalendarMonth(parseInt(parts[1], 10));
+                  const newYear = parseInt(parts[0], 10);
+                  const newMonth = parseInt(parts[1], 10);
+                  setCalendarYear(newYear);
+                  setCalendarMonth(newMonth);
                   setSelectedCalendarDate(todayBD);
+                  loadCalendarData(newYear, newMonth);
                 }}
               >
                 Today
@@ -1396,12 +1516,17 @@ export const AdminBillingPage: React.FC = () => {
                 size="sm"
                 className="px-2 py-0.5 text-[11px]"
                 onClick={() => {
+                  let newYear = calendarYear;
+                  let newMonth = calendarMonth;
                   if (calendarMonth === 12) {
-                    setCalendarMonth(1);
-                    setCalendarYear((y) => y + 1);
+                    newMonth = 1;
+                    newYear = calendarYear + 1;
                   } else {
-                    setCalendarMonth((m) => m + 1);
+                    newMonth = calendarMonth + 1;
                   }
+                  setCalendarMonth(newMonth);
+                  setCalendarYear(newYear);
+                  loadCalendarData(newYear, newMonth);
                 }}
               >
                 Next
@@ -1458,8 +1583,8 @@ export const AdminBillingPage: React.FC = () => {
               Schedule for {formatCalendarDate(selectedCalendarDate)}
             </div>
             {(() => {
-              const dueStudents = studentRecords.filter((r) => r.next_due_date === selectedCalendarDate);
-              const payouts = mentorRecords.filter((r) => r.payout_date?.startsWith(selectedCalendarDate));
+              const dueStudents = calendarStudentRecords.filter((r) => r.next_due_date === selectedCalendarDate);
+              const payouts = calendarMentorRecords.filter((r) => r.payout_date?.startsWith(selectedCalendarDate));
 
               if (dueStudents.length === 0 && payouts.length === 0) {
                 return <p className="text-brand-muted text-xs">No payments or payouts scheduled on this date.</p>;
@@ -1501,7 +1626,11 @@ export const AdminBillingPage: React.FC = () => {
             Billing Anchor Overrides & Activity
           </div>
 
-          {auditLogs.length === 0 ? (
+          {auditLogsLoading ? (
+            <div className="p-6 bg-brand-paper border border-brand-dark/20 text-center text-brand-muted">
+              Loading audit logs...
+            </div>
+          ) : auditLogs.length === 0 ? (
             <div className="p-6 bg-brand-paper border border-brand-dark/20 text-center text-brand-muted">
               No audit logs recorded yet.
             </div>
@@ -1856,7 +1985,12 @@ export const AdminBillingPage: React.FC = () => {
           onSuccess={() => {
             setIsCreateStudentModalOpen(false);
             setActionSuccess('Student payment record created.');
-            loadDeskData();
+            loadStudentPayments();
+            loadOverviewData();
+            loadDuplicateReferences();
+            if (activeTab === 'calendar') {
+              loadCalendarData(calendarYear, calendarMonth);
+            }
           }}
         />
       )}
@@ -1872,7 +2006,12 @@ export const AdminBillingPage: React.FC = () => {
             setEditingStudentRecord(null);
             setSelectedStudentRecord(null);
             setActionSuccess('Student payment record updated.');
-            loadDeskData();
+            loadStudentPayments();
+            loadOverviewData();
+            loadDuplicateReferences();
+            if (activeTab === 'calendar') {
+              loadCalendarData(calendarYear, calendarMonth);
+            }
           }}
         />
       )}
@@ -1888,7 +2027,12 @@ export const AdminBillingPage: React.FC = () => {
           onSuccess={() => {
             setIsCreateMentorModalOpen(false);
             setActionSuccess('Mentor payout record created.');
-            loadDeskData();
+            loadMentorPayouts();
+            loadOverviewData();
+            loadDuplicateReferences();
+            if (activeTab === 'calendar') {
+              loadCalendarData(calendarYear, calendarMonth);
+            }
           }}
         />
       )}
@@ -1904,7 +2048,12 @@ export const AdminBillingPage: React.FC = () => {
             setEditingMentorRecord(null);
             setSelectedMentorRecord(null);
             setActionSuccess('Mentor payout record updated.');
-            loadDeskData();
+            loadMentorPayouts();
+            loadOverviewData();
+            loadDuplicateReferences();
+            if (activeTab === 'calendar') {
+              loadCalendarData(calendarYear, calendarMonth);
+            }
           }}
         />
       )}
@@ -1948,7 +2097,11 @@ export const AdminBillingPage: React.FC = () => {
             setIsAnchorModalOpen(false);
             setActiveAnchorEnrollment(null);
             setActionSuccess('Billing start date updated.');
-            loadDeskData();
+            loadOverviewData();
+            loadStudentPayments();
+            if (auditLogsLoaded) {
+              loadAuditLogsData();
+            }
           }}
         />
       )}
