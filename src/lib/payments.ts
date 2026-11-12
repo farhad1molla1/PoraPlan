@@ -31,6 +31,7 @@ import type {
   BillingDateAuditLog,
   StudentPaymentStatus,
   MentorPaymentStatus,
+  PaymentMethod,
   ProgramEnrollment,
 } from '../types/database';
 
@@ -52,9 +53,23 @@ import {
   createMockPaymentAdminNote,
   overrideMockBillingStartDate,
   getMockBillingDateAuditLogs,
+  getMockUsers,
+  getMockEnrollments,
 } from './mockAuthStore';
 
-import { isValidCalendarDate } from './billingCycles';
+import {
+  isValidCalendarDate,
+  toBangladeshDateStr,
+  computeBillingPeriod,
+} from './billingCycles';
+import {
+  calculatePaginationRange,
+  createPaginationMeta,
+} from './pagination';
+import {
+  DEFAULT_PAGE,
+  type PaginationMeta,
+} from '../types/pagination';
 
 interface SupabaseBackend {
   isConfigured: boolean;
@@ -1143,6 +1158,772 @@ export async function overrideBillingStartDate(input: {
       enrollment: null,
       auditLog: null,
       error: err instanceof Error ? err : new Error('Failed to override billing start date.'),
+    };
+  }
+}
+
+// ==============================================================================
+// 7. Paginated Admin Billing Services & Performance Foundation (Batch 4.6B-1)
+// ==============================================================================
+
+export const DEFAULT_ADMIN_STUDENT_PAYMENT_PAGE_SIZE = 25;
+export const DEFAULT_ADMIN_MENTOR_PAYMENT_PAGE_SIZE = 25;
+
+/**
+ * Safely sanitizes search query input for PostgREST .or() filter expressions.
+ * Strips syntax delimiters (commas, parentheses, quotes, colons, semicolons, slashes) to prevent filter manipulation.
+ */
+export function sanitizeSearchInput(input: string): string {
+  if (!input || typeof input !== 'string') return '';
+  return input.replace(/[,()":;\\/]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+export interface AdminStudentPaymentRecordsPaginatedParams {
+  page?: number;
+  pageSize?: number;
+  studentId?: string;
+  enrollmentId?: string;
+  status?: StudentPaymentStatus;
+  paymentMethod?: PaymentMethod;
+  search?: string;
+  includeDeleted?: boolean;
+}
+
+export interface AdminStudentPaymentRecordsPaginatedResult {
+  records: StudentPaymentRecord[];
+  pagination: PaginationMeta;
+  error: Error | null;
+}
+
+/**
+ * Admin: Retrieve paginated student payment records with exact count metadata,
+ * deterministic ordering (cycle_start_date DESC NULLS LAST, id ASC),
+ * server-side status/method filtering, and safe search.
+ */
+export async function getAdminStudentPaymentRecordsPaginated(
+  params?: AdminStudentPaymentRecordsPaginatedParams
+): Promise<AdminStudentPaymentRecordsPaginatedResult> {
+  const auth = await resolveAuthContext();
+  const page = params?.page ?? DEFAULT_PAGE;
+  const pageSize = params?.pageSize ?? DEFAULT_ADMIN_STUDENT_PAYMENT_PAGE_SIZE;
+  const range = calculatePaginationRange({ page, pageSize });
+
+  const emptyMeta = createPaginationMeta({
+    page: range.page,
+    pageSize: range.pageSize,
+    totalCount: 0,
+  });
+
+  if (auth.error) {
+    return { records: [], pagination: emptyMeta, error: auth.error };
+  }
+  if (auth.role !== 'admin') {
+    return {
+      records: [],
+      pagination: emptyMeta,
+      error: new Error('Unauthorized: Admin privilege required.'),
+    };
+  }
+
+  // Guard against non-empty search that has zero searchable tokens after sanitization
+  const isSearchProvided = typeof params?.search === 'string' && params.search.trim().length > 0;
+  let sanitizedSearch = '';
+  if (isSearchProvided) {
+    sanitizedSearch = sanitizeSearchInput(params!.search!);
+    if (!sanitizedSearch) {
+      return { records: [], pagination: emptyMeta, error: null };
+    }
+    if (sanitizedSearch.replace(/[%]/g, '').trim().length === 0) {
+      return { records: [], pagination: emptyMeta, error: null };
+    }
+  }
+
+  const sb = await getSupabaseBackend();
+  if (!sb.isConfigured || !sb.supabase) {
+    let list = getMockStudentPaymentRecords({
+      studentId: params?.studentId,
+      enrollmentId: params?.enrollmentId,
+      status: params?.status,
+      includeDeleted: params?.includeDeleted,
+    });
+
+    if (params?.paymentMethod) {
+      list = list.filter((r) => r.payment_method === params.paymentMethod);
+    }
+
+    if (sanitizedSearch) {
+      const q = sanitizedSearch.toLowerCase();
+      const mockUsers = getMockUsers();
+      list = list.filter((r) => {
+        const refMatch = (r.transaction_reference || '').toLowerCase().includes(q);
+        const cycleMatch = r.cycle_start_date.includes(q) || r.cycle_end_date.includes(q);
+        const waivedMatch = (r.waived_reason || '').toLowerCase().includes(q);
+        const student = mockUsers.find((u) => u.id === r.student_id);
+        const nameMatch = (student?.full_name || '').toLowerCase().includes(q);
+        const idMatch = (student?.poraplan_id || '').toLowerCase().includes(q);
+        return refMatch || cycleMatch || waivedMatch || nameMatch || idMatch;
+      });
+    }
+
+    // Deterministic sort: cycle_start_date DESC NULLS LAST, id ASC
+    list.sort((a, b) => {
+      const timeA = a.cycle_start_date ? new Date(a.cycle_start_date).getTime() : -Infinity;
+      const timeB = b.cycle_start_date ? new Date(b.cycle_start_date).getTime() : -Infinity;
+      if (timeB !== timeA) return timeB - timeA;
+      return (a.id || '').localeCompare(b.id || '');
+    });
+
+    const totalCount = list.length;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+    });
+    const sliced = list.slice(range.from, range.to + 1);
+
+    return { records: sliced, pagination, error: null };
+  }
+
+  try {
+    let query = sb.supabase
+      .from('student_payment_records')
+      .select('*', { count: 'exact' });
+
+    if (!params?.includeDeleted) {
+      query = query.eq('is_deleted', false);
+    }
+    if (params?.studentId) {
+      query = query.eq('student_id', params.studentId);
+    }
+    if (params?.enrollmentId) {
+      query = query.eq('enrollment_id', params.enrollmentId);
+    }
+    if (params?.status) {
+      query = query.eq('status', params.status);
+    }
+    if (params?.paymentMethod) {
+      query = query.eq('payment_method', params.paymentMethod);
+    }
+
+    if (sanitizedSearch) {
+      // Find matching student profiles to enable searching by student name/poraplan_id
+      let matchedStudentIds: string[] = [];
+      const { data: matchedProfiles } = await sb.supabase
+        .from('profiles')
+        .select('id')
+        .or(`full_name.ilike.%${sanitizedSearch}%,poraplan_id.ilike.%${sanitizedSearch}%,email.ilike.%${sanitizedSearch}%`)
+        .limit(50);
+
+      if (matchedProfiles && matchedProfiles.length > 0) {
+        matchedStudentIds = matchedProfiles.map((p) => p.id);
+      }
+
+      if (matchedStudentIds.length > 0) {
+        query = query.or(
+          `transaction_reference.ilike.%${sanitizedSearch}%,waived_reason.ilike.%${sanitizedSearch}%,student_id.in.(${matchedStudentIds.join(',')})`
+        );
+      } else {
+        query = query.or(
+          `transaction_reference.ilike.%${sanitizedSearch}%,waived_reason.ilike.%${sanitizedSearch}%`
+        );
+      }
+    }
+
+    // Deterministic ordering: cycle_start_date DESC NULLS LAST, id ASC
+    query = query
+      .order('cycle_start_date', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true })
+      .range(range.from, range.to);
+
+    const { data, count, error } = await query;
+    if (error) throw error;
+
+    const totalCount = count ?? 0;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+    });
+
+    return {
+      records: (data as StudentPaymentRecord[]) || [],
+      pagination,
+      error: null,
+    };
+  } catch (err: unknown) {
+    return {
+      records: [],
+      pagination: emptyMeta,
+      error: err instanceof Error ? err : new Error('Failed to retrieve paginated student payment records.'),
+    };
+  }
+}
+
+export interface AdminMentorPaymentRecordsPaginatedParams {
+  page?: number;
+  pageSize?: number;
+  mentorId?: string;
+  billingMonth?: string;
+  status?: MentorPaymentStatus;
+  paymentMethod?: PaymentMethod;
+  search?: string;
+  includeDeleted?: boolean;
+}
+
+export interface AdminMentorPaymentRecordsPaginatedResult {
+  records: MentorPaymentRecord[];
+  pagination: PaginationMeta;
+  error: Error | null;
+}
+
+/**
+ * Admin: Retrieve paginated mentor payout records with exact count metadata,
+ * deterministic ordering (billing_month DESC NULLS LAST, id ASC),
+ * server-side status/method filtering, and safe search.
+ */
+export async function getAdminMentorPaymentRecordsPaginated(
+  params?: AdminMentorPaymentRecordsPaginatedParams
+): Promise<AdminMentorPaymentRecordsPaginatedResult> {
+  const auth = await resolveAuthContext();
+  const page = params?.page ?? DEFAULT_PAGE;
+  const pageSize = params?.pageSize ?? DEFAULT_ADMIN_MENTOR_PAYMENT_PAGE_SIZE;
+  const range = calculatePaginationRange({ page, pageSize });
+
+  const emptyMeta = createPaginationMeta({
+    page: range.page,
+    pageSize: range.pageSize,
+    totalCount: 0,
+  });
+
+  if (auth.error) {
+    return { records: [], pagination: emptyMeta, error: auth.error };
+  }
+  if (auth.role !== 'admin') {
+    return {
+      records: [],
+      pagination: emptyMeta,
+      error: new Error('Unauthorized: Admin privilege required.'),
+    };
+  }
+
+  // Guard against non-empty search that has zero searchable tokens after sanitization
+  const isSearchProvided = typeof params?.search === 'string' && params.search.trim().length > 0;
+  let sanitizedSearch = '';
+  if (isSearchProvided) {
+    sanitizedSearch = sanitizeSearchInput(params!.search!);
+    if (!sanitizedSearch) {
+      return { records: [], pagination: emptyMeta, error: null };
+    }
+    if (sanitizedSearch.replace(/[%]/g, '').trim().length === 0) {
+      return { records: [], pagination: emptyMeta, error: null };
+    }
+  }
+
+  const sb = await getSupabaseBackend();
+  if (!sb.isConfigured || !sb.supabase) {
+    let list = getMockMentorPaymentRecords({
+      mentorId: params?.mentorId,
+      billingMonth: params?.billingMonth,
+      status: params?.status,
+      includeDeleted: params?.includeDeleted,
+    });
+
+    if (params?.paymentMethod) {
+      list = list.filter((r) => r.payment_method === params.paymentMethod);
+    }
+
+    if (sanitizedSearch) {
+      const q = sanitizedSearch.toLowerCase();
+      const mockUsers = getMockUsers();
+      list = list.filter((r) => {
+        const refMatch = (r.transaction_reference || '').toLowerCase().includes(q);
+        const monthMatch = r.billing_month.includes(q);
+        const mentor = mockUsers.find((u) => u.id === r.mentor_id);
+        const nameMatch = (mentor?.full_name || '').toLowerCase().includes(q);
+        const emailMatch = (mentor?.email || '').toLowerCase().includes(q);
+        return refMatch || monthMatch || nameMatch || emailMatch;
+      });
+    }
+
+    // Deterministic sort: billing_month DESC NULLS LAST, id ASC
+    list.sort((a, b) => {
+      const timeA = a.billing_month ? new Date(a.billing_month).getTime() : -Infinity;
+      const timeB = b.billing_month ? new Date(b.billing_month).getTime() : -Infinity;
+      if (timeB !== timeA) return timeB - timeA;
+      return (a.id || '').localeCompare(b.id || '');
+    });
+
+    const totalCount = list.length;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+    });
+    const sliced = list.slice(range.from, range.to + 1);
+
+    return { records: sliced, pagination, error: null };
+  }
+
+  try {
+    let query = sb.supabase
+      .from('mentor_payment_records')
+      .select('*', { count: 'exact' });
+
+    if (!params?.includeDeleted) {
+      query = query.eq('is_deleted', false);
+    }
+    if (params?.mentorId) {
+      query = query.eq('mentor_id', params.mentorId);
+    }
+    if (params?.billingMonth) {
+      query = query.eq('billing_month', params.billingMonth);
+    }
+    if (params?.status) {
+      query = query.eq('status', params.status);
+    }
+    if (params?.paymentMethod) {
+      query = query.eq('payment_method', params.paymentMethod);
+    }
+
+    if (sanitizedSearch) {
+      // Find matching mentor profiles to enable searching by mentor name/email
+      let matchedMentorIds: string[] = [];
+      const { data: matchedProfiles } = await sb.supabase
+        .from('profiles')
+        .select('id')
+        .or(`full_name.ilike.%${sanitizedSearch}%,email.ilike.%${sanitizedSearch}%,poraplan_id.ilike.%${sanitizedSearch}%`)
+        .limit(50);
+
+      if (matchedProfiles && matchedProfiles.length > 0) {
+        matchedMentorIds = matchedProfiles.map((p) => p.id);
+      }
+
+      if (matchedMentorIds.length > 0) {
+        query = query.or(
+          `transaction_reference.ilike.%${sanitizedSearch}%,billing_month.ilike.%${sanitizedSearch}%,mentor_id.in.(${matchedMentorIds.join(',')})`
+        );
+      } else {
+        query = query.or(
+          `transaction_reference.ilike.%${sanitizedSearch}%,billing_month.ilike.%${sanitizedSearch}%`
+        );
+      }
+    }
+
+    // Deterministic ordering: billing_month DESC NULLS LAST, id ASC
+    query = query
+      .order('billing_month', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true })
+      .range(range.from, range.to);
+
+    const { data, count, error } = await query;
+    if (error) throw error;
+
+    const totalCount = count ?? 0;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+    });
+
+    return {
+      records: (data as MentorPaymentRecord[]) || [],
+      pagination,
+      error: null,
+    };
+  } catch (err: unknown) {
+    return {
+      records: [],
+      pagination: emptyMeta,
+      error: err instanceof Error ? err : new Error('Failed to retrieve paginated mentor payment records.'),
+    };
+  }
+}
+
+export interface GlobalDuplicateReferencesResult {
+  counts: Map<string, number>;
+  duplicateSet: Set<string>;
+  duplicatesList: Array<{ reference: string; count: number }>;
+  totalDuplicateCount: number;
+  error: Error | null;
+}
+
+/**
+ * Checks whether a given transaction reference is in the set of global duplicates.
+ */
+export function isDuplicateTransactionReference(
+  reference: string | null | undefined,
+  duplicateSet: Set<string>
+): boolean {
+  if (!reference || typeof reference !== 'string') return false;
+  const clean = reference.trim().toUpperCase();
+  return clean.length > 0 && duplicateSet.has(clean);
+}
+
+/**
+ * Admin: Global duplicate transaction-reference detection across student and mentor payment records.
+ *
+ * Implements strict scalability safeguard: uses deterministic chunked range queries
+ * (`range(from, to)` ordered by `id ASC`) to prevent PostgREST `max_rows` truncation.
+ *
+ * Rules:
+ * - Combines student and mentor records into one namespace.
+ * - Excludes cash payments (payment_method = 'cash').
+ * - Ignores null and empty references.
+ * - Trims whitespace and normalizes case to uppercase.
+ * - Detects cross-track and same-track duplicate references globally.
+ */
+export async function getGlobalDuplicateReferences(): Promise<GlobalDuplicateReferencesResult> {
+  const emptyResult: GlobalDuplicateReferencesResult = {
+    counts: new Map(),
+    duplicateSet: new Set(),
+    duplicatesList: [],
+    totalDuplicateCount: 0,
+    error: null,
+  };
+
+  const auth = await resolveAuthContext();
+  if (auth.error) return { ...emptyResult, error: auth.error };
+  if (auth.role !== 'admin') {
+    return { ...emptyResult, error: new Error('Unauthorized: Admin privilege required.') };
+  }
+
+  const sb = await getSupabaseBackend();
+  if (!sb.isConfigured || !sb.supabase) {
+    const rawStudents = getMockStudentPaymentRecords({ includeDeleted: false });
+    const rawMentors = getMockMentorPaymentRecords({ includeDeleted: false });
+
+    const counts = new Map<string, number>();
+    for (const r of rawStudents) {
+      if (r.transaction_reference && r.transaction_reference.trim() && r.payment_method !== 'cash') {
+        const ref = r.transaction_reference.trim().toUpperCase();
+        counts.set(ref, (counts.get(ref) || 0) + 1);
+      }
+    }
+    for (const r of rawMentors) {
+      if (r.transaction_reference && r.transaction_reference.trim() && r.payment_method !== 'cash') {
+        const ref = r.transaction_reference.trim().toUpperCase();
+        counts.set(ref, (counts.get(ref) || 0) + 1);
+      }
+    }
+
+    const duplicateSet = new Set<string>();
+    const duplicatesList: Array<{ reference: string; count: number }> = [];
+    counts.forEach((count, ref) => {
+      if (count > 1) {
+        duplicateSet.add(ref);
+        duplicatesList.push({ reference: ref, count });
+      }
+    });
+
+    return {
+      counts,
+      duplicateSet,
+      duplicatesList,
+      totalDuplicateCount: duplicatesList.length,
+      error: null,
+    };
+  }
+
+  try {
+    // Scalability safeguard: retrieve references using chunked range pagination
+    // to prevent truncation by PostgREST max_rows limits (typically 1000).
+    const chunkSize = 1000;
+    const counts = new Map<string, number>();
+
+    // 1. Chunked retrieval from student_payment_records
+    let studentFrom = 0;
+    while (true) {
+      const studentTo = studentFrom + chunkSize - 1;
+      const { data, error } = await sb.supabase
+        .from('student_payment_records')
+        .select('transaction_reference')
+        .eq('is_deleted', false)
+        .neq('payment_method', 'cash')
+        .not('transaction_reference', 'is', null)
+        .order('id', { ascending: true })
+        .range(studentFrom, studentTo);
+
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+
+      for (const row of data) {
+        if (row.transaction_reference && row.transaction_reference.trim()) {
+          const ref = row.transaction_reference.trim().toUpperCase();
+          counts.set(ref, (counts.get(ref) || 0) + 1);
+        }
+      }
+
+      if (data.length < chunkSize) break;
+      studentFrom += chunkSize;
+    }
+
+    // 2. Chunked retrieval from mentor_payment_records
+    let mentorFrom = 0;
+    while (true) {
+      const mentorTo = mentorFrom + chunkSize - 1;
+      const { data, error } = await sb.supabase
+        .from('mentor_payment_records')
+        .select('transaction_reference')
+        .eq('is_deleted', false)
+        .neq('payment_method', 'cash')
+        .not('transaction_reference', 'is', null)
+        .order('id', { ascending: true })
+        .range(mentorFrom, mentorTo);
+
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+
+      for (const row of data) {
+        if (row.transaction_reference && row.transaction_reference.trim()) {
+          const ref = row.transaction_reference.trim().toUpperCase();
+          counts.set(ref, (counts.get(ref) || 0) + 1);
+        }
+      }
+
+      if (data.length < chunkSize) break;
+      mentorFrom += chunkSize;
+    }
+
+    const duplicateSet = new Set<string>();
+    const duplicatesList: Array<{ reference: string; count: number }> = [];
+    counts.forEach((count, ref) => {
+      if (count > 1) {
+        duplicateSet.add(ref);
+        duplicatesList.push({ reference: ref, count });
+      }
+    });
+
+    return {
+      counts,
+      duplicateSet,
+      duplicatesList,
+      totalDuplicateCount: duplicatesList.length,
+      error: null,
+    };
+  } catch (err: unknown) {
+    return {
+      ...emptyResult,
+      error: err instanceof Error ? err : new Error('Failed to retrieve global duplicate transaction references.'),
+    };
+  }
+}
+
+export interface AdminBillingMetrics {
+  pendingStudents: number;
+  overdueStudents: number;
+  pendingMentors: number;
+  upcomingRenewals: number;
+  duplicateReferencesCount: number;
+}
+
+export interface AdminBillingMetricsResult {
+  metrics: AdminBillingMetrics;
+  error: Error | null;
+}
+
+/**
+ * Admin: Retrieve lightweight operational metrics for the Billing Desk overview.
+ * Uses parallel HEAD count queries for pending/overdue records and global duplicate detection.
+ * Strictly adheres to the absolute NO-AMOUNT policy.
+ */
+export async function getAdminBillingMetrics(): Promise<AdminBillingMetricsResult> {
+  const emptyMetrics: AdminBillingMetrics = {
+    pendingStudents: 0,
+    overdueStudents: 0,
+    pendingMentors: 0,
+    upcomingRenewals: 0,
+    duplicateReferencesCount: 0,
+  };
+
+  const auth = await resolveAuthContext();
+  if (auth.error) return { metrics: emptyMetrics, error: auth.error };
+  if (auth.role !== 'admin') {
+    return { metrics: emptyMetrics, error: new Error('Unauthorized: Admin privilege required.') };
+  }
+
+  const todayBD = toBangladeshDateStr();
+
+  const sb = await getSupabaseBackend();
+  if (!sb.isConfigured || !sb.supabase) {
+    const rawStudents = getMockStudentPaymentRecords({ includeDeleted: false });
+    const rawMentors = getMockMentorPaymentRecords({ includeDeleted: false });
+    const enrollments = getMockEnrollments();
+    const dupRes = await getGlobalDuplicateReferences();
+
+    const pendingStudents = rawStudents.filter((r) => r.status === 'pending').length;
+    const overdueStudents = rawStudents.filter((r) => r.status === 'overdue').length;
+    const pendingMentors = rawMentors.filter((r) => r.status === 'pending').length;
+
+    const upcomingRenewals = enrollments.filter((e) => {
+      if (e.status !== 'active') return false;
+      const anchor = e.billing_start_date || (e.enrolled_at ? e.enrolled_at.substring(0, 10) : todayBD);
+      const period = computeBillingPeriod(anchor, 0);
+      return period.nextDueDate >= todayBD;
+    }).length;
+
+    return {
+      metrics: {
+        pendingStudents,
+        overdueStudents,
+        pendingMentors,
+        upcomingRenewals,
+        duplicateReferencesCount: dupRes.totalDuplicateCount,
+      },
+      error: null,
+    };
+  }
+
+  try {
+    // Parallel exact-count queries with head: true to minimize database network transfer
+    const [
+      pendingStudentsRes,
+      overdueStudentsRes,
+      pendingMentorsRes,
+      activeEnrollmentsRes,
+      dupRes,
+    ] = await Promise.all([
+      sb.supabase
+        .from('student_payment_records')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_deleted', false)
+        .eq('status', 'pending'),
+      sb.supabase
+        .from('student_payment_records')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_deleted', false)
+        .eq('status', 'overdue'),
+      sb.supabase
+        .from('mentor_payment_records')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_deleted', false)
+        .eq('status', 'pending'),
+      sb.supabase
+        .from('program_enrollments')
+        .select('billing_start_date, enrolled_at')
+        .eq('status', 'active'),
+      getGlobalDuplicateReferences(),
+    ]);
+
+    if (pendingStudentsRes.error) throw pendingStudentsRes.error;
+    if (overdueStudentsRes.error) throw overdueStudentsRes.error;
+    if (pendingMentorsRes.error) throw pendingMentorsRes.error;
+    if (activeEnrollmentsRes.error) throw activeEnrollmentsRes.error;
+    if (dupRes.error) throw dupRes.error;
+
+    // Calculate upcoming renewals from active enrollments
+    const enrollments = (activeEnrollmentsRes.data as Array<{ billing_start_date?: string | null; enrolled_at?: string | null }>) || [];
+    const upcomingRenewals = enrollments.filter((e) => {
+      const anchor = e.billing_start_date || (e.enrolled_at ? e.enrolled_at.substring(0, 10) : todayBD);
+      const period = computeBillingPeriod(anchor, 0);
+      return period.nextDueDate >= todayBD;
+    }).length;
+
+    return {
+      metrics: {
+        pendingStudents: pendingStudentsRes.count ?? 0,
+        overdueStudents: overdueStudentsRes.count ?? 0,
+        pendingMentors: pendingMentorsRes.count ?? 0,
+        upcomingRenewals,
+        duplicateReferencesCount: dupRes.totalDuplicateCount,
+      },
+      error: null,
+    };
+  } catch (err: unknown) {
+    return {
+      metrics: emptyMetrics,
+      error: err instanceof Error ? err : new Error('Failed to retrieve admin billing metrics.'),
+    };
+  }
+}
+
+/**
+ * Admin: Retrieve up to 5 recent student payment records ordered by cycle_start_date DESC.
+ * Bounded query prevents full-table download on desk overview.
+ */
+export async function getRecentStudentPaymentRecords(
+  limit = 5
+): Promise<{ records: StudentPaymentRecord[]; error: Error | null }> {
+  const auth = await resolveAuthContext();
+  if (auth.error) return { records: [], error: auth.error };
+  if (auth.role !== 'admin') {
+    return { records: [], error: new Error('Unauthorized: Admin privilege required.') };
+  }
+
+  const safeLimit = Math.min(Math.max(1, limit), 5);
+
+  const sb = await getSupabaseBackend();
+  if (!sb.isConfigured || !sb.supabase) {
+    const list = getMockStudentPaymentRecords({ includeDeleted: false });
+    list.sort((a, b) => {
+      const timeA = a.cycle_start_date ? new Date(a.cycle_start_date).getTime() : -Infinity;
+      const timeB = b.cycle_start_date ? new Date(b.cycle_start_date).getTime() : -Infinity;
+      if (timeB !== timeA) return timeB - timeA;
+      return (a.id || '').localeCompare(b.id || '');
+    });
+    return { records: list.slice(0, safeLimit), error: null };
+  }
+
+  try {
+    const { data, error } = await sb.supabase
+      .from('student_payment_records')
+      .select('*')
+      .eq('is_deleted', false)
+      .order('cycle_start_date', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true })
+      .limit(safeLimit);
+
+    if (error) throw error;
+    return { records: (data as StudentPaymentRecord[]) || [], error: null };
+  } catch (err: unknown) {
+    return {
+      records: [],
+      error: err instanceof Error ? err : new Error('Failed to retrieve recent student payment records.'),
+    };
+  }
+}
+
+/**
+ * Admin: Retrieve up to 5 recent mentor payout records ordered by billing_month DESC.
+ * Bounded query prevents full-table download on desk overview.
+ */
+export async function getRecentMentorPaymentRecords(
+  limit = 5
+): Promise<{ records: MentorPaymentRecord[]; error: Error | null }> {
+  const auth = await resolveAuthContext();
+  if (auth.error) return { records: [], error: auth.error };
+  if (auth.role !== 'admin') {
+    return { records: [], error: new Error('Unauthorized: Admin privilege required.') };
+  }
+
+  const safeLimit = Math.min(Math.max(1, limit), 5);
+
+  const sb = await getSupabaseBackend();
+  if (!sb.isConfigured || !sb.supabase) {
+    const list = getMockMentorPaymentRecords({ includeDeleted: false });
+    list.sort((a, b) => {
+      const timeA = a.billing_month ? new Date(a.billing_month).getTime() : -Infinity;
+      const timeB = b.billing_month ? new Date(b.billing_month).getTime() : -Infinity;
+      if (timeB !== timeA) return timeB - timeA;
+      return (a.id || '').localeCompare(b.id || '');
+    });
+    return { records: list.slice(0, safeLimit), error: null };
+  }
+
+  try {
+    const { data, error } = await sb.supabase
+      .from('mentor_payment_records')
+      .select('*')
+      .eq('is_deleted', false)
+      .order('billing_month', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true })
+      .limit(safeLimit);
+
+    if (error) throw error;
+    return { records: (data as MentorPaymentRecord[]) || [], error: null };
+  } catch (err: unknown) {
+    return {
+      records: [],
+      error: err instanceof Error ? err : new Error('Failed to retrieve recent mentor payout records.'),
     };
   }
 }
