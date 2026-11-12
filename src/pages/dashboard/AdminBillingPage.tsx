@@ -21,7 +21,8 @@ import {
   getPaymentAdminNotes,
   createPaymentAdminNote,
   overrideBillingStartDate,
-  getBillingDateAuditLogs,
+  getBillingDateAuditLogsPaginated,
+  DEFAULT_ADMIN_BILLING_AUDIT_LOG_PAGE_SIZE,
   type AdminBillingMetrics,
   type GlobalDuplicateReferencesResult,
 } from '../../lib/payments';
@@ -72,6 +73,15 @@ import {
 // ==============================================================================
 // HELPERS
 // ==============================================================================
+
+function safeToBangladeshDate(dateVal?: string | null): string {
+  if (!dateVal) return '';
+  try {
+    return toBangladeshDateStr(dateVal);
+  } catch {
+    return dateVal.split('T')[0] || '';
+  }
+}
 
 function formatBillingMonth(monthStr: string): string {
   if (!monthStr) return 'Not recorded';
@@ -250,10 +260,13 @@ export const AdminBillingPage: React.FC = () => {
   const [calendarMentorRecords, setCalendarMentorRecords] = useState<MentorPaymentRecord[]>([]);
   const [calendarLoading, setCalendarLoading] = useState(false);
 
-  // Audit Logs (Lazy Loaded)
+  // Audit Logs (Lazy Loaded & Paginated)
   const [auditLogs, setAuditLogs] = useState<BillingDateAuditLog[]>([]);
   const [auditLogsLoading, setAuditLogsLoading] = useState(false);
   const [auditLogsLoaded, setAuditLogsLoaded] = useState(false);
+  const [auditPage, setAuditPage] = useState(1);
+  const [auditPageSize, setAuditPageSize] = useState<number>(DEFAULT_ADMIN_BILLING_AUDIT_LOG_PAGE_SIZE);
+  const [auditPagination, setAuditPagination] = useState<PaginationMeta | null>(null);
 
   // Request ID refs for race condition prevention
   const studentReqIdRef = useRef(0);
@@ -261,6 +274,7 @@ export const AdminBillingPage: React.FC = () => {
   const overviewReqIdRef = useRef(0);
   const calendarReqIdRef = useRef(0);
   const auditReqIdRef = useRef(0);
+  const duplicateReqIdRef = useRef(0);
 
   // Lookup Maps
   const studentsMap = useMemo(() => {
@@ -334,8 +348,10 @@ export const AdminBillingPage: React.FC = () => {
 
   // 2. Duplicate References Loader
   const loadDuplicateReferences = useCallback(async () => {
+    const reqId = ++duplicateReqIdRef.current;
     try {
       const res = await getGlobalDuplicateReferences();
+      if (reqId !== duplicateReqIdRef.current) return;
       if (!res.error) {
         setDuplicateReferences(res);
       }
@@ -422,16 +438,22 @@ export const AdminBillingPage: React.FC = () => {
     }
   }, []);
 
-  // 6. Audit Logs Loader (Lazy loaded)
-  const loadAuditLogsData = useCallback(async () => {
+  // 6. Audit Logs Loader (Lazy loaded & Paginated)
+  const loadAuditLogsData = useCallback(async (targetPage?: number, targetPageSize?: number) => {
     const reqId = ++auditReqIdRef.current;
     setAuditLogsLoading(true);
+    const p = targetPage ?? auditPage;
+    const ps = targetPageSize ?? auditPageSize;
     try {
-      const res = await getBillingDateAuditLogs();
+      const res = await getBillingDateAuditLogsPaginated({
+        page: p,
+        pageSize: ps,
+      });
       if (reqId !== auditReqIdRef.current) return;
       if (res.error) throw res.error;
 
       setAuditLogs(res.logs);
+      setAuditPagination(res.pagination);
       setAuditLogsLoaded(true);
     } catch (err: unknown) {
       if (reqId === auditReqIdRef.current) {
@@ -442,7 +464,7 @@ export const AdminBillingPage: React.FC = () => {
         setAuditLogsLoading(false);
       }
     }
-  }, []);
+  }, [auditPage, auditPageSize]);
 
   // Initial mount data load
   useEffect(() => {
@@ -480,7 +502,7 @@ export const AdminBillingPage: React.FC = () => {
       loadCalendarData(calendarYear, calendarMonth);
     }
     if (activeTab === 'audit_notes' || auditLogsLoaded) {
-      loadAuditLogsData();
+      loadAuditLogsData(auditPage, auditPageSize);
     }
   }, [
     loadOverviewData,
@@ -493,6 +515,8 @@ export const AdminBillingPage: React.FC = () => {
     calendarMonth,
     auditLogsLoaded,
     loadAuditLogsData,
+    auditPage,
+    auditPageSize,
   ]);
 
   // Essential Counts
@@ -517,7 +541,7 @@ export const AdminBillingPage: React.FC = () => {
     });
     calendarMentorRecords.forEach((r) => {
       if (r.payout_date) {
-        const dateKey = r.payout_date.split('T')[0];
+        const dateKey = safeToBangladeshDate(r.payout_date);
         const entry = map.get(dateKey) || { studentDueCount: 0, mentorPayoutCount: 0 };
         entry.mentorPayoutCount++;
         map.set(dateKey, entry);
@@ -705,7 +729,7 @@ export const AdminBillingPage: React.FC = () => {
           }`}
         >
           <span>Audit Log</span>
-          <span className="font-mono text-[10px] sm:text-[11px] opacity-80">({auditLogsLoaded ? auditLogs.length : '—'})</span>
+          <span className="font-mono text-[10px] sm:text-[11px] opacity-80">({auditPagination?.totalCount ?? (auditLogsLoaded ? auditLogs.length : '—')})</span>
         </button>
       </div>
 
@@ -1324,7 +1348,7 @@ export const AdminBillingPage: React.FC = () => {
                             Payout Date
                           </span>
                           <span className="font-mono text-[10px] sm:text-[11px] text-brand-muted block mt-0.5">
-                            {rec.payout_date ? formatCalendarDate(rec.payout_date.split('T')[0]) : 'Pending'}
+                            {rec.payout_date ? formatCalendarDate(safeToBangladeshDate(rec.payout_date)) : 'Pending'}
                           </span>
                         </div>
                       </div>
@@ -1410,7 +1434,7 @@ export const AdminBillingPage: React.FC = () => {
                             )}
                           </td>
                           <td className="p-2.5 font-mono text-[11px] text-brand-muted">
-                            {rec.payout_date ? formatCalendarDate(rec.payout_date.split('T')[0]) : 'Pending'}
+                            {rec.payout_date ? formatCalendarDate(safeToBangladeshDate(rec.payout_date)) : 'Pending'}
                           </td>
                           <td className="p-2.5 text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1">
@@ -1584,7 +1608,7 @@ export const AdminBillingPage: React.FC = () => {
             </div>
             {(() => {
               const dueStudents = calendarStudentRecords.filter((r) => r.next_due_date === selectedCalendarDate);
-              const payouts = calendarMentorRecords.filter((r) => r.payout_date?.startsWith(selectedCalendarDate));
+              const payouts = calendarMentorRecords.filter((r) => safeToBangladeshDate(r.payout_date) === selectedCalendarDate);
 
               if (dueStudents.length === 0 && payouts.length === 0) {
                 return <p className="text-brand-muted text-xs">No payments or payouts scheduled on this date.</p>;
@@ -1718,6 +1742,28 @@ export const AdminBillingPage: React.FC = () => {
                 </table>
               </div>
             </div>
+          )}
+
+          {/* Audit Logs Pagination */}
+          {auditPagination && (
+            <PaginationControls
+              currentPage={auditPagination.page}
+              totalPages={auditPagination.totalPages}
+              totalCount={auditPagination.totalCount}
+              pageSize={auditPagination.pageSize}
+              pageSizeOptions={[10, 25, 50, 100]}
+              onPageChange={(p) => {
+                setAuditPage(p);
+                loadAuditLogsData(p, auditPageSize);
+              }}
+              onPageSizeChange={(newSize) => {
+                setAuditPageSize(newSize);
+                setAuditPage(1);
+                loadAuditLogsData(1, newSize);
+              }}
+              isLoading={auditLogsLoading}
+              ariaLabel="Billing audit logs pagination"
+            />
           )}
         </div>
       )}
@@ -1909,7 +1955,7 @@ export const AdminBillingPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-brand-muted">Payout Date</span>
-                  <span className="font-bold">{selectedMentorRecord.payout_date ? formatCalendarDate(selectedMentorRecord.payout_date.split('T')[0]) : 'Pending'}</span>
+                  <span className="font-bold">{selectedMentorRecord.payout_date ? formatCalendarDate(safeToBangladeshDate(selectedMentorRecord.payout_date)) : 'Pending'}</span>
                 </div>
               </div>
 
@@ -2721,7 +2767,7 @@ const EditMentorPayoutModal: React.FC<EditMentorPayoutModalProps> = ({
   const [status, setStatus] = useState<MentorPaymentStatus>(record.status);
   const [method, setMethod] = useState<PaymentMethod>((record.payment_method as PaymentMethod) || 'bkash');
   const [reference, setReference] = useState(record.transaction_reference || '');
-  const [payoutDate, setPayoutDate] = useState(record.payout_date ? record.payout_date.split('T')[0] : '');
+  const [payoutDate, setPayoutDate] = useState(() => (record.payout_date ? safeToBangladeshDate(record.payout_date) : ''));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -2967,7 +3013,7 @@ const PaymentEventsModal: React.FC<PaymentEventsModalProps> = ({
               <div key={evt.id} className="p-2 bg-brand-paper border border-brand-dark/15 space-y-1">
                 <div className="flex justify-between font-bold">
                   <span>{formatPaymentMethod(evt.payment_method)}</span>
-                  <span className="font-mono text-brand-muted">{formatCalendarDate(evt.payment_date.split('T')[0])}</span>
+                  <span className="font-mono text-brand-muted">{formatCalendarDate(safeToBangladeshDate(evt.payment_date))}</span>
                 </div>
                 {evt.transaction_reference && (
                   <div className="font-mono text-brand-dark">Ref: {evt.transaction_reference}</div>

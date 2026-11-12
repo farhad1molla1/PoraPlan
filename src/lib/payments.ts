@@ -1047,6 +1047,109 @@ export async function getBillingDateAuditLogs(
   }
 }
 
+export const DEFAULT_ADMIN_BILLING_AUDIT_LOG_PAGE_SIZE = 25;
+
+export interface AdminBillingAuditLogsPaginatedParams {
+  page?: number;
+  pageSize?: number;
+  enrollmentId?: string;
+}
+
+export interface AdminBillingAuditLogsPaginatedResult {
+  logs: BillingDateAuditLog[];
+  pagination: PaginationMeta;
+  error: Error | null;
+}
+
+/**
+ * Admin: Retrieve paginated billing date audit logs with exact count metadata,
+ * deterministic ordering (created_at DESC, id ASC), and optional enrollment filtering.
+ */
+export async function getBillingDateAuditLogsPaginated(
+  params?: AdminBillingAuditLogsPaginatedParams
+): Promise<AdminBillingAuditLogsPaginatedResult> {
+  const auth = await resolveAuthContext();
+  const page = params?.page ?? DEFAULT_PAGE;
+  const pageSize = params?.pageSize ?? DEFAULT_ADMIN_BILLING_AUDIT_LOG_PAGE_SIZE;
+  const range = calculatePaginationRange({ page, pageSize });
+
+  const emptyMeta = createPaginationMeta({
+    page: range.page,
+    pageSize: range.pageSize,
+    totalCount: 0,
+  });
+
+  if (auth.error) {
+    return { logs: [], pagination: emptyMeta, error: auth.error };
+  }
+  if (auth.role !== 'admin') {
+    return {
+      logs: [],
+      pagination: emptyMeta,
+      error: new Error('Unauthorized: Billing audit logs are restricted to administrators.'),
+    };
+  }
+
+  const sb = await getSupabaseBackend();
+  if (!sb.isConfigured || !sb.supabase) {
+    const list = getMockBillingDateAuditLogs(params?.enrollmentId);
+
+    // Deterministic sort: created_at DESC NULLS LAST, id ASC
+    list.sort((a, b) => {
+      const timeA = a.created_at ? new Date(a.created_at).getTime() : -Infinity;
+      const timeB = b.created_at ? new Date(b.created_at).getTime() : -Infinity;
+      if (timeB !== timeA) return timeB - timeA;
+      return (a.id || '').localeCompare(b.id || '');
+    });
+
+    const totalCount = list.length;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+    });
+    const sliced = list.slice(range.from, range.to + 1);
+
+    return { logs: sliced, pagination, error: null };
+  }
+
+  try {
+    let query = sb.supabase
+      .from('billing_date_audit_logs')
+      .select('*', { count: 'exact' });
+
+    if (params?.enrollmentId) {
+      query = query.eq('enrollment_id', params.enrollmentId);
+    }
+
+    const { data, count, error } = await query
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true })
+      .range(range.from, range.to);
+
+    if (error) throw error;
+
+    const totalCount = count ?? 0;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+    });
+
+    return {
+      logs: (data as BillingDateAuditLog[]) || [],
+      pagination,
+      error: null,
+    };
+  } catch (err: unknown) {
+    return {
+      logs: [],
+      pagination: emptyMeta,
+      error: err instanceof Error ? err : new Error('Failed to retrieve billing date audit logs.'),
+    };
+  }
+}
+
 /**
  * Admin: Override an enrollment's effective billing start anchor date with mandatory audit logging.
  * Does NOT rewrite or delete historical billing records.
@@ -1976,7 +2079,12 @@ export async function getAdminCalendarMonthData(
 
     const mentorRecords = rawMentors.filter((r) => {
       if (!r.payout_date) return false;
-      const dateKey = r.payout_date.split('T')[0];
+      let dateKey: string;
+      try {
+        dateKey = toBangladeshDateStr(r.payout_date);
+      } catch {
+        dateKey = r.payout_date.split('T')[0];
+      }
       return dateKey >= startDateStr && dateKey <= endDateStr;
     });
 

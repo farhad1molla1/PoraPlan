@@ -52,6 +52,9 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { toBangladeshDateStr } from '../lib/billingCycles';
+import { calculatePaginationRange } from '../lib/pagination';
+import { DEFAULT_ADMIN_BILLING_AUDIT_LOG_PAGE_SIZE } from '../lib/payments';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,7 +75,8 @@ function report(
     | 'RACE_GUARD'
     | 'PAGINATION_UI'
     | 'WORKFLOWS'
-    | 'HYGIENE' = 'SERVICE'
+    | 'HYGIENE'
+    | 'HARDENING' = 'SERVICE'
 ) {
   if (condition) {
     console.log(`[PASS] [${category}] ${id}: ${description}`);
@@ -435,6 +439,103 @@ async function runTests() {
     allProtectedExist,
     'Protected user files (MentorTasksPage, PublicProfilePage, StudentLibraryPage) exist intact',
     'HYGIENE'
+  );
+
+  // =========================================================================
+  // Section 9: Batch 4.6B-2B Hardening (Audit Pagination, Duplicate Race & Bangladesh Dates)
+  // =========================================================================
+  console.log('\n--- Section 9: Batch 4.6B-2B Hardening ---');
+
+  report(
+    'HDN-01',
+    DEFAULT_ADMIN_BILLING_AUDIT_LOG_PAGE_SIZE === 25,
+    'DEFAULT_ADMIN_BILLING_AUDIT_LOG_PAGE_SIZE is exported and equals 25',
+    'HARDENING'
+  );
+
+  report(
+    'HDN-02',
+    paymentsSource.includes('export async function getBillingDateAuditLogsPaginated') &&
+      paymentsSource.includes("select('*', { count: 'exact' })") &&
+      paymentsSource.includes(".order('created_at', { ascending: false })") &&
+      paymentsSource.includes(".order('id', { ascending: true })"),
+    'getBillingDateAuditLogsPaginated provides exact count and deterministic ordering (created_at DESC, id ASC)',
+    'HARDENING'
+  );
+
+  report(
+    'HDN-03',
+    adminBillingSource.includes('getBillingDateAuditLogsPaginated') &&
+      adminBillingSource.includes('DEFAULT_ADMIN_BILLING_AUDIT_LOG_PAGE_SIZE'),
+    'AdminBillingPage imports getBillingDateAuditLogsPaginated and default page size',
+    'HARDENING'
+  );
+
+  report(
+    'HDN-04',
+    adminBillingSource.includes('ariaLabel="Billing audit logs pagination"') &&
+      adminBillingSource.includes('setAuditPageSize') &&
+      adminBillingSource.includes('setAuditPage'),
+    'AdminBillingPage renders PaginationControls for audit logs with standard page size controls',
+    'HARDENING'
+  );
+
+  report(
+    'HDN-05',
+    adminBillingSource.includes('auditPagination?.totalCount'),
+    'Audit Log tab counter displays server-provided totalCount from auditPagination',
+    'HARDENING'
+  );
+
+  report(
+    'HDN-06',
+    adminBillingSource.includes('duplicateReqIdRef') &&
+      adminBillingSource.includes('reqId !== duplicateReqIdRef.current'),
+    'duplicateReqIdRef guards global duplicate reference retrieval against stale out-of-order responses',
+    'HARDENING'
+  );
+
+  report(
+    'HDN-07',
+    adminBillingSource.includes('function safeToBangladeshDate') &&
+      adminBillingSource.includes('safeToBangladeshDate(r.payout_date) === selectedCalendarDate'),
+    'safeToBangladeshDate normalizes mentor payout dates and guards calendar agenda matching',
+    'HARDENING'
+  );
+
+  report(
+    'HDN-08',
+    paymentsSource.includes('toBangladeshDateStr(r.payout_date)'),
+    'getAdminCalendarMonthData mock fallback maps mentor payout_date via toBangladeshDateStr',
+    'HARDENING'
+  );
+
+  // Functional date test: UTC 20:00 on Oct 31 is 02:00 on Nov 1 in Bangladesh (+06:00)
+  const convertedDate = toBangladeshDateStr('2026-10-31T20:00:00Z');
+  report(
+    'HDN-09',
+    convertedDate === '2026-11-01',
+    `toBangladeshDateStr correctly shifts UTC evening timestamps into Asia/Dhaka day ('2026-10-31T20:00:00Z' -> '${convertedDate}')`,
+    'HARDENING'
+  );
+
+  // Functional date test: date-only strings preserved
+  const plainDate = toBangladeshDateStr('2026-11-01');
+  report(
+    'HDN-10',
+    plainDate === '2026-11-01',
+    `toBangladeshDateStr preserves date-only strings without shifting ('2026-11-01' -> '${plainDate}')`,
+    'HARDENING'
+  );
+
+  // Functional pagination range calculation for audit logs
+  const page1Range = calculatePaginationRange({ page: 1, pageSize: DEFAULT_ADMIN_BILLING_AUDIT_LOG_PAGE_SIZE });
+  const page2Range = calculatePaginationRange({ page: 2, pageSize: DEFAULT_ADMIN_BILLING_AUDIT_LOG_PAGE_SIZE });
+  report(
+    'HDN-11',
+    page1Range.from === 0 && page1Range.to === 24 && page2Range.from === 25 && page2Range.to === 49,
+    `Audit log pagination offsets match expected PostgREST bounds: [${page1Range.from}..${page1Range.to}], [${page2Range.from}..${page2Range.to}]`,
+    'HARDENING'
   );
 
   console.log('\n======================================================');
