@@ -575,7 +575,7 @@ export async function getAdminUsers(filters?: {
 
     if (filters?.search && filters.search.trim()) {
       const sanitized = sanitizeSearchInput(filters.search);
-      if (!sanitized) {
+      if (!sanitized || sanitized.replace(/[%]/g, '').trim().length === 0) {
         return { users: [], error: null };
       }
       query = query.or(`full_name.ilike.%${sanitized}%,email.ilike.%${sanitized}%,poraplan_id.ilike.%${sanitized}%`);
@@ -618,6 +618,15 @@ export async function getAdminUsersPaginated(
     sanitizedSearch = sanitizeSearchInput(params!.search!);
     if (!sanitizedSearch) {
       // Non-empty search with zero valid characters (only syntax delimiters).
+      // Return empty results rather than an unrestricted query.
+      return {
+        users: [],
+        pagination: emptyMeta,
+        error: null,
+      };
+    }
+    if (sanitizedSearch.replace(/[%]/g, '').trim().length === 0) {
+      // Non-empty search with zero valid characters (only wildcards).
       // Return empty results rather than an unrestricted query.
       return {
         users: [],

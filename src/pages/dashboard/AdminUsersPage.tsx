@@ -1,6 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { getAdminUsers } from '../../lib/profiles';
+import {
+  getAdminUsersPaginated,
+  getAdminUserRoleCounts,
+  DEFAULT_ADMIN_USERS_PAGE_SIZE,
+  type AdminUserRoleCounts,
+} from '../../lib/profiles';
 import { getEnrollments } from '../../lib/applications';
 import { getEffectiveMentor, getEffectiveStudentsForMentor } from '../../lib/mentorAssignments';
 import { useAuth } from '../../hooks/useAuth';
@@ -10,8 +15,10 @@ import type {
   AccountStatus,
   ProgramEnrollmentWithMeta,
 } from '../../types/database';
+import type { PaginationMeta } from '../../types/pagination';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import {
   Users,
   Search,
@@ -41,10 +48,34 @@ export const AdminUsersPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Pagination & Server Status Counts
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_ADMIN_USERS_PAGE_SIZE);
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
+  const [roleCounts, setRoleCounts] = useState<AdminUserRoleCounts | null>(null);
+
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | UserRole>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | AccountStatus>('all');
+
+  // Request-version tracker to eliminate stale-async race conditions
+  const requestIdRef = useRef(0);
+
+  // 300ms Search Debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch((prev) => {
+        if (prev !== searchQuery) {
+          setPage(1);
+          return searchQuery;
+        }
+        return prev;
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Drawer / Selection
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
@@ -55,25 +86,58 @@ export const AdminUsersPage: React.FC = () => {
   const [isSendingReset, setIsSendingReset] = useState(false);
 
   const loadUsers = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     setError(null);
     try {
-      const res = await getAdminUsers();
+      const [res, counts] = await Promise.all([
+        getAdminUsersPaginated({
+          page,
+          pageSize,
+          role: roleFilter === 'all' ? undefined : roleFilter,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+          search: debouncedSearch.trim() || undefined,
+        }),
+        getAdminUserRoleCounts({
+          status: statusFilter === 'all' ? undefined : statusFilter,
+        }),
+      ]);
+
+      if (requestId !== requestIdRef.current) return;
+
       if (res.error) {
         setError(res.error.message);
       } else {
         setUsers(res.users);
+        setPagination(res.pagination);
+      }
+
+      if (counts && !counts.error) {
+        setRoleCounts(counts);
       }
     } catch (err: unknown) {
+      if (requestId !== requestIdRef.current) return;
       setError(err instanceof Error ? err.message : 'Failed to retrieve user directory.');
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+      }
     }
-  }, []);
+  }, [page, pageSize, roleFilter, statusFilter, debouncedSearch]);
 
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
+
+  const handleRoleFilterChange = (role: 'all' | UserRole) => {
+    setRoleFilter(role);
+    setPage(1);
+  };
+
+  const handleStatusFilterChange = (status: 'all' | AccountStatus) => {
+    setStatusFilter(status);
+    setPage(1);
+  };
 
   // Load details when a user is selected
   useEffect(() => {
@@ -134,33 +198,15 @@ export const AdminUsersPage: React.FC = () => {
     };
   }, [selectedUser]);
 
-  // Filtered users
-  const filteredUsers = useMemo(() => {
-    return users.filter((u) => {
-      // Role filter
-      if (roleFilter !== 'all' && u.role !== roleFilter) return false;
-      // Status filter
-      if (statusFilter !== 'all' && (u.status || 'active') !== statusFilter) return false;
-      // Search
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const matchesName = u.full_name.toLowerCase().includes(q);
-        const matchesEmail = u.email.toLowerCase().includes(q);
-        const matchesId = u.poraplan_id ? u.poraplan_id.toLowerCase().includes(q) : false;
-        if (!matchesName && !matchesEmail && !matchesId) return false;
-      }
-      return true;
-    });
-  }, [users, roleFilter, statusFilter, searchQuery]);
-
-  // Statistics
+  // Statistics derived from lightweight server role counts
   const stats = useMemo(() => {
-    const total = users.length;
-    const students = users.filter((u) => u.role === 'student').length;
-    const mentors = users.filter((u) => u.role === 'mentor').length;
-    const admins = users.filter((u) => u.role === 'admin').length;
-    return { total, students, mentors, admins };
-  }, [users]);
+    return {
+      total: roleCounts?.total ?? (pagination?.totalCount ?? users.length),
+      students: roleCounts?.students ?? 0,
+      mentors: roleCounts?.mentors ?? 0,
+      admins: roleCounts?.admins ?? 0,
+    };
+  }, [roleCounts, pagination?.totalCount, users.length]);
 
   // Handle password recovery dispatch
   const handleTriggerPasswordReset = async () => {
@@ -247,11 +293,10 @@ export const AdminUsersPage: React.FC = () => {
       {/* Global Action Banner */}
       {actionNotice && (
         <div
-          className={`p-2.5 sm:p-4 rounded-lg sm:rounded-xl border flex items-center justify-between gap-2.5 sm:gap-3 text-xs sm:text-sm animate-fade-in ${
-            actionNotice.type === 'success'
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
-              : 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-300'
-          }`}
+          className={`p-2.5 sm:p-4 rounded-lg sm:rounded-xl border flex items-center justify-between gap-2.5 sm:gap-3 text-xs sm:text-sm animate-fade-in ${actionNotice.type === 'success'
+            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
+            : 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-300'
+            }`}
         >
           <div className="flex items-center gap-2 sm:gap-2.5">
             {actionNotice.type === 'success' ? (
@@ -318,7 +363,7 @@ export const AdminUsersPage: React.FC = () => {
             <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-text-muted" />
             <select
               value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value as any)}
+              onChange={(e) => handleRoleFilterChange(e.target.value as any)}
               className="py-1.5 px-2.5 sm:py-2 sm:px-3 text-base sm:text-sm min-h-[38px] sm:min-h-0 bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 text-text-primary w-full sm:w-auto"
             >
               <option value="all">All Roles</option>
@@ -331,7 +376,7 @@ export const AdminUsersPage: React.FC = () => {
           {/* Status Filter */}
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
+            onChange={(e) => handleStatusFilterChange(e.target.value as any)}
             className="py-1.5 px-2.5 sm:py-2 sm:px-3 text-base sm:text-sm min-h-[38px] sm:min-h-0 bg-surface-base border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-forest-600 text-text-primary flex-1 sm:flex-none w-full sm:w-auto"
           >
             <option value="all">All Statuses</option>
@@ -357,7 +402,7 @@ export const AdminUsersPage: React.FC = () => {
             Try Again
           </Button>
         </div>
-      ) : filteredUsers.length === 0 ? (
+      ) : users.length === 0 ? (
         <div className="p-12 text-center rounded-xl border border-border-default bg-surface-card">
           <Users className="w-10 h-10 text-text-muted mx-auto mb-3 opacity-40" />
           <h3 className="text-base font-medium text-text-primary">No members match your criteria</h3>
@@ -370,8 +415,10 @@ export const AdminUsersPage: React.FC = () => {
               size="sm"
               onClick={() => {
                 setSearchQuery('');
+                setDebouncedSearch('');
                 setRoleFilter('all');
                 setStatusFilter('all');
+                setPage(1);
               }}
               className="mt-4"
             >
@@ -380,10 +427,11 @@ export const AdminUsersPage: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="rounded-xl border border-border-default bg-surface-card shadow-sm overflow-hidden">
-          {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
-          <div className="lg:hidden p-2 sm:p-4 space-y-2 sm:space-y-3 bg-surface-base/30">
-            {filteredUsers.map((u) => {
+        <div className="space-y-4">
+          <div className="rounded-xl border border-border-default bg-surface-card shadow-sm overflow-hidden">
+            {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
+            <div className="lg:hidden p-2 sm:p-4 space-y-2 sm:space-y-3 bg-surface-base/30">
+              {users.map((u) => {
               const initial = u.full_name ? u.full_name.charAt(0).toUpperCase() : '?';
               const isSelected = selectedUser?.id === u.id;
 
@@ -391,9 +439,8 @@ export const AdminUsersPage: React.FC = () => {
                 <div
                   key={u.id}
                   onClick={() => setSelectedUser(u)}
-                  className={`p-2.5 sm:p-4 rounded-lg sm:rounded-xl border border-border-default bg-surface-card shadow-none sm:shadow-xs hover:border-forest-600 transition-all cursor-pointer space-y-2 sm:space-y-3 ${
-                    isSelected ? 'ring-2 ring-forest-600 bg-forest-900/5 dark:bg-forest-100/5' : ''
-                  }`}
+                  className={`p-2.5 sm:p-4 rounded-lg sm:rounded-xl border border-border-default bg-surface-card shadow-none sm:shadow-xs hover:border-forest-600 transition-all cursor-pointer space-y-2 sm:space-y-3 ${isSelected ? 'ring-2 ring-forest-600 bg-forest-900/5 dark:bg-forest-100/5' : ''
+                    }`}
                 >
                   {/* Card Header: Avatar/Initials + Name + ID + Role & Status Badges */}
                   <div className="flex items-start justify-between gap-2">
@@ -426,8 +473,8 @@ export const AdminUsersPage: React.FC = () => {
                             {u.status === 'not_activated'
                               ? 'Not Activated'
                               : u.status === 'suspended'
-                              ? 'Suspended'
-                              : 'Active'}
+                                ? 'Suspended'
+                                : 'Active'}
                           </Badge>
                         </div>
                       </div>
@@ -496,16 +543,15 @@ export const AdminUsersPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-default">
-                {filteredUsers.map((u) => {
+                {users.map((u) => {
                   const initial = u.full_name ? u.full_name.charAt(0).toUpperCase() : '?';
                   const isSelected = selectedUser?.id === u.id;
 
                   return (
                     <tr
                       key={u.id}
-                      className={`hover:bg-surface-base/80 transition-colors cursor-pointer ${
-                        isSelected ? 'bg-forest-900/5 dark:bg-forest-100/5' : ''
-                      }`}
+                      className={`hover:bg-surface-base/80 transition-colors cursor-pointer ${isSelected ? 'bg-forest-900/5 dark:bg-forest-100/5' : ''
+                        }`}
                       onClick={() => setSelectedUser(u)}
                     >
                       <td className="py-3.5 px-4">
@@ -546,8 +592,8 @@ export const AdminUsersPage: React.FC = () => {
                           {u.status === 'not_activated'
                             ? 'Not Activated'
                             : u.status === 'suspended'
-                            ? 'Suspended'
-                            : 'Active'}
+                              ? 'Suspended'
+                              : 'Active'}
                         </Badge>
                       </td>
                       <td className="py-3.5 px-4 hidden md:table-cell text-xs text-text-secondary whitespace-nowrap">
@@ -584,9 +630,32 @@ export const AdminUsersPage: React.FC = () => {
             </table>
           </div>
           <div className="py-3 px-4 bg-surface-base/30 border-t border-border-default flex justify-between items-center text-xs text-text-secondary">
-            <span>Showing {filteredUsers.length} of {users.length} members</span>
+            <span>
+              Showing {pagination?.displayStart ?? (users.length > 0 ? 1 : 0)}-{pagination?.displayEnd ?? users.length} of {pagination?.totalCount ?? users.length} members
+            </span>
           </div>
         </div>
+
+        {/* Server-Side Pagination Controls */}
+        {!loading && !error && pagination && pagination.totalCount > 0 && (
+          <div className="pt-2">
+            <PaginationControls
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              totalCount={pagination.totalCount}
+              pageSize={pagination.pageSize}
+              pageSizeOptions={[10, 25, 50, 100]}
+              onPageChange={setPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setPage(1);
+              }}
+              isLoading={loading}
+              ariaLabel="Admin users directory pagination"
+            />
+          </div>
+        )}
+      </div>
       )}
 
       {/* User Detail Drawer / Modal */}
@@ -631,8 +700,8 @@ export const AdminUsersPage: React.FC = () => {
                       {selectedUser.status === 'not_activated'
                         ? 'Not Activated'
                         : selectedUser.status === 'suspended'
-                        ? 'Suspended'
-                        : 'Active'}
+                          ? 'Suspended'
+                          : 'Active'}
                     </Badge>
                   </div>
                 </div>
@@ -749,7 +818,7 @@ export const AdminUsersPage: React.FC = () => {
               ) : selectedUser.role === 'student' ? (
                 <div className="space-y-4">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted">Active Enrollments & Mentorship</h3>
-                  
+
                   {/* Assigned Mentor Card */}
                   <div className="p-3.5 rounded-lg border border-border-default bg-surface-base/50">
                     <span className="text-xs text-text-muted block font-semibold mb-1">Dedicated Academic Mentor</span>
