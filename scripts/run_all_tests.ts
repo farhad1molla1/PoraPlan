@@ -154,6 +154,13 @@ const testSuites: TestSuiteDef[] = [
     category: 'Pagination Foundation',
   },
 
+  // Batch 4.7C-1 Admin Academic Reports Engine Optimization & Bulk Aggregation
+  {
+    name: 'Batch 4.7C-1: Academic Reports Engine Optimization',
+    relativePath: 'src/__tests__/adminAcademicReportsBulkAggregation.test.ts',
+    category: 'Pagination Foundation',
+  },
+
   // Modern Security & RLS Suites
   {
     name: 'RLS Helper Privacy & Status Semantics',

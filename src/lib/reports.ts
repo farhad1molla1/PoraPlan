@@ -2079,7 +2079,26 @@ export async function generateMentorReport(
 }
 
 /**
+ * Multi-program safe effective mentor lookup key helper.
+ * Format: `${studentId}:${programId}` if programId is provided, or `${studentId}`.
+ */
+function makeEffectiveMentorKey(studentId: string, programId?: string | null): string {
+  if (studentId && programId) {
+    return `${studentId}:${programId}`;
+  }
+  return studentId || '';
+}
+
+export const DEFAULT_ADMIN_REPORT_CHUNK_SIZE = 50;
+
+/**
  * Generates Platform-Wide Academic Intelligence & Operations Overview for Administrators (Milestone 12.3).
+ *
+ * Performance Optimized (Batch 4.7C-1):
+ * - Eliminates sequential per-student N+1 database queries.
+ * - Executes bulk chunked data retrieval for tasks, assignments, and evaluations.
+ * - Eliminates per-mentor sequential count queries via bulk assignment aggregation.
+ * - Computes all student metrics purely in memory via buildStudentReportFromData.
  *
  * Strict Security & Privacy Enforcement:
  * - Only administrators can access this report. Non-admin callers receive an immediate Unauthorized error.
@@ -2096,6 +2115,7 @@ export async function generateAdminAcademicIntelligence(
     referenceDate?: Date;
     requestingUserId?: string;
     requestingUserRole?: 'student' | 'mentor' | 'admin';
+    chunkSize?: number;
   }
 ): Promise<{ report: AdminAcademicIntelligenceReport | null; error: Error | null }> {
   const backend = await getSupabaseBackend();
@@ -2131,12 +2151,29 @@ export async function generateAdminAcademicIntelligence(
     let mentorProfiles: Profile[] = [];
     let allEnrollments: any[] = [];
 
+    const tasksByStudent = new Map<string, Task[]>();
+    const asgsByStudent = new Map<string, any[]>();
+    const evalsByStudent = new Map<string, any[]>();
+
+    const mentorActiveMenteesCountMap = new Map<string, number>();
+    const mentorActiveCohortsCountMap = new Map<string, number>();
+    const overrideByStudentProgram = new Map<string, any>();
+    const legacyOverrideByStudent = new Map<string, any>();
+    const cohortMentorMap = new Map<string, any>();
+
     if (!backend.isConfigured || !backend.supabase) {
       // Mock Data Layer
       const allUsers = getMockUsers();
       studentProfiles = allUsers.filter((u) => u.role === 'student');
       mentorProfiles = allUsers.filter((u) => u.role === 'mentor');
       allEnrollments = getMockEnrollments();
+
+      for (const s of studentProfiles) {
+        const normId = normalizeMockUserId(s.id);
+        tasksByStudent.set(s.id, getMockStudentTasks(normId));
+        asgsByStudent.set(s.id, getMockStudentAssignments(normId));
+        evalsByStudent.set(s.id, getMockStudentEvaluations(normId));
+      }
     } else {
       // Supabase Backend Layer — Privacy-conscious query excluding private contact fields
       const { data: profiles, error: pErr } = await backend.supabase
@@ -2155,12 +2192,97 @@ export async function generateAdminAcademicIntelligence(
 
       if (eErr) return { report: null, error: eErr };
       allEnrollments = enrs || [];
+
+      // Bulk fetch mentor allocations & workload across platform (eliminates per-mentor N+1 count queries)
+      const [overridesRes, cohortMentorsRes] = await Promise.all([
+        backend.supabase
+          .from('student_mentor_assignments')
+          .select('id, mentor_id, student_id, program_id, profiles!mentor_id(id, full_name, poraplan_id)')
+          .eq('is_active', true),
+        backend.supabase
+          .from('cohort_mentors')
+          .select('id, mentor_id, cohort_id, program_id, profiles!mentor_id(id, full_name, poraplan_id)')
+          .eq('is_active', true),
+      ]);
+
+      if (overridesRes.error) return { report: null, error: overridesRes.error };
+      if (cohortMentorsRes.error) return { report: null, error: cohortMentorsRes.error };
+
+      for (const ov of (overridesRes.data as any[]) || []) {
+        if (ov.mentor_id) {
+          mentorActiveMenteesCountMap.set(
+            ov.mentor_id,
+            (mentorActiveMenteesCountMap.get(ov.mentor_id) || 0) + 1
+          );
+        }
+        if (ov.program_id) {
+          overrideByStudentProgram.set(makeEffectiveMentorKey(ov.student_id, ov.program_id), ov);
+        }
+        if (!legacyOverrideByStudent.has(ov.student_id)) {
+          legacyOverrideByStudent.set(ov.student_id, ov);
+        }
+      }
+
+      for (const cm of (cohortMentorsRes.data as any[]) || []) {
+        if (cm.mentor_id) {
+          mentorActiveCohortsCountMap.set(
+            cm.mentor_id,
+            (mentorActiveCohortsCountMap.get(cm.mentor_id) || 0) + 1
+          );
+        }
+        if (cm.cohort_id && !cohortMentorMap.has(cm.cohort_id)) {
+          cohortMentorMap.set(cm.cohort_id, cm);
+        }
+      }
+
+      // Bulk fetch tasks, assignments, and evaluations in chunks (eliminates per-student N+1 queries)
+      const studentIds = studentProfiles.map((s) => s.id);
+      const chunkSize = Math.max(1, options?.chunkSize ?? DEFAULT_ADMIN_REPORT_CHUNK_SIZE);
+
+      for (let i = 0; i < studentIds.length; i += chunkSize) {
+        const chunk = studentIds.slice(i, i + chunkSize);
+        const [tasksRes, asgsRes, evalsRes] = await Promise.all([
+          backend.supabase
+            .from('tasks')
+            .select('id, student_id, subject_id, title, status, due_date, created_at, completed_at, estimated_minutes')
+            .in('student_id', chunk),
+          backend.supabase
+            .from('assignments')
+            .select('id, student_id, subject_id, title, status, due_date, created_at, total_points, submissions(*)')
+            .in('student_id', chunk),
+          backend.supabase
+            .from('evaluations')
+            .select('id, student_id, subject_id, title, status, score, total_points, format, scheduled_date, evaluated_at, created_at, feedback, recommendation')
+            .in('student_id', chunk),
+        ]);
+
+        if (tasksRes.error) return { report: null, error: tasksRes.error };
+        if (asgsRes.error) return { report: null, error: asgsRes.error };
+        if (evalsRes.error) return { report: null, error: evalsRes.error };
+
+        for (const t of (tasksRes.data as any[]) || []) {
+          const list = tasksByStudent.get(t.student_id) || [];
+          list.push(t);
+          tasksByStudent.set(t.student_id, list);
+        }
+        for (const a of (asgsRes.data as any[]) || []) {
+          const list = asgsByStudent.get(a.student_id) || [];
+          list.push(a);
+          asgsByStudent.set(a.student_id, list);
+        }
+        for (const e of (evalsRes.data as any[]) || []) {
+          const list = evalsByStudent.get(e.student_id) || [];
+          list.push(e);
+          evalsByStudent.set(e.student_id, list);
+        }
+      }
     }
 
     const activeEnrollments = allEnrollments.filter((e) => e.status === 'active');
     const activeStudentIdSet = new Set(activeEnrollments.map((e) => e.student_id));
+    const todayLocal = formatLocalDate(options?.referenceDate || new Date());
 
-    // 2. Aggregate Student Summaries via Existing Reporting Engine
+    // 2. Aggregate Student Summaries via In-Memory Pure Calculation Engine
     const studentSummaries: AdminStudentSummary[] = [];
     const attentionItems: AdminAttentionItem[] = [];
 
@@ -2178,49 +2300,109 @@ export async function generateAdminAcademicIntelligence(
         enrollmentStatus = enr.status === 'active' ? 'active' : enr.status === 'completed' ? 'completed' : 'inactive';
       }
 
-      // Generate student report using existing reporting engine with admin clearance
-      const { report: sReport } = await generateStudentReport(
-        student.id,
-        period,
-        customStart,
-        customEnd,
-        {
-          referenceDate: options?.referenceDate,
-          requestingUserId: caller.userId,
-          requestingUserRole: 'admin',
+      let programName: string | undefined = enr?.programs?.name;
+      let cohortName: string | undefined = enr?.cohorts?.name;
+      if (!programName && enr?.program_id) {
+        programName = getMockPrograms().find((p) => p.id === enr.program_id)?.name;
+      }
+      if (!cohortName && enr?.cohort_id) {
+        cohortName = getMockCohorts().find((c) => c.id === enr.cohort_id)?.name;
+      }
+
+      // Resolve effective mentor
+      let mentorName = 'Unassigned';
+      if (!backend.isConfigured || !backend.supabase) {
+        const normStudentId = normalizeMockUserId(student.id);
+        const assigned = getMockAssignedMentors(normStudentId);
+        mentorName = assigned[0]?.full_name || 'Unassigned';
+      } else {
+        const compositeKey = makeEffectiveMentorKey(student.id, enr?.program_id);
+        const ov = enr?.program_id
+          ? overrideByStudentProgram.get(compositeKey)
+          : legacyOverrideByStudent.get(student.id);
+
+        if (ov && (ov.profiles || ov.mentor)) {
+          const prof = ov.profiles || ov.mentor;
+          mentorName = prof.full_name || 'Unassigned';
+        } else if (enr?.cohort_id && cohortMentorMap.has(enr.cohort_id)) {
+          const cm = cohortMentorMap.get(enr.cohort_id);
+          const prof = cm.profiles || cm.mentor;
+          mentorName = prof?.full_name || 'Unassigned';
         }
-      );
+      }
 
-      const tasksAssigned = sReport?.taskMetrics.totalAssigned || 0;
-      const tasksCompleted = sReport?.taskMetrics.completed || 0;
-      const tasksOverdue = sReport?.taskMetrics.overdue || 0;
-      const taskCompletionRate = sReport?.taskMetrics.completionRate || 0;
-      const isCompletionRateApplicable = Boolean(sReport?.taskMetrics.isCompletionRateApplicable);
+      const sTasks: Task[] = tasksByStudent.get(student.id) || [];
+      const sAssignments: any[] = asgsByStudent.get(student.id) || [];
+      const sEvaluations: any[] = evalsByStudent.get(student.id) || [];
 
-      const scoredCount = sReport?.evaluationMetrics.scoredCount || 0;
-      const averageScorePercentage = sReport?.evaluationMetrics.averageScorePercentage ?? null;
+      // Dynamic schedule window determination
+      let derivedStart = customStart;
+      let derivedEnd = customEnd;
+      if (period === 'schedule') {
+        const scheduledDueDates = sTasks
+          .filter((t) => (t.status as string) !== 'cancelled' && t.due_date)
+          .map((t) => toLocalDateStr(t.due_date)!)
+          .sort();
+        if (scheduledDueDates.length > 0) {
+          derivedStart = scheduledDueDates[0];
+          derivedEnd = scheduledDueDates[scheduledDueDates.length - 1];
+        }
+      }
 
-      const submissionRate = sReport?.assignmentMetrics.submissionRate || 0;
-      const submissionsPendingReview = sReport?.assignmentMetrics.pendingReview || 0;
+      const sDateRange = computeReportDateRange(period, derivedStart, derivedEnd, options?.referenceDate);
 
-      const scheduledDaysCount = sReport?.studyConsistency.totalScheduledDays || 0;
-      const activeStudyDays = sReport?.studyConsistency.consistentScheduledDays || 0;
-      const consistencyPercentage = sReport?.studyConsistency.consistencyPercentage ?? null;
+      // Build student report using synchronous in-memory calculation (0 database queries)
+      const sReport = buildStudentReportFromData({
+        studentId: student.id,
+        studentName: student.full_name || 'Scholar',
+        poraplanId: student.poraplan_id || 'PP001',
+        studentEmail: (student as any).email,
+        university: student.university,
+        department: student.department,
+        batch: student.batch,
+        currentSemester: student.current_semester,
+        programName,
+        cohortName,
+        mentorName,
+        period,
+        dateRange: sDateRange,
+        now,
+        todayLocal,
+        tasks: sTasks,
+        assignments: sAssignments,
+        evaluations: sEvaluations,
+        subjects: [],
+        doubts: [],
+      });
+
+      const tasksAssigned = sReport.taskMetrics.totalAssigned || 0;
+      const tasksCompleted = sReport.taskMetrics.completed || 0;
+      const tasksOverdue = sReport.taskMetrics.overdue || 0;
+      const taskCompletionRate = sReport.taskMetrics.completionRate || 0;
+      const isCompletionRateApplicable = Boolean(sReport.taskMetrics.isCompletionRateApplicable);
+
+      const scoredCount = sReport.evaluationMetrics.scoredCount || 0;
+      const averageScorePercentage = sReport.evaluationMetrics.averageScorePercentage ?? null;
+
+      const submissionRate = sReport.assignmentMetrics.submissionRate || 0;
+      const submissionsPendingReview = sReport.assignmentMetrics.pendingReview || 0;
+
+      const scheduledDaysCount = sReport.studyConsistency.totalScheduledDays || 0;
+      const activeStudyDays = sReport.studyConsistency.consistentScheduledDays || 0;
+      const consistencyPercentage = sReport.studyConsistency.consistencyPercentage ?? null;
 
       totalSubmissionsPendingReview += submissionsPendingReview;
       totalOverdueTasks += tasksOverdue;
 
       // Determine Last Verified Activity Date
       let lastActivityDate: string | null = null;
-      if (sReport) {
-        const activityDates: string[] = [];
-        sReport.studyActivityTimeline.forEach((a) => {
-          if (a.totalActivities > 0) activityDates.push(a.date);
-        });
-        if (activityDates.length > 0) {
-          activityDates.sort();
-          lastActivityDate = activityDates[activityDates.length - 1];
-        }
+      const activityDates: string[] = [];
+      sReport.studyActivityTimeline.forEach((a) => {
+        if (a.totalActivities > 0) activityDates.push(a.date);
+      });
+      if (activityDates.length > 0) {
+        activityDates.sort();
+        lastActivityDate = activityDates[activityDates.length - 1];
       }
 
       // Determine Attention Condition with Neutral, Evidence-Based Classification
@@ -2341,20 +2523,9 @@ export async function generateAdminAcademicIntelligence(
         const subjects = getMockStudentSubjects('mock-student-pp001');
         expertiseSubjects = subjects.slice(0, 2).map((s) => s.name);
       } else {
-        // Supabase queries for mentor
-        const { count: menteeCount } = await backend.supabase
-          .from('student_mentor_assignments')
-          .select('id', { count: 'exact', head: true })
-          .eq('mentor_id', mentor.id)
-          .eq('is_active', true);
-        activeMenteesCount = menteeCount || 0;
-
-        const { count: cohortCount } = await backend.supabase
-          .from('cohort_mentors')
-          .select('id', { count: 'exact', head: true })
-          .eq('mentor_id', mentor.id)
-          .eq('is_active', true);
-        activeCohortsCount = cohortCount || 0;
+        // Pre-aggregated from bulk queries (0 per-mentor queries)
+        activeMenteesCount = mentorActiveMenteesCountMap.get(mentor.id) || 0;
+        activeCohortsCount = mentorActiveCohortsCountMap.get(mentor.id) || 0;
       }
 
       if (activeMenteesCount > 0 || activeCohortsCount > 0) {
