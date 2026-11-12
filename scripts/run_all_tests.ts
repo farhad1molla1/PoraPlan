@@ -133,6 +133,13 @@ const testSuites: TestSuiteDef[] = [
     category: 'Pagination Foundation',
   },
 
+  // Batch 4.7B-1 Admin Mentor Allocations Paginated Service Foundation
+  {
+    name: 'Batch 4.7B-1: Admin Mentor Allocations Pagination',
+    relativePath: 'src/__tests__/adminMentorAllocationsService.test.ts',
+    category: 'Pagination Foundation',
+  },
+
   // Modern Security & RLS Suites
   {
     name: 'RLS Helper Privacy & Status Semantics',
