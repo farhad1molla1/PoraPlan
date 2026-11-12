@@ -1,6 +1,15 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import type { Profile, ProfileUpdate, UserRole, AccountStatus, PublicProfile } from '../types/database';
 import {
+  DEFAULT_PAGE,
+  type PaginationMeta,
+  type PaginationParams,
+} from '../types/pagination';
+import {
+  calculatePaginationRange,
+  createPaginationMeta,
+} from './pagination';
+import {
   resolveMockPoraPlanId,
   checkMockGoogleLinked,
   connectMockPersonalEmail,
@@ -12,6 +21,44 @@ import {
   getMockPublicProfile,
 } from './mockAuthStore';
 import { validatePasswordPolicy } from './passwordPolicy';
+
+export const DEFAULT_ADMIN_USERS_PAGE_SIZE = 25;
+
+export interface AdminUsersPaginatedParams extends PaginationParams {
+  role?: UserRole;
+  status?: AccountStatus;
+  search?: string;
+}
+
+export interface AdminUsersPaginatedResult {
+  users: Profile[];
+  pagination: PaginationMeta;
+  error: Error | null;
+}
+
+export interface AdminUserRoleCounts {
+  total: number;
+  students: number;
+  mentors: number;
+  admins: number;
+  active: number;
+  notActivated: number;
+  suspended: number;
+  error: Error | null;
+}
+
+/**
+ * Safely sanitizes search query input for PostgREST .or() filter expressions.
+ * Strips reserved delimiters and syntax characters (commas, parentheses, quotes,
+ * backslashes, colons, semicolons, slashes) to prevent filter tree manipulation or syntax crashes.
+ */
+export function sanitizeSearchInput(input: string): string {
+  if (!input || typeof input !== 'string') return '';
+  return input
+    .replace(/[,()":;\\/]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 export interface PoraPlanIdResolution {
   authEmail: string;
@@ -504,6 +551,7 @@ export async function adminResetMemberPassword(
 /**
  * Retrieve user directory profiles for platform administrators.
  * Supports filtering by role, status, and searching across full name, email, and PoraPlan ID.
+ * Preserved for backward compatibility with existing callers.
  */
 export async function getAdminUsers(filters?: {
   role?: UserRole;
@@ -526,8 +574,11 @@ export async function getAdminUsers(filters?: {
     }
 
     if (filters?.search && filters.search.trim()) {
-      const q = filters.search.trim();
-      query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,poraplan_id.ilike.%${q}%`);
+      const sanitized = sanitizeSearchInput(filters.search);
+      if (!sanitized) {
+        return { users: [], error: null };
+      }
+      query = query.or(`full_name.ilike.%${sanitized}%,email.ilike.%${sanitized}%,poraplan_id.ilike.%${sanitized}%`);
     }
 
     const { data, error } = await query;
@@ -539,6 +590,222 @@ export async function getAdminUsers(filters?: {
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { users: [], error };
+  }
+}
+
+/**
+ * Retrieve paginated user directory profiles for platform administrators.
+ * Supports server-side pagination, exact record counts, deterministic sorting,
+ * safe multi-field search, and role/account status filtering.
+ */
+export async function getAdminUsersPaginated(
+  params?: AdminUsersPaginatedParams
+): Promise<AdminUsersPaginatedResult> {
+  const page = params?.page ?? DEFAULT_PAGE;
+  const pageSize = params?.pageSize ?? DEFAULT_ADMIN_USERS_PAGE_SIZE;
+  const range = calculatePaginationRange({ page, pageSize });
+
+  const emptyMeta = createPaginationMeta({
+    page: range.page,
+    pageSize: range.pageSize,
+    totalCount: 0,
+  });
+
+  // Guard against non-empty search that has zero searchable tokens after sanitization
+  const isSearchProvided = typeof params?.search === 'string' && params.search.trim().length > 0;
+  let sanitizedSearch = '';
+  if (isSearchProvided) {
+    sanitizedSearch = sanitizeSearchInput(params!.search!);
+    if (!sanitizedSearch) {
+      // Non-empty search with zero valid characters (only syntax delimiters).
+      // Return empty results rather than an unrestricted query.
+      return {
+        users: [],
+        pagination: emptyMeta,
+        error: null,
+      };
+    }
+  }
+
+  if (!isSupabaseConfigured()) {
+    let list = getMockUsers({
+      role: params?.role,
+      status: params?.status,
+    });
+
+    if (sanitizedSearch) {
+      const q = sanitizedSearch.toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.full_name.toLowerCase().includes(q) ||
+          p.email.toLowerCase().includes(q) ||
+          (p.poraplan_id && p.poraplan_id.toLowerCase().includes(q))
+      );
+    }
+
+    // Deterministic sort: created_at DESC (nulls last), id ASC
+    list.sort((a, b) => {
+      const timeA = a.created_at ? new Date(a.created_at).getTime() : -Infinity;
+      const timeB = b.created_at ? new Date(b.created_at).getTime() : -Infinity;
+      if (timeB !== timeA) return timeB - timeA;
+      return (a.id || '').localeCompare(b.id || '');
+    });
+
+    const totalCount = list.length;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+    });
+    const sliced = list.slice(range.from, range.to + 1);
+
+    return {
+      users: sliced,
+      pagination,
+      error: null,
+    };
+  }
+
+  try {
+    let query = supabase
+      .from('profiles')
+      .select('*', { count: 'exact' });
+
+    if (params?.role) {
+      query = query.eq('role', params.role);
+    }
+
+    if (params?.status) {
+      query = query.eq('status', params.status);
+    }
+
+    if (sanitizedSearch) {
+      query = query.or(
+        `full_name.ilike.%${sanitizedSearch}%,email.ilike.%${sanitizedSearch}%,poraplan_id.ilike.%${sanitizedSearch}%`
+      );
+    }
+
+    const { data, count, error } = await query
+      .order('created_at', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true })
+      .range(range.from, range.to);
+
+    if (error) {
+      return { users: [], pagination: emptyMeta, error };
+    }
+
+    const totalCount = count ?? 0;
+    const pagination = createPaginationMeta({
+      page: range.page,
+      pageSize: range.pageSize,
+      totalCount,
+    });
+
+    return {
+      users: (data as Profile[]) || [],
+      pagination,
+      error: null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { users: [], pagination: emptyMeta, error };
+  }
+}
+
+/**
+ * Retrieve exact role metrics and account status counters for platform administrators.
+ * Uses lightweight parallel head: true queries to avoid downloading all profile rows.
+ */
+export async function getAdminUserRoleCounts(filters?: {
+  status?: AccountStatus;
+}): Promise<AdminUserRoleCounts> {
+  if (!isSupabaseConfigured()) {
+    const allUsers = getMockUsers();
+    const baseList = filters?.status
+      ? allUsers.filter((u) => (u.status || 'active') === filters.status)
+      : allUsers;
+    const total = baseList.length;
+    const students = baseList.filter((u) => u.role === 'student').length;
+    const mentors = baseList.filter((u) => u.role === 'mentor').length;
+    const admins = baseList.filter((u) => u.role === 'admin').length;
+    const active = allUsers.filter((u) => (u.status || 'active') === 'active').length;
+    const notActivated = allUsers.filter((u) => u.status === 'not_activated').length;
+    const suspended = allUsers.filter((u) => u.status === 'suspended').length;
+    return {
+      total,
+      students,
+      mentors,
+      admins,
+      active,
+      notActivated,
+      suspended,
+      error: null,
+    };
+  }
+
+  try {
+    const buildCountQuery = (role?: UserRole) => {
+      let q = supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      if (role) {
+        q = q.eq('role', role);
+      }
+      if (filters?.status) {
+        q = q.eq('status', filters.status);
+      }
+      return q;
+    };
+
+    const [
+      totalRes,
+      studentsRes,
+      mentorsRes,
+      adminsRes,
+      activeRes,
+      notActivatedRes,
+      suspendedRes,
+    ] = await Promise.all([
+      buildCountQuery(),
+      buildCountQuery('student'),
+      buildCountQuery('mentor'),
+      buildCountQuery('admin'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'not_activated'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'suspended'),
+    ]);
+
+    if (totalRes.error) return { total: 0, students: 0, mentors: 0, admins: 0, active: 0, notActivated: 0, suspended: 0, error: totalRes.error };
+    if (studentsRes.error) return { total: 0, students: 0, mentors: 0, admins: 0, active: 0, notActivated: 0, suspended: 0, error: studentsRes.error };
+    if (mentorsRes.error) return { total: 0, students: 0, mentors: 0, admins: 0, active: 0, notActivated: 0, suspended: 0, error: mentorsRes.error };
+    if (adminsRes.error) return { total: 0, students: 0, mentors: 0, admins: 0, active: 0, notActivated: 0, suspended: 0, error: adminsRes.error };
+    if (activeRes.error) return { total: 0, students: 0, mentors: 0, admins: 0, active: 0, notActivated: 0, suspended: 0, error: activeRes.error };
+    if (notActivatedRes.error) return { total: 0, students: 0, mentors: 0, admins: 0, active: 0, notActivated: 0, suspended: 0, error: notActivatedRes.error };
+    if (suspendedRes.error) return { total: 0, students: 0, mentors: 0, admins: 0, active: 0, notActivated: 0, suspended: 0, error: suspendedRes.error };
+
+    return {
+      total: totalRes.count ?? 0,
+      students: studentsRes.count ?? 0,
+      mentors: mentorsRes.count ?? 0,
+      admins: adminsRes.count ?? 0,
+      active: activeRes.count ?? 0,
+      notActivated: notActivatedRes.count ?? 0,
+      suspended: suspendedRes.count ?? 0,
+      error: null,
+    };
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    return {
+      total: 0,
+      students: 0,
+      mentors: 0,
+      admins: 0,
+      active: 0,
+      notActivated: 0,
+      suspended: 0,
+      error,
+    };
   }
 }
 

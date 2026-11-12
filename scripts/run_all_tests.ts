@@ -105,6 +105,13 @@ const testSuites: TestSuiteDef[] = [
     category: 'Pagination Foundation',
   },
 
+  // Batch 4.5B-2 Admin Users Directory Paginated Service Foundation
+  {
+    name: 'Batch 4.5B-2: Admin Users Directory Pagination',
+    relativePath: 'src/__tests__/adminUsersPagination.test.ts',
+    category: 'Pagination Foundation',
+  },
+
   // Modern Security & RLS Suites
   {
     name: 'RLS Helper Privacy & Status Semantics',
