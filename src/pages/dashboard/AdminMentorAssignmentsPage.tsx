@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   getCohortMentors,
   getStudentMentorAssignments,
-  getEffectiveMentor,
   getEligibleMentorsForProgram,
   getMentorWorkloadSummary,
+  getAdminMentorAllocationsPaginated,
+  makeEffectiveMentorKey,
+  DEFAULT_ADMIN_MENTOR_ALLOCATIONS_PAGE_SIZE,
   assignCohortMentor,
   endCohortMentor,
   assignIndividualMentor,
@@ -13,7 +15,6 @@ import {
   getAssignmentLabel,
 } from '../../lib/mentorAssignments';
 import { getPrograms, getCohorts } from '../../lib/programs';
-import { getEnrollments } from '../../lib/applications';
 import type {
   CohortMentorWithMeta,
   StudentMentorAssignmentWithMeta,
@@ -24,8 +25,10 @@ import type {
   ProgramEnrollmentWithMeta,
   Profile,
 } from '../../types/database';
+import type { PaginationMeta } from '../../types/pagination';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import {
   Users,
   Search,
@@ -51,18 +54,48 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [cohortMentors, setCohortMentors] = useState<CohortMentorWithMeta[]>([]);
   const [studentAssignments, setStudentAssignments] = useState<StudentMentorAssignmentWithMeta[]>([]);
-  const [enrollments, setEnrollments] = useState<ProgramEnrollmentWithMeta[]>([]);
   const [workload, setWorkload] = useState<MentorWorkloadSummary[]>([]);
-  const [studentResolutions, setStudentResolutions] = useState<Record<string, EffectiveMentorResolution>>({});
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Workspace loading & error
+  const [workspaceLoading, setWorkspaceLoading] = useState(true);
+  const [workspaceError, setWorkspaceError] = useState<string | null>(null);
+
+  // Paginated Student Allocations State
+  const [enrollments, setEnrollments] = useState<ProgramEnrollmentWithMeta[]>([]);
+  const [studentResolutions, setStudentResolutions] = useState<Record<string, EffectiveMentorResolution>>({});
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_ADMIN_MENTOR_ALLOCATIONS_PAGE_SIZE);
+  const [allocationsLoading, setAllocationsLoading] = useState(true);
+  const [allocationsError, setAllocationsError] = useState<string | null>(null);
+
+  // Mutation error & notice
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Filters
   const [programFilter, setProgramFilter] = useState<string>('all');
   const [cohortFilter, setCohortFilter] = useState<string>('all');
   const [studentSearch, setStudentSearch] = useState<string>('');
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
+
+  // Request-version trackers to eliminate stale-response race conditions
+  const workspaceRequestIdRef = useRef(0);
+  const allocationsRequestIdRef = useRef(0);
+
+  // 300ms Search Debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch((prev) => {
+        if (prev !== studentSearch) {
+          setPage(1);
+          return studentSearch;
+        }
+        return prev;
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [studentSearch]);
 
   // Cohort Assignment Modal State
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
@@ -108,67 +141,96 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
     };
   }, [cohortModalOpen, individualModalOpen, historyModalOpen, isSubmittingCohort, isSubmittingIndividual]);
 
-  // Load all data
-  const loadData = async () => {
+  // Load Workspace Metadata & Cohort Data
+  const loadWorkspaceData = useCallback(async () => {
+    const requestId = ++workspaceRequestIdRef.current;
+    setWorkspaceLoading(true);
+    setWorkspaceError(null);
+
     try {
-      const [progRes, cohRes, cmRes, smaRes, enrRes, wlRes] = await Promise.all([
+      const [progRes, cohRes, cmRes, smaRes, wlRes] = await Promise.all([
         getPrograms({ includeUnpublished: true }),
         getCohorts(),
         getCohortMentors(),
         getStudentMentorAssignments(),
-        getEnrollments(),
         getMentorWorkloadSummary(),
       ]);
 
-      if (progRes.error) setError(progRes.error.message);
+      if (requestId !== workspaceRequestIdRef.current) return;
+
+      if (progRes.error) setWorkspaceError(progRes.error.message);
       else setPrograms(progRes.programs);
 
-      if (cohRes.error) setError(cohRes.error.message);
+      if (cohRes.error) setWorkspaceError(cohRes.error.message);
       else setCohorts(cohRes.cohorts);
 
-      if (cmRes.error) setError(cmRes.error.message);
+      if (cmRes.error) setWorkspaceError(cmRes.error.message);
       else setCohortMentors(cmRes.cohortMentors);
 
-      if (smaRes.error) setError(smaRes.error.message);
+      if (smaRes.error) setWorkspaceError(smaRes.error.message);
       else setStudentAssignments(smaRes.assignments);
 
-      if (enrRes.error) setError(enrRes.error.message);
-      else {
-        setEnrollments(enrRes.enrollments);
-
-        // Resolve effective mentors for all active student enrollments
-        const resolutions: Record<string, EffectiveMentorResolution> = {};
-        for (const enr of enrRes.enrollments) {
-          if (enr.status === 'active') {
-            const { resolution } = await getEffectiveMentor(enr.student_id, enr.program_id);
-            resolutions[enr.student_id] = resolution;
-          }
-        }
-        setStudentResolutions(resolutions);
-      }
-
-      if (wlRes.error) setError(wlRes.error.message);
+      if (wlRes.error) setWorkspaceError(wlRes.error.message);
       else setWorkload(wlRes.workload);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load assignment data.');
+      if (requestId !== workspaceRequestIdRef.current) return;
+      setWorkspaceError(err instanceof Error ? err.message : 'Failed to load workspace data.');
     } finally {
-      setLoading(false);
+      if (requestId === workspaceRequestIdRef.current) {
+        setWorkspaceLoading(false);
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    async function init() {
-      setLoading(true);
-      setError(null);
-      await loadData();
-      if (!isMounted) return;
+    loadWorkspaceData();
+  }, [loadWorkspaceData]);
+
+  // Load Paginated Student Allocations
+  const loadPaginatedAllocations = useCallback(async () => {
+    const requestId = ++allocationsRequestIdRef.current;
+    setAllocationsLoading(true);
+    setAllocationsError(null);
+
+    try {
+      const res = await getAdminMentorAllocationsPaginated({
+        page,
+        pageSize,
+        programId: programFilter === 'all' ? undefined : programFilter,
+        cohortId: cohortFilter === 'all' ? undefined : cohortFilter,
+        search: debouncedSearch.trim() || undefined,
+        status: 'active',
+      });
+
+      if (requestId !== allocationsRequestIdRef.current) return;
+
+      if (res.error) {
+        setAllocationsError(res.error.message);
+      } else {
+        setEnrollments(res.enrollments);
+        setStudentResolutions(res.resolutions);
+        setPagination(res.pagination);
+      }
+    } catch (err: unknown) {
+      if (requestId !== allocationsRequestIdRef.current) return;
+      setAllocationsError(err instanceof Error ? err.message : 'Failed to load student allocations.');
+    } finally {
+      if (requestId === allocationsRequestIdRef.current) {
+        setAllocationsLoading(false);
+      }
     }
-    init();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  }, [page, pageSize, programFilter, cohortFilter, debouncedSearch]);
+
+  useEffect(() => {
+    loadPaginatedAllocations();
+  }, [loadPaginatedAllocations]);
+
+  // Refresh All Workspace Data
+  const handleRefreshAll = async () => {
+    setSuccessMessage(null);
+    setMutationError(null);
+    await Promise.all([loadWorkspaceData(), loadPaginatedAllocations()]);
+  };
 
   // Open Cohort Assignment Modal
   const handleOpenCohortModal = async (cohort: Cohort) => {
@@ -176,7 +238,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
     setSelectedMentorId('');
     setAssignmentNotes('');
     setIsSubmittingCohort(false);
-    setError(null);
+    setMutationError(null);
 
     // Fetch eligible mentors for this cohort's program
     const { mentors: eligMentors } = await getEligibleMentorsForProgram(cohort.program_id);
@@ -191,7 +253,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
   const handleAssignCohortMentor = async () => {
     if (!selectedCohort || !selectedMentorId) return;
     setIsSubmittingCohort(true);
-    setError(null);
+    setMutationError(null);
 
     const program = programs.find((p) => p.id === selectedCohort.program_id);
     const mentor = eligibleMentorsForCohort.find((m) => m.id === selectedMentorId);
@@ -208,14 +270,14 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
     setIsSubmittingCohort(false);
 
     if (result.error || !result.success) {
-      setError(result.error?.message || result.message);
+      setMutationError(result.error?.message || result.message);
     } else {
       setSuccessMessage(
         `Mentor ${mentor?.full_name || ''} successfully assigned to ${selectedCohort.name}.`
       );
       setCohortModalOpen(false);
       setSelectedCohort(null);
-      await loadData();
+      await Promise.all([loadWorkspaceData(), loadPaginatedAllocations()]);
     }
   };
 
@@ -225,8 +287,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       return;
     }
 
-    setLoading(true);
-    setError(null);
+    setMutationError(null);
 
     const result = await endCohortMentor({
       cohortId: cohort.id,
@@ -236,11 +297,10 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
     });
 
     if (result.error || !result.success) {
-      setError(result.error?.message || result.message);
-      setLoading(false);
+      setMutationError(result.error?.message || result.message);
     } else {
       setSuccessMessage(`Cohort mentor assignment for ${cohort.name} has concluded.`);
-      await loadData();
+      await Promise.all([loadWorkspaceData(), loadPaginatedAllocations()]);
     }
   };
 
@@ -250,7 +310,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
     setSelectedIndividualMentorId('');
     setIndividualNotes('');
     setIsSubmittingIndividual(false);
-    setError(null);
+    setMutationError(null);
 
     const { mentors: eligMentors } = await getEligibleMentorsForProgram(enr.program_id);
     setEligibleMentorsForStudent(eligMentors);
@@ -264,7 +324,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
   const handleAssignIndividualMentor = async () => {
     if (!selectedStudentEnrollment || !selectedIndividualMentorId) return;
     setIsSubmittingIndividual(true);
-    setError(null);
+    setMutationError(null);
 
     const program = programs.find((p) => p.id === selectedStudentEnrollment.program_id);
     const mentor = eligibleMentorsForStudent.find((m) => m.id === selectedIndividualMentorId);
@@ -284,14 +344,14 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
     setIsSubmittingIndividual(false);
 
     if (result.error || !result.success) {
-      setError(result.error?.message || result.message);
+      setMutationError(result.error?.message || result.message);
     } else {
       setSuccessMessage(
         `Individual override set: ${mentor?.full_name || 'Mentor'} assigned to ${student?.full_name || 'Student'}.`
       );
       setIndividualModalOpen(false);
       setSelectedStudentEnrollment(null);
-      await loadData();
+      await Promise.all([loadWorkspaceData(), loadPaginatedAllocations()]);
     }
   };
 
@@ -305,8 +365,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
       return;
     }
 
-    setLoading(true);
-    setError(null);
+    setMutationError(null);
 
     const result = await endIndividualMentor({
       assignmentId,
@@ -315,13 +374,12 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
     });
 
     if (result.error || !result.success) {
-      setError(result.error?.message || result.message);
-      setLoading(false);
+      setMutationError(result.error?.message || result.message);
     } else {
       setSuccessMessage(
         `Individual override ended for ${studentName || 'student'}. Reverted to cohort default.`
       );
-      await loadData();
+      await Promise.all([loadWorkspaceData(), loadPaginatedAllocations()]);
     }
   };
 
@@ -346,12 +404,28 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
   // Metric Computations
   const activeCohortAssignmentsCount = cohortMentors.filter((cm) => cm.is_active).length;
   const activeIndividualOverridesCount = studentAssignments.filter((sma) => sma.is_active).length;
-  const activeEnrollments = enrollments.filter((e) => e.status === 'active');
-  const studentsWithMentorCount = activeEnrollments.filter(
-    (e) => studentResolutions[e.student_id]?.assignment_type !== 'none' && studentResolutions[e.student_id]?.mentor
-  ).length;
-  const studentsWithoutMentorCount = activeEnrollments.length - studentsWithMentorCount;
+  const totalEnrollmentsCount = pagination?.totalCount ?? enrollments.length;
+  const totalPairedCount = workload.reduce((sum, w) => sum + (w.totalEffectiveMenteesCount || 0), 0);
+  const totalUnassignedCount = Math.max(0, totalEnrollmentsCount - totalPairedCount);
   const mentorsCount = workload.length;
+
+  // Cohort Student Count Map from Workload & Cohort Mentors
+  const cohortStudentCountMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const w of workload) {
+      for (const c of w.cohorts || []) {
+        if (c.id && c.studentCount !== undefined) {
+          map.set(c.id, c.studentCount);
+        }
+      }
+    }
+    for (const cm of cohortMentors) {
+      if (cm.cohort_id && cm.enrolled_students_count !== undefined && !map.has(cm.cohort_id)) {
+        map.set(cm.cohort_id, cm.enrolled_students_count);
+      }
+    }
+    return map;
+  }, [workload, cohortMentors]);
 
   // Filtered Cohorts for Cohort Tab
   const filteredCohorts = cohorts.filter((c) => {
@@ -359,33 +433,8 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
     return true;
   });
 
-  // Filtered Enrollments for Student Tab
-  const filteredEnrollments = activeEnrollments.filter((enr) => {
-    if (programFilter !== 'all' && enr.program_id !== programFilter) return false;
-    if (cohortFilter !== 'all' && enr.cohort_id !== cohortFilter) return false;
-
-    if (studentSearch.trim()) {
-      const q = studentSearch.toLowerCase();
-      const sName = enr.student?.full_name?.toLowerCase() || '';
-      const sId = enr.student?.poraplan_id?.toLowerCase() || '';
-      const sEmail = enr.student?.email?.toLowerCase() || '';
-      const sUni = enr.student?.university?.toLowerCase() || '';
-      const pName = enr.program?.name?.toLowerCase() || '';
-      const cName = enr.cohort?.name?.toLowerCase() || '';
-
-      const match =
-        sName.includes(q) ||
-        sId.includes(q) ||
-        sEmail.includes(q) ||
-        sUni.includes(q) ||
-        pName.includes(q) ||
-        cName.includes(q);
-
-      if (!match) return false;
-    }
-
-    return true;
-  });
+  const isRefreshing = workspaceLoading || allocationsLoading;
+  const error = workspaceError || allocationsError || mutationError;
 
   return (
     <div className="w-full py-2.5 sm:py-8 px-2.5 sm:px-6 lg:px-8 academic-grid-pattern min-h-full">
@@ -411,14 +460,15 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                setLoading(true);
-                loadData();
-              }}
-              disabled={loading}
+              onClick={handleRefreshAll}
+              disabled={isRefreshing}
               className="gap-1.5 sm:gap-2 min-h-[32px] sm:min-h-0 text-[11px] sm:text-xs py-1 px-2.5 sm:py-1.5 sm:px-3"
             >
-              {loading ? <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" /> : <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              {isRefreshing ? (
+                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+              ) : (
+                <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              )}
               Refresh Allocations
             </Button>
           </div>
@@ -436,11 +486,11 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
           </div>
           <div className="p-1.5 sm:p-3 bg-brand-navy/10 border sm:border-2 border-brand-dark">
             <p className="text-[9px] sm:text-xs font-bold text-brand-navy/70 uppercase">Students Paired</p>
-            <p className="text-base sm:text-2xl font-black text-brand-navy mt-0.5">{studentsWithMentorCount}</p>
+            <p className="text-base sm:text-2xl font-black text-brand-navy mt-0.5">{totalPairedCount}</p>
           </div>
           <div className="p-1.5 sm:p-3 bg-red-50 border sm:border-2 border-red-300">
             <p className="text-[9px] sm:text-xs font-bold text-red-700 uppercase">Unassigned Students</p>
-            <p className="text-base sm:text-2xl font-black text-red-800 mt-0.5">{studentsWithoutMentorCount}</p>
+            <p className="text-base sm:text-2xl font-black text-red-800 mt-0.5">{totalUnassignedCount}</p>
           </div>
           <div className="p-1.5 sm:p-3 bg-brand-bg border sm:border-2 border-brand-dark col-span-2 sm:col-span-1">
             <p className="text-[9px] sm:text-xs font-bold text-brand-navy/60 uppercase">Available Mentors</p>
@@ -456,7 +506,14 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
             <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0" />
             <p className="text-xs sm:text-sm font-bold text-red-800">{error}</p>
           </div>
-          <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800">
+          <button
+            onClick={() => {
+              setWorkspaceError(null);
+              setAllocationsError(null);
+              setMutationError(null);
+            }}
+            className="text-red-600 hover:text-red-800"
+          >
             <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
@@ -497,7 +554,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
           }`}
         >
           <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-          <span>Student Overrides ({activeEnrollments.length})</span>
+          <span>Student Overrides ({totalEnrollmentsCount})</span>
         </button>
 
         <button
@@ -543,7 +600,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
           </div>
 
           {/* Cohorts Grid */}
-          {loading ? (
+          {workspaceLoading ? (
             <div className="border-2 sm:border-3 border-brand-dark bg-brand-paper p-8 sm:p-12 text-center shadow-brutal-sm sm:shadow-brutal">
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
               <p className="text-sm font-bold text-brand-navy">Loading cohort allocations...</p>
@@ -563,9 +620,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 const activeAssignment = cohortMentors.find(
                   (cm) => cm.cohort_id === cohort.id && cm.is_active
                 );
-                const enrolledCount = enrollments.filter(
-                  (e) => e.cohort_id === cohort.id && e.status === 'active'
-                ).length;
+                const enrolledCount = cohortStudentCountMap.get(cohort.id) ?? 0;
 
                 return (
                   <div
@@ -719,6 +774,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                   onChange={(e) => {
                     setProgramFilter(e.target.value);
                     setCohortFilter('all');
+                    setPage(1);
                   }}
                   className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
@@ -734,7 +790,10 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
               <div className="md:col-span-3">
                 <select
                   value={cohortFilter}
-                  onChange={(e) => setCohortFilter(e.target.value)}
+                  onChange={(e) => {
+                    setCohortFilter(e.target.value);
+                    setPage(1);
+                  }}
                   className="w-full px-3 py-2 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal"
                 >
                   <option value="all">All Cohorts</option>
@@ -751,12 +810,12 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
           </div>
 
           {/* Student Roster Table */}
-          {loading ? (
+          {allocationsLoading ? (
             <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
               <p className="text-sm font-bold text-brand-navy">Loading student roster &amp; resolutions...</p>
             </div>
-          ) : filteredEnrollments.length === 0 ? (
+          ) : enrollments.length === 0 ? (
             <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
               <UserCheck className="w-12 h-12 text-brand-navy/30 mx-auto mb-3" />
               <h3 className="text-lg font-black text-brand-navy">No Students Found</h3>
@@ -768,9 +827,10 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
             <div className="border-3 border-brand-dark bg-brand-paper shadow-brutal overflow-hidden">
               {/* Mobile & Tablet Responsive Cards (< lg: 1024px) */}
               <div className="lg:hidden p-3 sm:p-4 space-y-3 bg-brand-bg">
-                {filteredEnrollments.map((enr) => {
+                {enrollments.map((enr) => {
                   const student = enr.student;
-                  const resolution = studentResolutions[enr.student_id];
+                  const resolutionKey = makeEffectiveMentorKey(enr.student_id, enr.program_id);
+                  const resolution = studentResolutions[resolutionKey] || studentResolutions[enr.student_id];
                   const effectiveMentor = resolution?.mentor;
                   const assignType = resolution?.assignment_type || 'none';
                   const isIndividual = assignType === 'individual';
@@ -906,9 +966,10 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y-2 divide-[#082B4C]/10 text-sm">
-                    {filteredEnrollments.map((enr) => {
+                    {enrollments.map((enr) => {
                       const student = enr.student;
-                      const resolution = studentResolutions[enr.student_id];
+                      const resolutionKey = makeEffectiveMentorKey(enr.student_id, enr.program_id);
+                      const resolution = studentResolutions[resolutionKey] || studentResolutions[enr.student_id];
                       const effectiveMentor = resolution?.mentor;
                       const assignType = resolution?.assignment_type || 'none';
                       const isIndividual = assignType === 'individual';
@@ -1021,6 +1082,26 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+
+              {/* Pagination Controls */}
+              {pagination && pagination.totalCount > 0 && (
+                <div className="p-3 sm:p-4 border-t-2 sm:border-t-3 border-brand-dark bg-brand-paper">
+                  <PaginationControls
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    totalCount={pagination.totalCount}
+                    pageSize={pagination.pageSize}
+                    pageSizeOptions={[10, 25, 50, 100]}
+                    onPageChange={setPage}
+                    onPageSizeChange={(newSize) => {
+                      setPageSize(newSize);
+                      setPage(1);
+                    }}
+                    isLoading={allocationsLoading}
+                    ariaLabel="Admin mentor allocations pagination"
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1042,142 +1123,157 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="border-3 border-brand-dark bg-brand-paper shadow-brutal overflow-hidden">
-            {/* Compact Responsive Table (< lg: 1024px) */}
-            <div className="lg:hidden">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="border-b-2 border-brand-dark bg-brand-bg text-[10.5px] font-black uppercase text-brand-navy tracking-wider">
-                    <th scope="col" className="py-2.5 px-3">Mentor &amp; Contact</th>
-                    <th scope="col" className="py-2.5 px-2 text-center">Workload Allocation</th>
-                    <th scope="col" className="py-2.5 px-3 text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#082B4C]/10">
-                  {workload.map((w) => (
-                    <tr key={w.mentor.id} className="hover:bg-brand-bg/50 transition-colors">
-                      {/* Column 1: Mentor & Contact */}
-                      <td className="py-2.5 px-3 align-top">
-                        <div className="font-black text-brand-navy leading-snug">
-                          {w.mentor.full_name}
-                        </div>
-                        {w.mentor.poraplan_id && (
-                          <div className="font-mono text-[10px] text-brand-teal font-bold mt-0.5">
-                            {w.mentor.poraplan_id}
-                          </div>
-                        )}
-                        <div className="text-[11px] text-brand-navy/70 font-medium mt-0.5 line-clamp-1">
-                          {w.mentor.academic_background || w.mentor.expertise || 'Mentor'}
-                        </div>
-                        <div className="font-mono text-[10.5px] text-brand-muted mt-1 break-all">
-                          {w.mentor.email}
-                        </div>
-                        {w.mentor.whatsapp_number && (
-                          <div className="text-brand-teal flex items-center gap-1 mt-0.5 font-mono text-[10.5px]">
-                            <Phone className="w-2.5 h-2.5 shrink-0" />
-                            <span>{w.mentor.whatsapp_number}</span>
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Column 2: Workload Breakdown */}
-                      <td className="py-2.5 px-2 text-center align-top whitespace-nowrap">
-                        <div className="inline-block px-2 py-0.5 bg-[#0BA7B4]/20 border border-[#0BA7B4] font-black text-xs sm:text-sm text-brand-navy">
-                          {w.totalEffectiveMenteesCount} Mentees
-                        </div>
-                        <div className="text-[10px] font-mono text-brand-muted mt-1 space-y-0.5">
-                          <div>Cohorts: <strong className="text-brand-navy">{w.activeCohortsCount}</strong></div>
-                          <div>Overrides: <strong className="text-brand-navy">{w.individualOverridesCount}</strong></div>
-                        </div>
-                      </td>
-
-                      {/* Column 3: Status */}
-                      <td className="py-2.5 px-3 text-right align-top">
-                        <Badge
-                          variant={w.mentor.status === 'active' ? 'teal' : 'paper'}
-                          size="sm"
-                        >
-                          {w.mentor.status?.toUpperCase() || 'ACTIVE'}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {workspaceLoading ? (
+            <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-teal mb-3" />
+              <p className="text-sm font-bold text-brand-navy">Loading mentor workload distribution...</p>
             </div>
-
-            {/* Desktop Table (>= lg: 1024px) */}
-            <div className="hidden lg:block overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b-3 border-brand-dark bg-brand-bg text-xs font-black uppercase text-brand-navy tracking-wider">
-                    <th className="py-3 px-4">Mentor</th>
-                    <th className="py-3 px-4">Contact</th>
-                    <th className="py-3 px-4 text-center">Active Cohorts</th>
-                    <th className="py-3 px-4 text-center">Individual Overrides</th>
-                    <th className="py-3 px-4 text-center">Effective Mentees</th>
-                    <th className="py-3 px-4">Account Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y-2 divide-[#082B4C]/10 text-sm">
-                  {workload.map((w) => (
-                    <tr key={w.mentor.id} className="hover:bg-brand-bg/80 transition-colors">
-                      <td className="py-3 px-4">
-                        <div className="font-black text-brand-navy flex items-center gap-2">
-                          <span>{w.mentor.full_name}</span>
+          ) : workload.length === 0 ? (
+            <div className="border-3 border-brand-dark bg-brand-paper p-12 text-center shadow-brutal">
+              <Briefcase className="w-12 h-12 text-brand-navy/30 mx-auto mb-3" />
+              <h3 className="text-lg font-black text-brand-navy">No Mentors Found</h3>
+              <p className="text-sm text-brand-navy/70 mt-1">
+                No mentor accounts have been created yet.
+              </p>
+            </div>
+          ) : (
+            <div className="border-3 border-brand-dark bg-brand-paper shadow-brutal overflow-hidden">
+              {/* Compact Responsive Table (< lg: 1024px) */}
+              <div className="lg:hidden">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b-2 border-brand-dark bg-brand-bg text-[10.5px] font-black uppercase text-brand-navy tracking-wider">
+                      <th scope="col" className="py-2.5 px-3">Mentor &amp; Contact</th>
+                      <th scope="col" className="py-2.5 px-2 text-center">Workload Allocation</th>
+                      <th scope="col" className="py-2.5 px-3 text-right">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#082B4C]/10">
+                    {workload.map((w) => (
+                      <tr key={w.mentor.id} className="hover:bg-brand-bg/50 transition-colors">
+                        {/* Column 1: Mentor & Contact */}
+                        <td className="py-2.5 px-3 align-top">
+                          <div className="font-black text-brand-navy leading-snug">
+                            {w.mentor.full_name}
+                          </div>
                           {w.mentor.poraplan_id && (
-                            <span className="font-mono text-xs px-1.5 py-0.2 bg-brand-bg border border-brand-dark/30 font-bold">
+                            <div className="font-mono text-[10px] text-brand-teal font-bold mt-0.5">
                               {w.mentor.poraplan_id}
-                            </span>
+                            </div>
                           )}
-                        </div>
-                        <div className="text-xs text-brand-navy/70 font-medium">
-                          {w.mentor.academic_background || w.mentor.expertise || 'Mentor'}
-                        </div>
-                      </td>
-
-                      <td className="py-3 px-4 font-mono text-xs text-brand-navy">
-                        <div>{w.mentor.email}</div>
-                        {w.mentor.whatsapp_number && (
-                          <div className="text-brand-teal flex items-center gap-1 mt-0.5">
-                            <Phone className="w-3 h-3" />
-                            <span>{w.mentor.whatsapp_number}</span>
+                          <div className="text-[11px] text-brand-navy/70 font-medium mt-0.5 line-clamp-1">
+                            {w.mentor.academic_background || w.mentor.expertise || 'Mentor'}
                           </div>
-                        )}
-                      </td>
+                          <div className="font-mono text-[10.5px] text-brand-muted mt-1 break-all">
+                            {w.mentor.email}
+                          </div>
+                          {w.mentor.whatsapp_number && (
+                            <div className="text-brand-teal flex items-center gap-1 mt-0.5 font-mono text-[10.5px]">
+                              <Phone className="w-2.5 h-2.5 shrink-0" />
+                              <span>{w.mentor.whatsapp_number}</span>
+                            </div>
+                          )}
+                        </td>
 
-                      <td className="py-3 px-4 text-center font-bold text-base text-brand-navy">
-                        <span className="px-2.5 py-0.5 bg-gray-100 border border-gray-300">
-                          {w.activeCohortsCount}
-                        </span>
-                      </td>
+                        {/* Column 2: Workload Breakdown */}
+                        <td className="py-2.5 px-2 text-center align-top whitespace-nowrap">
+                          <div className="inline-block px-2 py-0.5 bg-[#0BA7B4]/20 border border-[#0BA7B4] font-black text-xs sm:text-sm text-brand-navy">
+                            {w.totalEffectiveMenteesCount} Mentees
+                          </div>
+                          <div className="text-[10px] font-mono text-brand-muted mt-1 space-y-0.5">
+                            <div>Cohorts: <strong className="text-brand-navy">{w.activeCohortsCount}</strong></div>
+                            <div>Overrides: <strong className="text-brand-navy">{w.individualOverridesCount}</strong></div>
+                          </div>
+                        </td>
 
-                      <td className="py-3 px-4 text-center font-bold text-base text-brand-navy">
-                        <span className="px-2.5 py-0.5 bg-[#F5A623]/20 border border-[#F5A623]">
-                          {w.individualOverridesCount}
-                        </span>
-                      </td>
+                        {/* Column 3: Status */}
+                        <td className="py-2.5 px-3 text-right align-top">
+                          <Badge
+                            variant={w.mentor.status === 'active' ? 'teal' : 'paper'}
+                            size="sm"
+                          >
+                            {w.mentor.status?.toUpperCase() || 'ACTIVE'}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-                      <td className="py-3 px-4 text-center">
-                        <span className="px-3 py-1 bg-[#0BA7B4]/20 border-2 border-[#0BA7B4] font-black text-base text-brand-navy">
-                          {w.totalEffectiveMenteesCount}
-                        </span>
-                      </td>
-
-                      <td className="py-3 px-4">
-                        <Badge
-                          variant={w.mentor.status === 'active' ? 'teal' : 'paper'}
-                          size="sm"
-                        >
-                          {w.mentor.status?.toUpperCase() || 'ACTIVE'}
-                        </Badge>
-                      </td>
+              {/* Desktop Table (>= lg: 1024px) */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b-3 border-brand-dark bg-brand-bg text-xs font-black uppercase text-brand-navy tracking-wider">
+                      <th className="py-3 px-4">Mentor</th>
+                      <th className="py-3 px-4">Contact</th>
+                      <th className="py-3 px-4 text-center">Active Cohorts</th>
+                      <th className="py-3 px-4 text-center">Individual Overrides</th>
+                      <th className="py-3 px-4 text-center">Effective Mentees</th>
+                      <th className="py-3 px-4">Account Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y-2 divide-[#082B4C]/10 text-sm">
+                    {workload.map((w) => (
+                      <tr key={w.mentor.id} className="hover:bg-brand-bg/80 transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="font-black text-brand-navy flex items-center gap-2">
+                            <span>{w.mentor.full_name}</span>
+                            {w.mentor.poraplan_id && (
+                              <span className="font-mono text-xs px-1.5 py-0.2 bg-brand-bg border border-brand-dark/30 font-bold">
+                                {w.mentor.poraplan_id}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-brand-navy/70 font-medium">
+                            {w.mentor.academic_background || w.mentor.expertise || 'Mentor'}
+                          </div>
+                        </td>
+
+                        <td className="py-3 px-4 font-mono text-xs text-brand-navy">
+                          <div>{w.mentor.email}</div>
+                          {w.mentor.whatsapp_number && (
+                            <div className="text-brand-teal flex items-center gap-1 mt-0.5">
+                              <Phone className="w-3 h-3" />
+                              <span>{w.mentor.whatsapp_number}</span>
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="py-3 px-4 text-center font-bold text-base text-brand-navy">
+                          <span className="px-2.5 py-0.5 bg-gray-100 border border-gray-300">
+                            {w.activeCohortsCount}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-4 text-center font-bold text-base text-brand-navy">
+                          <span className="px-2.5 py-0.5 bg-[#F5A623]/20 border border-[#F5A623]">
+                            {w.individualOverridesCount}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-4 text-center">
+                          <span className="px-3 py-1 bg-[#0BA7B4]/20 border-2 border-[#0BA7B4] font-black text-base text-brand-navy">
+                            {w.totalEffectiveMenteesCount}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-4">
+                          <Badge
+                            variant={w.mentor.status === 'active' ? 'teal' : 'paper'}
+                            size="sm"
+                          >
+                            {w.mentor.status?.toUpperCase() || 'ACTIVE'}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 
