@@ -86,13 +86,8 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
   // 300ms Search Debounce
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearch((prev) => {
-        if (prev !== studentSearch) {
-          setPage(1);
-          return studentSearch;
-        }
-        return prev;
-      });
+      setDebouncedSearch(studentSearch);
+      setPage(1);
     }, 300);
     return () => clearTimeout(timer);
   }, [studentSearch]);
@@ -583,7 +578,11 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
               </span>
               <select
                 value={programFilter}
-                onChange={(e) => setProgramFilter(e.target.value)}
+                onChange={(e) => {
+                  setProgramFilter(e.target.value);
+                  setCohortFilter('all');
+                  setPage(1);
+                }}
                 className="w-full sm:w-auto max-w-full px-3 py-2 sm:py-1.5 text-base sm:text-sm min-h-[44px] sm:min-h-0 border-2 border-brand-dark font-semibold bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-teal truncate"
               >
                 <option value="all">All Programs ({programs.length})</option>
@@ -830,7 +829,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                 {enrollments.map((enr) => {
                   const student = enr.student;
                   const resolutionKey = makeEffectiveMentorKey(enr.student_id, enr.program_id);
-                  const resolution = studentResolutions[resolutionKey] || studentResolutions[enr.student_id];
+                  const resolution = studentResolutions[resolutionKey];
                   const effectiveMentor = resolution?.mentor;
                   const assignType = resolution?.assignment_type || 'none';
                   const isIndividual = assignType === 'individual';
@@ -969,7 +968,7 @@ export const AdminMentorAssignmentsPage: React.FC = () => {
                     {enrollments.map((enr) => {
                       const student = enr.student;
                       const resolutionKey = makeEffectiveMentorKey(enr.student_id, enr.program_id);
-                      const resolution = studentResolutions[resolutionKey] || studentResolutions[enr.student_id];
+                      const resolution = studentResolutions[resolutionKey];
                       const effectiveMentor = resolution?.mentor;
                       const assignType = resolution?.assignment_type || 'none';
                       const isIndividual = assignType === 'individual';

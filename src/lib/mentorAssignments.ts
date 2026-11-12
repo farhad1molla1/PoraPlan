@@ -526,13 +526,13 @@ export async function resolveEffectiveMentorsBulk(
 
     // Build lookup maps
     const overrideByStudentProgram = new Map<string, any>();
-    const overrideByStudent = new Map<string, any>();
+    const legacyOverrideByStudent = new Map<string, any>();
     for (const ov of overrides || []) {
       if (ov.program_id) {
         overrideByStudentProgram.set(makeEffectiveMentorKey(ov.student_id, ov.program_id), ov);
       }
-      if (!overrideByStudent.has(ov.student_id)) {
-        overrideByStudent.set(ov.student_id, ov);
+      if (!legacyOverrideByStudent.has(ov.student_id)) {
+        legacyOverrideByStudent.set(ov.student_id, ov);
       }
     }
 
@@ -550,9 +550,13 @@ export async function resolveEffectiveMentorsBulk(
       if (!t.studentId) continue;
       const compositeKey = makeEffectiveMentorKey(t.studentId, t.programId);
 
-      // Check override first
-      const ov = (t.programId ? overrideByStudentProgram.get(compositeKey) : null)
-        || overrideByStudent.get(t.studentId);
+      // Check override first:
+      // If target specifies programId, lookup MUST match that program's composite key.
+      // It must NEVER fall back to another program's override.
+      // If target does NOT specify programId, fall back to any active override for the student.
+      const ov = t.programId
+        ? overrideByStudentProgram.get(compositeKey)
+        : legacyOverrideByStudent.get(t.studentId);
 
       if (ov) {
         const res: EffectiveMentorResolution = {

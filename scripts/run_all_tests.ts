@@ -147,6 +147,13 @@ const testSuites: TestSuiteDef[] = [
     category: 'Pagination Foundation',
   },
 
+  // Batch 4.7B-2B Admin Mentor Allocations Hardening
+  {
+    name: 'Batch 4.7B-2B: Admin Mentor Allocations Hardening',
+    relativePath: 'src/__tests__/adminMentorAllocationsHardening.test.ts',
+    category: 'Pagination Foundation',
+  },
+
   // Modern Security & RLS Suites
   {
     name: 'RLS Helper Privacy & Status Semantics',

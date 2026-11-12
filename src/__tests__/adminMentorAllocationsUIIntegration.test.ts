@@ -157,8 +157,9 @@ function runTestSuite() {
 
   report(
     'UI-RES-03',
-    pageSrc.includes('studentResolutions[resolutionKey] || studentResolutions[enr.student_id]'),
-    'Authoritative lookup queries composite resolutionKey first with backward-compatible fallback',
+    pageSrc.includes('const resolution = studentResolutions[resolutionKey];') &&
+      !pageSrc.includes('studentResolutions[enr.student_id]'),
+    'Authoritative lookup strictly queries composite resolutionKey without unsafe student-level fallback',
     'RESOLUTION'
   );
 
@@ -205,9 +206,9 @@ function runTestSuite() {
 
   report(
     'UI-SRCH-02',
-    pageSrc.includes('if (prev !== studentSearch) {') &&
+    pageSrc.includes('setDebouncedSearch(studentSearch);') &&
       pageSrc.includes('setPage(1);'),
-    'Search term change resets pagination to page 1',
+    'Search term debounce resets pagination to page 1 purely without updater side-effects',
     'SEARCH_FILTER'
   );
 
